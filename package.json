@@ -1,0 +1,28 @@
+{
+  "name": "noteburner",
+  "version": "1.0.0",
+  "description": "Secure one-time message encryption and decryption app",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "deploy:backend": "cd backend && npm run deploy",
+    "deploy:frontend": "cd frontend && npm run deploy",
+    "setup": "npm install && npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd backend && npm install",
+    "setup:frontend": "cd frontend && npm install"
+  },
+  "keywords": [
+    "encryption",
+    "self-destruct",
+    "cloudflare",
+    "workers",
+    "privacy"
+  ],
+  "author": "",
+  "license": "MIT"
+}
