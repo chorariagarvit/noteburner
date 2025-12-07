@@ -46,8 +46,8 @@ function ViewMessage() {
             const mediaData = await getMedia(fileId);
             const decryptedFile = await decryptFile(
               mediaData.fileData,
-              data.iv,
-              data.salt,
+              mediaData.iv,
+              mediaData.salt,
               password,
               mediaData.fileName,
               mediaData.fileType
