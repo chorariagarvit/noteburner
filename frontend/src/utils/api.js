@@ -46,6 +46,19 @@ export async function deleteMessage(token) {
   return response.json();
 }
 
+export async function confirmMediaDownload(fileId) {
+  const response = await fetch(`${API_URL}/api/media/${fileId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to confirm download');
+  }
+
+  return response.json();
+}
+
 export async function uploadMedia(fileData, fileName, fileType, iv, salt, token) {
   const response = await fetch(`${API_URL}/api/media`, {
     method: 'POST',

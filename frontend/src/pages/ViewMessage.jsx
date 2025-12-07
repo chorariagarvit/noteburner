@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle } from 'lucide-react';
 import { decryptMessage, decryptFile } from '../utils/crypto';
-import { getMessage, getMedia, deleteMessage } from '../utils/api';
+import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
 
 function ViewMessage() {
   const { token } = useParams();
@@ -81,7 +81,7 @@ function ViewMessage() {
         mediaData.fileType
       );
       
-      // Immediately download and release from memory
+      // Trigger download
       const url = URL.createObjectURL(decryptedFile.blob);
       const a = document.createElement('a');
       a.href = url;
@@ -91,11 +91,19 @@ function ViewMessage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
+      // Only delete file after successful download
+      // If there's a network error or decryption failure, file stays available
+      await confirmMediaDownload(fileId);
+      
+      // Remove this file from the list (one-time download)
+      setMediaFileIds(prev => prev.filter((_, i) => i !== index));
+      
       setDownloading(prev => ({ ...prev, [index]: false }));
     } catch (err) {
       console.error('Failed to download file:', err);
-      setError('Failed to download file: ' + err.message);
+      setError('Failed to download file: ' + err.message + '. You can retry.');
       setDownloading(prev => ({ ...prev, [index]: false }));
+      // File remains available for retry on error
     }
   };
 
