@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Flame, Lock, Zap, Shield, Clock, FileImage } from 'lucide-react';
 
