@@ -1,7 +1,12 @@
 name = "noteburner-api"
 main = "src/index.js"
-compatibility_date = "2024-01-01"
-compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2025-11-17"
+compatibility_flags = [
+  "nodejs_compat_v2"
+]
+
+# Enable logs
+observability = { enabled = true }
 
 # D1 Database binding
 [[ d1_databases ]]
@@ -17,7 +22,7 @@ bucket_name = "noteburner-media"
 # Environment variables
 [vars]
 #FRONTEND_URL = "http://localhost:5173"
-FRONTEND_URL = "https://85ea3afa.noteburner.pages.dev"
+FRONTEND_URL = "https://c0d31adf.noteburner.pages.dev"
 DEFAULT_EXPIRY_HOURS = "24"  # Default expiration time in hours
 MAX_MESSAGE_SIZE = "10485760"  # 10MB
 MAX_FILE_SIZE = "104857600"    # 100MB

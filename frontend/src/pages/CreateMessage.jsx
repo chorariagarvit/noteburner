@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
