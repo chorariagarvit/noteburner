@@ -1,0 +1,30 @@
+{
+  "name": "noteburner-backend",
+  "version": "1.0.0",
+  "description": "NoteBurner backend API - Cloudflare Workers",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "d1:create": "wrangler d1 create noteburner-db",
+    "d1:migrations:apply": "wrangler d1 migrations apply noteburner-db",
+    "d1:migrations:create": "wrangler d1 migrations create noteburner-db"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "encryption"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "wrangler": "^4.53.0"
+  },
+  "dependencies": {
+    "hono": "^4.6.14",
+    "nanoid": "^5.0.8"
+  }
+}
