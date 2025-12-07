@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle } from 'lucide-react';
 import { decryptMessage, decryptFile } from '../utils/crypto';
@@ -11,8 +11,10 @@ function ViewMessage() {
   const [loading, setLoading] = useState(false);
   const [decrypted, setDecrypted] = useState(false);
   const [message, setMessage] = useState('');
-  const [mediaFiles, setMediaFiles] = useState([]);
+  const [mediaFileIds, setMediaFileIds] = useState([]); // Store file IDs, not decrypted files
+  const [decryptedPassword, setDecryptedPassword] = useState(''); // Store password for on-demand decryption
   const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState({});
   const [burning, setBurning] = useState(false);
 
   const handleDecrypt = async (e) => {
@@ -37,27 +39,11 @@ function ViewMessage() {
       );
 
       setMessage(decryptedText);
+      setDecryptedPassword(password); // Store password for on-demand file decryption
 
-      // Decrypt media files if any
+      // Store media file IDs instead of decrypting all files at once
       if (data.mediaFiles && data.mediaFiles.length > 0) {
-        const decryptedFiles = [];
-        for (const fileId of data.mediaFiles) {
-          try {
-            const mediaData = await getMedia(fileId);
-            const decryptedFile = await decryptFile(
-              mediaData.fileData,
-              mediaData.iv,
-              mediaData.salt,
-              password,
-              mediaData.fileName,
-              mediaData.fileType
-            );
-            decryptedFiles.push(decryptedFile);
-          } catch (err) {
-            console.error('Failed to decrypt file:', err);
-          }
-        }
-        setMediaFiles(decryptedFiles);
+        setMediaFileIds(data.mediaFiles);
       }
 
       // Decryption successful - now permanently delete the message and media
@@ -80,15 +66,37 @@ function ViewMessage() {
     }
   };
 
-  const handleDownload = (file) => {
-    const url = URL.createObjectURL(file.blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = file.fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDownload = async (fileId, index) => {
+    try {
+      setDownloading(prev => ({ ...prev, [index]: true }));
+      
+      // Fetch and decrypt file on-demand
+      const mediaData = await getMedia(fileId);
+      const decryptedFile = await decryptFile(
+        mediaData.fileData,
+        mediaData.iv,
+        mediaData.salt,
+        decryptedPassword,
+        mediaData.fileName,
+        mediaData.fileType
+      );
+      
+      // Immediately download and release from memory
+      const url = URL.createObjectURL(decryptedFile.blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = decryptedFile.fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      setDownloading(prev => ({ ...prev, [index]: false }));
+    } catch (err) {
+      console.error('Failed to download file:', err);
+      setError('Failed to download file: ' + err.message);
+      setDownloading(prev => ({ ...prev, [index]: false }));
+    }
   };
 
   if (decrypted) {
@@ -112,18 +120,20 @@ function ViewMessage() {
               </pre>
             </div>
 
-            {mediaFiles.length > 0 && (
+            {mediaFileIds.length > 0 && (
               <div className="space-y-3 mb-6">
-                <h3 className="font-semibold text-gray-900">Attached Files</h3>
-                {mediaFiles.map((file, index) => (
+                <h3 className="font-semibold text-gray-900">Attached Files ({mediaFileIds.length})</h3>
+                <p className="text-sm text-amber-700 mb-2">⚠️ Files are decrypted and downloaded on-demand to save memory. You have 24 hours to download them before they're permanently deleted.</p>
+                {mediaFileIds.map((fileId, index) => (
                   <div key={index} className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-                    <span className="text-gray-700">{file.fileName}</span>
+                    <span className="text-gray-700">File {index + 1}</span>
                     <button
-                      onClick={() => handleDownload(file)}
+                      onClick={() => handleDownload(fileId, index)}
+                      disabled={downloading[index]}
                       className="btn-secondary flex items-center gap-2"
                     >
                       <Download className="w-4 h-4" />
-                      Download
+                      {downloading[index] ? 'Downloading...' : 'Download'}
                     </button>
                   </div>
                 ))}
