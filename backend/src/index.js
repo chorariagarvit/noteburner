@@ -112,8 +112,10 @@ app.get('/api/messages/:token', async (c) => {
       return c.json({ error: 'Message has expired' }, 410);
     }
 
-    // Mark as accessed and delete immediately
-    await c.env.DB.prepare(`DELETE FROM messages WHERE token = ?`).bind(token).run();
+    // Mark as accessed (but don't delete yet - wait for confirmation of successful decryption)
+    await c.env.DB.prepare(
+      `UPDATE messages SET accessed = 1, accessed_at = ? WHERE token = ?`
+    ).bind(Date.now(), token).run();
 
     // Return message data
     const response = {
@@ -128,6 +130,50 @@ app.get('/api/messages/:token', async (c) => {
   } catch (error) {
     console.error('Error retrieving message:', error);
     return c.json({ error: 'Failed to retrieve message' }, 500);
+  }
+});
+
+// Delete message after successful decryption (called by frontend)
+app.delete('/api/messages/:token', async (c) => {
+  try {
+    const token = c.req.param('token');
+    
+    if (!token || token.length !== 32) {
+      return c.json({ error: 'Invalid token' }, 400);
+    }
+
+    // Get message to retrieve media files
+    const result = await c.env.DB.prepare(
+      `SELECT media_files FROM messages WHERE token = ?`
+    ).bind(token).first();
+
+    if (!result) {
+      return c.json({ error: 'Message not found' }, 404);
+    }
+
+    // Delete message from database
+    await c.env.DB.prepare(`DELETE FROM messages WHERE token = ?`).bind(token).run();
+
+    // Delete associated media files from R2
+    let deletedMediaCount = 0;
+    if (result.media_files) {
+      const mediaFiles = JSON.parse(result.media_files);
+      for (const fileId of mediaFiles) {
+        try {
+          await c.env.MEDIA_BUCKET.delete(fileId);
+          deletedMediaCount++;
+          console.log(`Deleted media file: ${fileId}`);
+        } catch (err) {
+          console.error(`Failed to delete media file ${fileId}:`, err);
+        }
+      }
+    }
+
+    console.log(`Message ${token} deleted with ${deletedMediaCount} media files`);
+    return c.json({ success: true, deletedMedia: deletedMediaCount });
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    return c.json({ error: 'Failed to delete message' }, 500);
   }
 });
 
@@ -272,14 +318,17 @@ export default {
     console.log('Running scheduled cleanup job...');
     try {
       const now = Date.now();
+      const oneHourAgo = now - (60 * 60 * 1000);
       
-      // Find expired messages
-      const expiredMessages = await env.DB.prepare(
-        `SELECT token, media_files FROM messages WHERE expires_at IS NOT NULL AND expires_at < ?`
-      ).bind(now).all();
+      // Find expired messages OR accessed messages older than 1 hour (failed decryption attempts)
+      const messagesToDelete = await env.DB.prepare(
+        `SELECT token, media_files FROM messages 
+         WHERE (expires_at IS NOT NULL AND expires_at < ?) 
+         OR (accessed = 1 AND accessed_at < ?)`
+      ).bind(now, oneHourAgo).all();
 
-      // Delete expired messages and their media
-      for (const message of expiredMessages.results) {
+      // Delete messages and their media
+      for (const message of messagesToDelete.results) {
         // Delete media files
         if (message.media_files) {
           const mediaFiles = JSON.parse(message.media_files);
@@ -292,7 +341,7 @@ export default {
         await env.DB.prepare(`DELETE FROM messages WHERE token = ?`).bind(message.token).run();
       }
       
-      console.log(`Cleanup completed: ${expiredMessages.results.length} messages deleted`);
+      console.log(`Cleanup completed: ${messagesToDelete.results.length} messages deleted`);
     } catch (error) {
       console.error('Scheduled cleanup error:', error);
     }
