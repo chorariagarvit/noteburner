@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle } from 'lucide-react';
 import { decryptMessage, decryptFile } from '../utils/crypto';
-import { getMessage, getMedia } from '../utils/api';
+import { getMessage, getMedia, deleteMessage } from '../utils/api';
 
 function ViewMessage() {
   const { token } = useParams();
@@ -58,6 +58,14 @@ function ViewMessage() {
           }
         }
         setMediaFiles(decryptedFiles);
+      }
+
+      // Decryption successful - now permanently delete the message and media
+      try {
+        await deleteMessage(token);
+      } catch (err) {
+        console.error('Failed to delete message:', err);
+        // Continue anyway - message was decrypted successfully
       }
 
       setDecrypted(true);

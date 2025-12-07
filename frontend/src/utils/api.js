@@ -33,6 +33,19 @@ export async function getMessage(token) {
   return response.json();
 }
 
+export async function deleteMessage(token) {
+  const response = await fetch(`${API_URL}/api/messages/${token}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete message');
+  }
+
+  return response.json();
+}
+
 export async function uploadMedia(fileData, fileName, fileType, iv, salt, token) {
   const response = await fetch(`${API_URL}/api/media`, {
     method: 'POST',
