@@ -141,9 +141,9 @@ app.post('/api/media', async (c) => {
     }
 
     const body = await c.req.json();
-    const { fileData, fileName, fileType, token } = body;
+    const { fileData, fileName, fileType, iv, salt, token } = body;
 
-    if (!fileData || !fileName || !token) {
+    if (!fileData || !fileName || !iv || !salt || !token) {
       return c.json({ error: 'Missing required fields' }, 400);
     }
 
@@ -162,14 +162,16 @@ app.post('/api/media', async (c) => {
     // Convert base64 to binary
     const binaryData = Uint8Array.from(atob(fileData), c => c.charCodeAt(0));
 
-    // Store in R2
+    // Store in R2 with encryption metadata
     await c.env.MEDIA_BUCKET.put(fileId, binaryData, {
       httpMetadata: {
         contentType: fileType || 'application/octet-stream',
       },
       customMetadata: {
         originalName: fileName,
-        messageToken: token
+        messageToken: token,
+        iv: iv,
+        salt: salt
       }
     });
 
@@ -215,7 +217,9 @@ app.get('/api/media/:fileId', async (c) => {
     return c.json({
       fileData: base64Data,
       fileName: object.customMetadata?.originalName || 'unknown',
-      fileType: object.httpMetadata?.contentType || 'application/octet-stream'
+      fileType: object.httpMetadata?.contentType || 'application/octet-stream',
+      iv: object.customMetadata?.iv || '',
+      salt: object.customMetadata?.salt || ''
     });
   } catch (error) {
     console.error('Error retrieving media:', error);

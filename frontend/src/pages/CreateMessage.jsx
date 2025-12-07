@@ -74,6 +74,8 @@ function CreateMessage() {
             encryptedFile.encryptedData,
             file.name,
             file.type,
+            encryptedFile.iv,
+            encryptedFile.salt,
             result.token
           );
         }

@@ -33,7 +33,7 @@ export async function getMessage(token) {
   return response.json();
 }
 
-export async function uploadMedia(fileData, fileName, fileType, token) {
+export async function uploadMedia(fileData, fileName, fileType, iv, salt, token) {
   const response = await fetch(`${API_URL}/api/media`, {
     method: 'POST',
     headers: {
@@ -43,6 +43,8 @@ export async function uploadMedia(fileData, fileName, fileType, token) {
       fileData,
       fileName,
       fileType,
+      iv,
+      salt,
       token,
     }),
   });
