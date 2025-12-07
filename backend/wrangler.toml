@@ -11,7 +11,7 @@ database_id = "aa64ae0a-1bbe-4916-b083-b8e027b53148" # Add your database ID afte
 
 # R2 Storage binding for media files
 [[ r2_buckets ]]
-binding = "noteburner_media"
+binding = "MEDIA_BUCKET"
 bucket_name = "noteburner-media"
 
 # Environment variables
