@@ -87,23 +87,25 @@ app.get('/api/messages/:token', async (c) => {
       return c.json({ error: 'Invalid token' }, 400);
     }
 
-    // Retrieve message (allow multiple attempts until successful decryption)
-    const result = await c.env.DB.prepare(
-      `SELECT * FROM messages WHERE token = ?`
+    // Atomically retrieve and mark message as accessed to prevent race condition
+    // Use UPDATE with WHERE clause to ensure only first request succeeds
+    const updateResult = await c.env.DB.prepare(
+      `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING *`
     ).bind(token).first();
 
-    if (!result) {
-      return c.json({ error: 'Message not found or already deleted' }, 404);
+    if (!updateResult) {
+      // Message either doesn't exist or was already accessed
+      return c.json({ error: 'Message not found or already accessed' }, 404);
     }
 
     // Check expiration
-    if (result.expires_at && Date.now() > result.expires_at) {
+    if (updateResult.expires_at && Date.now() > updateResult.expires_at) {
       // Delete expired message
       await c.env.DB.prepare(`DELETE FROM messages WHERE token = ?`).bind(token).run();
       
       // Delete associated media files
-      if (result.media_files) {
-        const mediaFiles = JSON.parse(result.media_files);
+      if (updateResult.media_files) {
+        const mediaFiles = JSON.parse(updateResult.media_files);
         for (const fileId of mediaFiles) {
           await c.env.MEDIA_BUCKET.delete(fileId);
         }
@@ -112,16 +114,13 @@ app.get('/api/messages/:token', async (c) => {
       return c.json({ error: 'Message has expired' }, 410);
     }
 
-    // Don't mark as accessed - allow multiple attempts
-    // Message will only be deleted after successful decryption (DELETE endpoint)
-
-    // Return message data
+    // Return message data (only first request gets here due to atomic update)
     const response = {
-      encryptedData: result.encrypted_data,
-      iv: result.iv,
-      salt: result.salt,
-      mediaFiles: result.media_files ? JSON.parse(result.media_files) : [],
-      createdAt: result.created_at
+      encryptedData: updateResult.encrypted_data,
+      iv: updateResult.iv,
+      salt: updateResult.salt,
+      mediaFiles: updateResult.media_files ? JSON.parse(updateResult.media_files) : [],
+      createdAt: updateResult.created_at
     };
 
     return c.json(response);
@@ -257,7 +256,7 @@ app.get('/api/media/:fileId', async (c) => {
     const object = await c.env.MEDIA_BUCKET.get(fileId);
 
     if (!object) {
-      return c.json({ error: 'File not found' }, 404);
+      return c.json({ error: 'File not found or already downloaded' }, 404);
     }
 
     // Return file data
@@ -274,6 +273,31 @@ app.get('/api/media/:fileId', async (c) => {
   } catch (error) {
     console.error('Error retrieving media:', error);
     return c.json({ error: 'Failed to retrieve media' }, 500);
+  }
+});
+
+// Confirm media download and delete (one-time download)
+app.delete('/api/media/:fileId', async (c) => {
+  try {
+    const fileId = c.req.param('fileId');
+    
+    if (!fileId || fileId.length !== 32) {
+      return c.json({ error: 'Invalid file ID' }, 400);
+    }
+
+    // Delete from R2 after successful download
+    await c.env.MEDIA_BUCKET.delete(fileId);
+    
+    // Also remove from cleanup tracking if it exists
+    await c.env.DB.prepare(
+      `DELETE FROM media_cleanup WHERE file_id = ?`
+    ).bind(fileId).run();
+
+    console.log(`Media file ${fileId} deleted after successful download`);
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error confirming media download:', error);
+    return c.json({ error: 'Failed to confirm download' }, 500);
   }
 });
 
