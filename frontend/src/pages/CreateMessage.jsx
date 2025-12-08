@@ -76,7 +76,7 @@ function CreateMessage() {
       const encrypted = await encryptMessage(message, password);
       
       // Create message on server
-      const expirySeconds = expiresIn ? parseInt(expiresIn) * 3600 : null;
+      const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
       const result = await createMessage(
         encrypted.encryptedData,
         encrypted.iv,
@@ -239,10 +239,11 @@ function CreateMessage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Message *
               </label>
               <textarea
+                id="message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Enter your secret message..."
@@ -256,12 +257,13 @@ function CreateMessage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password * (min 8 characters)
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <input
+                    id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -289,11 +291,12 @@ function CreateMessage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="expiration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
                 Expiration (optional)
               </label>
               <select
+                id="expiration"
                 value={expiresIn}
                 onChange={(e) => setExpiresIn(e.target.value)}
                 className="input-field"
@@ -308,7 +311,7 @@ function CreateMessage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="attachments-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Attachments (optional, max 100MB per file)
               </label>
               <div className="space-y-2">
@@ -327,10 +330,11 @@ function CreateMessage() {
                     </button>
                   </div>
                 ))}
-                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                <label htmlFor="file-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
                   <Upload className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   <span className="text-gray-600 dark:text-gray-300">Choose files to encrypt</span>
                   <input
+                    id="file-upload"
                     type="file"
                     multiple
                     onChange={handleFileUpload}
