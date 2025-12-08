@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Flame, Lock, Zap, Shield, Clock, FileImage, Copy, Check, Eye, EyeOff, Upload, X } from 'lucide-react';
+import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
 
@@ -230,7 +230,7 @@ function HomePage() {
                 {files.length > 0 && (
                   <div className="space-y-1">
                     {files.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded text-xs">
+                      <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded text-xs">
                         <span className="text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
                         <button
                           type="button"
