@@ -15,6 +15,7 @@ function CreateMessage() {
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+  const [locking, setLocking] = useState(false);
 
   const handleFileUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -81,6 +82,14 @@ function CreateMessage() {
         }
       }
 
+      // Show locking animation
+      setLoading(false);
+      setLocking(true);
+      
+      // Wait for lock animation to complete
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setLocking(false);
       setShareUrl(result.url);
     } catch (err) {
       setError(err.message);
@@ -103,6 +112,23 @@ function CreateMessage() {
     setExpiresIn('24'); // Reset to default 24 hours
     setError('');
   };
+
+  if (locking) {
+    return (
+      <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-blue-50 to-indigo-50 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-75"></div>
+            <div className="relative bg-white rounded-full p-8 shadow-2xl">
+              <Lock className="w-16 h-16 text-blue-600 animate-pulse" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 animate-pulse">Securing Message...</h2>
+          <p className="text-gray-600">Encrypting with AES-256</p>
+        </div>
+      </div>
+    );
+  }
 
   if (shareUrl) {
     return (
