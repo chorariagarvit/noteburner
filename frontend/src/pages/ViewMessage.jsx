@@ -98,7 +98,8 @@ function ViewMessage() {
       const url = URL.createObjectURL(decryptedFile.blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = decryptedFile.fileName;
+      // Sanitize filename to prevent any potential issues
+      a.download = decryptedFile.fileName.replace(/[<>:"/\\|?*]/g, '_');
       document.body.appendChild(a);
       a.click();
       a.remove();
