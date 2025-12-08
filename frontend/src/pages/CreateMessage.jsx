@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
 
 function CreateMessage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,17 @@ function CreateMessage() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [locking, setLocking] = useState(false);
+
+  // Check if redirected from HomePage with success data
+  useEffect(() => {
+    if (location.state?.shareUrl) {
+      setShareUrl(location.state.shareUrl);
+      setPassword(location.state.password);
+      setExpiresIn(location.state.expiresIn || '24');
+      // Clear location state to prevent re-showing on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleFileUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -178,7 +190,7 @@ function CreateMessage() {
                   <li>• Share the password separately (not in the same channel as the link)</li>
                   <li>• The message will be deleted after the first successful decryption</li>
                   <li>• There are no backups - once it's gone, it's gone forever</li>
-                  {files.length > 0 && <li>• {files.length} encrypted file(s) attached</li>}
+                  {location.state?.filesCount > 0 && <li>• {location.state.filesCount} encrypted file(s) attached</li>}
                   {expiresIn && <li>• Message expires in {expiresIn} hour(s)</li>}
                 </ul>
               </div>
