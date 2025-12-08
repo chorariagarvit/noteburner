@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle } from 'lucide-react';
 import { decryptMessage, decryptFile } from '../utils/crypto';
@@ -6,6 +6,10 @@ import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../ut
 
 function ViewMessage() {
   const { token } = useParams();
+  
+  useEffect(() => {
+    document.title = 'NoteBurner - View Message';
+  }, []);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
