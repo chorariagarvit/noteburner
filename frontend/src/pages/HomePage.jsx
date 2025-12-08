@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { Flame, Lock, Zap, Shield, Clock, FileImage, Copy, Check, Eye, EyeOff, Upload, X } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
@@ -57,7 +58,7 @@ function HomePage() {
       }
 
       const encrypted = await encryptMessage(message, password);
-      const expirySeconds = expiresIn ? parseInt(expiresIn) * 3600 : null;
+      const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
       const result = await createMessage(
         encrypted.encryptedData,
         encrypted.iv,
@@ -139,10 +140,11 @@ function HomePage() {
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Message *
                   </label>
                   <textarea
+                    id="message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Enter your secret message..."
@@ -153,12 +155,13 @@ function HomePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Password * (min 8 characters)
                   </label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <input
+                        id="password"
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -187,11 +190,12 @@ function HomePage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="expiration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       <Clock className="w-4 h-4 inline mr-1" />
                       Expiration
                     </label>
                     <select
+                      id="expiration"
                       value={expiresIn}
                       onChange={(e) => setExpiresIn(e.target.value)}
                       className="input-field text-sm"
@@ -206,13 +210,14 @@ function HomePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label htmlFor="files-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Files (max 100MB)
                     </label>
-                    <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2.5 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                    <label htmlFor="files-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2.5 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
                       <Upload className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       <span className="text-gray-600 dark:text-gray-300 text-sm">{files.length > 0 ? `${files.length} file(s)` : 'Choose files'}</span>
                       <input
+                        id="files-upload"
                         type="file"
                         multiple
                         onChange={handleFileUpload}
@@ -343,9 +348,9 @@ function HomePage() {
           <p className="text-xl text-primary-100 dark:text-primary-200 mb-8">
             Free, anonymous, and completely secure. No registration required.
           </p>
-          <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-white dark:bg-gray-100 text-primary-600 dark:text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-200 font-semibold py-4 px-8 rounded-lg text-lg transition-all duration-200 inline-block shadow-lg">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="bg-white dark:bg-gray-100 text-primary-600 dark:text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-200 font-semibold py-4 px-8 rounded-lg text-lg transition-all duration-200 inline-block shadow-lg">
             Create Message Now
-          </a>
+          </button>
         </div>
       </section>
     </div>
@@ -362,6 +367,12 @@ function FeatureCard({ icon, title, description }) {
   );
 }
 
+FeatureCard.propTypes = {
+  icon: PropTypes.node.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+};
+
 function StepCard({ number, title, description }) {
   return (
     <div className="text-center">
@@ -373,5 +384,11 @@ function StepCard({ number, title, description }) {
     </div>
   );
 }
+
+StepCard.propTypes = {
+  number: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+};
 
 export default HomePage;
