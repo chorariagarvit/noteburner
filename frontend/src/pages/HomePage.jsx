@@ -92,7 +92,7 @@ function HomePage() {
             {/* Left: Hero Content */}
             <div className="animate-fade-in">
               <div className="flex items-center gap-3 mb-6">
-                <Flame className="w-12 md:w-16 h-12 md:h-16 text-primary-600 dark:text-primary-500" />
+                <Flame className="w-12 md:w-16 h-12 md:h-16 text-red-600 dark:text-red-500" />
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
                   Burn After Reading
                 </h1>
@@ -269,7 +269,7 @@ function HomePage() {
             />
             
             <FeatureCard
-              icon={<Flame className="w-8 h-8" />}
+              icon={<Flame className="w-8 h-8 text-red-600 dark:text-red-500" />}
               title="One-Time Access"
               description="Messages are permanently deleted after the first successful decryption. No backups, no recovery."
             />

@@ -223,7 +223,7 @@ function CreateMessage() {
       <div className="max-w-3xl mx-auto px-4">
         <div className="card">
           <div className="text-center mb-8">
-            <Flame className="w-12 h-12 text-primary-600 dark:text-primary-500 mx-auto mb-4" />
+            <Flame className="w-12 h-12 text-red-600 dark:text-red-500 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Create Encrypted Message
             </h2>
