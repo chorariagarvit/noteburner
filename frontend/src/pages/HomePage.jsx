@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flame, Lock, Zap, Shield, Clock, FileImage, Copy, Check, Eye, EyeOff, Upload, X } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
@@ -6,6 +6,10 @@ import { createMessage, uploadMedia } from '../utils/api';
 
 function HomePage() {
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    document.title = 'NoteBurner - Home';
+  }, []);
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
