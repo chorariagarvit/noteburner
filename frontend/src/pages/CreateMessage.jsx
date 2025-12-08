@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock } from 'lucide-react';
+import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
 
@@ -96,7 +96,6 @@ function CreateMessage() {
       setLoading(false);
       setLocking(false);
     }
-  };
   };
 
   const handleCopy = async () => {
