@@ -101,7 +101,7 @@ function ViewMessage() {
       a.download = decryptedFile.fileName;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      a.remove();
       URL.revokeObjectURL(url);
       
       // Only delete file after successful download
@@ -146,7 +146,7 @@ function ViewMessage() {
                 <h3 className="font-semibold text-gray-900 dark:text-white">Attached Files ({mediaFileIds.length})</h3>
                 <p className="text-sm text-amber-700 dark:text-amber-400 mb-2">⚠️ Files are decrypted and downloaded on-demand to save memory. You have 24 hours to download them before they're permanently deleted.</p>
                 {mediaFileIds.map((fileId, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <div key={fileId} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                     <span className="text-gray-700 dark:text-gray-200">File {index + 1}</span>
                     <button
                       onClick={() => handleDownload(fileId, index)}
