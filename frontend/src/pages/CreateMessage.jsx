@@ -18,6 +18,11 @@ function CreateMessage() {
   const [error, setError] = useState('');
   const [locking, setLocking] = useState(false);
 
+  // Set document title
+  useEffect(() => {
+    document.title = 'NoteBurner - Create Message';
+  }, []);
+
   // Check if redirected from HomePage with success data
   useEffect(() => {
     if (location.state?.shareUrl) {
