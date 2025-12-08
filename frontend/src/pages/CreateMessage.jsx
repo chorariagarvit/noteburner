@@ -5,7 +5,6 @@ import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
 
 function CreateMessage() {
-  const navigate = useNavigate();
   const location = useLocation();
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +29,7 @@ function CreateMessage() {
       setPassword(location.state.password);
       setExpiresIn(location.state.expiresIn || '24');
       // Clear location state to prevent re-showing on refresh
-      window.history.replaceState({}, document.title);
+      globalThis.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
@@ -316,7 +315,7 @@ function CreateMessage() {
               </label>
               <div className="space-y-2">
                 {files.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                  <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                     <span className="text-sm text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400 mx-2">
                       {(file.size / 1024 / 1024).toFixed(2)} MB
