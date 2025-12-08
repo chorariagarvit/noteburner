@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CreateMessage from './pages/CreateMessage';
@@ -33,8 +33,10 @@ function App() {
     setDarkMode(!darkMode);
   };
 
+  const contextValue = useMemo(() => ({ darkMode, toggleDarkMode }), [darkMode]);
+
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+    <ThemeContext.Provider value={contextValue}>
       <Router>
         <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors">
           <Header />
