@@ -83,7 +83,7 @@ app.get('/api/messages/:token', async (c) => {
   try {
     const token = c.req.param('token');
     
-    if (!token || token.length !== 32) {
+    if (!token || token?.length !== 32) {
       return c.json({ error: 'Invalid token' }, 400);
     }
 
@@ -140,7 +140,7 @@ app.delete('/api/messages/:token', async (c) => {
   try {
     const token = c.req.param('token');
     
-    if (!token || token.length !== 32) {
+    if (!token || token?.length !== 32) {
       return c.json({ error: 'Invalid token' }, 400);
     }
 
@@ -255,7 +255,7 @@ app.get('/api/media/:fileId', async (c) => {
   try {
     const fileId = c.req.param('fileId');
     
-    if (!fileId || fileId.length !== 32) {
+    if (!fileId || fileId?.length !== 32) {
       return c.json({ error: 'Invalid file ID' }, 400);
     }
 
@@ -288,7 +288,7 @@ app.delete('/api/media/:fileId', async (c) => {
   try {
     const fileId = c.req.param('fileId');
     
-    if (!fileId || fileId.length !== 32) {
+    if (!fileId || fileId?.length !== 32) {
       return c.json({ error: 'Invalid file ID' }, 400);
     }
 
