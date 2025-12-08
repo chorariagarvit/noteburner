@@ -132,24 +132,24 @@ function CreateMessage() {
 
   if (shareUrl) {
     return (
-      <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-green-50 to-emerald-50 py-12">
+      <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 py-12">
         <div className="max-w-2xl mx-auto px-4">
           <div className="card animate-fade-in">
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 mb-4">
                 <Check className="w-8 h-8" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 Message Created Successfully!
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Your encrypted message is ready to share
               </p>
             </div>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Share this URL
                 </label>
                 <div className="flex gap-2">
@@ -169,12 +169,12 @@ function CreateMessage() {
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <h3 className="font-semibold text-amber-900 dark:text-amber-400 mb-2 flex items-center gap-2">
                   <Flame className="w-5 h-5" />
                   Important Security Notice
                 </h3>
-                <ul className="text-sm text-amber-800 space-y-1">
+                <ul className="text-sm text-amber-800 dark:text-amber-300 space-y-1">
                   <li>• Share the password separately (not in the same channel as the link)</li>
                   <li>• The message will be deleted after the first successful decryption</li>
                   <li>• There are no backups - once it's gone, it's gone forever</li>
@@ -183,12 +183,12 @@ function CreateMessage() {
                 </ul>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Password</h3>
-                <div className="font-mono text-lg text-gray-700 bg-white p-3 rounded border border-gray-300">
+              <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Password</h3>
+                <div className="font-mono text-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600">
                   {password}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   Make sure the recipient has this password before sharing the link
                 </p>
               </div>
@@ -207,22 +207,22 @@ function CreateMessage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] bg-gray-50 py-12">
+    <div className="min-h-[calc(100vh-8rem)] bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-3xl mx-auto px-4">
         <div className="card">
           <div className="text-center mb-8">
-            <Flame className="w-12 h-12 text-primary-600 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <Flame className="w-12 h-12 text-primary-600 dark:text-primary-500 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Create Encrypted Message
             </h2>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-300">
               Write your message, set a password, and get a one-time shareable link
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Message *
               </label>
               <textarea
@@ -233,13 +233,13 @@ function CreateMessage() {
                 className="input-field resize-none"
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {message.length} characters
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Password * (min 8 characters)
               </label>
               <div className="flex gap-2">
@@ -272,7 +272,7 @@ function CreateMessage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <Clock className="w-4 h-4 inline mr-1" />
                 Expiration (optional)
               </label>
@@ -291,28 +291,28 @@ function CreateMessage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Attachments (optional, max 100MB per file)
               </label>
               <div className="space-y-2">
                 {files.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                    <span className="text-sm text-gray-700 truncate flex-1">{file.name}</span>
-                    <span className="text-xs text-gray-500 mx-2">
+                  <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                    <span className="text-sm text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mx-2">
                       {(file.size / 1024 / 1024).toFixed(2)} MB
                     </span>
                     <button
                       type="button"
                       onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
-                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors">
-                  <Upload className="w-5 h-5 text-gray-500" />
-                  <span className="text-gray-600">Choose files to encrypt</span>
+                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                  <Upload className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  <span className="text-gray-600 dark:text-gray-300">Choose files to encrypt</span>
                   <input
                     type="file"
                     multiple
@@ -324,7 +324,7 @@ function CreateMessage() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
@@ -338,9 +338,9 @@ function CreateMessage() {
             </button>
           </form>
 
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-900 mb-2">How it works</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
+          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">How it works</h3>
+            <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
               <li>• Your message is encrypted in your browser with AES-256-GCM</li>
               <li>• Password never leaves your device</li>
               <li>• Share the link and password separately for maximum security</li>
