@@ -16,6 +16,7 @@ function ViewMessage() {
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState({});
   const [burning, setBurning] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   const handleDecrypt = async (e) => {
     e.preventDefault();
@@ -46,6 +47,12 @@ function ViewMessage() {
         setMediaFileIds(data.mediaFiles);
       }
 
+      // Show unlocking animation
+      setUnlocking(true);
+      
+      // Wait for unlock animation to complete
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       // Decryption successful - now permanently delete the message and media
       try {
         await deleteMessage(token);
@@ -54,6 +61,7 @@ function ViewMessage() {
         // Continue anyway - message was decrypted successfully
       }
 
+      setUnlocking(false);
       setDecrypted(true);
       
       // Show burning animation
@@ -158,6 +166,23 @@ function ViewMessage() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (unlocking) {
+    return (
+      <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-green-50 to-emerald-50 py-12 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-75"></div>
+            <div className="relative bg-white rounded-full p-8 shadow-2xl">
+              <Lock className="w-16 h-16 text-green-600 animate-bounce" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 animate-pulse">Unlocking Message...</h2>
+          <p className="text-gray-600">Decryption successful!</p>
         </div>
       </div>
     );
