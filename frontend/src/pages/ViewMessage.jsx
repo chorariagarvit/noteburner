@@ -69,6 +69,7 @@ function ViewMessage() {
       setTimeout(() => setBurning(false), 3000);
     } catch (err) {
       setError(err.message || 'Failed to decrypt message. Check your password.');
+      setUnlocking(false); // Reset unlocking state on error
     } finally {
       setLoading(false);
     }
