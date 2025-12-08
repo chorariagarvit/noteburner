@@ -165,11 +165,12 @@ function CreateMessage() {
 
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="share-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Share this URL
                 </label>
                 <div className="flex gap-2">
                   <input
+                    id="share-url"
                     type="text"
                     value={shareUrl}
                     readOnly
