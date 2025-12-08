@@ -216,7 +216,7 @@ app.post('/api/media', async (c) => {
     const fileId = nanoid(32);
     
     // Convert base64 to binary
-    const binaryData = Uint8Array.from(atob(fileData), c => c.charCodeAt(0));
+    const binaryData = Uint8Array.from(atob(fileData), c => c.codePointAt(0));
 
     // Store in R2 with encryption metadata
     await c.env.MEDIA_BUCKET.put(fileId, binaryData, {
@@ -268,7 +268,7 @@ app.get('/api/media/:fileId', async (c) => {
 
     // Return file data
     const arrayBuffer = await object.arrayBuffer();
-    const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const base64Data = btoa(String.fromCodePoint(...new Uint8Array(arrayBuffer)));
 
     return c.json({
       fileData: base64Data,
