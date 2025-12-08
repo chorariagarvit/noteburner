@@ -5,16 +5,16 @@ function HomePage() {
   return (
     <div className="min-h-[calc(100vh-8rem)]">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-50 to-orange-50 py-20">
+      <section className="bg-gradient-to-br from-primary-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center animate-fade-in">
             <div className="flex justify-center mb-6">
-              <Flame className="w-20 h-20 text-primary-600" />
+              <Flame className="w-20 h-20 text-primary-600 dark:text-primary-500" />
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
               Burn After Reading
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
               Send encrypted messages and files that self-destruct after one read. 
               No traces. No backups. Complete privacy.
             </p>
@@ -28,9 +28,9 @@ function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
             Military-Grade Security
           </h2>
           
@@ -75,9 +75,9 @@ function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
             How It Works
           </h2>
           
@@ -104,15 +104,15 @@ function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary-600">
+      <section className="py-20 bg-primary-600 dark:bg-primary-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Send a Secure Message?
           </h2>
-          <p className="text-xl text-primary-100 mb-8">
+          <p className="text-xl text-primary-100 dark:text-primary-200 mb-8">
             Free, anonymous, and completely secure. No registration required.
           </p>
-          <Link to="/create" className="bg-white text-primary-600 hover:bg-gray-100 font-semibold py-4 px-8 rounded-lg text-lg transition-all duration-200 inline-block shadow-lg">
+          <Link to="/create" className="bg-white dark:bg-gray-100 text-primary-600 dark:text-primary-700 hover:bg-gray-100 dark:hover:bg-gray-200 font-semibold py-4 px-8 rounded-lg text-lg transition-all duration-200 inline-block shadow-lg">
             Get Started Now
           </Link>
         </div>
@@ -124,9 +124,9 @@ function HomePage() {
 function FeatureCard({ icon, title, description }) {
   return (
     <div className="card hover:shadow-xl transition-shadow duration-200">
-      <div className="text-primary-600 mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold mb-2 text-gray-900">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <div className="text-primary-600 dark:text-primary-500 mb-4">{icon}</div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{title}</h3>
+      <p className="text-gray-600 dark:text-gray-300">{description}</p>
     </div>
   );
 }
@@ -134,11 +134,11 @@ function FeatureCard({ icon, title, description }) {
 function StepCard({ number, title, description }) {
   return (
     <div className="text-center">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-600 text-white text-2xl font-bold mb-4">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-600 dark:bg-primary-500 text-white text-2xl font-bold mb-4">
         {number}
       </div>
-      <h3 className="text-xl font-semibold mb-2 text-gray-900">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{title}</h3>
+      <p className="text-gray-600 dark:text-gray-300">{description}</p>
     </div>
   );
 }
