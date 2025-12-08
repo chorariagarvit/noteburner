@@ -87,25 +87,25 @@ app.get('/api/messages/:token', async (c) => {
       return c.json({ error: 'Invalid token' }, 400);
     }
 
-    // Atomically retrieve and mark message as accessed to prevent race condition
-    // Use UPDATE with WHERE clause to ensure only first request succeeds
-    const updateResult = await c.env.DB.prepare(
-      `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING *`
+    // Retrieve message without marking as accessed yet
+    // Allow multiple attempts for wrong password
+    const result = await c.env.DB.prepare(
+      `SELECT * FROM messages WHERE token = ? AND accessed = 0`
     ).bind(token).first();
 
-    if (!updateResult) {
+    if (!result) {
       // Message either doesn't exist or was already accessed
       return c.json({ error: 'Message not found or already accessed' }, 404);
     }
 
     // Check expiration
-    if (updateResult.expires_at && Date.now() > updateResult.expires_at) {
+    if (result.expires_at && Date.now() > result.expires_at) {
       // Delete expired message
       await c.env.DB.prepare(`DELETE FROM messages WHERE token = ?`).bind(token).run();
       
       // Delete associated media files
-      if (updateResult.media_files) {
-        const mediaFiles = JSON.parse(updateResult.media_files);
+      if (result.media_files) {
+        const mediaFiles = JSON.parse(result.media_files);
         for (const fileId of mediaFiles) {
           await c.env.MEDIA_BUCKET.delete(fileId);
         }
@@ -114,13 +114,18 @@ app.get('/api/messages/:token', async (c) => {
       return c.json({ error: 'Message has expired' }, 410);
     }
 
-    // Return message data (only first request gets here due to atomic update)
+    // Increment incorrect attempts (will be reset on successful decryption)
+    await c.env.DB.prepare(
+      `UPDATE messages SET incorrect_attempts = incorrect_attempts + 1 WHERE token = ?`
+    ).bind(token).run();
+
+    // Return message data for decryption attempt
     const response = {
-      encryptedData: updateResult.encrypted_data,
-      iv: updateResult.iv,
-      salt: updateResult.salt,
-      mediaFiles: updateResult.media_files ? JSON.parse(updateResult.media_files) : [],
-      createdAt: updateResult.created_at
+      encryptedData: result.encrypted_data,
+      iv: result.iv,
+      salt: result.salt,
+      mediaFiles: result.media_files ? JSON.parse(result.media_files) : [],
+      createdAt: result.created_at
     };
 
     return c.json(response);
@@ -139,13 +144,15 @@ app.delete('/api/messages/:token', async (c) => {
       return c.json({ error: 'Invalid token' }, 400);
     }
 
-    // Get message to retrieve media files
+    // Atomically mark as accessed and get message to prevent race condition
+    // Only first successful decryption should reach here
     const result = await c.env.DB.prepare(
-      `SELECT media_files FROM messages WHERE token = ?`
+      `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING media_files`
     ).bind(token).first();
 
     if (!result) {
-      return c.json({ error: 'Message not found' }, 404);
+      // Message either doesn't exist or was already deleted
+      return c.json({ error: 'Message not found or already deleted' }, 404);
     }
 
     // Delete message from database
