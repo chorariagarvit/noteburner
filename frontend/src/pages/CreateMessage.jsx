@@ -93,9 +93,10 @@ function CreateMessage() {
       setShareUrl(result.url);
     } catch (err) {
       setError(err.message);
-    } finally {
       setLoading(false);
+      setLocking(false);
     }
+  };
   };
 
   const handleCopy = async () => {
