@@ -99,7 +99,7 @@ function ViewMessage() {
       const a = document.createElement('a');
       a.href = url;
       // Sanitize filename to prevent any potential issues
-      a.download = decryptedFile.fileName.replace(/[<>:"/\\|?*]/g, '_');
+      a.download = decryptedFile.fileName.replaceAll(/[<>:"/\\|?*]/g, '_');
       document.body.appendChild(a);
       a.click();
       a.remove();
