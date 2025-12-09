@@ -11,7 +11,10 @@ const ALLOWED_ORIGINS = [
   'http://localhost:4173',
   'https://noteburner.pages.dev',
   'https://noteburner.com',
-  'https://www.noteburner.com'
+  'https://www.noteburner.com',
+  'https://noteburner.gravitysolutions.in',
+  'https://noteburner-api.gravitysolutions.in',
+  'https://noteburner-media.gravitysolutions.in'
 ];
 
 app.use('/*', cors({
