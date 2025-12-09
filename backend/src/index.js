@@ -4,11 +4,26 @@ import { nanoid } from 'nanoid';
 
 const app = new Hono();
 
-// CORS middleware
+// CORS middleware - Restrict to trusted origins only
+// In production, replace with your actual frontend domain
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'https://noteburner.pages.dev',
+  'https://noteburner.com',
+  'https://www.noteburner.com'
+];
+
 app.use('/*', cors({
-  origin: '*',
+  origin: (origin) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return true;
+    // Check if origin is in allowed list
+    return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  },
   allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
+  credentials: false,
 }));
 
 // Rate limiting helper
@@ -174,12 +189,12 @@ app.delete('/api/messages/:token', async (c) => {
           ).bind(fileId, deleteAfter, markedAt).run();
           markedMediaCount++;
         } catch (err) {
-          console.error(`Failed to mark media file ${fileId}:`, err);
+          console.error('Failed to mark media file:', { fileId, error: err });
         }
       }
     }
 
-    console.log(`Message ${token} deleted, ${markedMediaCount} media files marked for deletion in 24 hours`);
+    console.log('Message deleted:', { token, markedMediaCount, messageAge: '24 hours' });
     return c.json({ success: true, markedMedia: markedMediaCount });
   } catch (error) {
     console.error('Error deleting message:', error);
@@ -385,13 +400,13 @@ export default {
           await env.MEDIA_BUCKET.delete(row.file_id);
           await env.DB.prepare(`DELETE FROM media_cleanup WHERE file_id = ?`).bind(row.file_id).run();
           markedMediaDeleted++;
-          console.log(`Deleted marked media file: ${row.file_id}`);
+          console.log('Deleted marked media file:', { fileId: row.file_id });
         } catch (err) {
-          console.error(`Failed to delete media file ${row.file_id}:`, err);
+          console.error('Failed to delete media file:', { fileId: row.file_id, error: err });
         }
       }
       
-      console.log(`Cleanup completed: ${messagesToDelete.results.length} messages deleted, ${markedMediaDeleted} marked media files deleted`);
+      console.log('Cleanup completed:', { messagesDeleted: messagesToDelete.results.length, mediaDeleted: markedMediaDeleted });
     } catch (error) {
       console.error('Scheduled cleanup error:', error);
     }
