@@ -97,6 +97,78 @@
 
 ---
 
+## 🧪 Week 2.5 - E2E Testing Setup
+**Branch**: `feature/e2e-testing`
+**Target**: Dec 25, 2025
+
+### Features
+- [ ] **Playwright setup & configuration**
+  - Install Playwright with TypeScript support
+  - Configure test environments (local + staging)
+  - Set up CI/CD integration (GitHub Actions)
+  - Parallel test execution
+
+- [ ] **Core security flow tests**
+  - Create encrypted message → View once → Verify deletion
+  - Upload file → Download once → Verify file deleted
+  - Wrong password attempts → Correct password → Success
+  - Message expiration validation
+  - Race condition prevention (simultaneous access)
+
+- [ ] **User experience tests**
+  - Dark mode toggle persistence
+  - Copy URL button functionality
+  - Mobile responsive layouts (viewport testing)
+  - Form validation (empty message, weak password)
+  - Navigation flows
+
+- [ ] **Edge case tests**
+  - Large file upload (100MB) performance
+  - Browser back button after message burn
+  - Expired message error handling
+  - Network failure recovery
+  - Concurrent user scenarios
+
+### Testing Strategy
+- **Priority 1**: Critical security paths (message deletion, one-time access)
+- **Priority 2**: User flows (create, share, view)
+- **Priority 3**: Edge cases and error states
+
+### CI Integration
+- Run tests on every PR
+- Require passing tests before merge
+- Generate test reports and coverage
+- Screenshot failures for debugging
+
+### Implementation Notes
+```typescript
+// Example test structure
+test('message self-destructs after first view', async ({ page }) => {
+  // Create message
+  await page.goto('/');
+  await page.fill('#message', 'Secret test message');
+  await page.fill('#password', 'TestPass123!');
+  await page.click('button[type="submit"]');
+  
+  // Get shareable URL
+  const url = await page.locator('#share-url').inputValue();
+  
+  // View message (first access)
+  await page.goto(url);
+  await page.fill('#password', 'TestPass123!');
+  await page.click('button[type="submit"]');
+  await expect(page.locator('text=Secret test message')).toBeVisible();
+  
+  // Try to access again (should fail)
+  await page.goto(url);
+  await page.fill('#password', 'TestPass123!');
+  await page.click('button[type="submit"]');
+  await expect(page.locator('text=Message not found')).toBeVisible();
+});
+```
+
+---
+
 ## 🔗 Week 3 - Custom URLs & Branding
 **Branch**: `feature/custom-urls`
 **Target**: Dec 29, 2025
