@@ -233,8 +233,12 @@ app.post('/api/media', async (c) => {
     // Generate unique file ID
     const fileId = nanoid(32);
     
-    // Convert base64 to binary
-    const binaryData = Uint8Array.from(atob(fileData), c => c.codePointAt(0));
+    // Convert base64 to binary - chunked approach for large files
+    const binaryString = atob(fileData);
+    const binaryData = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      binaryData[i] = binaryString.charCodeAt(i);
+    }
 
     // Store in R2 with encryption metadata
     await c.env.MEDIA_BUCKET.put(fileId, binaryData, {
@@ -284,9 +288,18 @@ app.get('/api/media/:fileId', async (c) => {
       return c.json({ error: 'File not found or already downloaded' }, 404);
     }
 
-    // Return file data
+    // Return file data - use chunked conversion for large files
     const arrayBuffer = await object.arrayBuffer();
-    const base64Data = btoa(String.fromCodePoint(...new Uint8Array(arrayBuffer)));
+    const bytes = new Uint8Array(arrayBuffer);
+    const CHUNK_SIZE = 8192; // Process 8KB at a time
+    let binary = '';
+    
+    for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+      const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, bytes.length));
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    
+    const base64Data = btoa(binary);
 
     return c.json({
       fileData: base64Data,
