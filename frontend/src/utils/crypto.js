@@ -153,24 +153,30 @@ export async function decryptFile(encryptedData, iv, salt, password, fileName, f
 
 /**
  * Helper: Convert ArrayBuffer to base64
+ * Uses chunked approach to avoid stack overflow with large files
  */
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
+  const CHUNK_SIZE = 8192; // Process 8KB at a time
   let binary = '';
-  for (const byte of bytes) {
-    binary += String.fromCodePoint(byte);
+  
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, bytes.length));
+    binary += String.fromCharCode.apply(null, chunk);
   }
+  
   return btoa(binary);
 }
 
 /**
  * Helper: Convert base64 to ArrayBuffer
+ * Uses efficient direct conversion without string concatenation
  */
 function base64ToArrayBuffer(base64) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.codePointAt(i);
+    bytes[i] = binary.charCodeAt(i);
   }
   return bytes.buffer;
 }
