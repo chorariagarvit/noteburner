@@ -19,7 +19,6 @@ function ViewMessage() {
   const [decryptedPassword, setDecryptedPassword] = useState(''); // Store password for on-demand decryption
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState({});
-  const [burning, setBurning] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
 
   const handleDecrypt = async (e) => {
@@ -67,10 +66,6 @@ function ViewMessage() {
 
       setUnlocking(false);
       setDecrypted(true);
-      
-      // Show burning animation
-      setBurning(true);
-      setTimeout(() => setBurning(false), 3000);
     } catch (err) {
       setError(err.message || 'Failed to decrypt message. Check your password.');
       setUnlocking(false); // Reset unlocking state on error
@@ -125,7 +120,7 @@ function ViewMessage() {
     return (
       <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-900 py-12">
         <div className="max-w-3xl mx-auto px-4">
-          <div className={`card ${burning ? 'animate-burn' : 'animate-fade-in'}`}>
+          <div className="card animate-fade-in">
             <div className="text-center mb-6">
               <Flame className="w-16 h-16 text-primary-600 dark:text-primary-500 mx-auto mb-4 animate-pulse" />
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
