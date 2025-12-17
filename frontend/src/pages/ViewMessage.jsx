@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, Share2, Twitter, MessageSquare } from 'lucide-react';
 import { decryptMessage, decryptFile } from '../utils/crypto';
 import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
 
 function ViewMessage() {
   const { token } = useParams();
+  const navigate = useNavigate();
   
   useEffect(() => {
     document.title = 'NoteBurner - View Message';
@@ -20,6 +21,19 @@ function ViewMessage() {
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState({});
   const [unlocking, setUnlocking] = useState(false);
+
+  const handleShare = (platform) => {
+    const shareText = 'I just sent a self-destructing message 🔥 Try NoteBurner for secure, encrypted messaging!';
+    const shareUrl = window.location.origin;
+    
+    const urls = {
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      reddit: `https://reddit.com/submit?title=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`
+    };
+    
+    window.open(urls[platform], '_blank', 'width=600,height=400');
+  };
 
   const handleDecrypt = async (e) => {
     e.preventDefault();
@@ -157,13 +171,50 @@ function ViewMessage() {
               </div>
             )}
 
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-red-800 dark:text-red-300">
                   <p className="font-semibold mb-1">This message has self-destructed</p>
                   <p>It has been permanently deleted from our servers. There are no backups or recovery options. Make sure to save any important information now.</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Social Share Section */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div className="text-center mb-4">
+                <Share2 className="w-8 h-8 text-primary-600 dark:text-primary-500 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Want to send your own secret?
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Share NoteBurner with your friends for secure messaging
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => navigate('/')}
+                  className="btn-primary flex items-center justify-center gap-2"
+                >
+                  <Flame className="w-4 h-4" />
+                  Create Your Message
+                </button>
+                <button
+                  onClick={() => handleShare('twitter')}
+                  className="btn-secondary flex items-center justify-center gap-2"
+                >
+                  <Twitter className="w-4 h-4" />
+                  Share on X
+                </button>
+                <button
+                  onClick={() => handleShare('reddit')}
+                  className="btn-secondary flex items-center justify-center gap-2"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Share on Reddit
+                </button>
               </div>
             </div>
           </div>
