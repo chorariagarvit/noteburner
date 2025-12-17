@@ -55,6 +55,86 @@ app.get('/', (c) => {
   });
 });
 
+// Helper function to increment stats
+async function incrementStat(db, metric, value = 1) {
+  const today = new Date().toISOString().split('T')[0];
+  
+  try {
+    // Update all_time
+    await db.prepare(
+      `INSERT INTO stats (metric, value, period, date) 
+       VALUES (?, ?, 'all_time', ?)
+       ON CONFLICT(metric, period, date) 
+       DO UPDATE SET value = value + ?, updated_at = CURRENT_TIMESTAMP`
+    ).bind(metric, value, today, value).run();
+    
+    // Update today
+    await db.prepare(
+      `INSERT INTO stats (metric, value, period, date) 
+       VALUES (?, ?, 'today', ?)
+       ON CONFLICT(metric, period, date) 
+       DO UPDATE SET value = value + ?, updated_at = CURRENT_TIMESTAMP`
+    ).bind(metric, value, today, value).run();
+    
+    // Update this_week (calculate week start)
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    const weekDate = weekStart.toISOString().split('T')[0];
+    
+    await db.prepare(
+      `INSERT INTO stats (metric, value, period, date) 
+       VALUES (?, ?, 'this_week', ?)
+       ON CONFLICT(metric, period, date) 
+       DO UPDATE SET value = value + ?, updated_at = CURRENT_TIMESTAMP`
+    ).bind(metric, value, weekDate, value).run();
+  } catch (error) {
+    console.error('Failed to increment stat:', { metric, error });
+  }
+}
+
+// Get stats endpoint
+app.get('/api/stats', async (c) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    const weekDate = weekStart.toISOString().split('T')[0];
+    
+    // Get all stats
+    const stats = await c.env.DB.prepare(
+      `SELECT metric, value, period FROM stats 
+       WHERE (period = 'all_time' AND date = ?) 
+          OR (period = 'today' AND date = ?)
+          OR (period = 'this_week' AND date = ?)`
+    ).bind(today, today, weekDate).all();
+    
+    // Format response
+    const response = {
+      all_time: {},
+      today: {},
+      this_week: {}
+    };
+    
+    for (const stat of stats.results) {
+      response[stat.period][stat.metric] = stat.value;
+    }
+    
+    // Calculate average file size
+    if (response.all_time.files_encrypted > 0) {
+      response.all_time.avg_file_size = Math.round(
+        response.all_time.total_file_size / response.all_time.files_encrypted
+      );
+    }
+    
+    return c.json(response);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    return c.json({ error: 'Failed to fetch stats' }, 500);
+  }
+});
+
 // Create encrypted message
 app.post('/api/messages', async (c) => {
   try {
@@ -81,6 +161,9 @@ app.post('/api/messages', async (c) => {
       `INSERT INTO messages (token, encrypted_data, iv, salt, created_at, expires_at, accessed) 
        VALUES (?, ?, ?, ?, ?, ?, 0)`
     ).bind(token, encryptedData, iv, salt, createdAt, expiresAt).run();
+
+    // Increment stats
+    await incrementStat(c.env.DB, 'messages_created');
 
     // Use FRONTEND_URL from environment or fallback to request origin
     const frontendUrl = c.env.FRONTEND_URL || new URL(c.req.url).origin;
@@ -176,6 +259,9 @@ app.delete('/api/messages/:token', async (c) => {
     // Delete message from database
     await c.env.DB.prepare(`DELETE FROM messages WHERE token = ?`).bind(token).run();
 
+    // Increment stats
+    await incrementStat(c.env.DB, 'messages_burned');
+
     // DON'T delete media files immediately - allow grace period for large file downloads
     // Track files in D1 for cleanup after 24 hours (avoids re-uploading large files to R2)
     let markedMediaCount = 0;
@@ -260,6 +346,10 @@ app.post('/api/media', async (c) => {
     await c.env.DB.prepare(
       `UPDATE messages SET media_files = ? WHERE token = ?`
     ).bind(JSON.stringify(existingFiles), token).run();
+
+    // Increment stats
+    await incrementStat(c.env.DB, 'files_encrypted');
+    await incrementStat(c.env.DB, 'total_file_size', binaryData.length);
 
     return c.json({ 
       success: true,
@@ -380,10 +470,27 @@ export default {
   },
   
   async scheduled(event, env, ctx) {
-    // Run cleanup job automatically
+    // Run cleanup job automatically + reset daily/weekly stats
     console.log('Running scheduled cleanup job...');
     try {
       const now = Date.now();
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      
+      // Reset yesterday's stats (keep today's)
+      await env.DB.prepare(
+        `DELETE FROM stats WHERE period = 'today' AND date < ?`
+      ).bind(today).run();
+      
+      // Reset old week stats
+      const nowDate = new Date();
+      const weekStart = new Date(nowDate);
+      weekStart.setDate(nowDate.getDate() - nowDate.getDay());
+      const weekDate = weekStart.toISOString().split('T')[0];
+      
+      await env.DB.prepare(
+        `DELETE FROM stats WHERE period = 'this_week' AND date < ?`
+      ).bind(weekDate).run();
       
       // 1. Find expired messages
       const messagesToDelete = await env.DB.prepare(
