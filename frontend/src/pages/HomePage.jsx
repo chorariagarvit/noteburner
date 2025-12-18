@@ -75,30 +75,38 @@ function HomePage() {
       if (files.length > 0) {
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
-          const encryptedFile = await encryptFile(file, password);
           
-          // Use chunked upload for files >100MB
-          if (shouldUseChunkedUpload(encryptedFile.encryptedData.length)) {
-            await uploadLargeFile(
-              file,
-              encryptedFile.encryptedData,
-              encryptedFile.iv,
-              encryptedFile.salt,
-              result.token,
-              (progress) => {
-                setUploadProgress(prev => ({ ...prev, [i]: progress }));
-              }
-            );
-          } else {
-            // Use direct upload for smaller files
-            await uploadMedia(
-              encryptedFile.encryptedData,
-              file.name,
-              file.type,
-              encryptedFile.iv,
-              encryptedFile.salt,
-              result.token
-            );
+          try {
+            const encryptedFile = await encryptFile(file, password);
+            
+            // Use chunked upload for files >100MB
+            if (shouldUseChunkedUpload(encryptedFile.encryptedData.length)) {
+              await uploadLargeFile(
+                file,
+                encryptedFile.encryptedData,
+                encryptedFile.iv,
+                encryptedFile.salt,
+                result.token,
+                (progress) => {
+                  setUploadProgress(prev => ({ ...prev, [i]: progress }));
+                }
+              );
+            } else {
+              // Use direct upload for smaller files
+              await uploadMedia(
+                encryptedFile.encryptedData,
+                file.name,
+                file.type,
+                encryptedFile.iv,
+                encryptedFile.salt,
+                result.token
+              );
+              // Set progress to 100 for small files
+              setUploadProgress(prev => ({ ...prev, [i]: 100 }));
+            }
+          } catch (uploadErr) {
+            // Provide more context on upload errors
+            throw new Error(`Failed to upload ${file.name}: ${uploadErr.message}`);
           }
         }
       }
