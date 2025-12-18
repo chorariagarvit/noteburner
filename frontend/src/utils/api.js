@@ -97,14 +97,16 @@ export async function getMedia(fileId) {
   if (contentType !== 'application/json') {
     const iv = response.headers.get('X-File-IV');
     const salt = response.headers.get('X-File-Salt');
+    const encodedFileName = response.headers.get('X-File-Name');
+    const fileName = encodedFileName ? decodeURIComponent(encodedFileName) : 'encrypted-file';
     const blob = await response.blob();
     
     return {
       fileData: blob, // Return blob for streaming files
       iv,
       salt,
-      fileName: 'encrypted-file',
-      fileType: contentType,
+      fileName,
+      fileType: 'application/octet-stream',
       isStream: true
     };
   }

@@ -26,6 +26,7 @@ app.use('/*', cors({
   },
   allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
+  exposeHeaders: ['X-File-IV', 'X-File-Salt', 'X-File-Name', 'Content-Disposition'],
   credentials: false,
 }));
 
@@ -522,16 +523,21 @@ app.get('/api/media/:fileId', async (c) => {
     const fileSize = object.size;
     const fileName = object.customMetadata?.originalName || 'file';
     
+    // Sanitize and encode filename for Content-Disposition
+    const sanitizedFileName = fileName.replace(/[^\w\s.-]/g, '_');
+    const encodedFileName = encodeURIComponent(sanitizedFileName);
+    
     if (fileSize > 100 * 1024 * 1024) {
       // Stream response for large files
       return new Response(object.body, {
         headers: {
-          'Content-Type': object.httpMetadata.contentType || 'application/octet-stream',
+          'Content-Type': 'application/octet-stream',
           'Content-Length': fileSize.toString(),
-          'Content-Disposition': `attachment; filename="${fileName}"`,
+          'Content-Disposition': `attachment; filename="${sanitizedFileName}"; filename*=UTF-8''${encodedFileName}`,
           'X-File-IV': object.customMetadata.iv,
           'X-File-Salt': object.customMetadata.salt,
-          'Access-Control-Expose-Headers': 'X-File-IV, X-File-Salt'
+          'X-File-Name': encodedFileName,
+          'Access-Control-Expose-Headers': 'X-File-IV, X-File-Salt, X-File-Name, Content-Disposition'
         }
       });
     }

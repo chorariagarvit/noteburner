@@ -103,16 +103,23 @@ function ViewMessage() {
         mediaData.fileType
       );
       
-      // Trigger download
+      // Force download (not open in browser)
       const url = URL.createObjectURL(decryptedFile.blob);
       const a = document.createElement('a');
       a.href = url;
-      // Sanitize filename to prevent any potential issues
-      a.download = decryptedFile.fileName.replaceAll(/[<>:"/\\|?*]/g, '_');
+      // Sanitize filename and force download attribute
+      const sanitizedFilename = decryptedFile.fileName.replaceAll(/[<>:"/\\|?*]/g, '_');
+      a.download = sanitizedFilename;
+      a.setAttribute('download', sanitizedFilename); // Explicit attribute
+      a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      
+      // Cleanup - delayed to ensure download starts
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
       
       // Only delete file after successful download
       // If there's a network error or decryption failure, file stays available
