@@ -10,14 +10,17 @@ export function useStats(refreshInterval = 30000) {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        console.log('Fetching stats from:', `${API_URL}/api/stats`);
         const response = await fetch(`${API_URL}/api/stats`);
         if (!response.ok) {
-          throw new Error('Failed to fetch stats');
+          throw new Error(`Failed to fetch stats: ${response.status}`);
         }
         const data = await response.json();
+        console.log('Stats received:', data);
         setStats(data);
         setError(null);
       } catch (err) {
+        console.error('Error fetching stats:', err);
         setError(err.message);
       } finally {
         setLoading(false);
