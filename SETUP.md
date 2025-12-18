@@ -129,7 +129,7 @@ Or manually deploy to Cloudflare Pages:
 ### Backend (wrangler.toml)
 
 - `MAX_MESSAGE_SIZE`: Maximum message size in bytes (default: 10MB)
-- `MAX_FILE_SIZE`: Maximum file size in bytes (default: 100MB)
+- `MAX_FILE_SIZE`: Maximum file size in bytes (default: 2GB, uses chunked uploads for files >100MB)
 - `RATE_LIMIT_REQUESTS`: Max requests per window (default: 10)
 - `RATE_LIMIT_WINDOW`: Rate limit window in seconds (default: 60)
 
