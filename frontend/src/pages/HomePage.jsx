@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X, TrendingUp } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
+import { uploadLargeFile, shouldUseChunkedUpload } from '../utils/chunkedUpload';
 import { useStats } from '../hooks/useStats';
 import { AnimatedCounter } from '../components/AnimatedCounter';
 
@@ -20,14 +21,16 @@ function HomePage() {
   const [expiresIn, setExpiresIn] = useState('24');
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
   const [error, setError] = useState('');
 
   const handleFileUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    const validFiles = selectedFiles.filter(f => f.size <= 100 * 1024 * 1024);
+    const maxSize = 2 * 1024 * 1024 * 1024; // 2GB
+    const validFiles = selectedFiles.filter(f => f.size <= maxSize);
     
     if (validFiles.length !== selectedFiles.length) {
-      setError('Some files exceeded 100MB limit and were skipped');
+      setError('Some files exceeded 2GB limit and were skipped');
     }
     
     setFiles([...files, ...validFiles]);
@@ -70,16 +73,33 @@ function HomePage() {
       );
 
       if (files.length > 0) {
-        for (const file of files) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
           const encryptedFile = await encryptFile(file, password);
-          await uploadMedia(
-            encryptedFile.encryptedData,
-            file.name,
-            file.type,
-            encryptedFile.iv,
-            encryptedFile.salt,
-            result.token
-          );
+          
+          // Use chunked upload for files >100MB
+          if (shouldUseChunkedUpload(encryptedFile.encryptedData.length)) {
+            await uploadLargeFile(
+              file,
+              encryptedFile.encryptedData,
+              encryptedFile.iv,
+              encryptedFile.salt,
+              result.token,
+              (progress) => {
+                setUploadProgress(prev => ({ ...prev, [i]: progress }));
+              }
+            );
+          } else {
+            // Use direct upload for smaller files
+            await uploadMedia(
+              encryptedFile.encryptedData,
+              file.name,
+              file.type,
+              encryptedFile.iv,
+              encryptedFile.salt,
+              result.token
+            );
+          }
         }
       }
 
@@ -235,7 +255,7 @@ function HomePage() {
 
                   <div>
                     <label htmlFor="files-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Files (max 100MB)
+                      Files (max 2GB each)
                     </label>
                     <label htmlFor="files-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2.5 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
                       <Upload className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -252,17 +272,39 @@ function HomePage() {
                 </div>
 
                 {files.length > 0 && (
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {files.map((file, index) => (
-                      <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded text-xs">
-                        <span className="text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(index)}
-                          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
+                      <div key={`${file.name}-${file.size}-${index}`}>
+                        <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded text-xs">
+                          <div className="flex-1 truncate">
+                            <span className="text-gray-700 dark:text-gray-200">{file.name}</span>
+                            <span className="text-gray-500 dark:text-gray-400 ml-2">
+                              ({(file.size / (1024 * 1024)).toFixed(1)}MB)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            disabled={loading}
+                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2 disabled:opacity-50"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                        {uploadProgress[index] !== undefined && (
+                          <div className="mt-1">
+                            <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                              <span>Uploading...</span>
+                              <span>{uploadProgress[index]}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                              <div 
+                                className="bg-primary-600 dark:bg-primary-500 h-1.5 rounded-full transition-all duration-300"
+                                style={{ width: `${uploadProgress[index]}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

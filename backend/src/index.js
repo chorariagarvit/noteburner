@@ -291,7 +291,146 @@ app.delete('/api/messages/:token', async (c) => {
   }
 });
 
-// Upload encrypted media file
+// Initialize multipart upload for large files (>100MB)
+app.post('/api/media/init', async (c) => {
+  try {
+    const ip = c.req.header('CF-Connecting-IP') || 'unknown';
+    
+    if (!checkRateLimit(ip, 5, 60000)) {
+      return c.json({ error: 'Rate limit exceeded' }, 429);
+    }
+
+    const body = await c.req.json();
+    const { fileName, fileType, fileSize, iv, salt, token } = body;
+
+    if (!fileName || !iv || !salt || !token || !fileSize) {
+      return c.json({ error: 'Missing required fields' }, 400);
+    }
+
+    // Check file size limit (2GB)
+    if (fileSize > 2 * 1024 * 1024 * 1024) {
+      return c.json({ error: 'File size exceeds 2GB limit' }, 400);
+    }
+
+    // Verify token exists
+    const message = await c.env.DB.prepare(
+      `SELECT media_files FROM messages WHERE token = ?`
+    ).bind(token).first();
+
+    if (!message) {
+      return c.json({ error: 'Invalid message token' }, 404);
+    }
+
+    // Generate unique file ID
+    const fileId = nanoid(32);
+    const uploadId = nanoid(32);
+
+    // Create multipart upload in R2
+    const multipartUpload = await c.env.MEDIA_BUCKET.createMultipartUpload(fileId, {
+      httpMetadata: {
+        contentType: fileType || 'application/octet-stream',
+      },
+      customMetadata: {
+        originalName: fileName,
+        messageToken: token,
+        iv: iv,
+        salt: salt,
+        uploadId: uploadId
+      }
+    });
+
+    return c.json({ 
+      success: true,
+      fileId,
+      uploadId: multipartUpload.uploadId,
+      chunkSize: 50 * 1024 * 1024 // 50MB chunks
+    }, 201);
+  } catch (error) {
+    console.error('Error initializing upload:', error);
+    return c.json({ error: 'Failed to initialize upload' }, 500);
+  }
+});
+
+// Upload a single chunk
+app.post('/api/media/chunk', async (c) => {
+  try {
+    const ip = c.req.header('CF-Connecting-IP') || 'unknown';
+    
+    if (!checkRateLimit(ip, 50, 60000)) { // Higher limit for chunks
+      return c.json({ error: 'Rate limit exceeded' }, 429);
+    }
+
+    const body = await c.req.json();
+    const { fileId, uploadId, chunkIndex, chunkData } = body;
+
+    if (!fileId || !uploadId || chunkIndex === undefined || !chunkData) {
+      return c.json({ error: 'Missing required fields' }, 400);
+    }
+
+    // Convert base64 to binary
+    const binaryString = atob(chunkData);
+    const binaryData = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      binaryData[i] = binaryString.charCodeAt(i);
+    }
+
+    // Upload chunk as part
+    const multipartUpload = c.env.MEDIA_BUCKET.resumeMultipartUpload(fileId, uploadId);
+    const part = await multipartUpload.uploadPart(chunkIndex + 1, binaryData);
+
+    return c.json({ 
+      success: true,
+      partNumber: chunkIndex + 1,
+      etag: part.etag
+    });
+  } catch (error) {
+    console.error('Error uploading chunk:', error);
+    return c.json({ error: 'Failed to upload chunk' }, 500);
+  }
+});
+
+// Complete multipart upload
+app.post('/api/media/complete', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { fileId, uploadId, parts, fileName, token, fileSize } = body;
+
+    if (!fileId || !uploadId || !parts || !token) {
+      return c.json({ error: 'Missing required fields' }, 400);
+    }
+
+    // Complete the multipart upload
+    const multipartUpload = c.env.MEDIA_BUCKET.resumeMultipartUpload(fileId, uploadId);
+    await multipartUpload.complete(parts);
+
+    // Update message with file reference
+    const message = await c.env.DB.prepare(
+      `SELECT media_files FROM messages WHERE token = ?`
+    ).bind(token).first();
+
+    const existingFiles = message.media_files ? JSON.parse(message.media_files) : [];
+    existingFiles.push(fileId);
+    
+    await c.env.DB.prepare(
+      `UPDATE messages SET media_files = ? WHERE token = ?`
+    ).bind(JSON.stringify(existingFiles), token).run();
+
+    // Increment stats
+    await incrementStat(c.env.DB, 'files_encrypted');
+    await incrementStat(c.env.DB, 'total_file_size', fileSize || 0);
+
+    return c.json({ 
+      success: true,
+      fileId,
+      fileName 
+    }, 201);
+  } catch (error) {
+    console.error('Error completing upload:', error);
+    return c.json({ error: 'Failed to complete upload' }, 500);
+  }
+});
+
+// Upload encrypted media file (legacy endpoint for files <100MB)
 app.post('/api/media', async (c) => {
   try {
     const ip = c.req.header('CF-Connecting-IP') || 'unknown';
