@@ -130,7 +130,16 @@ export async function encryptFile(file, password) {
  */
 export async function decryptFile(encryptedData, iv, salt, password, fileName, fileType) {
   try {
-    const encryptedBuffer = base64ToArrayBuffer(encryptedData);
+    // Handle both base64 string (small files) and Blob (large streamed files)
+    let encryptedBuffer;
+    if (encryptedData instanceof Blob) {
+      // Large file - already downloaded as blob
+      encryptedBuffer = await encryptedData.arrayBuffer();
+    } else {
+      // Small file - convert from base64
+      encryptedBuffer = base64ToArrayBuffer(encryptedData);
+    }
+    
     const ivBuffer = base64ToArrayBuffer(iv);
     const saltBuffer = base64ToArrayBuffer(salt);
     
