@@ -91,5 +91,35 @@ export async function getMedia(fileId) {
     throw new Error(error.error || 'Failed to retrieve media');
   }
 
+  const contentType = response.headers.get('Content-Type');
+  
+  // Large files are streamed as binary with metadata in headers
+  if (contentType !== 'application/json') {
+    const iv = response.headers.get('X-File-IV');
+    const salt = response.headers.get('X-File-Salt');
+    const blob = await response.blob();
+    
+    return {
+      fileData: blob, // Return blob for streaming files
+      iv,
+      salt,
+      fileName: 'encrypted-file',
+      fileType: contentType,
+      isStream: true
+    };
+  }
+
+  // Small files return JSON with base64 data
   return response.json();
+}
+
+export async function getMediaStream(fileId) {
+  const response = await fetch(`${API_URL}/api/media/${fileId}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to retrieve media');
+  }
+
+  return response;
 }

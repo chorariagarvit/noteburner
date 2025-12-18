@@ -517,7 +517,26 @@ app.get('/api/media/:fileId', async (c) => {
       return c.json({ error: 'File not found or already downloaded' }, 404);
     }
 
-    // Return file data - use chunked conversion for large files
+    // For large files (>100MB), stream directly from R2
+    // This avoids loading entire file into Workers memory
+    const fileSize = object.size;
+    const fileName = object.customMetadata?.originalName || 'file';
+    
+    if (fileSize > 100 * 1024 * 1024) {
+      // Stream response for large files
+      return new Response(object.body, {
+        headers: {
+          'Content-Type': object.httpMetadata.contentType || 'application/octet-stream',
+          'Content-Length': fileSize.toString(),
+          'Content-Disposition': `attachment; filename="${fileName}"`,
+          'X-File-IV': object.customMetadata.iv,
+          'X-File-Salt': object.customMetadata.salt,
+          'Access-Control-Expose-Headers': 'X-File-IV, X-File-Salt'
+        }
+      });
+    }
+
+    // For smaller files, use the existing base64 conversion method
     const arrayBuffer = await object.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
     const CHUNK_SIZE = 8192; // Process 8KB at a time
