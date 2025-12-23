@@ -2,6 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Message Creation', () => {
   test('should create a simple text message', async ({ page }) => {
+    // Log console errors
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        console.log('Browser console error:', msg.text());
+      }
+    });
+    
     await page.goto('/');
 
     // Fill in message
@@ -20,7 +27,7 @@ test.describe('Message Creation', () => {
     const shareUrlInput = page.locator('input[readonly]').first();
     await expect(shareUrlInput).toBeVisible();
     const shareUrl = await shareUrlInput.inputValue();
-    expect(shareUrl).toContain('http://localhost:5173/message/');
+    expect(shareUrl).toContain('http://localhost:5173/m/');
     
     // Verify password is displayed
     await expect(page.locator('text=TestPassword123!')).toBeVisible();
@@ -109,7 +116,7 @@ test.describe('Message Creation', () => {
     
     // Verify clipboard content
     const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-    expect(clipboardText).toContain('http://localhost:5173/message/');
+    expect(clipboardText).toContain('http://localhost:5173/m/');
   });
 
   test('should use "Create Similar Message" feature', async ({ page }) => {

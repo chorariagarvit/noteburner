@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --port 8787 --local",
+    "dev": "wrangler dev --port 8787 --local --var FRONTEND_URL:http://localhost:5173 --var RATE_LIMIT_REQUESTS:100",
     "dev:setup": "wrangler d1 migrations apply noteburner-db --local < /dev/null || true",
     "deploy": "wrangler deploy",
     "tail": "wrangler tail",
