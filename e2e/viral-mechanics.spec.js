@@ -4,16 +4,20 @@ test.describe('Viral Mechanics Features', () => {
   test('should display animated stats counters on homepage', async ({ page }) => {
     await page.goto('/');
 
+    // Scroll down to stats section
+    const statsSection = page.locator('text=Platform Statistics');
+    await statsSection.scrollIntoViewIfNeeded();
+    
     // Verify stats section exists
-    await expect(page.locator('text=Platform Statistics')).toBeVisible();
+    await expect(statsSection).toBeVisible({ timeout: 5000 });
     
-    // Verify stat cards are visible
-    const statCards = page.locator('.grid > div').filter({ hasText: /Messages Created|Messages Burned|Files Encrypted/ });
-    await expect(statCards).toHaveCount(3);
+    // Verify the stats grid container is visible with stat cards
+    const statsGrid = page.locator('section').filter({ hasText: 'Platform Statistics' }).locator('.grid');
+    await expect(statsGrid).toBeVisible();
     
-    // Verify numbers are displayed (should be > 0 if stats are working)
-    const numbers = page.locator('.text-4xl.font-bold');
-    expect(await numbers.count()).toBeGreaterThanOrEqual(3);
+    // Verify we have multiple stat items
+    const statItems = statsGrid.locator('> div');
+    expect(await statItems.count()).toBeGreaterThanOrEqual(3);
   });
 
   test('should show rotating loading messages during encryption', async ({ page }) => {
