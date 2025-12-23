@@ -121,6 +121,30 @@ cd frontend
 npm run dev
 ```
 
+### Testing
+
+NoteBurner includes comprehensive end-to-end tests using Playwright.
+
+```bash
+# Run all E2E tests
+npm run test:e2e
+
+# Run tests with UI mode (interactive)
+npm run test:e2e:ui
+
+# View test report
+npm run test:report
+```
+
+**Test Coverage:**
+- ✅ Message creation (text, files, passwords, expiration)
+- ✅ Message viewing and decryption
+- ✅ One-time access enforcement
+- ✅ Viral mechanics (confetti, CTAs, loading states)
+- ✅ Preview page and countdown timers
+
+See [E2E_TESTING.md](./E2E_TESTING.md) for detailed testing documentation.
+
 ## License
 
 MIT
