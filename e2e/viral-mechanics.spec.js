@@ -5,7 +5,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.goto('/');
 
     // Verify stats section exists
-    await expect(page.locator('text=NoteBurner by the Numbers')).toBeVisible();
+    await expect(page.locator('text=Platform Statistics')).toBeVisible();
     
     // Verify stat cards are visible
     const statCards = page.locator('.grid > div').filter({ hasText: /Messages Created|Messages Burned|Files Encrypted/ });
