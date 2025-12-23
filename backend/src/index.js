@@ -35,7 +35,12 @@ app.use('/*', cors({
 // Rate limiting helper
 const rateLimitMap = new Map();
 
-function checkRateLimit(ip, limit = 10, window = 60000) {
+function checkRateLimit(ip, limit = 10, window = 60000, env = {}) {
+  // Skip rate limiting in local development mode
+  if (env.FRONTEND_URL === 'http://localhost:5173') {
+    return true;
+  }
+  
   const now = Date.now();
   const userRequests = rateLimitMap.get(ip) || [];
   const recentRequests = userRequests.filter(time => now - time < window);
@@ -143,7 +148,7 @@ app.post('/api/messages', async (c) => {
   try {
     const ip = c.req.header('CF-Connecting-IP') || 'unknown';
     
-    if (!checkRateLimit(ip, 10, 60000)) {
+    if (!checkRateLimit(ip, 10, 60000, c.env)) {
       return c.json({ error: 'Rate limit exceeded' }, 429);
     }
 
@@ -300,7 +305,7 @@ app.post('/api/media/init', async (c) => {
   try {
     const ip = c.req.header('CF-Connecting-IP') || 'unknown';
     
-    if (!checkRateLimit(ip, 5, 60000)) {
+    if (!checkRateLimit(ip, 5, 60000, c.env)) {
       return c.json({ error: 'Rate limit exceeded' }, 429);
     }
 
@@ -360,7 +365,7 @@ app.post('/api/media/chunk', async (c) => {
   try {
     const ip = c.req.header('CF-Connecting-IP') || 'unknown';
     
-    if (!checkRateLimit(ip, 50, 60000)) { // Higher limit for chunks
+    if (!checkRateLimit(ip, 50, 60000, c.env)) { // Higher limit for chunks
       return c.json({ error: 'Rate limit exceeded' }, 429);
     }
 
@@ -439,7 +444,7 @@ app.post('/api/media', async (c) => {
   try {
     const ip = c.req.header('CF-Connecting-IP') || 'unknown';
     
-    if (!checkRateLimit(ip, 5, 60000)) {
+    if (!checkRateLimit(ip, 5, 60000, c.env)) {
       return c.json({ error: 'Rate limit exceeded' }, 429);
     }
 
