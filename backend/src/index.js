@@ -227,7 +227,8 @@ app.get('/api/messages/:token', async (c) => {
       iv: result.iv,
       salt: result.salt,
       mediaFiles: result.media_files ? JSON.parse(result.media_files) : [],
-      createdAt: result.created_at
+      createdAt: result.created_at,
+      expiresAt: result.expires_at
     };
 
     return c.json(response);

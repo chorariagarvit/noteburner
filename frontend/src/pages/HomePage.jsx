@@ -6,6 +6,7 @@ import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../utils/chunkedUpload';
 import { useStats } from '../hooks/useStats';
+import { useLoadingMessages } from '../hooks/useLoadingMessages';
 import { AnimatedCounter } from '../components/AnimatedCounter';
 
 function HomePage() {
@@ -23,6 +24,7 @@ function HomePage() {
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
   const [error, setError] = useState('');
+  const loadingMessage = useLoadingMessages(loading);
 
   const handleFileUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -302,14 +304,21 @@ function HomePage() {
                         {uploadProgress[index] !== undefined && (
                           <div className="mt-1">
                             <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
-                              <span>Uploading...</span>
-                              <span>{uploadProgress[index]}%</span>
+                              <span className="flex items-center gap-1">
+                                {uploadProgress[index] < 30 && '🚀 Launching...'}
+                                {uploadProgress[index] >= 30 && uploadProgress[index] < 60 && '⚡ Flying through cyberspace...'}
+                                {uploadProgress[index] >= 60 && uploadProgress[index] < 90 && '🔐 Encrypting chunks...'}
+                                {uploadProgress[index] >= 90 && '✨ Almost there...'}
+                              </span>
+                              <span className="font-mono font-semibold">{uploadProgress[index]}%</span>
                             </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                               <div 
-                                className="bg-primary-600 dark:bg-primary-500 h-1.5 rounded-full transition-all duration-300"
+                                className="bg-gradient-to-r from-primary-500 via-pink-500 to-purple-500 h-1.5 rounded-full transition-all duration-300 relative"
                                 style={{ width: `${uploadProgress[index]}%` }}
-                              />
+                              >
+                                <div className="absolute inset-0 bg-white/30 animate-pulse" />
+                              </div>
                             </div>
                           </div>
                         )}
@@ -329,7 +338,7 @@ function HomePage() {
                   disabled={loading}
                   className="btn-primary w-full"
                 >
-                  {loading ? 'Encrypting...' : 'Encrypt & Create Link'}
+                  {loading ? loadingMessage : 'Encrypt & Create Link'}
                 </button>
               </form>
             </div>

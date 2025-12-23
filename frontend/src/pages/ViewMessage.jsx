@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, Share2, Twitter, MessageSquare } from 'lucide-react';
+import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, Share2, Twitter, MessageSquare, Clock } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { decryptMessage, decryptFile } from '../utils/crypto';
 import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
+import { useCountdown, formatTimeLeft } from '../hooks/useCountdown';
 
 function ViewMessage() {
   const { token } = useParams();
@@ -21,6 +23,9 @@ function ViewMessage() {
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState({});
   const [unlocking, setUnlocking] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
+  const [expiresAt, setExpiresAt] = useState(null);
+  const timeLeft = useCountdown(expiresAt);
 
   const handleShare = (platform) => {
     const shareText = 'I just sent a self-destructing message 🔥 Try NoteBurner for secure, encrypted messaging!';
@@ -47,6 +52,11 @@ function ViewMessage() {
 
       // Fetch encrypted message
       const data = await getMessage(token);
+      
+      // Store expiration time
+      if (data.expiresAt) {
+        setExpiresAt(data.expiresAt);
+      }
 
       // Decrypt message
       const decryptedText = await decryptMessage(
@@ -80,6 +90,29 @@ function ViewMessage() {
 
       setUnlocking(false);
       setDecrypted(true);
+      
+      // Trigger confetti celebration 🎉
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      
+      // Second burst for extra celebration
+      setTimeout(() => {
+        confetti({
+          particleCount: 50,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 50,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 }
+        });
+      }, 200);
     } catch (err) {
       setError(err.message || 'Failed to decrypt message. Check your password.');
       setUnlocking(false); // Reset unlocking state on error
@@ -190,38 +223,49 @@ function ViewMessage() {
 
             {/* Social Share Section */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-              <div className="text-center mb-4">
-                <Share2 className="w-8 h-8 text-primary-600 dark:text-primary-500 mx-auto mb-2" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Want to send your own secret?
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
+                  <Flame className="w-8 h-8 text-primary-600 dark:text-primary-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Your secret has self-destructed! 🔥
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Share NoteBurner with your friends for secure messaging
+                <p className="text-base text-gray-600 dark:text-gray-400 mb-1">
+                  Want to send your own encrypted message?
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-500">
+                  No registration. No tracking. Just pure privacy.
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
                 <button
                   onClick={() => navigate('/')}
-                  className="btn-primary flex items-center justify-center gap-2"
+                  className="btn-primary flex items-center justify-center gap-2 text-lg px-6 py-3"
                 >
-                  <Flame className="w-4 h-4" />
-                  Create Your Message
+                  <Flame className="w-5 h-5" />
+                  Create Your Secret Message
                 </button>
-                <button
-                  onClick={() => handleShare('twitter')}
-                  className="btn-secondary flex items-center justify-center gap-2"
-                >
-                  <Twitter className="w-4 h-4" />
-                  Share on X
-                </button>
-                <button
-                  onClick={() => handleShare('reddit')}
-                  className="btn-secondary flex items-center justify-center gap-2"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Share on Reddit
-                </button>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Share NoteBurner with friends:</p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => handleShare('twitter')}
+                    className="btn-secondary flex items-center gap-2 text-sm"
+                  >
+                    <Twitter className="w-4 h-4" />
+                    Share on X
+                  </button>
+                  <button
+                    onClick={() => handleShare('reddit')}
+                    className="btn-secondary flex items-center gap-2 text-sm"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Share on Reddit
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -242,6 +286,56 @@ function ViewMessage() {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">Unlocking Message...</h2>
           <p className="text-gray-600 dark:text-gray-300">Decryption successful!</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show preview page first
+  if (showPreview) {
+    return (
+      <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-pink-900/20 py-12 flex items-center justify-center">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="card text-center">
+            <div className="mb-8">
+              <div className="relative inline-block">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-400 to-pink-400 rounded-full animate-pulse opacity-30 blur-xl"></div>
+                <div className="relative bg-gradient-to-r from-primary-500 to-pink-500 rounded-full p-8 shadow-2xl">
+                  <Lock className="w-20 h-20 text-white animate-bounce" style={{ animationDuration: '2s' }} />
+                </div>
+              </div>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-primary-600 to-pink-600 dark:from-primary-400 dark:to-pink-400 bg-clip-text text-transparent">
+              Someone sent you a secret message...
+            </h1>
+            
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-3">
+              🔐 Encrypted end-to-end
+            </p>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-3">
+              🔥 Self-destructs after reading
+            </p>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+              ⏱️ One-time access only
+            </p>
+
+            <button
+              onClick={() => setShowPreview(false)}
+              className="btn-primary text-xl px-8 py-4 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+            >
+              <Lock className="w-6 h-6 inline-block mr-2" />
+              Unlock Secret Message
+            </button>
+
+            <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Powered by <span className="font-semibold text-primary-600 dark:text-primary-400">NoteBurner</span>
+                <br />
+                Military-grade encryption • Zero knowledge • No tracking
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -301,6 +395,33 @@ function ViewMessage() {
               {loading ? 'Decrypting...' : 'Decrypt Message'}
             </button>
           </form>
+
+          {timeLeft && !timeLeft.expired && (
+            <div className="mt-6 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+              <div className="flex items-center justify-center gap-3">
+                <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400 animate-pulse" />
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-orange-900 dark:text-orange-300">
+                    Message expires in
+                  </p>
+                  <p className="text-2xl font-mono font-bold text-orange-700 dark:text-orange-400">
+                    {formatTimeLeft(timeLeft)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {timeLeft?.expired && (
+            <div className="mt-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <div className="flex items-center justify-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                <p className="text-sm font-semibold text-red-900 dark:text-red-300">
+                  ⏰ This message has expired
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
             <div className="flex items-start gap-3">
