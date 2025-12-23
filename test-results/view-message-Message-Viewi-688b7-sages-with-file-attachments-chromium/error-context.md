@@ -1,0 +1,158 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "NoteBurner" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img [ref=e8]
+        - heading "NoteBurner" [level=1] [ref=e10]
+      - navigation [ref=e11]:
+        - link "Create Message" [ref=e12] [cursor=pointer]:
+          - /url: /create
+        - button "Toggle dark mode" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+  - main [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - img [ref=e23]
+            - heading "Burn After Reading" [level=1] [ref=e25]
+          - paragraph [ref=e26]: Send encrypted messages and files that self-destruct after one read. No traces. No backups. Complete privacy.
+          - generic [ref=e27]:
+            - img [ref=e28]
+            - generic [ref=e31]:
+              - text: 6 messages burned today
+              - generic [ref=e32]: · 6 this week
+          - generic [ref=e33]:
+            - generic [ref=e34]:
+              - img [ref=e35]
+              - generic [ref=e37]:
+                - heading "Military-Grade Encryption" [level=3] [ref=e38]
+                - paragraph [ref=e39]: AES-256-GCM with 300,000 PBKDF2 iterations
+            - generic [ref=e40]:
+              - img [ref=e41]
+              - generic [ref=e44]:
+                - heading "One-Time Access" [level=3] [ref=e45]
+                - paragraph [ref=e46]: Permanently deleted after first read
+            - generic [ref=e47]:
+              - img [ref=e48]
+              - generic [ref=e50]:
+                - heading "Lightning Fast" [level=3] [ref=e51]
+                - paragraph [ref=e52]: Powered by Cloudflare's global network
+        - generic [ref=e53]:
+          - heading "Create Secure Message" [level=2] [ref=e54]
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: Message *
+              - textbox "Message *" [ref=e58]:
+                - /placeholder: Enter your secret message...
+                - text: Message with attachment
+            - generic [ref=e59]:
+              - generic [ref=e60]: Password * (min 8 characters)
+              - generic [ref=e61]:
+                - generic [ref=e62]:
+                  - textbox "Password * (min 8 characters)" [ref=e63]:
+                    - /placeholder: Enter a strong password
+                    - text: FileAttach123!
+                  - button [ref=e64] [cursor=pointer]:
+                    - img [ref=e65]
+                - button "Generate" [ref=e68] [cursor=pointer]
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - generic [ref=e71]:
+                  - img [ref=e72]
+                  - text: Expiration
+                - combobox "Expiration" [ref=e75]:
+                  - option "No expiration"
+                  - option "1 hour"
+                  - option "6 hours"
+                  - option "24 hours" [selected]
+                  - option "3 days"
+                  - option "7 days"
+              - generic [ref=e76]:
+                - generic [ref=e77]: Files (max 2GB each)
+                - generic [ref=e78] [cursor=pointer]:
+                  - img [ref=e79]
+                  - generic [ref=e82]: 1 file(s)
+            - generic [ref=e85]:
+              - generic [ref=e86]:
+                - text: attachment.txt
+                - generic [ref=e87]: (0.0MB)
+              - button [ref=e88] [cursor=pointer]:
+                - img [ref=e89]
+            - generic [ref=e92]: "Failed to upload attachment.txt: Rate limit exceeded"
+            - button "Encrypt & Create Link" [ref=e93] [cursor=pointer]
+      - generic [ref=e95]:
+        - heading "Military-Grade Security" [level=2] [ref=e96]
+        - generic [ref=e97]:
+          - generic [ref=e98]:
+            - img [ref=e100]
+            - heading "Client-Side Encryption" [level=3] [ref=e103]
+            - paragraph [ref=e104]: AES-256-GCM encryption happens in your browser. Your password never leaves your device.
+          - generic [ref=e105]:
+            - img [ref=e107]
+            - heading "One-Time Access" [level=3] [ref=e109]
+            - paragraph [ref=e110]: Messages are permanently deleted after the first successful decryption. No backups, no recovery.
+          - generic [ref=e111]:
+            - img [ref=e113]
+            - heading "Password Protected" [level=3] [ref=e115]
+            - paragraph [ref=e116]: PBKDF2 key derivation ensures strong password-based security. Only you and the recipient can decrypt.
+          - generic [ref=e117]:
+            - img [ref=e119]
+            - heading "Media Support" [level=3] [ref=e124]
+            - paragraph [ref=e125]: Encrypt and share images, documents, and files up to 100MB. All encrypted end-to-end.
+          - generic [ref=e126]:
+            - img [ref=e128]
+            - heading "Auto-Expiration" [level=3] [ref=e131]
+            - paragraph [ref=e132]: Set optional time limits. Messages automatically delete after expiration, even if unread.
+          - generic [ref=e133]:
+            - img [ref=e135]
+            - heading "Lightning Fast" [level=3] [ref=e137]
+            - paragraph [ref=e138]: Powered by Cloudflare's global network. Instant encryption, decryption, and delivery worldwide.
+      - generic [ref=e140]:
+        - heading "How It Works" [level=2] [ref=e141]
+        - generic [ref=e142]:
+          - generic [ref=e143]:
+            - generic [ref=e144]: "1"
+            - heading "Create & Encrypt" [level=3] [ref=e145]
+            - paragraph [ref=e146]: Write your message, set a password. Everything is encrypted in your browser before being sent.
+          - generic [ref=e147]:
+            - generic [ref=e148]: "2"
+            - heading "Share Link" [level=3] [ref=e149]
+            - paragraph [ref=e150]: Get a unique shareable link. Send it along with the password (separately!) to your recipient.
+          - generic [ref=e151]:
+            - generic [ref=e152]: "3"
+            - heading "Read & Burn" [level=3] [ref=e153]
+            - paragraph [ref=e154]: Recipient enters password to decrypt and read once. Message is permanently deleted immediately.
+      - generic [ref=e156]:
+        - heading "Platform Statistics" [level=2] [ref=e157]
+        - generic [ref=e158]:
+          - generic [ref=e159]:
+            - generic [ref=e160]: "20"
+            - generic [ref=e161]: Messages Created
+          - generic [ref=e162]:
+            - generic [ref=e163]: "6"
+            - generic [ref=e164]: Messages Burned
+          - generic [ref=e165]:
+            - generic [ref=e166]: "1"
+            - generic [ref=e167]: Files Encrypted
+          - generic [ref=e168]:
+            - generic [ref=e169]: 0MB
+            - generic [ref=e170]: Avg File Size
+      - generic [ref=e172]:
+        - heading "Ready to Send a Secure Message?" [level=2] [ref=e173]
+        - paragraph [ref=e174]: Free, anonymous, and completely secure. No registration required.
+        - button "Create Message Now" [ref=e175] [cursor=pointer]
+  - contentinfo [ref=e176]:
+    - generic [ref=e178]:
+      - generic [ref=e179]:
+        - img [ref=e180]
+        - generic [ref=e182]: End-to-end encrypted. Zero knowledge.
+      - generic [ref=e183]: © 2025 NoteBurner. All messages self-destruct.
+      - link [ref=e185] [cursor=pointer]:
+        - /url: https://github.com/chorariagarvit/noteburner
+        - img [ref=e186]
+```

@@ -1,0 +1,60 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "NoteBurner" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img [ref=e8]
+        - heading "NoteBurner" [level=1] [ref=e10]
+      - navigation [ref=e11]:
+        - link "Create Message" [ref=e12] [cursor=pointer]:
+          - /url: /create
+        - button "Toggle dark mode" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+  - main [ref=e16]:
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - img [ref=e22]
+        - heading "Message Created Successfully!" [level=2] [ref=e24]
+        - paragraph [ref=e25]: Your encrypted message is ready to share
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]: Share this URL
+          - generic [ref=e29]:
+            - textbox "Share this URL" [ref=e30]: https://noteburner.gravitysolutions.in/m/fBXTE0FutVvb4oSwM5OO4RJpSHD6tSQU
+            - button "Copied!" [active] [ref=e31] [cursor=pointer]:
+              - img [ref=e32]
+              - text: Copied!
+        - generic [ref=e34]:
+          - heading "Important Security Notice" [level=3] [ref=e35]:
+            - img [ref=e36]
+            - text: Important Security Notice
+          - list [ref=e38]:
+            - listitem [ref=e39]: • Share the password separately (not in the same channel as the link)
+            - listitem [ref=e40]: • The message will be deleted after the first successful decryption
+            - listitem [ref=e41]: • There are no backups - once it's gone, it's gone forever
+            - listitem [ref=e42]: • Message expires in 24 hour(s)
+        - generic [ref=e43]:
+          - heading "Password" [level=3] [ref=e44]
+          - generic [ref=e45]: ClipTest123!
+          - paragraph [ref=e46]: Make sure the recipient has this password before sharing the link
+        - generic [ref=e47]:
+          - button "Create New Message" [ref=e48] [cursor=pointer]:
+            - img [ref=e49]
+            - text: Create New Message
+          - button "Create Similar Message" [ref=e51] [cursor=pointer]:
+            - img [ref=e52]
+            - text: Create Similar Message
+        - paragraph [ref=e55]: 💡 "Similar" keeps your settings but clears the message
+  - contentinfo [ref=e56]:
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - img [ref=e60]
+        - generic [ref=e62]: End-to-end encrypted. Zero knowledge.
+      - generic [ref=e63]: © 2025 NoteBurner. All messages self-destruct.
+      - link [ref=e65] [cursor=pointer]:
+        - /url: https://github.com/chorariagarvit/noteburner
+        - img [ref=e66]
+```
