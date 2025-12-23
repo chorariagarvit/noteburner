@@ -27,16 +27,26 @@ export default defineConfig({
   /* Run local dev server before starting tests */
   webServer: [
     {
-      command: 'cd frontend && VITE_API_URL=http://localhost:8787 npm run dev',
-      url: 'http://localhost:5173',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-    {
       command: 'cd backend && npm run dev',
       url: 'http://localhost:8787',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
     },
+    {
+      command: 'cd frontend && npm run dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
   ],
+  
+  // Use localhost API for tests
+  use: {
+    baseURL: 'http://localhost:5173',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    extraHTTPHeaders: {
+      'X-Test-Mode': 'true',
+    },
+  },
 });
