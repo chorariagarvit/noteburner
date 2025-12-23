@@ -129,6 +129,16 @@ function CreateMessage() {
     setError('');
   };
 
+  const handleCreateSimilar = () => {
+    // Keep password and expiresIn settings, just clear message and files
+    setMessage('');
+    setFiles([]);
+    setShareUrl('');
+    setError('');
+    // Scroll to top for better UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (locking) {
     return (
       <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 py-12 flex items-center justify-center">
@@ -210,12 +220,25 @@ function CreateMessage() {
                 </p>
               </div>
 
-              <button
-                onClick={handleReset}
-                className="btn-primary w-full"
-              >
-                Create Another Message
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleReset}
+                  className="btn-secondary flex-1 flex items-center justify-center gap-2"
+                >
+                  <Flame className="w-4 h-4" />
+                  Create New Message
+                </button>
+                <button
+                  onClick={handleCreateSimilar}
+                  className="btn-primary flex-1 flex items-center justify-center gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Create Similar Message
+                </button>
+              </div>
+              <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+                💡 "Similar" keeps your settings but clears the message
+              </p>
             </div>
           </div>
         </div>

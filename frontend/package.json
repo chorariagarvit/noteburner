@@ -10,6 +10,7 @@
     "deploy": "npm run build && wrangler pages deploy dist"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.4",
     "lucide-react": "^0.454.0",
     "nanoid": "^5.0.8",
     "prop-types": "^15.8.1",
