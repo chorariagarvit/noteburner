@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --port 8787 --local",
+    "dev:setup": "wrangler d1 migrations apply noteburner-db --local --yes 2>/dev/null || true",
     "deploy": "wrangler deploy",
     "tail": "wrangler tail",
     "d1:create": "wrangler d1 create noteburner-db",
