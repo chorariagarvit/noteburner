@@ -13,6 +13,21 @@ function ViewMessage() {
   const messageIdentifier = token || identifier; // Support both routes
   const navigate = useNavigate();
   
+  // State declarations MUST come before useEffect
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [decrypted, setDecrypted] = useState(false);
+  const [message, setMessage] = useState('');
+  const [mediaFileIds, setMediaFileIds] = useState([]); // Store file IDs, not decrypted files
+  const [decryptedPassword, setDecryptedPassword] = useState(''); // Store password for on-demand decryption
+  const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState({});
+  const [unlocking, setUnlocking] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
+  const [expiresAt, setExpiresAt] = useState(null);
+  const timeLeft = useCountdown(expiresAt);
+  
   useEffect(() => {
     document.title = 'NoteBurner - View Message';
     setMessageOpenGraph(); // Set Open Graph tags for message preview
@@ -34,19 +49,6 @@ function ViewMessage() {
       fetchMetadata();
     }
   }, [messageIdentifier]);
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [decrypted, setDecrypted] = useState(false);
-  const [message, setMessage] = useState('');
-  const [mediaFileIds, setMediaFileIds] = useState([]); // Store file IDs, not decrypted files
-  const [decryptedPassword, setDecryptedPassword] = useState(''); // Store password for on-demand decryption
-  const [error, setError] = useState('');
-  const [downloading, setDownloading] = useState({});
-  const [unlocking, setUnlocking] = useState(false);
-  const [showPreview, setShowPreview] = useState(true);
-  const [expiresAt, setExpiresAt] = useState(null);
-  const timeLeft = useCountdown(expiresAt);
 
   const handleExpire = () => {
     setError('This message has expired and is no longer available.');
