@@ -8,12 +8,14 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
 
+    const uniqueSlug = `my-test-${Date.now()}`;
+
     // Fill in message and password
     await page.fill('#message', 'Test message with custom URL');
     await page.fill('#password', 'SecurePassword123');
 
     // Enter custom URL
-    await page.fill('#custom-url', 'my-test-message');
+    await page.fill('#custom-url', uniqueSlug);
     
     // Wait for validation
     await page.waitForSelector('.text-green-500', { timeout: 2000 });
@@ -26,7 +28,7 @@ test.describe('Week 3 - Custom URLs', () => {
 
     // Check that URL contains custom slug
     const shareUrl = await page.inputValue('#share-url');
-    expect(shareUrl).toContain('/my-test-message');
+    expect(shareUrl).toContain(`/${uniqueSlug}`);
   });
 
   test('should show validation error for invalid custom URL', async ({ page }) => {
@@ -56,10 +58,12 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
 
+    const duplicateSlug = `dup-test-${Date.now()}`;
+
     // Create first message
     await page.fill('#message', 'First message');
     await page.fill('#password', 'SecurePassword123');
-    await page.fill('#custom-url', 'duplicate-test');
+    await page.fill('#custom-url', duplicateSlug);
     await page.waitForSelector('.text-green-500', { timeout: 2000 });
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
@@ -68,11 +72,11 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.click('text=Create New Message');
     await page.fill('#message', 'Second message');
     await page.fill('#password', 'SecurePassword123');
-    await page.fill('#custom-url', 'duplicate-test');
+    await page.fill('#custom-url', duplicateSlug);
     
     // Should show unavailable error
     await page.waitForSelector('.text-red-500', { timeout: 2000 });
-    await expect(page.locator('text=/.*not available.*/i')).toBeVisible();
+    await expect(page.locator('text=/.*already taken.*/i')).toBeVisible();
   });
 
   test('should access message via custom URL slug', async ({ page }) => {
@@ -81,7 +85,7 @@ test.describe('Week 3 - Custom URLs', () => {
 
     const testMessage = 'Message accessible via custom URL';
     const testPassword = 'TestPassword123';
-    const customSlug = 'access-test-slug';
+    const customSlug = `access-test-${Date.now()}`;
 
     // Create message with custom slug
     await page.fill('#message', testMessage);
@@ -167,8 +171,7 @@ test.describe('Week 3 - Countdown Timer', () => {
 
     // Get share URL and navigate to it
     const shareUrl = await page.inputValue('#share-url');
-    const token = shareUrl.split('/').pop();
-    await page.goto(`${BASE_URL}/${token}`);
+    await page.goto(shareUrl);
 
     // Should show countdown on password page
     await expect(page.locator('text=/Message expires in/i')).toBeVisible();
@@ -190,8 +193,7 @@ test.describe('Week 3 - Countdown Timer', () => {
 
     // Navigate to message
     const shareUrl = await page.inputValue('#share-url');
-    const token = shareUrl.split('/').pop();
-    await page.goto(`${BASE_URL}/${token}`);
+    await page.goto(shareUrl);
 
     // Decrypt
     await page.fill('#password', testPassword);
@@ -218,8 +220,7 @@ test.describe('Week 3 - Countdown Timer', () => {
 
     // Navigate to view
     const shareUrl = await page.inputValue('#share-url');
-    const token = shareUrl.split('/').pop();
-    await page.goto(`${BASE_URL}/${token}`);
+    await page.goto(shareUrl);
 
     // Countdown should be visible (urgency styling would be tested at lower levels)
     await expect(page.locator('text=/Message expires in/i')).toBeVisible();
@@ -238,8 +239,7 @@ test.describe('Week 3 - Countdown Timer', () => {
 
     // Navigate to message
     const shareUrl = await page.inputValue('#share-url');
-    const token = shareUrl.split('/').pop();
-    await page.goto(`${BASE_URL}/${token}`);
+    await page.goto(shareUrl);
 
     // Countdown should NOT be visible
     await expect(page.locator('text=/Message expires in/i')).not.toBeVisible();
