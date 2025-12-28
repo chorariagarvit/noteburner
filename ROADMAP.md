@@ -182,38 +182,80 @@ test('message self-destructs after first view', async ({ page }) => {
 ## 🔗 Week 3 - Custom URLs & Branding
 **Branch**: `feature/custom-urls`
 **Target**: Dec 29, 2025
+**Status**: ✅ Complete
 
 ### Features
-- [ ] **Custom short URLs** (optional)
+- ✅ **Custom short URLs** (optional)
   - User chooses: `noteburner.com/SecretSanta` vs random token
-  - Validate uniqueness, profanity filter
-  - Character limit: 3-20 chars, alphanumeric only
+  - Real-time validation with debouncing (500ms)
+  - Format: 3-20 chars, lowercase alphanumeric + hyphens/underscores
+  - Profanity filter with leetspeak detection (21 words)
+  - Reserved slug protection (api, admin, login, etc.)
+  - Visual feedback: checkmark (available), X (unavailable), spinner (checking)
 
-- [ ] **QR Code generation**
-  - Auto-generate QR for each message
-  - Download QR as PNG
-  - Perfect for in-person sharing
+- ✅ **QR Code generation**
+  - Auto-generate QR for all message URLs
+  - 512x512px PNG with error correction level M
+  - Download as `noteburner-secret-message.png`
+  - Branded variant with NoteBurner red color (#dc2626)
+  - Responsive display on mobile
 
-- [ ] **Message preview images**
-  - Social media Open Graph tags
-  - Preview shows lock icon + "Secret Message" (no content)
-  - Custom image per message type
+- ✅ **Message preview images**
+  - Social media Open Graph tags for Twitter, Facebook, LinkedIn
+  - Preview shows lock icon + "Secret Message" (no content exposed)
+  - Twitter Card: `summary_large_image` format
+  - Dynamic meta tag updates via `useOpenGraph` hook
+  - Security: Never reveals message content in OG tags
 
-- [ ] **Countdown timer on view page**
-  - Live countdown: "This message expires in 23:45:12"
-  - Visual progress bar
-  - Urgency indicator when <1 hour left
+- ✅ **Countdown timer**
+  - Live countdown with 1-second updates
+  - Progress bar showing time remaining (24hr = 100%)
+  - Urgency states:
+    - Normal (>1hr): Blue bar, standard text
+    - Urgent (<1hr): Orange bar, warning message
+    - Critical (<15min): Red bar, pulsing icon
+  - Displays before and after decryption
+  - Auto-redirect when timer expires
+  - Hidden for no-expiration messages
 
 ### Backend Changes
-- Add `custom_slug` column to messages table
-- Slug validation and collision detection
-- API endpoint: `GET /m/:slug` (supports both token and slug)
+- ✅ Add `custom_slug` column to messages table (migration 0004)
+- ✅ Slug validation with profanity filter and reserved words
+- ✅ API endpoint: `GET /:identifier` (supports both token and slug)
+- ✅ `GET /check-slug/:slug` for real-time availability checking
+- ✅ Unique index on custom_slug (sparse, only non-NULL values)
+
+### Frontend Changes
+- ✅ QRCodeDisplay component with download functionality
+- ✅ CountdownTimer component with urgency states
+- ✅ Custom URL input with debounced validation
+- ✅ Open Graph meta tag management (useOpenGraph hook)
+- ✅ Updated CreateMessage page with custom URL field
+- ✅ Updated ViewMessage page with countdown timer
+
+### Dependencies
+- ✅ `qrcode@1.5.4` - QR code generation
+- ✅ `lodash.debounce@4.0.8` - Input validation debouncing
+
+### Testing
+- ✅ 16 E2E tests covering all Week 3 features
+- ✅ Custom URL creation and validation
+- ✅ QR code display and download
+- ✅ Countdown timer with urgency indicators
+- ✅ Open Graph meta tags (security verified)
+
+### Metrics
+- **Code**: 1,338 lines added (backend + frontend + tests)
+- **Files**: 11 files changed (7 new, 4 modified)
+- **Commits**: 4 (backend, frontend, tests, docs)
+- **Test Coverage**: 16/16 passing
 
 ---
 
 ## 🎮 Week 4 - Gamification
 **Branch**: `feature/gamification`
 **Target**: Jan 5, 2026
+**Status**: 📋 Not Started
 
 ### Features
 - [ ] **Achievement system** (localStorage-based, privacy-first)
