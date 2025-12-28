@@ -45,6 +45,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/create" element={<CreateMessage />} />
               <Route path="/m/:token" element={<ViewMessage />} />
+              <Route path="/:identifier" element={<ViewMessage />} />
             </Routes>
           </main>
           <Footer />
