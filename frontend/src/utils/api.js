@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
 
-export async function createMessage(encryptedData, iv, salt, expiresIn = null) {
+export async function createMessage(encryptedData, iv, salt, expiresIn = null, customSlug = null) {
   const response = await fetch(`${API_URL}/api/messages`, {
     method: 'POST',
     headers: {
@@ -11,6 +11,7 @@ export async function createMessage(encryptedData, iv, salt, expiresIn = null) {
       iv,
       salt,
       expiresIn,
+      customSlug,
     }),
   });
 
@@ -41,6 +42,17 @@ export async function deleteMessage(token) {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || 'Failed to delete message');
+  }
+
+  return response.json();
+}
+
+export async function checkSlugAvailability(slug) {
+  const response = await fetch(`${API_URL}/api/messages/check-slug/${encodeURIComponent(slug)}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to check slug availability');
   }
 
   return response.json();

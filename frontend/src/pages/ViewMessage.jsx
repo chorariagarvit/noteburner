@@ -5,6 +5,8 @@ import confetti from 'canvas-confetti';
 import { decryptMessage, decryptFile } from '../utils/crypto';
 import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
 import { useCountdown, formatTimeLeft } from '../hooks/useCountdown';
+import { CountdownTimer } from '../components/CountdownTimer';
+import { setMessageOpenGraph } from '../utils/openGraph';
 
 function ViewMessage() {
   const { token } = useParams();
@@ -12,6 +14,7 @@ function ViewMessage() {
   
   useEffect(() => {
     document.title = 'NoteBurner - View Message';
+    setMessageOpenGraph(); // Set Open Graph tags for message preview
   }, []);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +29,11 @@ function ViewMessage() {
   const [showPreview, setShowPreview] = useState(true);
   const [expiresAt, setExpiresAt] = useState(null);
   const timeLeft = useCountdown(expiresAt);
+
+  const handleExpire = () => {
+    setError('This message has expired and is no longer available.');
+    navigate('/');
+  };
 
   const handleShare = (platform) => {
     const shareText = 'I just sent a self-destructing message 🔥 Try NoteBurner for secure, encrypted messaging!';
@@ -190,6 +198,13 @@ function ViewMessage() {
                 {message}
               </pre>
             </div>
+
+            {expiresAt && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-3">Time Remaining</h3>
+                <CountdownTimer expiresAt={expiresAt} onExpire={handleExpire} />
+              </div>
+            )}
 
             {mediaFileIds.length > 0 && (
               <div className="space-y-3 mb-6">
