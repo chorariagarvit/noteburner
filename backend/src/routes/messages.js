@@ -85,13 +85,14 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     const frontendUrl = c.env.FRONTEND_URL || new URL(c.req.url).origin;
 
     // Return URL with custom slug if provided, otherwise use token
-    const urlPath = finalSlug || token;
+    // Custom slugs use root path (e.g., /my-slug), tokens use /m/ prefix
+    const urlPath = finalSlug ? `/${finalSlug}` : `/m/${token}`;
 
     return c.json({
       success: true,
       token,
       slug: finalSlug,
-      url: `${frontendUrl}/m/${urlPath}`
+      url: `${frontendUrl}${urlPath}`
     }, 201);
   } catch (error) {
     console.error('Error creating message:', error);
