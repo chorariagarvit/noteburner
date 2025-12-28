@@ -28,9 +28,11 @@ function ViewMessage() {
   const [expiresAt, setExpiresAt] = useState(null);
   const timeLeft = useCountdown(expiresAt);
   
+  // Set Open Graph tags - must be at component level, not in useEffect
+  setMessageOpenGraph();
+  
   useEffect(() => {
     document.title = 'NoteBurner - View Message';
-    setMessageOpenGraph(); // Set Open Graph tags for message preview
     
     // Fetch message metadata (including expiration) without decrypting
     async function fetchMetadata() {

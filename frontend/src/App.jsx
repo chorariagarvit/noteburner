@@ -45,7 +45,9 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/create" element={<CreateMessage />} />
               <Route path="/m/:token" element={<ViewMessage />} />
+              {/* Custom slug route - use * for catch-all to avoid conflicting with other routes */}
               <Route path="/:identifier" element={<ViewMessage />} />
+              <Route path="*" element={<HomePage />} />
             </Routes>
           </main>
           <Footer />
