@@ -98,6 +98,9 @@ test.describe('Week 3 - Custom URLs', () => {
     // Navigate to custom URL
     await page.goto(`${BASE_URL}/${customSlug}`);
     
+    // Click "Unlock Secret Message" button to get past preview screen
+    await page.click('text=Unlock Secret Message');
+    
     // Should show password prompt
     await expect(page.locator('text=Encrypted Message')).toBeVisible();
     
@@ -173,9 +176,13 @@ test.describe('Week 3 - Countdown Timer', () => {
     const shareUrl = await page.inputValue('#share-url');
     await page.goto(shareUrl);
 
+    // Click unlock button to get past preview screen
+    await page.click('text=Unlock Secret Message');
+
     // Should show countdown on password page
     await expect(page.locator('text=/Message expires in/i')).toBeVisible();
-    await expect(page.locator('text=/[0-9]+h [0-9]+m [0-9]+s/i')).toBeVisible();
+    // Time format can be: "59m 59s" or "23h 59m 59s" depending on how much time is left
+    await expect(page.locator('text=/([0-9]+h )?[0-9]+m [0-9]+s/i')).toBeVisible();
   });
 
   test('should show countdown after decryption', async ({ page }) => {
@@ -194,6 +201,9 @@ test.describe('Week 3 - Countdown Timer', () => {
     // Navigate to message
     const shareUrl = await page.inputValue('#share-url');
     await page.goto(shareUrl);
+
+    // Click unlock button to get past preview screen
+    await page.click('text=Unlock Secret Message');
 
     // Decrypt
     await page.fill('#password', testPassword);
@@ -222,6 +232,9 @@ test.describe('Week 3 - Countdown Timer', () => {
     const shareUrl = await page.inputValue('#share-url');
     await page.goto(shareUrl);
 
+    // Click unlock button to get past preview screen
+    await page.click('text=Unlock Secret Message');
+
     // Countdown should be visible (urgency styling would be tested at lower levels)
     await expect(page.locator('text=/Message expires in/i')).toBeVisible();
   });
@@ -240,6 +253,9 @@ test.describe('Week 3 - Countdown Timer', () => {
     // Navigate to message
     const shareUrl = await page.inputValue('#share-url');
     await page.goto(shareUrl);
+
+    // Click unlock button to get past preview screen
+    await page.click('text=Unlock Secret Message');
 
     // Countdown should NOT be visible
     await expect(page.locator('text=/Message expires in/i')).not.toBeVisible();

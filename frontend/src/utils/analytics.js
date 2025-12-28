@@ -4,13 +4,11 @@ export function initGTM() {
   const gtmId = import.meta.env.VITE_GTM_ID;
   
   if (!gtmId || gtmId === 'GTM-XXXXXXX') {
-    console.log('Google Tag Manager not initialized - no container ID configured');
     return;
   }
 
   // Check if already initialized
   if (window.dataLayer) {
-    console.log('Google Tag Manager already initialized');
     return;
   }
 
@@ -26,8 +24,6 @@ export function initGTM() {
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtm.js?id=${gtmId}`;
   document.head.appendChild(script);
-
-  console.log('Google Tag Manager initialized with ID:', gtmId);
 }
 
 // Google Analytics 4 Integration
@@ -36,13 +32,11 @@ export function initGA4() {
   const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   
   if (!measurementId || measurementId === 'G-XXXXXXXXXX') {
-    console.log('Google Analytics not initialized - no measurement ID configured');
     return;
   }
 
   // Check if already initialized
   if (window.gtag) {
-    console.log('Google Analytics already initialized');
     return;
   }
 
@@ -62,8 +56,6 @@ export function initGA4() {
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
   document.head.appendChild(script);
-
-  console.log('Google Analytics initialized with ID:', measurementId);
 }
 
 // Track custom events (works with both GTM and GA4)

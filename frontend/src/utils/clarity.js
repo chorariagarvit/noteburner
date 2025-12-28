@@ -5,13 +5,11 @@ export function initClarity() {
   
   // Only initialize if Clarity ID is provided and not in development mode
   if (!clarityId || clarityId === 'your_clarity_project_id') {
-    console.log('Microsoft Clarity not initialized - no project ID configured');
     return;
   }
 
   // Check if already initialized
   if (window.clarity) {
-    console.log('Microsoft Clarity already initialized');
     return;
   }
 
@@ -21,8 +19,6 @@ export function initClarity() {
     t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
   })(window, document, "clarity", "script", clarityId);
-
-  console.log('Microsoft Clarity initialized');
 }
 
 // Track custom events (optional)

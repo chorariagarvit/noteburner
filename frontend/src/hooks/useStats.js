@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://noteburner-api.gravitysolutions.in';
+const API_URL = import.meta.env.VITE_API_URL || 'https://api.noteburner.work';
 
 export function useStats(refreshInterval = 30000) {
   const [stats, setStats] = useState(null);
@@ -10,13 +10,11 @@ export function useStats(refreshInterval = 30000) {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        console.log('Fetching stats from:', `${API_URL}/api/stats`);
         const response = await fetch(`${API_URL}/api/stats`);
         if (!response.ok) {
           throw new Error(`Failed to fetch stats: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Stats received:', data);
         setStats(data);
         setError(null);
       } catch (err) {
