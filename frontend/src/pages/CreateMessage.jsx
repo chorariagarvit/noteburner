@@ -40,10 +40,10 @@ function CreateMessage() {
 
   const handleFileUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    const validFiles = selectedFiles.filter(f => f.size <= 100 * 1024 * 1024); // 100MB limit
+    const validFiles = selectedFiles.filter(f => f.size <= 2 * 1024 * 1024 * 1024); // 2GB limit
     
     if (validFiles.length !== selectedFiles.length) {
-      setError('Some files exceeded 100MB limit and were skipped');
+      setError('Some files exceeded 2GB limit and were skipped');
     }
     
     setFiles([...files, ...validFiles]);

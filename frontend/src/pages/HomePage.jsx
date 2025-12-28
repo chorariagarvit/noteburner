@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X, TrendingUp } from 'lucide-react';
+import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X, TrendingUp, Link2, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
-import { createMessage, uploadMedia } from '../utils/api';
+import { createMessage, uploadMedia, checkSlugAvailability } from '../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../utils/chunkedUpload';
 import { useStats } from '../hooks/useStats';
 import { useLoadingMessages } from '../hooks/useLoadingMessages';
 import { AnimatedCounter } from '../components/AnimatedCounter';
+import debounce from 'lodash.debounce';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -25,6 +26,9 @@ function HomePage() {
   const [uploadProgress, setUploadProgress] = useState({});
   const [error, setError] = useState('');
   const loadingMessage = useLoadingMessages(loading);
+  const [customSlug, setCustomSlug] = useState('');
+  const [slugStatus, setSlugStatus] = useState(''); // 'checking', 'available', 'unavailable', 'invalid'
+  const [slugError, setSlugError] = useState('');
 
   const handleFileUpload = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -47,6 +51,39 @@ function HomePage() {
     setPassword(newPassword);
   };
 
+  // Debounced slug validation
+  const checkSlug = useCallback(
+    debounce(async (slug) => {
+      if (!slug) {
+        setSlugStatus('');
+        setSlugError('');
+        return;
+      }
+
+      setSlugStatus('checking');
+      try {
+        const result = await checkSlugAvailability(slug);
+        if (result.available) {
+          setSlugStatus('available');
+          setSlugError('');
+        } else {
+          setSlugStatus('unavailable');
+          setSlugError(result.error || 'This custom URL is not available');
+        }
+      } catch (err) {
+        setSlugStatus('invalid');
+        setSlugError(err.message || 'Invalid custom URL');
+      }
+    }, 500),
+    []
+  );
+
+  const handleCustomSlugChange = (e) => {
+    const value = e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '');
+    setCustomSlug(value);
+    checkSlug(value);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -65,13 +102,19 @@ function HomePage() {
         throw new Error('Password must be at least 8 characters');
       }
 
+      // Validate custom slug if provided
+      if (customSlug && (slugStatus === 'unavailable' || slugStatus === 'invalid')) {
+        throw new Error('Please fix the custom URL before submitting');
+      }
+
       const encrypted = await encryptMessage(message, password);
       const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
       const result = await createMessage(
         encrypted.encryptedData,
         encrypted.iv,
         encrypted.salt,
-        expirySeconds
+        expirySeconds,
+        customSlug || null
       );
 
       if (files.length > 0) {
@@ -262,7 +305,42 @@ function HomePage() {
                       <option value="168">7 days</option>
                     </select>
                   </div>
-
+                  <div>
+                    <label htmlFor="custom-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <Link2 className="w-4 h-4 inline mr-1" />
+                      Custom URL (optional)
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="custom-url"
+                        type="text"
+                        value={customSlug}
+                        onChange={handleCustomSlugChange}
+                        placeholder="my-secret-link"
+                        maxLength={20}
+                        className="input-field text-sm pr-8"
+                        disabled={loading}
+                      />
+                      {slugStatus === 'checking' && (
+                        <Loader className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
+                      )}
+                      {slugStatus === 'available' && (
+                        <CheckCircle className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                      {(slugStatus === 'unavailable' || slugStatus === 'invalid') && (
+                        <XCircle className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
+                      )}
+                    </div>
+                    {slugError && (
+                      <p className="text-xs text-red-500 mt-1">{slugError}</p>
+                    )}
+                    {customSlug && slugStatus === 'available' && (
+                      <p className="text-xs text-green-500 mt-1">✓ Available</p>
+                    )}
+                    {!customSlug && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">3-20 characters, letters, numbers, hyphens, underscores</p>
+                    )}
+                  </div>
                   <div>
                     <label htmlFor="files-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Files (max 2GB each)

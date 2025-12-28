@@ -84,9 +84,8 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     // Use FRONTEND_URL from environment or fallback to request origin
     const frontendUrl = c.env.FRONTEND_URL || new URL(c.req.url).origin;
 
-    // Return URL with custom slug if provided, otherwise use token
-    // Custom slugs use root path (e.g., /my-slug), tokens use /m/ prefix
-    const urlPath = finalSlug ? `/${finalSlug}` : `/m/${token}`;
+    // Both custom slugs and tokens use /m/ prefix
+    const urlPath = `/m/${finalSlug || token}`;
 
     return c.json({
       success: true,

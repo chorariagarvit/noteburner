@@ -9,8 +9,8 @@ import { CountdownTimer } from '../components/CountdownTimer';
 import { setMessageOpenGraph } from '../utils/openGraph';
 
 function ViewMessage() {
-  const { token, identifier } = useParams();
-  const messageIdentifier = token || identifier; // Support both routes
+  const { identifier } = useParams();
+  const messageIdentifier = identifier; // Can be either token or custom slug
   const navigate = useNavigate();
   
   // State declarations MUST come before useEffect
@@ -112,7 +112,7 @@ function ViewMessage() {
       
       // Decryption successful - now permanently delete the message and media
       try {
-        await deleteMessage(token);
+        await deleteMessage(messageIdentifier);
       } catch (err) {
         console.error('Failed to delete message:', err);
         // Continue anyway - message was decrypted successfully
