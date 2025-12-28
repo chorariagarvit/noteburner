@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock } from 'lucide-react';
+import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock, Link2, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
-import { createMessage, uploadMedia } from '../utils/api';
+import { createMessage, uploadMedia, checkSlugAvailability } from '../utils/api';
+import { QRCodeDisplay } from '../components/QRCodeDisplay';
+import debounce from 'lodash.debounce';
 
 function CreateMessage() {
   const location = useLocation();
@@ -16,6 +18,9 @@ function CreateMessage() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [locking, setLocking] = useState(false);
+  const [customSlug, setCustomSlug] = useState('');
+  const [slugStatus, setSlugStatus] = useState(''); // 'checking', 'available', 'unavailable', 'invalid'
+  const [slugError, setSlugError] = useState('');
 
   // Set document title
   useEffect(() => {
@@ -53,6 +58,39 @@ function CreateMessage() {
     setPassword(newPassword);
   };
 
+  // Debounced slug validation
+  const checkSlug = useCallback(
+    debounce(async (slug) => {
+      if (!slug) {
+        setSlugStatus('');
+        setSlugError('');
+        return;
+      }
+
+      setSlugStatus('checking');
+      try {
+        const result = await checkSlugAvailability(slug);
+        if (result.available) {
+          setSlugStatus('available');
+          setSlugError('');
+        } else {
+          setSlugStatus('unavailable');
+          setSlugError(result.error || 'This custom URL is not available');
+        }
+      } catch (err) {
+        setSlugStatus('invalid');
+        setSlugError(err.message || 'Invalid custom URL');
+      }
+    }, 500),
+    []
+  );
+
+  const handleCustomSlugChange = (e) => {
+    const value = e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '');
+    setCustomSlug(value);
+    checkSlug(value);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -80,7 +118,8 @@ function CreateMessage() {
         encrypted.encryptedData,
         encrypted.iv,
         encrypted.salt,
-        expirySeconds
+        expirySeconds,
+        customSlug || undefined
       );
 
       // Upload encrypted files if any
@@ -127,6 +166,9 @@ function CreateMessage() {
     setShareUrl('');
     setExpiresIn('24'); // Reset to default 24 hours
     setError('');
+    setCustomSlug('');
+    setSlugStatus('');
+    setSlugError('');
   };
 
   const handleCreateSimilar = () => {
@@ -135,6 +177,9 @@ function CreateMessage() {
     setFiles([]);
     setShareUrl('');
     setError('');
+    setCustomSlug('');
+    setSlugStatus('');
+    setSlugError('');
     // Scroll to top for better UX
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -218,6 +263,11 @@ function CreateMessage() {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   Make sure the recipient has this password before sharing the link
                 </p>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">Share via QR Code</h3>
+                <QRCodeDisplay url={shareUrl} size={256} />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -331,6 +381,37 @@ function CreateMessage() {
                 <option value="72">3 days</option>
                 <option value="168">7 days</option>
               </select>
+            </div>
+
+            <div>
+              <label htmlFor="custom-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Link2 className="w-4 h-4 inline mr-1" />
+                Custom URL (optional)
+              </label>
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">noteburner.com/</span>
+                  <input
+                    id="custom-url"
+                    type="text"
+                    value={customSlug}
+                    onChange={handleCustomSlugChange}
+                    placeholder="your-custom-url"
+                    className="input-field flex-1"
+                    maxLength={20}
+                    pattern="[a-z0-9-_]{3,20}"
+                  />
+                  {slugStatus === 'checking' && <Loader className="w-5 h-5 animate-spin text-gray-400" />}
+                  {slugStatus === 'available' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                  {slugStatus === 'unavailable' && <XCircle className="w-5 h-5 text-red-500" />}
+                </div>
+                {slugError && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mb-1">{slugError}</p>
+                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  3-20 characters: lowercase letters, numbers, hyphens, and underscores only
+                </p>
+              </div>
             </div>
 
             <div>
