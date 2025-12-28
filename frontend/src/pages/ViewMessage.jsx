@@ -9,13 +9,31 @@ import { CountdownTimer } from '../components/CountdownTimer';
 import { setMessageOpenGraph } from '../utils/openGraph';
 
 function ViewMessage() {
-  const { token } = useParams();
+  const { token, identifier } = useParams();
+  const messageIdentifier = token || identifier; // Support both routes
   const navigate = useNavigate();
   
   useEffect(() => {
     document.title = 'NoteBurner - View Message';
     setMessageOpenGraph(); // Set Open Graph tags for message preview
-  }, []);
+    
+    // Fetch message metadata (including expiration) without decrypting
+    async function fetchMetadata() {
+      try {
+        const data = await getMessage(messageIdentifier);
+        if (data.expiresAt) {
+          setExpiresAt(data.expiresAt);
+        }
+      } catch (err) {
+        // Message not found or error - will be handled during decryption attempt
+        console.error('Failed to fetch message metadata:', err);
+      }
+    }
+    
+    if (messageIdentifier) {
+      fetchMetadata();
+    }
+  }, [messageIdentifier]);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,7 +77,7 @@ function ViewMessage() {
       }
 
       // Fetch encrypted message
-      const data = await getMessage(token);
+      const data = await getMessage(messageIdentifier);
       
       // Store expiration time
       if (data.expiresAt) {

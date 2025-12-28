@@ -72,7 +72,7 @@ test.describe('Week 3 - Custom URLs', () => {
     
     // Should show unavailable error
     await page.waitForSelector('.text-red-500', { timeout: 2000 });
-    await expect(page.locator('text=/.*already taken.*/i')).toBeVisible();
+    await expect(page.locator('text=/.*not available.*/i')).toBeVisible();
   });
 
   test('should access message via custom URL slug', async ({ page }) => {
