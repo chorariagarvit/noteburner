@@ -8,7 +8,7 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
 
-    const uniqueSlug = `my-test-${Date.now()}`;
+    const uniqueSlug = `test-${Date.now().toString().slice(-10)}`;
 
     // Fill in message and password
     await page.fill('#message', 'Test message with custom URL');
@@ -58,7 +58,7 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
 
-    const duplicateSlug = `dup-test-${Date.now()}`;
+    const duplicateSlug = `dup-${Date.now().toString().slice(-13)}`;
 
     // Create first message
     await page.fill('#message', 'First message');
@@ -85,7 +85,7 @@ test.describe('Week 3 - Custom URLs', () => {
 
     const testMessage = 'Message accessible via custom URL';
     const testPassword = 'TestPassword123';
-    const customSlug = `access-test-${Date.now()}`;
+    const customSlug = `acc-${Date.now().toString().slice(-13)}`;
 
     // Create message with custom slug
     await page.fill('#message', testMessage);
