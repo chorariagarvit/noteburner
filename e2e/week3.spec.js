@@ -26,9 +26,9 @@ test.describe('Week 3 - Custom URLs', () => {
     // Wait for success page
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
 
-    // Check that URL contains custom slug
+    // Check that URL contains custom slug with /m/ prefix
     const shareUrl = await page.inputValue('#share-url');
-    expect(shareUrl).toContain(`/${uniqueSlug}`);
+    expect(shareUrl).toContain(`/m/${uniqueSlug}`);
   });
 
   test('should show validation error for invalid custom URL', async ({ page }) => {
@@ -50,8 +50,8 @@ test.describe('Week 3 - Custom URLs', () => {
     // Try slug that's too short
     await page.fill('#custom-url', 'ab');
     
-    // Wait for error message
-    await page.waitForSelector('text=/.*3-20 characters.*/i');
+    // Wait for error message (text was shortened to "chars")
+    await page.waitForSelector('text=/.*3-20.*chars.*/i');
   });
 
   test('should show unavailable error for duplicate custom URL', async ({ page }) => {
