@@ -50,8 +50,8 @@ test.describe('Week 3 - Custom URLs', () => {
     // Try slug that's too short
     await page.fill('#custom-url', 'ab');
     
-    // Wait for error indicator (red X icon or error message)
-    await page.waitForSelector('.text-red-500, text=/.*at least 3 characters.*/i', { timeout: 3000 });
+    // Wait for error indicator (red X icon)
+    await page.waitForSelector('.text-red-500', { timeout: 3000 });
   });
 
   test('should show unavailable error for duplicate custom URL', async ({ page }) => {
