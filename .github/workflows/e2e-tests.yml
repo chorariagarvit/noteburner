@@ -27,7 +27,7 @@ jobs:
       run: npx playwright install --with-deps chromium
     
     - name: Apply D1 Migrations
-      run: cd backend && npx wrangler d1 migrations apply noteburner-db --local --yes || npx wrangler d1 migrations apply noteburner-db --local < /dev/null
+      run: cd backend && npx wrangler d1 migrations apply noteburner-db --local < /dev/null
     
     - name: Run Playwright tests
       run: npx playwright test
