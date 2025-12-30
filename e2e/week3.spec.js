@@ -95,8 +95,11 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
 
+    // Get the share URL from the page
+    const shareUrl = await page.inputValue('#share-url');
+    
     // Navigate to custom URL
-    await page.goto(`${BASE_URL}/${customSlug}`);
+    await page.goto(shareUrl);
     
     // Click "Unlock Secret Message" button to get past preview screen
     await page.click('text=Unlock Secret Message');
