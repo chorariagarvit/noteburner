@@ -408,9 +408,14 @@ function CreateMessage() {
                 {slugError && (
                   <p className="text-sm text-red-600 dark:text-red-400 mb-1">{slugError}</p>
                 )}
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  3-20 characters: lowercase letters, numbers, hyphens, and underscores only
-                </p>
+                {!slugError && customSlug && slugStatus === 'available' && (
+                  <p className="text-xs text-green-600 dark:text-green-400">✓ Available</p>
+                )}
+                {!customSlug && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    3-20 chars: letters, numbers, hyphens, underscores
+                  </p>
+                )}
               </div>
             </div>
 
