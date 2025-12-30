@@ -338,25 +338,26 @@ function HomePage() {
                       <p className="text-xs text-green-500 mt-1">✓ Available</p>
                     )}
                     {!customSlug && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">3-20 characters, letters, numbers, hyphens, underscores</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">3-20 chars: letters, numbers, hyphens, underscores</p>
                     )}
                   </div>
-                  <div>
-                    <label htmlFor="files-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Files (max 2GB each)
-                    </label>
-                    <label htmlFor="files-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2.5 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
-                      <Upload className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                      <span className="text-gray-600 dark:text-gray-300 text-sm">{files.length > 0 ? `${files.length} file(s)` : 'Choose files'}</span>
-                      <input
-                        id="files-upload"
-                        type="file"
-                        multiple
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="files-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Files (max 2GB each)
+                  </label>
+                  <label htmlFor="files-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-2.5 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                    <Upload className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <span className="text-gray-600 dark:text-gray-300 text-sm">{files.length > 0 ? `${files.length} file(s)` : 'Choose files'}</span>
+                    <input
+                      id="files-upload"
+                      type="file"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
 
                 {files.length > 0 && (
