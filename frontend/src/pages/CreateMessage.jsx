@@ -421,7 +421,7 @@ function CreateMessage() {
 
             <div>
               <label htmlFor="attachments-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Attachments (optional, max 100MB per file)
+                Attachments (optional, max 2GB per file)
               </label>
               <div className="space-y-2">
                 {files.map((file, index) => (
