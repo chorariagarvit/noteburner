@@ -6,9 +6,9 @@
 
 ---
 
-## 🚀 Version 1.0 - CURRENT (Launch Ready)
-**Status**: ✅ Complete - Ready for initial launch
-**Target**: Week of Dec 8, 2025
+## 🚀 Version 1.3 - CURRENT (Custom URLs & QR Codes)
+**Status**: ✅ Complete - Week 3 Released
+**Released**: Jan 1, 2026
 
 ### Features
 - ✅ Client-side AES-256-GCM encryption
@@ -181,8 +181,8 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ## 🔗 Week 3 - Custom URLs & Branding
 **Branch**: `feature/custom-urls`
-**Target**: Dec 29, 2025
-**Status**: ✅ Complete
+**Released**: Jan 1, 2026
+**Status**: ✅ Released to Production
 
 ### Features
 - ✅ **Custom short URLs** (optional)
@@ -640,6 +640,6 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 ---
 
-**Last Updated**: December 8, 2025  
-**Current Version**: v1.0.0  
-**Next Release**: Week 1 - Analytics & Social Proof (Dec 15, 2025)
+**Last Updated**: January 1, 2026  
+**Current Version**: v1.3.0  
+**Next Release**: Week 4 - Gamification (Jan 5, 2026)
