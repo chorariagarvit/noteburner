@@ -5,7 +5,7 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 
 ## 📊 Test Coverage Summary
 
-### Total Tests: 25+
+### Total Tests: 40+
 
 #### 1. Message Creation Tests (8 tests)
 ✅ Simple text message creation  
@@ -39,6 +39,22 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Quick recreation workflow  
 ✅ Social share buttons (X/Reddit)  
 
+#### 4. Week 3 - Custom URLs & Branding Tests (14 tests)
+✅ Custom URL creation with availability checking  
+✅ Real-time slug validation with debouncing  
+✅ Invalid character sanitization (uppercase → lowercase)  
+✅ Too-short slug rejection (<3 chars)  
+✅ Too-long slug rejection (>20 chars)  
+✅ Duplicate slug detection  
+✅ Reserved slug protection (api, admin, etc.)  
+✅ QR code generation and display  
+✅ QR code download functionality  
+✅ Countdown timer with live updates  
+✅ Countdown timer urgency states (<1hr, <15min)  
+✅ Open Graph meta tags for social sharing  
+✅ Custom URL navigation (/m/slug format)  
+✅ Password visibility toggle (browser default hidden)  
+
 ## 🚀 Quick Start
 
 ```bash
@@ -63,6 +79,7 @@ npm run test:report
 - `e2e/create-message.spec.js` - Message creation flows
 - `e2e/view-message.spec.js` - Message viewing and decryption
 - `e2e/viral-mechanics.spec.js` - Viral features and UX enhancements
+- `e2e/week3.spec.js` - Custom URLs, QR codes, countdown timers, Open Graph
 - `playwright.config.js` - Playwright configuration
 - `.github/workflows/e2e-tests.yml` - CI/CD automation
 
@@ -104,6 +121,13 @@ Tests automatically start both frontend and backend dev servers before running.
 - Quick recreation
 - Social sharing
 
+**Custom URLs & Branding**
+- Custom slug creation
+- Real-time validation
+- QR code generation
+- Countdown timers
+- Open Graph tags
+
 ## 🔧 Configuration
 
 **Browser**: Chromium (Desktop Chrome)  
@@ -129,10 +153,11 @@ Tests automatically start both frontend and backend dev servers before running.
 
 ## 📊 Metrics
 
-**Test Execution Time**: ~2-3 minutes (local)  
-**CI Execution Time**: ~5-7 minutes (with server startup)  
-**Code Coverage**: All major user flows  
+**Test Execution Time**: ~3-4 minutes (local)  
+**CI Execution Time**: ~6-8 minutes (with server startup)  
+**Code Coverage**: All major user flows including Week 3 features  
 **Success Rate**: 100% when services are healthy  
+**Week 3 Addition**: +14 tests for custom URLs, QR codes, timers, OG tags  
 
 ## 🔮 Future Enhancements
 
@@ -154,7 +179,7 @@ NoteBurner now has enterprise-grade E2E testing coverage ensuring:
 
 ---
 
-**Last Updated**: December 23, 2025  
+**Last Updated**: January 1, 2026  
 **Test Framework**: Playwright v1.57.0  
-**Total Test Files**: 3  
-**Total Test Cases**: 25+
+**Total Test Files**: 4  
+**Total Test Cases**: 40+
