@@ -14,10 +14,10 @@ app.get('/', async (c) => {
     // Get all stats
     const stats = await c.env.DB.prepare(
       `SELECT metric, value, period FROM stats 
-       WHERE (period = 'all_time' AND date = ?) 
+       WHERE (period = 'all_time' AND date = '1970-01-01') 
           OR (period = 'today' AND date = ?)
           OR (period = 'this_week' AND date = ?)`
-    ).bind(today, today, weekDate).all();
+    ).bind(today, weekDate).all();
 
     // Format response
     const response = {

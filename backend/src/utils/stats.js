@@ -3,13 +3,13 @@ export async function incrementStat(db, metric, value = 1) {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    // Update all_time
+    // Update all_time (uses fixed date '1970-01-01' for accumulation)
     await db.prepare(
       `INSERT INTO stats (metric, value, period, date) 
-       VALUES (?, ?, 'all_time', ?)
+       VALUES (?, ?, 'all_time', '1970-01-01')
        ON CONFLICT(metric, period, date) 
        DO UPDATE SET value = value + ?, updated_at = CURRENT_TIMESTAMP`
-    ).bind(metric, value, today, value).run();
+    ).bind(metric, value, value).run();
 
     // Update today
     await db.prepare(
