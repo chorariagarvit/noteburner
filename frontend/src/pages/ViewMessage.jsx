@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, Share2, Twitter, MessageSquare, Clock } from 'lucide-react';
+import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, Twitter, MessageSquare, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { decryptMessage, decryptFile } from '../utils/crypto';
 import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
@@ -59,7 +59,7 @@ function ViewMessage() {
 
   const handleShare = (platform) => {
     const shareText = 'I just sent a self-destructing message 🔥 Try NoteBurner for secure, encrypted messaging!';
-    const shareUrl = window.location.origin;
+    const shareUrl = globalThis.location.origin;
     
     const urls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
@@ -67,7 +67,7 @@ function ViewMessage() {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`
     };
     
-    window.open(urls[platform], '_blank', 'width=600,height=400');
+    globalThis.open(urls[platform], '_blank', 'width=600,height=400');
   };
 
   const handleDecrypt = async (e) => {
@@ -180,7 +180,7 @@ function ViewMessage() {
       
       // Cleanup - delayed to ensure download starts
       setTimeout(() => {
-        document.body.removeChild(a);
+        a.remove();
         URL.revokeObjectURL(url);
       }, 100);
       

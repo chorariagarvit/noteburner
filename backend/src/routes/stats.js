@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { PERIOD_ALL_TIME, PERIOD_TODAY, PERIOD_THIS_WEEK, ALL_TIME_DATE } from '../utils/stats.js';
 
 const app = new Hono();
 
@@ -14,16 +15,16 @@ app.get('/', async (c) => {
     // Get all stats
     const stats = await c.env.DB.prepare(
       `SELECT metric, value, period FROM stats 
-       WHERE (period = 'all_time' AND date = '1970-01-01') 
-          OR (period = 'today' AND date = ?)
-          OR (period = 'this_week' AND date = ?)`
-    ).bind(today, weekDate).all();
+       WHERE (period = ? AND date = ?) 
+          OR (period = ? AND date = ?)
+          OR (period = ? AND date = ?)`
+    ).bind(PERIOD_ALL_TIME, ALL_TIME_DATE, PERIOD_TODAY, today, PERIOD_THIS_WEEK, weekDate).all();
 
     // Format response
     const response = {
-      all_time: {},
-      today: {},
-      this_week: {}
+      [PERIOD_ALL_TIME]: {},
+      [PERIOD_TODAY]: {},
+      [PERIOD_THIS_WEEK]: {}
     };
 
     for (const stat of stats.results) {
@@ -31,9 +32,9 @@ app.get('/', async (c) => {
     }
 
     // Calculate average file size
-    if (response.all_time.files_encrypted > 0) {
-      response.all_time.avg_file_size = Math.round(
-        response.all_time.total_file_size / response.all_time.files_encrypted
+    if (response[PERIOD_ALL_TIME].files_encrypted > 0) {
+      response[PERIOD_ALL_TIME].avg_file_size = Math.round(
+        response[PERIOD_ALL_TIME].total_file_size / response[PERIOD_ALL_TIME].files_encrypted
       );
     }
 

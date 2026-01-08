@@ -259,13 +259,19 @@ function CreateMessage() {
         </div>
         
         {/* Achievement unlock popup */}
-        {newAchievements.map((achievement, index) => (
-          <AchievementUnlocked
-            key={achievement.id}
-            achievement={achievement}
-            onClose={() => setNewAchievements(prev => prev.filter((_, i) => i !== index))}
-          />
-        ))}
+        {newAchievements.map((achievement, index) => {
+          const handleCloseAchievement = () => {
+            setNewAchievements(prev => prev.filter((_, i) => i !== index));
+          };
+
+          return (
+            <AchievementUnlocked
+              key={achievement.id}
+              achievement={achievement}
+              onClose={handleCloseAchievement}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -403,6 +409,7 @@ function CreateMessage() {
               />
               <label htmlFor="mystery-mode" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 cursor-pointer">
                 <span className="text-2xl">🎭</span>
+                {' '}
                 Mystery Message Mode (completely anonymous)
               </label>
             </div>
