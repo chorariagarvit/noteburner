@@ -4,6 +4,8 @@ import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock, Link2, CheckCi
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia, checkSlugAvailability } from '../utils/api';
 import { QRCodeDisplay } from '../components/QRCodeDisplay';
+import { updateStatsOnMessageCreate } from '../utils/achievements';
+import AchievementUnlocked from '../components/AchievementUnlocked';
 import debounce from 'lodash.debounce';
 
 function CreateMessage() {
@@ -21,6 +23,8 @@ function CreateMessage() {
   const [customSlug, setCustomSlug] = useState('');
   const [slugStatus, setSlugStatus] = useState(''); // 'checking', 'available', 'unavailable', 'invalid'
   const [slugError, setSlugError] = useState('');
+  const [mysteryMode, setMysteryMode] = useState(false);
+  const [newAchievements, setNewAchievements] = useState([]);
 
   // Set document title
   useEffect(() => {
@@ -146,6 +150,18 @@ function CreateMessage() {
       
       setLocking(false);
       setShareUrl(result.url);
+      
+      // Track achievements
+      const fileSize = files.length > 0 ? files.reduce((sum, f) => sum + f.size, 0) : 0;
+      const achievements = updateStatsOnMessageCreate({
+        fileSize,
+        expiration: expirySeconds * 1000,
+        mysteryMode
+      });
+      
+      if (achievements.length > 0) {
+        setNewAchievements(achievements);
+      }
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -292,6 +308,15 @@ function CreateMessage() {
             </div>
           </div>
         </div>
+        
+        {/* Achievement unlock popup */}
+        {newAchievements.map((achievement, index) => (
+          <AchievementUnlocked
+            key={achievement.id}
+            achievement={achievement}
+            onClose={() => setNewAchievements(prev => prev.filter((_, i) => i !== index))}
+          />
+        ))}
       </div>
     );
   }
@@ -417,6 +442,20 @@ function CreateMessage() {
                   </p>
                 )}
               </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+              <input
+                id="mystery-mode"
+                type="checkbox"
+                checked={mysteryMode}
+                onChange={(e) => setMysteryMode(e.target.checked)}
+                className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label htmlFor="mystery-mode" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 cursor-pointer">
+                <span className="text-2xl">🎭</span>
+                Mystery Message Mode (completely anonymous)
+              </label>
             </div>
 
             <div>

@@ -292,12 +292,12 @@ wrangler r2 object list noteburner-media --limit 10
 
 ## Deployment Checklist
 
-- [x] Backend: Add multipart upload endpoints
-- [x] Backend: Update `MAX_FILE_SIZE` to 2GB
-- [x] Frontend: Implement chunked upload utility
-- [x] Frontend: Add progress indicators
-- [x] Frontend: Update file size validation
-- [x] Documentation: Update SETUP.md
+- [ ] Backend: Add multipart upload endpoints
+- [ ] Backend: Update `MAX_FILE_SIZE` to 2GB
+- [ ] Frontend: Implement chunked upload utility
+- [ ] Frontend: Add progress indicators
+- [ ] Frontend: Update file size validation
+- [ ] Documentation: Update SETUP.md
 - [ ] Deploy backend to Workers
 - [ ] Deploy frontend to Pages
 - [ ] Test with 500MB file
