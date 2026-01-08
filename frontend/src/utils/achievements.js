@@ -176,7 +176,13 @@ export function getAchievementProgress() {
   const progress = [];
   
   Object.values(ACHIEVEMENTS).forEach(achievement => {
-    if (!stats.achievements.includes(achievement.id)) {
+    if (stats.achievements.includes(achievement.id)) {
+      progress.push({
+        achievement,
+        percentage: 100,
+        unlocked: true
+      });
+    } else {
       let percentage = 0;
       let current = 0;
       let target = 0;
@@ -210,12 +216,6 @@ export function getAchievementProgress() {
         current,
         target,
         unlocked: false
-      });
-    } else {
-      progress.push({
-        achievement,
-        percentage: 100,
-        unlocked: true
       });
     }
   });

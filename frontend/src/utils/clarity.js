@@ -9,7 +9,7 @@ export function initClarity() {
   }
 
   // Check if already initialized
-  if (window.clarity) {
+  if (globalThis.clarity) {
     return;
   }
 
@@ -18,19 +18,19 @@ export function initClarity() {
     c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
     t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-  })(window, document, "clarity", "script", clarityId);
+  })(globalThis, document, "clarity", "script", clarityId);
 }
 
 // Track custom events (optional)
 export function trackEvent(eventName, eventData = {}) {
-  if (window.clarity) {
-    window.clarity('event', eventName, eventData);
+  if (globalThis.clarity) {
+    globalThis.clarity('event', eventName, eventData);
   }
 }
 
 // Set custom tags (optional)
 export function setTag(key, value) {
-  if (window.clarity) {
-    window.clarity('set', key, value);
+  if (globalThis.clarity) {
+    globalThis.clarity('set', key, value);
   }
 }

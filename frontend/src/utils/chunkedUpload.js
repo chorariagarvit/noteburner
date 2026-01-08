@@ -37,6 +37,115 @@ async function fetchWithTimeout(url, options, timeout = UPLOAD_TIMEOUT) {
 }
 
 /**
+ * Initialize multipart upload
+ */
+async function initializeUpload(file, encryptedData, iv, salt, token) {
+  const initResponse = await fetchWithTimeout(`${API_URL}/api/media/init`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: encryptedData.length,
+      iv,
+      salt,
+      token
+    })
+  }, 30000);
+
+  if (!initResponse.ok) {
+    const error = await initResponse.json();
+    throw new Error(error.error || 'Failed to initialize upload');
+  }
+
+  return initResponse.json();
+}
+
+/**
+ * Upload a single chunk with retry logic
+ */
+async function uploadChunk(fileId, uploadId, chunkIndex, chunkData, totalChunks, onProgress, currentProgress) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      // Smooth progress animation
+      const targetProgress = Math.floor(((chunkIndex + 0.5) / totalChunks) * 100);
+      if (onProgress && targetProgress > currentProgress.value) {
+        const progressInterval = setInterval(() => {
+          if (currentProgress.value < targetProgress) {
+            currentProgress.value++;
+            onProgress(currentProgress.value);
+          }
+        }, 50);
+        
+        setTimeout(() => clearInterval(progressInterval), 1000);
+      }
+
+      const chunkResponse = await fetchWithTimeout(`${API_URL}/api/media/chunk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileId,
+          uploadId,
+          chunkIndex,
+          chunkData
+        })
+      });
+
+      if (!chunkResponse.ok) {
+        const error = await chunkResponse.json();
+        throw new Error(error.error || 'Chunk upload failed');
+      }
+
+      const { partNumber, etag } = await chunkResponse.json();
+      
+      // Update progress after successful upload
+      currentProgress.value = Math.floor(((chunkIndex + 1) / totalChunks) * 100);
+      if (onProgress) {
+        onProgress(currentProgress.value);
+      }
+
+      return { partNumber, etag };
+    } catch (error) {
+      lastError = error;
+      console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} upload attempt ${attempt + 1} failed:`, error.message);
+      
+      if (attempt < MAX_RETRIES - 1) {
+        await sleep(RETRY_DELAY * (attempt + 1));
+      }
+    }
+  }
+
+  throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks} after ${MAX_RETRIES} attempts: ${lastError?.message || 'Unknown error'}`);
+}
+
+/**
+ * Complete multipart upload
+ */
+async function completeUpload(fileId, uploadId, parts, fileName, token, fileSize) {
+  const completeResponse = await fetchWithTimeout(`${API_URL}/api/media/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fileId,
+      uploadId,
+      parts,
+      fileName,
+      token,
+      fileSize
+    })
+  }, 30000);
+
+  if (!completeResponse.ok) {
+    const error = await completeResponse.json();
+    throw new Error(error.error || 'Failed to complete upload');
+  }
+
+  return completeResponse.json();
+}
+
+/**
  * Upload a large file using chunked multipart upload with retry logic
  * @param {File} file - The file to upload
  * @param {string} encryptedData - Base64 encoded encrypted file data
@@ -51,125 +160,32 @@ export async function uploadLargeFile(file, encryptedData, iv, salt, token, onPr
     throw new Error(`File size exceeds maximum of ${MAX_FILE_SIZE / (1024 * 1024 * 1024)}GB`);
   }
 
-  // Step 1: Initialize multipart upload with timeout
-  const initResponse = await fetchWithTimeout(`${API_URL}/api/media/init`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: encryptedData.length,
-      iv,
-      salt,
-      token
-    })
-  }, 30000); // 30s timeout for init
+  // Step 1: Initialize multipart upload
+  const { fileId, uploadId, chunkSize } = await initializeUpload(file, encryptedData, iv, salt, token);
 
-  if (!initResponse.ok) {
-    const error = await initResponse.json();
-    throw new Error(error.error || 'Failed to initialize upload');
-  }
-
-  const { fileId, uploadId, chunkSize } = await initResponse.json();
-
-  // Step 2: Upload chunks with retry logic and smooth progress
+  // Step 2: Upload chunks with retry logic
   const totalChunks = Math.ceil(encryptedData.length / chunkSize);
   const parts = [];
-  let currentProgress = 0;
+  const currentProgress = { value: 0 }; // Use object to pass by reference
 
   for (let i = 0; i < totalChunks; i++) {
     const start = i * chunkSize;
     const end = Math.min(start + chunkSize, encryptedData.length);
     const chunkData = encryptedData.slice(start, end);
     
-    let lastError = null;
-    let uploaded = false;
-
-    // Retry logic for each chunk
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        // Smooth progress - increment gradually during upload attempt
-        const targetProgress = Math.floor(((i + 0.5) / totalChunks) * 100);
-        if (onProgress && targetProgress > currentProgress) {
-          // Animate progress in small steps
-          const progressInterval = setInterval(() => {
-            if (currentProgress < targetProgress) {
-              currentProgress++;
-              onProgress(currentProgress);
-            }
-          }, 50); // Update every 50ms for smooth animation
-          
-          setTimeout(() => clearInterval(progressInterval), 1000); // Clear after 1s
-        }
-
-        const chunkResponse = await fetchWithTimeout(`${API_URL}/api/media/chunk`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileId,
-            uploadId,
-            chunkIndex: i,
-            chunkData
-          })
-        });
-
-        if (!chunkResponse.ok) {
-          const error = await chunkResponse.json();
-          throw new Error(error.error || 'Chunk upload failed');
-        }
-
-        const { partNumber, etag } = await chunkResponse.json();
-        parts.push({ partNumber, etag });
-        uploaded = true;
-
-        // Update progress after successful upload
-        currentProgress = Math.floor(((i + 1) / totalChunks) * 100);
-        if (onProgress) {
-          onProgress(currentProgress);
-        }
-
-        break; // Success, exit retry loop
-      } catch (error) {
-        lastError = error;
-        console.warn(`Chunk ${i + 1}/${totalChunks} upload attempt ${attempt + 1} failed:`, error.message);
-        
-        if (attempt < MAX_RETRIES - 1) {
-          // Wait before retry with exponential backoff
-          await sleep(RETRY_DELAY * (attempt + 1));
-        }
-      }
-    }
-
-    if (!uploaded) {
-      throw new Error(`Failed to upload chunk ${i + 1}/${totalChunks} after ${MAX_RETRIES} attempts: ${lastError?.message || 'Unknown error'}`);
-    }
+    const part = await uploadChunk(fileId, uploadId, i, chunkData, totalChunks, onProgress, currentProgress);
+    parts.push(part);
   }
 
-  // Step 3: Complete upload with timeout
-  const completeResponse = await fetchWithTimeout(`${API_URL}/api/media/complete`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fileId,
-      uploadId,
-      parts,
-      fileName: file.name,
-      token,
-      fileSize: encryptedData.length
-    })
-  }, 30000); // 30s timeout for completion
-
-  if (!completeResponse.ok) {
-    const error = await completeResponse.json();
-    throw new Error(error.error || 'Failed to complete upload');
-  }
+  // Step 3: Complete upload
+  const result = await completeUpload(fileId, uploadId, parts, file.name, token, encryptedData.length);
 
   // Set progress to 100%
   if (onProgress) {
     onProgress(100);
   }
 
-  return completeResponse.json();
+  return result;
 }
 
 /**

@@ -39,28 +39,71 @@ function HomePage() {
     setPassword(newPassword);
   };
 
+  const validateForm = () => {
+    if (!message.trim()) {
+      throw new Error('Message cannot be empty');
+    }
+
+    if (!password) {
+      throw new Error('Password is required');
+    }
+
+    if (password.length < 8) {
+      throw new Error('Password must be at least 8 characters');
+    }
+
+    // Validate custom slug if provided
+    if (customSlug && (slugStatus === 'unavailable' || slugStatus === 'invalid')) {
+      throw new Error('Please fix the custom URL before submitting');
+    }
+  };
+
+  const uploadFiles = async (result, password) => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      try {
+        const encryptedFile = await encryptFile(file, password);
+        
+        // Use chunked upload for files >100MB
+        if (shouldUseChunkedUpload(encryptedFile.encryptedData.length)) {
+          await uploadLargeFile(
+            file,
+            encryptedFile.encryptedData,
+            encryptedFile.iv,
+            encryptedFile.salt,
+            result.token,
+            (progress) => {
+              setUploadProgress(prev => ({ ...prev, [i]: progress }));
+            }
+          );
+        } else {
+          // Use direct upload for smaller files
+          await uploadMedia(
+            encryptedFile.encryptedData,
+            file.name,
+            file.type,
+            encryptedFile.iv,
+            encryptedFile.salt,
+            result.token
+          );
+          // Set progress to 100 for small files
+          setUploadProgress(prev => ({ ...prev, [i]: 100 }));
+        }
+      } catch (error_) {
+        // Provide more context on upload errors
+        throw new Error(`Failed to upload ${file.name}: ${error_.message}`);
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      if (!message.trim()) {
-        throw new Error('Message cannot be empty');
-      }
-
-      if (!password) {
-        throw new Error('Password is required');
-      }
-
-      if (password.length < 8) {
-        throw new Error('Password must be at least 8 characters');
-      }
-
-      // Validate custom slug if provided
-      if (customSlug && (slugStatus === 'unavailable' || slugStatus === 'invalid')) {
-        throw new Error('Please fix the custom URL before submitting');
-      }
+      validateForm();
 
       const encrypted = await encryptMessage(message, password);
       const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
@@ -73,42 +116,7 @@ function HomePage() {
       );
 
       if (files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          
-          try {
-            const encryptedFile = await encryptFile(file, password);
-            
-            // Use chunked upload for files >100MB
-            if (shouldUseChunkedUpload(encryptedFile.encryptedData.length)) {
-              await uploadLargeFile(
-                file,
-                encryptedFile.encryptedData,
-                encryptedFile.iv,
-                encryptedFile.salt,
-                result.token,
-                (progress) => {
-                  setUploadProgress(prev => ({ ...prev, [i]: progress }));
-                }
-              );
-            } else {
-              // Use direct upload for smaller files
-              await uploadMedia(
-                encryptedFile.encryptedData,
-                file.name,
-                file.type,
-                encryptedFile.iv,
-                encryptedFile.salt,
-                result.token
-              );
-              // Set progress to 100 for small files
-              setUploadProgress(prev => ({ ...prev, [i]: 100 }));
-            }
-          } catch (uploadErr) {
-            // Provide more context on upload errors
-            throw new Error(`Failed to upload ${file.name}: ${uploadErr.message}`);
-          }
-        }
+        await uploadFiles(result, password);
       }
 
       // Track achievements
@@ -151,20 +159,26 @@ function HomePage() {
                 <div className="inline-flex items-center gap-2 bg-primary-100 dark:bg-primary-900/30 px-4 py-2 rounded-full">
                   <TrendingUp className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   <span className="text-sm font-medium text-primary-900 dark:text-primary-100">
-                    {statsLoading ? (
-                      'Loading stats...'
-                    ) : stats ? (
-                      <>
-                        <AnimatedCounter value={stats.today?.messages_burned || 0} /> messages burned today
-                        {(stats.this_week?.messages_burned || 0) > 0 && (
-                          <span className="text-xs text-primary-700 dark:text-primary-300 ml-2">
-                            · <AnimatedCounter value={stats.this_week.messages_burned} /> this week
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      '0 messages burned today'
-                    )}
+                    {(() => {
+                      if (statsLoading) {
+                        return 'Loading stats...';
+                      }
+                      
+                      if (stats) {
+                        return (
+                          <>
+                            <AnimatedCounter value={stats.today?.messages_burned || 0} /> messages burned today
+                            {(stats.this_week?.messages_burned || 0) > 0 && (
+                              <span className="text-xs text-primary-700 dark:text-primary-300 ml-2">
+                                · <AnimatedCounter value={stats.this_week.messages_burned} /> this week
+                              </span>
+                            )}
+                          </>
+                        );
+                      }
+                      
+                      return '0 messages burned today';
+                    })()}
                   </span>
                 </div>
                 <StreakCounter />
@@ -473,57 +487,65 @@ function HomePage() {
           <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 dark:text-white mb-8">
             Platform Statistics
           </h2>
-          {statsLoading ? (
-            <div className="text-center text-gray-500 dark:text-gray-400">Loading statistics...</div>
-          ) : stats ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2">
-                  <AnimatedCounter value={stats.all_time?.messages_created || 0} />
+          {(() => {
+            if (statsLoading) {
+              return <div className="text-center text-gray-500 dark:text-gray-400">Loading statistics...</div>;
+            }
+            
+            if (stats) {
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2">
+                      <AnimatedCounter value={stats.all_time?.messages_created || 0} />
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Messages Created</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl md:text-4xl font-bold text-red-600 dark:text-red-500 mb-2">
+                      <AnimatedCounter value={stats.all_time?.messages_burned || 0} />
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Messages Burned</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-500 mb-2">
+                      <AnimatedCounter value={stats.all_time?.files_encrypted || 0} />
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Files Encrypted</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-500 mb-2">
+                      {stats.all_time?.avg_file_size 
+                        ? `${Math.round(stats.all_time.avg_file_size / 1024 / 1024)}MB`
+                        : '0MB'}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Avg File Size</div>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Messages Created</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-red-600 dark:text-red-500 mb-2">
-                  <AnimatedCounter value={stats.all_time?.messages_burned || 0} />
+              );
+            }
+            
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2">0</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Messages Created</div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Messages Burned</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-500 mb-2">
-                  <AnimatedCounter value={stats.all_time?.files_encrypted || 0} />
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-red-600 dark:text-red-500 mb-2">0</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Messages Burned</div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Files Encrypted</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-500 mb-2">
-                  {stats.all_time?.avg_file_size 
-                    ? `${Math.round(stats.all_time.avg_file_size / 1024 / 1024)}MB`
-                    : '0MB'}
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-500 mb-2">0</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Files Encrypted</div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Avg File Size</div>
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-500 mb-2">0MB</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Avg File Size</div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary-600 dark:text-primary-500 mb-2">0</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Messages Created</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-red-600 dark:text-red-500 mb-2">0</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Messages Burned</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-green-600 dark:text-green-500 mb-2">0</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Files Encrypted</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-500 mb-2">0MB</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Avg File Size</div>
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </section>
 
