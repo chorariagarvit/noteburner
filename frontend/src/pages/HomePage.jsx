@@ -5,9 +5,11 @@ import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X, Tre
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia, checkSlugAvailability } from '../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../utils/chunkedUpload';
+import { updateStatsOnMessageCreate } from '../utils/achievements';
 import { useStats } from '../hooks/useStats';
 import { useLoadingMessages } from '../hooks/useLoadingMessages';
 import { AnimatedCounter } from '../components/AnimatedCounter';
+import StreakCounter from '../components/StreakCounter';
 import debounce from 'lodash.debounce';
 
 function HomePage() {
@@ -156,6 +158,14 @@ function HomePage() {
         }
       }
 
+      // Track achievements
+      const fileSize = files.length > 0 ? files.reduce((sum, f) => sum + f.size, 0) : 0;
+      updateStatsOnMessageCreate({
+        fileSize,
+        expiration: expirySeconds * 1000,
+        mysteryMode: false // HomePage doesn't have mystery mode
+      });
+
       // Redirect to CreateMessage page in success mode
       navigate('/create', { state: { shareUrl: result.url, password, filesCount: files.length, expiresIn } });
     } catch (err) {
@@ -184,24 +194,27 @@ function HomePage() {
               </p>
               
               {/* Live Stats Counter */}
-              <div className="inline-flex items-center gap-2 bg-primary-100 dark:bg-primary-900/30 px-4 py-2 rounded-full mb-8">
-                <TrendingUp className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                <span className="text-sm font-medium text-primary-900 dark:text-primary-100">
-                  {statsLoading ? (
-                    'Loading stats...'
-                  ) : stats ? (
-                    <>
-                      <AnimatedCounter value={stats.today?.messages_burned || 0} /> messages burned today
-                      {(stats.this_week?.messages_burned || 0) > 0 && (
-                        <span className="text-xs text-primary-700 dark:text-primary-300 ml-2">
-                          · <AnimatedCounter value={stats.this_week.messages_burned} /> this week
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    '0 messages burned today'
-                  )}
-                </span>
+              <div className="flex flex-wrap items-center gap-3 mb-8">
+                <div className="inline-flex items-center gap-2 bg-primary-100 dark:bg-primary-900/30 px-4 py-2 rounded-full">
+                  <TrendingUp className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                  <span className="text-sm font-medium text-primary-900 dark:text-primary-100">
+                    {statsLoading ? (
+                      'Loading stats...'
+                    ) : stats ? (
+                      <>
+                        <AnimatedCounter value={stats.today?.messages_burned || 0} /> messages burned today
+                        {(stats.this_week?.messages_burned || 0) > 0 && (
+                          <span className="text-xs text-primary-700 dark:text-primary-300 ml-2">
+                            · <AnimatedCounter value={stats.this_week.messages_burned} /> this week
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      '0 messages burned today'
+                    )}
+                  </span>
+                </div>
+                <StreakCounter />
               </div>
               
               <div className="space-y-4">
