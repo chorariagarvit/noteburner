@@ -39,7 +39,7 @@ export function useCustomSlug() {
   );
 
   const handleCustomSlugChange = (e) => {
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '');
+    const value = e.target.value.toLowerCase().replaceAll(/[^a-z0-9\-_]/g, '');
     setCustomSlug(value);
     checkSlug(value);
   };

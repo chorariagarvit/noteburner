@@ -84,17 +84,20 @@ export function CountdownTimer({ expiresAt, onExpire }) {
   const isUrgent = timeRemaining.total < 60 * 60 * 1000; // Less than 1 hour
   const isCritical = timeRemaining.total < 15 * 60 * 1000; // Less than 15 minutes
 
-  const urgencyColor = isCritical 
-    ? 'text-red-600 dark:text-red-400' 
-    : isUrgent 
-    ? 'text-orange-600 dark:text-orange-400' 
-    : 'text-gray-700 dark:text-gray-300';
-
-  const progressColor = isCritical
-    ? 'bg-red-500'
-    : isUrgent
-    ? 'bg-orange-500'
-    : 'bg-blue-500';
+  // Determine urgency colors based on time remaining
+  let urgencyColor;
+  let progressColor;
+  
+  if (isCritical) {
+    urgencyColor = 'text-red-600 dark:text-red-400';
+    progressColor = 'bg-red-500';
+  } else if (isUrgent) {
+    urgencyColor = 'text-orange-600 dark:text-orange-400';
+    progressColor = 'bg-orange-500';
+  } else {
+    urgencyColor = 'text-gray-700 dark:text-gray-300';
+    progressColor = 'bg-blue-500';
+  }
 
   return (
     <div className="space-y-3">

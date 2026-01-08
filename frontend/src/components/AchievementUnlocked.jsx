@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import confetti from 'canvas-confetti';
 
 export default function AchievementUnlocked({ achievement, onClose }) {
@@ -62,3 +63,13 @@ export default function AchievementUnlocked({ achievement, onClose }) {
     </div>
   );
 }
+
+AchievementUnlocked.propTypes = {
+  achievement: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired
+  }).isRequired,
+  onClose: PropTypes.func.isRequired
+};

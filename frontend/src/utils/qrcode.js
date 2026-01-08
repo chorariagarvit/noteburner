@@ -38,7 +38,7 @@ export function downloadQRCode(dataUrl, filename = 'noteburner-qr.png') {
   link.download = filename;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  link.remove();
 }
 
 /**
