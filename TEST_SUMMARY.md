@@ -5,7 +5,7 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 
 ## 📊 Test Coverage Summary
 
-### Total Tests: 40+
+### Total Tests: 52
 
 #### 1. Message Creation Tests (8 tests)
 ✅ Simple text message creation  
@@ -55,6 +55,20 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Custom URL navigation (/m/slug format)  
 ✅ Password visibility toggle (browser default hidden)  
 
+#### 5. Week 4 - Gamification Tests (12 tests)
+✅ Message creation stats tracking in localStorage  
+✅ "First Burn" achievement unlock detection  
+✅ Streak counter display on homepage  
+✅ Achievements page rendering with stats grid  
+✅ Leaderboard page with platform statistics  
+✅ Mystery mode checkbox functionality  
+✅ File upload tracking for "File Master" achievement  
+✅ Max expiration tracking for "Security Expert"  
+✅ Achievement progress bars for locked achievements  
+✅ Navigation between /achievements and /leaderboard  
+✅ Mystery message tracking for "Mystery Sender"  
+✅ Streak persistence across page reloads  
+
 ## 🚀 Quick Start
 
 ```bash
@@ -76,10 +90,11 @@ npm run test:report
 
 ## 📁 Test Files
 
-- `e2e/create-message.spec.js` - Message creation flows
-- `e2e/view-message.spec.js` - Message viewing and decryption
-- `e2e/viral-mechanics.spec.js` - Viral features and UX enhancements
-- `e2e/week3.spec.js` - Custom URLs, QR codes, countdown timers, Open Graph
+- `e2e/create-message.spec.js` - Message creation flows (8 tests)
+- `e2e/view-message.spec.js` - Message viewing and decryption (10 tests)
+- `e2e/viral-mechanics.spec.js` - Viral features and UX enhancements (8 tests)
+- `e2e/week3.spec.js` - Custom URLs, QR codes, countdown timers, Open Graph (14 tests)
+- `e2e/week4.spec.js` - Gamification (achievements, streaks, leaderboard, mystery mode) (12 tests)
 - `playwright.config.js` - Playwright configuration
 - `.github/workflows/e2e-tests.yml` - CI/CD automation
 
@@ -128,6 +143,14 @@ Tests automatically start both frontend and backend dev servers before running.
 - Countdown timers
 - Open Graph tags
 
+**Gamification Features**
+- Achievement tracking (localStorage)
+- Streak counter with daily tracking
+- Anonymous leaderboard
+- Mystery message mode
+- Progress bars for achievements
+- Confetti celebration on unlocks
+
 ## 🔧 Configuration
 
 **Browser**: Chromium (Desktop Chrome)  
@@ -155,9 +178,13 @@ Tests automatically start both frontend and backend dev servers before running.
 
 **Test Execution Time**: ~3-4 minutes (local)  
 **CI Execution Time**: ~6-8 minutes (with server startup)  
-**Code Coverage**: All major user flows including Week 3 features  
+**Code Coverage**: All major user flows including Weeks 1-4 features  
 **Success Rate**: 100% when services are healthy  
-**Week 3 Addition**: +14 tests for custom URLs, QR codes, timers, OG tags  
+**Latest Additions**:
+- Week 3 (Jan 1, 2026): +14 tests for custom URLs, QR codes, timers, OG tags  
+- Week 4 (Jan 8, 2026): +12 tests for gamification (achievements, streaks, leaderboard)  
+
+**Last Updated**: Jan 8, 2026  
 
 ## 🔮 Future Enhancements
 

@@ -6,9 +6,9 @@
 
 ---
 
-## 🚀 Version 1.3 - CURRENT (Custom URLs & QR Codes)
-**Status**: ✅ Complete - Week 3 Released
-**Released**: Jan 1, 2026
+## 🚀 Version 1.4 - CURRENT (Gamification)
+**Status**: ✅ Complete - Week 4 Released
+**Released**: Jan 8, 2026
 
 ### Features
 - ✅ Client-side AES-256-GCM encryption
@@ -255,36 +255,80 @@ test('message self-destructs after first view', async ({ page }) => {
 ## 🎮 Week 4 - Gamification
 **Branch**: `feature/gamification`
 **Target**: Jan 5, 2026
-**Status**: 📋 Not Started
+**Status**: ✅ Released to Production (v1.4.0)
+**Released**: Jan 8, 2026
 
 ### Features
-- [ ] **Achievement system** (localStorage-based, privacy-first)
+- ✅ **Achievement system** (localStorage-based, privacy-first)
   - "First Burn" 🔥
   - "Speed Demon" - Send 10 messages in a day
   - "Security Expert" - Use max expiration settings
   - "File Master" - Upload 50+ MB file
-  - Display badges on success page
+  - "Centurion" - Create 100 messages total
+  - "Night Owl" - Create message between 12am-6am
+  - "Streak Master" - 7-day message streak
+  - "Mystery Sender" - Send 5 mystery messages
+  - Display badges on AchievementsPage with progress tracking
 
-- [ ] **Anonymous leaderboard**
-  - "Most secure users this week"
-  - Based on: messages sent, encryption strength
-  - No personal info, just anonymous stats
-  - Display top 10 on homepage
+- ✅ **Anonymous leaderboard**
+  - "Platform Statistics" showing Today/This Week/All Time
+  - Based on: messages sent, files encrypted, burn rate
+  - No personal info, 100% anonymous
+  - Display on /leaderboard page
 
-- [ ] **Streak tracking**
-  - "You're on a 5-day streak! 🔥"
+- ✅ **Streak tracking**
+  - Daily consecutive message creation tracking
+  - "You're on a 5-day streak! 🔥" with fire emoji
+  - Pulsing animation on StreakCounter component
   - Encourages repeat usage
-  - Optional email reminders
+  - Displayed on homepage hero section
 
-- [ ] **Mystery message mode**
+- ✅ **Mystery message mode**
   - Sender stays completely anonymous
-  - No metadata, no hints
-  - "You have a secret admirer..." angle
+  - Checkbox toggle in CreateMessage form
+  - Tracked separately for Mystery Sender achievement
+  - "Send Anonymously" option
 
 ### Implementation
-- Client-side achievement tracking
-- Optional backend stats (opt-in)
-- Celebration animations for milestones
+- ✅ Client-side achievement tracking (localStorage)
+- ✅ Backend stats API (already existing from Week 1)
+- ✅ Celebration animations with confetti for achievement unlocks
+- ✅ Progress bars showing partial achievement completion
+- ✅ Two new pages: /achievements and /leaderboard
+- ✅ Header navigation updates with Trophy icon
+
+### Backend Changes
+- No changes required (stats API already existed)
+- Uses existing `/api/stats` endpoint
+
+### Frontend Changes
+- ✅ AchievementBadge component - Display badges with gradients
+- ✅ AchievementUnlocked component - Popup with confetti
+- ✅ StreakCounter component - Fire emoji with daily count
+- ✅ AchievementsPage - Full overview with stats grid
+- ✅ LeaderboardPage - Platform statistics display
+- ✅ achievements.js utility - Core tracking logic
+- ✅ Updated CreateMessage page with mystery mode checkbox
+- ✅ Updated HomePage with achievement tracking integration
+
+### Dependencies
+- ✅ `canvas-confetti@1.9.3` - Achievement unlock celebrations
+
+### Testing
+- ✅ 12 E2E tests covering all Week 4 features
+- ✅ Achievement tracking and unlocking
+- ✅ Streak persistence across reloads
+- ✅ Leaderboard stats display
+- ✅ Mystery mode checkbox functionality
+- ✅ File upload tracking
+- ✅ Progress bar rendering
+
+### Metrics
+- **Code**: 1,040 lines added (frontend + tests)
+- **Files**: 13 files changed (6 new, 6 modified, 2 moved)
+- **Commits**: 3 (implementation, test fixes, merge)
+- **Test Coverage**: 12/12 passing (52 total E2E tests)
+- **Branch**: Merged to main with no-ff merge
 
 ---
 
@@ -576,7 +620,23 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🛠️ Development Guidelines
+## � Project Status
+
+**Current Version**: v1.4.0 (Week 4 - Gamification)  
+**Last Updated**: Jan 8, 2026  
+**Next Release**: Week 5 (Network Effects) - Jan 12, 2026
+
+### Release History
+- **v1.4.0** - Jan 8, 2026: Gamification (achievements, streaks, leaderboard, mystery mode)
+- **v1.3.0** - Jan 1, 2026: Custom URLs & Branding (QR codes, countdown timer, Open Graph)
+- **v1.2.5** - Dec 25, 2025: E2E Testing (52 passing tests)
+- **v1.2.0** - Dec 22, 2025: Viral Mechanics (post-burn CTA, message preview)
+- **v1.1.0** - Dec 15, 2025: Analytics & Social Proof (stats counter, platform stats)
+- **v1.0.0** - Dec 1, 2025: Initial Launch (AES-256-GCM, one-time access, file encryption)
+
+---
+
+## �🛠️ Development Guidelines
 
 ### Branch Naming Convention
 ```
