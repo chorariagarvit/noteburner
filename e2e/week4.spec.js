@@ -194,6 +194,11 @@ test.describe('Week 4 - Gamification', () => {
         messagesCreated: 50, // Halfway to Centurion (100)
         messagesToday: 5,
         currentStreak: 3,
+        lastMessageDate: new Date().toISOString().split('T')[0],
+        largestFileSize: 0,
+        maxExpirationUsed: false,
+        nightOwlMessages: 0,
+        mysteryMessages: 0,
         achievements: ['first_burn']
       };
       localStorage.setItem('noteburner_stats', JSON.stringify(stats));
@@ -202,12 +207,19 @@ test.describe('Week 4 - Gamification', () => {
     // Go to achievements page
     await page.goto(`${BASE_URL}/achievements`);
     
+    // Wait for page to load
+    await page.waitForSelector('text=Your Achievements');
+    
     // Check for progress section
     await expect(page.locator('text=In Progress')).toBeVisible();
     
-    // Check for progress bar
-    await expect(page.locator('text=Progress').nth(1)).toBeVisible();
-    await expect(page.locator('text=50%')).toBeVisible();
+    // Check for Centurion achievement with 50% progress
+    const centurionCard = page.locator('text=Centurion').locator('..');
+    await expect(centurionCard).toBeVisible();
+    
+    // Check for progress text and percentage
+    await expect(page.locator('text=Progress').first()).toBeVisible();
+    await expect(page.locator('text=50%').first()).toBeVisible();
   });
 
   test('should navigate between gamification pages using header links', async ({ page }) => {
