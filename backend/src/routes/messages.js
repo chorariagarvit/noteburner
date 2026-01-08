@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { incrementStat } from '../utils/stats.js';
 import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValidation.js';
+import { getMessageByIdentifier, deleteMessageByIdentifier, deleteExpiredMessage } from '../utils/messageHelpers.js';
 
 const app = new Hono();
 
@@ -108,21 +109,8 @@ app.get('/:identifier', async (c) => {
       return c.json({ error: 'Invalid identifier' }, 400);
     }
 
-    // Determine if identifier is a token (32 chars) or custom slug
-    const isToken = identifier.length === 32 && /^[A-Za-z0-9_-]+$/.test(identifier);
-    
     // Retrieve message without marking as accessed yet
-    // Allow multiple attempts for wrong password
-    let result;
-    if (isToken) {
-      result = await c.env.DB.prepare(
-        `SELECT * FROM messages WHERE token = ? AND accessed = 0`
-      ).bind(identifier).first();
-    } else {
-      result = await c.env.DB.prepare(
-        `SELECT * FROM messages WHERE custom_slug = ? AND accessed = 0`
-      ).bind(identifier).first();
-    }
+    const result = await getMessageByIdentifier(c.env.DB, identifier);
 
     if (!result) {
       // Message either doesn't exist or was already accessed
@@ -131,20 +119,8 @@ app.get('/:identifier', async (c) => {
 
     // Check expiration
     if (result.expires_at && Date.now() > result.expires_at) {
-      // Delete expired message
-      const deleteQuery = isToken 
-        ? `DELETE FROM messages WHERE token = ?`
-        : `DELETE FROM messages WHERE custom_slug = ?`;
-      await c.env.DB.prepare(deleteQuery).bind(identifier).run();
-
-      // Delete associated media files
-      if (result.media_files) {
-        const mediaFiles = JSON.parse(result.media_files);
-        for (const fileId of mediaFiles) {
-          await c.env.MEDIA_BUCKET.delete(fileId);
-        }
-      }
-
+      // Delete expired message and media files
+      await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
       return c.json({ error: 'Message has expired' }, 410);
     }
 
@@ -179,21 +155,8 @@ app.delete('/:identifier', async (c) => {
       return c.json({ error: 'Invalid identifier' }, 400);
     }
 
-    // Determine if identifier is a token (32 chars) or custom slug
-    const isToken = identifier.length === 32 && /^[A-Za-z0-9_-]+$/.test(identifier);
-    
     // Atomically mark as accessed and get message to prevent race condition
-    // Only first successful decryption should reach here
-    let result;
-    if (isToken) {
-      result = await c.env.DB.prepare(
-        `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING media_files, token`
-      ).bind(identifier).first();
-    } else {
-      result = await c.env.DB.prepare(
-        `UPDATE messages SET accessed = 1 WHERE custom_slug = ? AND accessed = 0 RETURNING media_files, token`
-      ).bind(identifier).first();
-    }
+    const result = await deleteMessageByIdentifier(c.env.DB, identifier);
 
     if (!result) {
       // Message either doesn't exist or was already deleted

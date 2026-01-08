@@ -1,16 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X, TrendingUp, Link2, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
-import { createMessage, uploadMedia, checkSlugAvailability } from '../utils/api';
+import { createMessage, uploadMedia } from '../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../utils/chunkedUpload';
 import { updateStatsOnMessageCreate } from '../utils/achievements';
 import { useStats } from '../hooks/useStats';
 import { useLoadingMessages } from '../hooks/useLoadingMessages';
 import { AnimatedCounter } from '../components/AnimatedCounter';
 import StreakCounter from '../components/StreakCounter';
-import debounce from 'lodash.debounce';
+import { useCustomSlug } from '../hooks/useCustomSlug';
+import { useFileUpload } from '../hooks/useFileUpload';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -19,71 +20,23 @@ function HomePage() {
   useEffect(() => {
     document.title = 'NoteBurner - Home';
   }, []);
+  
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [expiresIn, setExpiresIn] = useState('24');
-  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
   const [error, setError] = useState('');
   const loadingMessage = useLoadingMessages(loading);
-  const [customSlug, setCustomSlug] = useState('');
-  const [slugStatus, setSlugStatus] = useState(''); // 'checking', 'available', 'unavailable', 'invalid'
-  const [slugError, setSlugError] = useState('');
-
-  const handleFileUpload = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    const maxSize = 2 * 1024 * 1024 * 1024; // 2GB
-    const validFiles = selectedFiles.filter(f => f.size <= maxSize);
-    
-    if (validFiles.length !== selectedFiles.length) {
-      setError('Some files exceeded 2GB limit and were skipped');
-    }
-    
-    setFiles([...files, ...validFiles]);
-  };
-
-  const removeFile = (index) => {
-    setFiles(files.filter((_, i) => i !== index));
-  };
+  
+  // Use custom hooks for file upload and slug validation
+  const { files, handleFileUpload, removeFile, getTotalSize } = useFileUpload();
+  const { customSlug, slugStatus, slugError, handleCustomSlugChange } = useCustomSlug();
 
   const handleGeneratePassword = () => {
     const newPassword = generatePassword(16);
     setPassword(newPassword);
-  };
-
-  // Debounced slug validation
-  const checkSlug = useCallback(
-    debounce(async (slug) => {
-      if (!slug) {
-        setSlugStatus('');
-        setSlugError('');
-        return;
-      }
-
-      setSlugStatus('checking');
-      try {
-        const result = await checkSlugAvailability(slug);
-        if (result.available) {
-          setSlugStatus('available');
-          setSlugError('');
-        } else {
-          setSlugStatus('unavailable');
-          setSlugError(result.error || 'This custom URL is not available');
-        }
-      } catch (err) {
-        setSlugStatus('invalid');
-        setSlugError(err.message || 'Invalid custom URL');
-      }
-    }, 500),
-    []
-  );
-
-  const handleCustomSlugChange = (e) => {
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '');
-    setCustomSlug(value);
-    checkSlug(value);
   };
 
   const handleSubmit = async (e) => {
@@ -159,7 +112,7 @@ function HomePage() {
       }
 
       // Track achievements
-      const fileSize = files.length > 0 ? files.reduce((sum, f) => sum + f.size, 0) : 0;
+      const fileSize = getTotalSize();
       updateStatsOnMessageCreate({
         fileSize,
         expiration: expirySeconds * 1000,
