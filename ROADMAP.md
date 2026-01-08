@@ -700,6 +700,6 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 ---
 
-**Last Updated**: January 1, 2026  
-**Current Version**: v1.3.0  
-**Next Release**: Week 4 - Gamification (Jan 5, 2026)
+**Last Updated**: January 8, 2026  
+**Current Version**: v1.4.0  
+**Next Release**: Week 5 - Network Effects (Jan 12, 2026)
