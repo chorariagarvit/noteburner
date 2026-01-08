@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock, Link2, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
-import { createMessage, uploadMedia, checkSlugAvailability } from '../utils/api';
+import { createMessage, uploadMedia } from '../utils/api';
 import { QRCodeDisplay } from '../components/QRCodeDisplay';
 import { updateStatsOnMessageCreate } from '../utils/achievements';
 import AchievementUnlocked from '../components/AchievementUnlocked';
-import debounce from 'lodash.debounce';
+import { useCustomSlug } from '../hooks/useCustomSlug';
+import { useFileUpload } from '../hooks/useFileUpload';
 
 function CreateMessage() {
   const location = useLocation();
@@ -14,17 +15,17 @@ function CreateMessage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [expiresIn, setExpiresIn] = useState('24'); // Default 24 hours
-  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [locking, setLocking] = useState(false);
-  const [customSlug, setCustomSlug] = useState('');
-  const [slugStatus, setSlugStatus] = useState(''); // 'checking', 'available', 'unavailable', 'invalid'
-  const [slugError, setSlugError] = useState('');
   const [mysteryMode, setMysteryMode] = useState(false);
   const [newAchievements, setNewAchievements] = useState([]);
+  
+  // Use custom hooks for file upload and slug validation
+  const { files, handleFileUpload, removeFile, getTotalSize, clearFiles } = useFileUpload();
+  const { customSlug, slugStatus, slugError, handleCustomSlugChange, resetSlug } = useCustomSlug();
 
   // Set document title
   useEffect(() => {
@@ -42,57 +43,9 @@ function CreateMessage() {
     }
   }, [location.state]);
 
-  const handleFileUpload = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    const validFiles = selectedFiles.filter(f => f.size <= 2 * 1024 * 1024 * 1024); // 2GB limit
-    
-    if (validFiles.length !== selectedFiles.length) {
-      setError('Some files exceeded 2GB limit and were skipped');
-    }
-    
-    setFiles([...files, ...validFiles]);
-  };
-
-  const removeFile = (index) => {
-    setFiles(files.filter((_, i) => i !== index));
-  };
-
   const handleGeneratePassword = () => {
     const newPassword = generatePassword(16);
     setPassword(newPassword);
-  };
-
-  // Debounced slug validation
-  const checkSlug = useCallback(
-    debounce(async (slug) => {
-      if (!slug) {
-        setSlugStatus('');
-        setSlugError('');
-        return;
-      }
-
-      setSlugStatus('checking');
-      try {
-        const result = await checkSlugAvailability(slug);
-        if (result.available) {
-          setSlugStatus('available');
-          setSlugError('');
-        } else {
-          setSlugStatus('unavailable');
-          setSlugError(result.error || 'This custom URL is not available');
-        }
-      } catch (err) {
-        setSlugStatus('invalid');
-        setSlugError(err.message || 'Invalid custom URL');
-      }
-    }, 500),
-    []
-  );
-
-  const handleCustomSlugChange = (e) => {
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '');
-    setCustomSlug(value);
-    checkSlug(value);
   };
 
   const handleSubmit = async (e) => {
@@ -152,7 +105,7 @@ function CreateMessage() {
       setShareUrl(result.url);
       
       // Track achievements
-      const fileSize = files.length > 0 ? files.reduce((sum, f) => sum + f.size, 0) : 0;
+      const fileSize = getTotalSize();
       const achievements = updateStatsOnMessageCreate({
         fileSize,
         expiration: expirySeconds * 1000,
@@ -178,24 +131,20 @@ function CreateMessage() {
   const handleReset = () => {
     setMessage('');
     setPassword('');
-    setFiles([]);
+    clearFiles();
     setShareUrl('');
     setExpiresIn('24'); // Reset to default 24 hours
     setError('');
-    setCustomSlug('');
-    setSlugStatus('');
-    setSlugError('');
+    resetSlug();
   };
 
   const handleCreateSimilar = () => {
     // Keep password and expiresIn settings, just clear message and files
     setMessage('');
-    setFiles([]);
+    clearFiles();
     setShareUrl('');
     setError('');
-    setCustomSlug('');
-    setSlugStatus('');
-    setSlugError('');
+    resetSlug();
     // Scroll to top for better UX
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
