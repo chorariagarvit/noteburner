@@ -4,13 +4,25 @@ A secure one-time message encryption and decryption application. Messages can on
 
 ## Features
 
+### Core Security
 - 🔐 **Client-side AES-256-GCM encryption** - Messages encrypted in browser before transmission
 - 🔥 **One-time access** - Automatic deletion after first successful decryption
 - 🔑 **Password protection** - PBKDF2 key derivation for strong password-based encryption
 - 📎 **Media support** - Encrypt and share files along with text messages
 - ⏰ **Optional expiration** - Set time-based deletion for added security
 - 🚫 **No backups** - Permanent deletion guarantee
-- 🌐 **Shareable links** - Unique URLs for secure message sharing
+
+### Customization & Sharing
+- 🌐 **Custom short URLs** - Choose memorable URLs for your messages
+- 📱 **QR code generation** - Instant QR codes for easy mobile sharing
+- ⏱️ **Countdown timers** - Visual countdown with urgency indicators
+- 🔗 **Social media previews** - Open Graph tags for Twitter, Facebook, LinkedIn
+
+### Gamification & Engagement
+- 🏆 **Achievement system** - Unlock 8 achievements (First Burn, Speed Demon, File Master, etc.)
+- 🔥 **Streak tracking** - Daily message creation streaks with fire emoji
+- 📊 **Anonymous leaderboard** - Platform statistics without personal data
+- 🎭 **Mystery mode** - Send completely anonymous messages
 
 ## Architecture
 
@@ -136,14 +148,18 @@ npm run test:e2e:ui
 npm run test:report
 ```
 
-**Test Coverage:**
+**Test Coverage (52 E2E tests):**
 - ✅ Message creation (text, files, passwords, expiration)
 - ✅ Message viewing and decryption
 - ✅ One-time access enforcement
 - ✅ Viral mechanics (confetti, CTAs, loading states)
-- ✅ Preview page and countdown timers
+- ✅ Custom URLs (validation, profanity filter, reserved slugs)
+- ✅ QR code generation and download
+- ✅ Countdown timers with urgency states
+- ✅ Open Graph meta tags
+- ✅ Gamification (achievements, streaks, leaderboard, mystery mode)
 
-See [E2E_TESTING.md](./E2E_TESTING.md) for detailed testing documentation.
+See [docs/E2E_TESTING.md](./docs/E2E_TESTING.md) and [docs/TEST_SUMMARY.md](./docs/TEST_SUMMARY.md) for detailed testing documentation.
 
 ## License
 
