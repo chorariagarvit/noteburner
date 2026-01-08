@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, Moon, Sun } from 'lucide-react';
+import { Flame, Moon, Sun, Trophy } from 'lucide-react';
 import { ThemeContext } from '../App';
 
 function Header() {
@@ -23,6 +23,20 @@ function Header() {
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors"
             >
               Create Message
+            </Link>
+            <Link 
+              to="/achievements" 
+              className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 font-medium transition-colors"
+            >
+              <Trophy className="w-4 h-4" />
+              <span className="hidden sm:inline">Achievements</span>
+            </Link>
+            <Link 
+              to="/leaderboard" 
+              className="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 font-medium transition-colors"
+            >
+              <span className="hidden sm:inline">Leaderboard</span>
+              <span className="sm:hidden">Stats</span>
             </Link>
             <button
               onClick={toggleDarkMode}
