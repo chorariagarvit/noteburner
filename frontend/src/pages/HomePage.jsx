@@ -5,6 +5,7 @@ import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X, Tre
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia, checkSlugAvailability } from '../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../utils/chunkedUpload';
+import { updateStatsOnMessageCreate } from '../utils/achievements';
 import { useStats } from '../hooks/useStats';
 import { useLoadingMessages } from '../hooks/useLoadingMessages';
 import { AnimatedCounter } from '../components/AnimatedCounter';
@@ -156,6 +157,14 @@ function HomePage() {
           }
         }
       }
+
+      // Track achievements
+      const fileSize = files.length > 0 ? files.reduce((sum, f) => sum + f.size, 0) : 0;
+      updateStatsOnMessageCreate({
+        fileSize,
+        expiration: expirySeconds * 1000,
+        mysteryMode: false // HomePage doesn't have mystery mode
+      });
 
       // Redirect to CreateMessage page in success mode
       navigate('/create', { state: { shareUrl: result.url, password, filesCount: files.length, expiresIn } });
