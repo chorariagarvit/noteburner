@@ -8,12 +8,12 @@ const PROFANITY_LIST = [
 ];
 
 // Reserved slugs that cannot be used
-const RESERVED_SLUGS = [
+const RESERVED_SLUGS = new Set([
   'api', 'admin', 'login', 'signup', 'logout', 'settings',
   'about', 'help', 'support', 'contact', 'privacy', 'terms',
   'm', 'message', 'messages', 'media', 'stats', 'health',
   'test', 'demo', 'example', 'null', 'undefined'
-];
+]);
 
 /**
  * Validate custom URL slug
@@ -39,7 +39,7 @@ export function validateSlug(slug) {
   }
 
   // Check format (alphanumeric, hyphens, underscores only)
-  const validFormat = /^[a-zA-Z0-9_-]+$/;
+  const validFormat = /^[a-zA-Z0-9_\-]+$/;
   if (!validFormat.test(slug)) {
     return { valid: false, error: 'Slug can only contain letters, numbers, hyphens, and underscores' };
   }
@@ -51,7 +51,7 @@ export function validateSlug(slug) {
 
   // Check for reserved slugs
   const lowerSlug = slug.toLowerCase();
-  if (RESERVED_SLUGS.includes(lowerSlug)) {
+  if (RESERVED_SLUGS.has(lowerSlug)) {
     return { valid: false, error: 'This slug is reserved and cannot be used' };
   }
 
@@ -82,12 +82,12 @@ function containsProfanity(text) {
     
     // Check for leetspeak variations (4 for a, 3 for e, etc.)
     const leetWord = word
-      .replace(/a/g, '[a4@]')
-      .replace(/e/g, '[e3]')
-      .replace(/i/g, '[i1!]')
-      .replace(/o/g, '[o0]')
-      .replace(/s/g, '[s5$]')
-      .replace(/t/g, '[t7]');
+      .replaceAll('a', '[a4@]')
+      .replaceAll('e', '[e3]')
+      .replaceAll('i', '[i1!]')
+      .replaceAll('o', '[o0]')
+      .replaceAll('s', '[s5$]')
+      .replaceAll('t', '[t7]');
     
     const leetRegex = new RegExp(leetWord, 'i');
     if (leetRegex.test(lowerText)) return true;
@@ -107,11 +107,11 @@ export function sanitizeSlug(slug) {
   return slug
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')           // Replace spaces with hyphens
-    .replace(/[^a-z0-9_-]/g, '')    // Remove invalid characters
-    .replace(/--+/g, '-')           // Replace multiple hyphens with single
-    .replace(/^-+|-+$/g, '')        // Remove leading/trailing hyphens
-    .slice(0, 20);                  // Limit to 20 characters
+    .replaceAll(/\s+/g, '-')             // Replace spaces with hyphens
+    .replaceAll(/[^a-z0-9_\-]/g, '')     // Remove invalid characters
+    .replaceAll(/\-\-+/g, '-')           // Replace multiple hyphens with single
+    .replaceAll(/(^\-+)|(\-+$)/g, '')    // Remove leading/trailing hyphens
+    .slice(0, 20);                       // Limit to 20 characters
 }
 
 /**

@@ -54,7 +54,7 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
 
     // Handle custom slug if provided
     let finalSlug = null;
-    if (customSlug && customSlug.trim()) {
+    if (customSlug?.trim()) {
       // Sanitize the slug
       const sanitized = sanitizeSlug(customSlug);
       

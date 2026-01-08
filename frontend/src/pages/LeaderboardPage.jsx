@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Trophy, TrendingUp, Flame, Shield, Clock } from 'lucide-react';
+import { Trophy, TrendingUp, Shield, Clock } from 'lucide-react';
 
 export default function LeaderboardPage() {
   const [leaderboardData, setLeaderboardData] = useState(null);
