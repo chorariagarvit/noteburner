@@ -79,7 +79,7 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     const encrypted = await encryptMessage(message, password);
     
     // Get API URL (prefer localhost for development)
-    const apiUrl = 'https://noteburner.app/api';
+    const apiUrl = 'https://noteburner.work/api';
     
     // Create message via API
     const response = await fetch(`${apiUrl}/messages`, {
@@ -103,7 +103,7 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     const data = await response.json();
     
     // Construct share URL
-    const shareUrl = `https://noteburner.app/${data.id}`;
+    const shareUrl = `https://noteburner.work/${data.id}`;
     
     return {
       url: shareUrl,

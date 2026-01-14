@@ -31,12 +31,12 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
   };
 
   const handleTwitter = () => {
-    const text = encodeURIComponent(`🔥 Just sent a self-destructing message with @NoteBurner\n\nSecure • Private • Burns after reading\n\nTry it: noteburner.app`);
+    const text = encodeURIComponent(`🔥 Just sent a self-destructing message with @NoteBurner\n\nSecure • Private • Burns after reading\n\nTry it: noteburner.work`);
     window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank', 'width=550,height=420');
   };
 
   const handleLinkedIn = () => {
-    const url = encodeURIComponent('https://noteburner.app');
+    const url = encodeURIComponent('https://noteburner.work');
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=550,height=420');
   };
 

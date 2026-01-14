@@ -38,7 +38,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   
   if (request.action === 'openNoteBurner') {
     // Open NoteBurner in new tab with encrypted message
-    const url = request.url || 'https://noteburner.app/create';
+    const url = request.url || 'https://noteburner.work/create';
     chrome.tabs.create({ url });
   }
   
