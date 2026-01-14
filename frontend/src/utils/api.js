@@ -47,6 +47,31 @@ export async function deleteMessage(token) {
   return response.json();
 }
 
+export async function createGroupMessage(encryptedData, iv, salt, expiresIn = null, recipientCount = 1, maxViews = null, burnOnFirstView = false) {
+  const response = await fetch(`${API_URL}/api/messages/group`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      encryptedData,
+      iv,
+      salt,
+      expiresIn,
+      recipientCount,
+      maxViews,
+      burnOnFirstView,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create group message');
+  }
+
+  return response.json();
+}
+
 export async function checkSlugAvailability(slug) {
   const response = await fetch(`${API_URL}/api/messages/check-slug/${encodeURIComponent(slug)}`);
 
