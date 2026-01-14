@@ -698,14 +698,15 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ## � Project Status
 
-**Current Version**: v1.4.0 (Week 4 - Gamification)  
-**Last Updated**: Jan 8, 2026  
-**Next Release**: Week 5 (Network Effects) - Jan 12, 2026
+**Current Version**: v1.5.0 (Week 5 - Network Effects)  
+**Last Updated**: Jan 14, 2026  
+**Next Release**: Week 6 (UI/UX Polish) - Jan 19, 2026
 
 ### Release History
+- **v1.5.0** - Jan 14, 2026: Network Effects (group messages, referral rewards, browser extension, invite friends)
 - **v1.4.0** - Jan 8, 2026: Gamification (achievements, streaks, leaderboard, mystery mode)
 - **v1.3.0** - Jan 1, 2026: Custom URLs & Branding (QR codes, countdown timer, Open Graph)
-- **v1.2.5** - Dec 25, 2025: E2E Testing (52 passing tests)
+- **v1.2.5** - Dec 25, 2025: E2E Testing (96 passing tests)
 - **v1.2.0** - Dec 22, 2025: Viral Mechanics (post-burn CTA, message preview)
 - **v1.1.0** - Dec 15, 2025: Analytics & Social Proof (stats counter, platform stats)
 - **v1.0.0** - Dec 1, 2025: Initial Launch (AES-256-GCM, one-time access, file encryption)
@@ -776,6 +777,6 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 ---
 
-**Last Updated**: January 8, 2026  
-**Current Version**: v1.4.0  
-**Next Release**: Week 5 - Network Effects (Jan 12, 2026)
+**Last Updated**: January 14, 2026  
+**Current Version**: v1.5.0  
+**Next Release**: Week 6 - UI/UX Polish (Jan 19, 2026)

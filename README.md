@@ -154,7 +154,7 @@ npm run test:e2e:ui
 npm run test:report
 ```
 
-**Test Coverage (52 E2E tests):**
+**Test Coverage (96 E2E tests):**
 - ✅ Message creation (text, files, passwords, expiration)
 - ✅ Message viewing and decryption
 - ✅ One-time access enforcement
@@ -164,6 +164,9 @@ npm run test:report
 - ✅ Countdown timers with urgency states
 - ✅ Open Graph meta tags
 - ✅ Gamification (achievements, streaks, leaderboard, mystery mode)
+- ✅ Group messages (multi-recipient, burn-on-first-view, validation)
+- ✅ Referral system (tracking, rewards, URL parameters, notifications)
+- ✅ Invite friends (social sharing, email/SMS, modal integration)
 
 See [docs/E2E_TESTING.md](./docs/E2E_TESTING.md) and [docs/TEST_SUMMARY.md](./docs/TEST_SUMMARY.md) for detailed testing documentation.
 
