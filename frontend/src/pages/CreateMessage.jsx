@@ -6,7 +6,9 @@ import { createMessage, createGroupMessage, uploadMedia } from '../utils/api';
 import { QRCodeDisplay } from '../components/QRCodeDisplay';
 import { GroupMessageLinks } from '../components/GroupMessageLinks';
 import { updateStatsOnMessageCreate } from '../utils/achievements';
+import { incrementReferralProgress } from '../utils/referrals';
 import AchievementUnlocked from '../components/AchievementUnlocked';
+import RewardUnlocked from '../components/RewardUnlocked';
 import { useCustomSlug } from '../hooks/useCustomSlug';
 import { useFileUpload } from '../hooks/useFileUpload';
 
@@ -23,6 +25,7 @@ function CreateMessage() {
   const [locking, setLocking] = useState(false);
   const [mysteryMode, setMysteryMode] = useState(false);
   const [newAchievements, setNewAchievements] = useState([]);
+  const [newRewards, setNewRewards] = useState([]);
   
   // Group message state
   const [isGroupMessage, setIsGroupMessage] = useState(false);
@@ -141,6 +144,12 @@ function CreateMessage() {
       
       if (achievements.length > 0) {
         setNewAchievements(achievements);
+      }
+
+      // Track referral progress (privacy-first, client-side only)
+      const referralUpdate = incrementReferralProgress();
+      if (referralUpdate.newRewards.length > 0) {
+        setNewRewards(referralUpdate.newRewards);
       }
     } catch (err) {
       setError(err.message);
@@ -310,6 +319,21 @@ function CreateMessage() {
               key={achievement.id}
               achievement={achievement}
               onClose={handleCloseAchievement}
+            />
+          );
+        })}
+        
+        {/* Reward unlock popup */}
+        {newRewards.map((reward, index) => {
+          const handleCloseReward = () => {
+            setNewRewards(prev => prev.filter((_, i) => i !== index));
+          };
+
+          return (
+            <RewardUnlocked
+              key={reward.reward}
+              reward={reward}
+              onClose={handleCloseReward}
             />
           );
         })}
