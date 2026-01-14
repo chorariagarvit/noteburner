@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock, Link2, CheckCircle, XCircle, Loader } from 'lucide-react';
+import { Flame, Copy, Check, Eye, EyeOff, Upload, X, Clock, Lock, Link2, CheckCircle, XCircle, Loader, Users } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
-import { createMessage, uploadMedia } from '../utils/api';
+import { createMessage, createGroupMessage, uploadMedia } from '../utils/api';
 import { QRCodeDisplay } from '../components/QRCodeDisplay';
+import { GroupMessageLinks } from '../components/GroupMessageLinks';
 import { updateStatsOnMessageCreate } from '../utils/achievements';
 import AchievementUnlocked from '../components/AchievementUnlocked';
 import { useCustomSlug } from '../hooks/useCustomSlug';
@@ -22,6 +23,12 @@ function CreateMessage() {
   const [locking, setLocking] = useState(false);
   const [mysteryMode, setMysteryMode] = useState(false);
   const [newAchievements, setNewAchievements] = useState([]);
+  
+  // Group message state
+  const [isGroupMessage, setIsGroupMessage] = useState(false);
+  const [recipientCount, setRecipientCount] = useState(2);
+  const [burnOnFirstView, setBurnOnFirstView] = useState(false);
+  const [groupData, setGroupData] = useState(null);
   
   // Use custom hooks for file upload and slug validation
   const { files, handleFileUpload, removeFile, getTotalSize, clearFiles } = useFileUpload();
@@ -71,16 +78,33 @@ function CreateMessage() {
       
       // Create message on server
       const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
-      const result = await createMessage(
-        encrypted.encryptedData,
-        encrypted.iv,
-        encrypted.salt,
-        expirySeconds,
-        customSlug || undefined
-      );
+      
+      let result;
+      if (isGroupMessage) {
+        // Create group message with multiple links
+        result = await createGroupMessage(
+          encrypted.encryptedData,
+          encrypted.iv,
+          encrypted.salt,
+          expirySeconds,
+          recipientCount,
+          null, // maxViews - can be added later
+          burnOnFirstView
+        );
+        setGroupData(result);
+      } else {
+        // Create regular single message
+        result = await createMessage(
+          encrypted.encryptedData,
+          encrypted.iv,
+          encrypted.salt,
+          expirySeconds,
+          customSlug || undefined
+        );
+      }
 
-      // Upload encrypted files if any
-      if (files.length > 0) {
+      // Upload encrypted files if any (only for non-group messages for now)
+      if (files.length > 0 && !isGroupMessage) {
         for (const file of files) {
           const encryptedFile = await encryptFile(file, password);
           await uploadMedia(
@@ -102,7 +126,10 @@ function CreateMessage() {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       setLocking(false);
-      setShareUrl(result.url);
+      
+      if (!isGroupMessage) {
+        setShareUrl(result.url);
+      }
       
       // Track achievements
       const fileSize = getTotalSize();
@@ -133,9 +160,13 @@ function CreateMessage() {
     setPassword('');
     clearFiles();
     setShareUrl('');
+    setGroupData(null);
     setExpiresIn('24'); // Reset to default 24 hours
     setError('');
     resetSlug();
+    setIsGroupMessage(false);
+    setRecipientCount(2);
+    setBurnOnFirstView(false);
   };
 
   const handleCreateSimilar = () => {
@@ -143,10 +174,11 @@ function CreateMessage() {
     setMessage('');
     clearFiles();
     setShareUrl('');
+    setGroupData(null);
     setError('');
     resetSlug();
     // Scroll to top for better UX
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (locking) {
@@ -166,24 +198,32 @@ function CreateMessage() {
     );
   }
 
-  if (shareUrl) {
+  if (shareUrl || groupData) {
     return (
       <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900 py-12">
-        <div className="max-w-2xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="card animate-fade-in">
             <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 mb-4">
-                <Check className="w-8 h-8" />
+                {groupData ? <Users className="w-8 h-8" /> : <Check className="w-8 h-8" />}
               </div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Message Created Successfully!
+                {groupData ? 'Group Message Created!' : 'Message Created Successfully!'}
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
-                Your encrypted message is ready to share
+                {groupData 
+                  ? `${groupData.recipientCount} unique links generated for your recipients`
+                  : 'Your encrypted message is ready to share'
+                }
               </p>
             </div>
 
-            <div className="space-y-6">
+            {groupData ? (
+              /* Group Message Links Display */
+              <GroupMessageLinks groupData={groupData} />
+            ) : (
+              /* Regular Single Message Display */
+              <div className="space-y-6">
               <div>
                 <label htmlFor="share-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Share this URL
@@ -255,6 +295,7 @@ function CreateMessage() {
                 💡 "Similar" keeps your settings but clears the message
               </p>
             </div>
+            )}
           </div>
         </div>
         
@@ -363,41 +404,45 @@ function CreateMessage() {
               </select>
             </div>
 
-            <div>
-              <label htmlFor="custom-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <Link2 className="w-4 h-4 inline mr-1" />
-                Custom URL (optional)
-              </label>
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">noteburner.com/</span>
-                  <input
-                    id="custom-url"
-                    type="text"
-                    value={customSlug}
-                    onChange={handleCustomSlugChange}
-                    placeholder="your-custom-url"
-                    className="input-field flex-1"
-                    maxLength={20}
-                    pattern="[a-z0-9-_]{3,20}"
-                  />
-                  {slugStatus === 'checking' && <Loader className="w-5 h-5 animate-spin text-gray-400" />}
-                  {slugStatus === 'available' && <CheckCircle className="w-5 h-5 text-green-500" />}
-                  {slugStatus === 'unavailable' && <XCircle className="w-5 h-5 text-red-500" />}
+            {!isGroupMessage && (
+              <>
+                <div>
+                  <label htmlFor="custom-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <Link2 className="w-4 h-4 inline mr-1" />
+                    Custom URL (optional)
+                  </label>
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">noteburner.com/</span>
+                      <input
+                        id="custom-url"
+                        type="text"
+                        value={customSlug}
+                        onChange={handleCustomSlugChange}
+                        placeholder="your-custom-url"
+                        className="input-field flex-1"
+                        maxLength={20}
+                        pattern="[a-z0-9-_]{3,20}"
+                      />
+                      {slugStatus === 'checking' && <Loader className="w-5 h-5 animate-spin text-gray-400" />}
+                      {slugStatus === 'available' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                      {slugStatus === 'unavailable' && <XCircle className="w-5 h-5 text-red-500" />}
+                    </div>
+                    {slugError && (
+                      <p className="text-sm text-red-600 dark:text-red-400 mb-1">{slugError}</p>
+                    )}
+                    {!slugError && customSlug && slugStatus === 'available' && (
+                      <p className="text-xs text-green-600 dark:text-green-400">✓ Available</p>
+                    )}
+                    {!customSlug && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        3-20 chars: letters, numbers, hyphens, underscores
+                      </p>
+                    )}
+                  </div>
                 </div>
-                {slugError && (
-                  <p className="text-sm text-red-600 dark:text-red-400 mb-1">{slugError}</p>
-                )}
-                {!slugError && customSlug && slugStatus === 'available' && (
-                  <p className="text-xs text-green-600 dark:text-green-400">✓ Available</p>
-                )}
-                {!customSlug && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    3-20 chars: letters, numbers, hyphens, underscores
-                  </p>
-                )}
-              </div>
-            </div>
+              </>
+            )}
 
             <div className="flex items-center gap-2 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
               <input
@@ -414,11 +459,83 @@ function CreateMessage() {
               </label>
             </div>
 
-            <div>
-              <label htmlFor="attachments-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Attachments (optional, max 2GB per file)
-              </label>
-              <div className="space-y-2">
+            {/* Group Message Section */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div className="flex items-center gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mb-4">
+                <input
+                  id="group-message"
+                  type="checkbox"
+                  checked={isGroupMessage}
+                  onChange={(e) => {
+                    setIsGroupMessage(e.target.checked);
+                    if (!e.target.checked) {
+                      setRecipientCount(2);
+                      setBurnOnFirstView(false);
+                    }
+                  }}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <label htmlFor="group-message" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 cursor-pointer">
+                  <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  Group Message (create multiple unique links)
+                </label>
+              </div>
+
+              {isGroupMessage && (
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div>
+                    <label htmlFor="recipient-count" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Number of Recipients (1-100)
+                    </label>
+                    <input
+                      id="recipient-count"
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={recipientCount}
+                      onChange={(e) => setRecipientCount(Number.parseInt(e.target.value) || 2)}
+                      className="input-field"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Each recipient will get a unique, one-time-use link
+                    </p>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <input
+                      id="burn-on-first-view"
+                      type="checkbox"
+                      checked={burnOnFirstView}
+                      onChange={(e) => setBurnOnFirstView(e.target.checked)}
+                      className="mt-1 w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label htmlFor="burn-on-first-view" className="flex-1">
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        🔥 Burn all copies after first view
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        When enabled, ALL recipient links will be deleted as soon as the first person views the message.
+                        This ensures maximum security but only one recipient can see it.
+                      </p>
+                    </label>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                      <strong>Note:</strong> Custom URLs and file attachments are not available for group messages.
+                      Each recipient will use the same password to decrypt.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {!isGroupMessage && (
+              <div>
+                <label htmlFor="attachments-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Attachments (optional, max 2GB per file)
+                </label>
+                <div className="space-y-2">
                 {files.map((file, index) => (
                   <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                     <span className="text-sm text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
@@ -447,6 +564,7 @@ function CreateMessage() {
                 </label>
               </div>
             </div>
+            )}
 
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
