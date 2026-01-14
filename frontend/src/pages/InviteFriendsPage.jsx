@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Mail, Copy, Check, Share2, Send } from 'lucide-react';
+import { Users, Mail, Copy, Check, Share2, Send, Twitter, Linkedin, MessageCircle, Facebook } from 'lucide-react';
 
 export default function InviteFriendsPage() {
   const [emails, setEmails] = useState('');
@@ -7,7 +7,7 @@ export default function InviteFriendsPage() {
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const inviteUrl = 'https://noteburner.app';
+  const inviteUrl = 'https://noteburner.work';
   const defaultInviteMessage = `Hey! 👋
 
 I've been using NoteBurner to send secure, self-destructing messages and thought you might find it useful too!
@@ -195,36 +195,40 @@ Try it out: ${inviteUrl}`;
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('🔥 Check out NoteBurner - Send secure, self-destructing messages!\n\n')}&url=${encodeURIComponent(inviteUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary text-center py-2"
+                className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
-                🐦 Twitter
+                <Twitter className="w-4 h-4" />
+                Twitter
               </a>
               
               <a
                 href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(inviteUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary text-center py-2"
+                className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
-                💼 LinkedIn
+                <Linkedin className="w-4 h-4" />
+                LinkedIn
               </a>
               
               <a
                 href={`https://wa.me/?text=${encodeURIComponent(`🔥 Check out NoteBurner - Secure self-destructing messages: ${inviteUrl}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary text-center py-2"
+                className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
-                💬 WhatsApp
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
               </a>
               
               <a
                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary text-center py-2"
+                className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
-                📘 Facebook
+                <Facebook className="w-4 h-4" />
+                Facebook
               </a>
             </div>
           </div>

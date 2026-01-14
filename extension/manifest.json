@@ -14,7 +14,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://noteburner.app/*",
+    "https://noteburner.work/*",
     "http://localhost:5173/*"
   ],
   "background": {
