@@ -9,6 +9,7 @@ import { updateStatsOnMessageCreate } from '../utils/achievements';
 import { incrementReferralProgress } from '../utils/referrals';
 import AchievementUnlocked from '../components/AchievementUnlocked';
 import RewardUnlocked from '../components/RewardUnlocked';
+import InviteModal from '../components/InviteModal';
 import { useCustomSlug } from '../hooks/useCustomSlug';
 import { useFileUpload } from '../hooks/useFileUpload';
 
@@ -26,6 +27,7 @@ function CreateMessage() {
   const [mysteryMode, setMysteryMode] = useState(false);
   const [newAchievements, setNewAchievements] = useState([]);
   const [newRewards, setNewRewards] = useState([]);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   
   // Group message state
   const [isGroupMessage, setIsGroupMessage] = useState(false);
@@ -300,6 +302,15 @@ function CreateMessage() {
                   Create Similar Message
                 </button>
               </div>
+              
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="btn-secondary w-full flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+              >
+                <Users className="w-4 h-4" />
+                Invite Friends to NoteBurner
+              </button>
+              
               <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
                 💡 "Similar" keeps your settings but clears the message
               </p>
@@ -337,6 +348,14 @@ function CreateMessage() {
             />
           );
         })}
+        
+        {/* Invite Friends Modal */}
+        <InviteModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          shareUrl={shareUrl}
+          messagePreview="I just created a secure message using NoteBurner"
+        />
       </div>
     );
   }
