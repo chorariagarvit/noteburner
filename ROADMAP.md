@@ -6,20 +6,24 @@
 
 ---
 
-## 🚀 Version 1.4 - CURRENT (Gamification)
-**Status**: ✅ Complete - Week 4 Released
-**Released**: Jan 8, 2026
+## 🚀 Version 1.5 - CURRENT (Network Effects)
+**Status**: ✅ Complete - Week 5 Released
+**Released**: Jan 14, 2026
 
 ### Features
 - ✅ Client-side AES-256-GCM encryption
 - ✅ One-time message access with atomic deletion
 - ✅ Password-protected messages (PBKDF2 300k iterations)
-- ✅ Media file support (up to 100MB)
+- ✅ Media file support (up to 100MB, 100MB with referral reward)
 - ✅ Auto-expiration (1h to 7 days)
 - ✅ Dark mode with system preference detection
 - ✅ Responsive design (mobile + desktop)
 - ✅ On-demand file decryption (memory optimization)
 - ✅ 24-hour grace period for file downloads
+- ✅ Group messages (1-100 recipients)
+- ✅ Privacy-first referral system with rewards
+- ✅ Browser extension (Chrome/Firefox)
+- ✅ Invite friends with social sharing
 
 ### Launch Checklist
 - ✅ Deploy to Cloudflare Workers
@@ -334,33 +338,105 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ## 👥 Week 5 - Network Effects
 **Branch**: `feature/network-effects`
-**Target**: Jan 12, 2026
+**Released**: Jan 14, 2026
+**Status**: ✅ Released to Production
 
 ### Features
-- [ ] **Group messages** (1-to-many)
-  - Create one message, generate multiple unique links
-  - Each recipient gets own password
-  - All copies burn after first access (or after X views)
+- ✅ **Group messages** (1-to-many)
+  - Create one message, generate 1-100 unique recipient links
+  - Each recipient gets unique token, same encrypted content
+  - Burn-on-first-view option (all links destroyed after first access)
+  - Optional max view limit per group
+  - Individual copy buttons for each recipient link
+  - Group metadata display (total recipients, access count, expiration)
+  - File uploads and custom URLs disabled for groups (security)
 
-- [ ] **Referral system**
-  - "Send 5 messages, unlock 100MB file limit"
-  - Share referral link
-  - Track referrals (privacy-preserving)
+- ✅ **Referral system**
+  - Client-side privacy-first tracking (localStorage only)
+  - 3 reward tiers: 5, 10, 25 messages
+  - Rewards: 100MB file limit, custom expiration, priority badge
+  - Unique 6-character referral codes (uppercase)
+  - URL parameter handling (?ref=CODE)
+  - Reward unlock notifications with confetti
+  - Progress tracking with visual progress bars
+  - Self-referral prevention
+  - Web Share API for mobile sharing
 
-- [ ] **Browser extension**
-  - Right-click any text → "Send via NoteBurner"
-  - Quick-share from any webpage
-  - Chrome, Firefox, Edge support
+- ✅ **Browser extension**
+  - Manifest V3 (Chrome/Edge) and Firefox compatible
+  - Three access methods:
+    1. Right-click context menu on selected text
+    2. Floating action button when text selected
+    3. Extension popup for quick encryption
+  - Built-in password generator
+  - AES-256-GCM encryption in browser
+  - Direct API integration
+  - Expiration time selector
+  - One-click copy and open in NoteBurner
 
-- [ ] **Invite friends feature**
-  - Email/SMS invitation (using their client)
-  - Pre-filled message template
-  - Track viral coefficient
+- ✅ **Invite friends feature**
+  - Dedicated /invite page with customization
+  - Personal message customization
+  - Email invitations (comma-separated recipients)
+  - Social media share buttons (Twitter, LinkedIn, WhatsApp, Facebook)
+  - SMS invitation support
+  - Pre-filled invitation templates
+  - InviteModal component on message success
+  - Web Share API integration
+  - Copy to clipboard functionality
+  - "Why Invite" section explaining benefits
 
 ### Backend Changes
-- Multi-link generation API
-- Referral tracking table (optional, opt-in)
-- View counter per message group
+- ✅ Migration 0006: Add group_id to messages table
+- ✅ New table: message_groups (group_id, total_links, accessed_count, max_views, burn_on_first_view, expires_at)
+- ✅ groupMessages.js utility (155 lines)
+  - createGroupMessage() - Generate multiple unique tokens
+  - getGroupInfo() - Retrieve group metadata
+  - incrementGroupAccess() - Track views and auto-burn
+  - cleanupExpiredGroups() - Remove expired groups
+- ✅ POST /api/messages/group endpoint (rate limited 5/60s)
+- ✅ Updated DELETE endpoint with group burn logic
+- ✅ No backend for referrals (100% client-side for privacy)
+
+### Frontend Changes
+- ✅ GroupMessageLinks component (178 lines) - Display recipient links
+- ✅ ReferralsPage component (220 lines) - Rewards dashboard
+- ✅ RewardUnlocked component (105 lines) - Celebration popup
+- ✅ InviteFriendsPage component (280 lines) - Invitation hub
+- ✅ InviteModal component (195 lines) - Post-creation sharing
+- ✅ referrals.js utility (195 lines) - Complete referral logic
+- ✅ Updated CreateMessage page with group toggle and invite button
+- ✅ Updated HomePage with referral URL parameter handling
+- ✅ Updated App.jsx with /referrals and /invite routes
+- ✅ Updated Header with Rewards and Invite navigation links
+
+### Browser Extension
+- ✅ manifest.json - Extension configuration (Manifest V3)
+- ✅ background.js (61 lines) - Service worker and context menu
+- ✅ content.js (80 lines) - Floating button and page interaction
+- ✅ popup.html/css/js (150+ lines) - Extension popup UI
+- ✅ crypto.js (100 lines) - Encryption utilities
+- ✅ README.md - Installation and usage instructions
+
+### Dependencies
+- No new dependencies (uses existing nanoid)
+
+### Testing
+- ✅ 44 E2E tests covering all Week 5 features
+- ✅ Group message creation with 1-100 recipients
+- ✅ Burn-on-first-view functionality
+- ✅ Referral tracking and reward unlocks
+- ✅ URL parameter handling
+- ✅ Invite modal and page interactions
+- ✅ Integration tests for combined features
+- ✅ Edge cases (max recipients, empty codes, long URLs)
+
+### Metrics
+- **Code**: 2,696 lines added (backend + frontend + extension + tests)
+- **Files**: 24 files changed (16 new, 8 modified)
+- **Commits**: 4 (group messages, referrals, extension, invite)
+- **Test Coverage**: 44 new tests (96 total E2E tests)
+- **Branch**: Ready to merge to main
 
 ---
 

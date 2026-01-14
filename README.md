@@ -8,7 +8,7 @@ A secure one-time message encryption and decryption application. Messages can on
 - 🔐 **Client-side AES-256-GCM encryption** - Messages encrypted in browser before transmission
 - 🔥 **One-time access** - Automatic deletion after first successful decryption
 - 🔑 **Password protection** - PBKDF2 key derivation for strong password-based encryption
-- 📎 **Media support** - Encrypt and share files along with text messages
+- 📎 **Media support** - Encrypt and share files along with text messages (up to 100MB with rewards)
 - ⏰ **Optional expiration** - Set time-based deletion for added security
 - 🚫 **No backups** - Permanent deletion guarantee
 
@@ -23,6 +23,12 @@ A secure one-time message encryption and decryption application. Messages can on
 - 🔥 **Streak tracking** - Daily message creation streaks with fire emoji
 - 📊 **Anonymous leaderboard** - Platform statistics without personal data
 - 🎭 **Mystery mode** - Send completely anonymous messages
+
+### Network Effects (NEW in v1.5)
+- 👥 **Group messages** - Create 1-100 unique recipient links from one message
+- 🎁 **Referral rewards** - Unlock perks by sharing (100MB files, custom expiration, badges)
+- 🧩 **Browser extension** - Right-click encrypt on Chrome/Firefox
+- 📧 **Invite friends** - Built-in social sharing with email/SMS templates
 
 ## Architecture
 
