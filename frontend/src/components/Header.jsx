@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { Flame, Moon, Sun, Trophy, Gift } from 'lucide-react';
+import { Flame, Moon, Sun, Trophy, Gift, Users } from 'lucide-react';
 import { ThemeContext } from '../App';
 
 function Header() {
@@ -37,6 +37,13 @@ function Header() {
             >
               <Gift className="w-4 h-4" />
               <span className="hidden sm:inline">Rewards</span>
+            </Link>
+            <Link 
+              to="/invite" 
+              className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
+            >
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Invite</span>
             </Link>
             <Link 
               to="/leaderboard" 
