@@ -5,6 +5,8 @@ import CreateMessage from './pages/CreateMessage';
 import ViewMessage from './pages/ViewMessage';
 import AchievementsPage from './pages/AchievementsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import ReferralsPage from './pages/ReferralsPage';
+import InviteFriendsPage from './pages/InviteFriendsPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -48,6 +50,8 @@ function App() {
               <Route path="/create" element={<CreateMessage />} />
               <Route path="/achievements" element={<AchievementsPage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/referrals" element={<ReferralsPage />} />
+              <Route path="/invite" element={<InviteFriendsPage />} />
               <Route path="/m/:identifier" element={<ViewMessage />} />
               <Route path="*" element={<HomePage />} />
             </Routes>

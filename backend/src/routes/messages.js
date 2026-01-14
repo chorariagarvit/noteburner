@@ -4,6 +4,7 @@ import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { incrementStat } from '../utils/stats.js';
 import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValidation.js';
 import { getMessageByIdentifier, deleteMessageByIdentifier, deleteExpiredMessage } from '../utils/messageHelpers.js';
+import { createGroupMessage, incrementGroupAccess } from '../utils/groupMessages.js';
 
 const app = new Hono();
 
@@ -100,6 +101,63 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
   }
 });
 
+// Create group message (1-to-many)
+app.post('/group', rateLimitMiddleware(5, 60000), async (c) => {
+  try {
+    const body = await c.req.json();
+    const { 
+      encryptedData, 
+      iv, 
+      salt, 
+      expiresIn, 
+      recipientCount = 1,
+      maxViews = null,
+      burnOnFirstView = false
+    } = body;
+
+    if (!encryptedData || !iv || !salt) {
+      return c.json({ error: 'Missing required fields' }, 400);
+    }
+
+    if (recipientCount < 1 || recipientCount > 100) {
+      return c.json({ error: 'Recipient count must be between 1 and 100' }, 400);
+    }
+
+    // Create group message with multiple links
+    const groupData = await createGroupMessage(
+      c.env.DB,
+      { encryptedData, iv, salt, expiresIn },
+      { recipientCount, maxViews, burnOnFirstView }
+    );
+
+    // Increment stats for group message creation
+    await incrementStat(c.env.DB, 'messages_created');
+
+    // Use FRONTEND_URL from environment or fallback to request origin
+    const frontendUrl = c.env.FRONTEND_URL || new URL(c.req.url).origin;
+
+    // Generate URLs for all recipient links
+    const recipientUrls = groupData.links.map(link => ({
+      recipientIndex: link.recipientIndex,
+      token: link.token,
+      url: `${frontendUrl}/m/${link.token}`
+    }));
+
+    return c.json({
+      success: true,
+      groupId: groupData.groupId,
+      recipientCount: groupData.recipientCount,
+      links: recipientUrls,
+      expiresAt: groupData.expiresAt,
+      burnOnFirstView: groupData.burnOnFirstView,
+      maxViews: groupData.maxViews
+    }, 201);
+  } catch (error) {
+    console.error('Error creating group message:', error);
+    return c.json({ error: error.message || 'Failed to create group message' }, 500);
+  }
+});
+
 // Get and delete message (one-time access) - supports both token and custom slug
 app.get('/:identifier', async (c) => {
   try {
@@ -163,7 +221,27 @@ app.delete('/:identifier', async (c) => {
       return c.json({ error: 'Message not found or already deleted' }, 404);
     }
 
-    // Delete message from database using token
+    // Check if this is a group message
+    if (result.group_id) {
+      // Increment group access count and check if all should burn
+      const shouldBurnAll = await incrementGroupAccess(c.env.DB, result.group_id);
+      
+      if (shouldBurnAll) {
+        // All messages in the group were already deleted by incrementGroupAccess
+        console.log('Group message burned:', { groupId: result.group_id, burnOnFirstView: true });
+        
+        // Increment stats for all burned messages
+        await incrementStat(c.env.DB, 'messages_burned');
+        
+        return c.json({ 
+          success: true, 
+          groupBurned: true,
+          groupId: result.group_id
+        });
+      }
+    }
+
+    // Delete individual message from database using token
     await c.env.DB.prepare(`DELETE FROM messages WHERE token = ?`).bind(result.token).run();
 
     // Increment stats
