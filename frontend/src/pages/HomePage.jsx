@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Flame, Lock, Zap, Shield, Clock, FileImage, Eye, EyeOff, Upload, X, TrendingUp, Link2, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
 import { createMessage, uploadMedia } from '../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../utils/chunkedUpload';
 import { updateStatsOnMessageCreate } from '../utils/achievements';
+import { setReferredBy } from '../utils/referrals';
 import { useStats } from '../hooks/useStats';
 import { useLoadingMessages } from '../hooks/useLoadingMessages';
 import { AnimatedCounter } from '../components/AnimatedCounter';
@@ -15,11 +16,18 @@ import { useFileUpload } from '../hooks/useFileUpload';
 
 function HomePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { stats, loading: statsLoading } = useStats(30000); // Refresh every 30s
   
   useEffect(() => {
     document.title = 'NoteBurner - Home';
-  }, []);
+    
+    // Handle referral code from URL
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferredBy(refCode);
+    }
+  }, [searchParams]);
   
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
