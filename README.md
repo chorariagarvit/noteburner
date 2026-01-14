@@ -72,6 +72,10 @@ noteburner/
 # Install dependencies
 npm run setup
 
+# Run database migrations (local development)
+cd backend
+wrangler d1 execute noteburner-db --local --file=migrations/0006_add_group_messages.sql
+
 # Start development servers
 npm run dev:backend   # Backend on http://localhost:8787
 npm run dev:frontend  # Frontend on http://localhost:5173
@@ -164,9 +168,11 @@ npm run test:report
 - ✅ Countdown timers with urgency states
 - ✅ Open Graph meta tags
 - ✅ Gamification (achievements, streaks, leaderboard, mystery mode)
-- ✅ Group messages (multi-recipient, burn-on-first-view, validation)
-- ✅ Referral system (tracking, rewards, URL parameters, notifications)
-- ✅ Invite friends (social sharing, email/SMS, modal integration)
+- ✅ Network Effects - Week 5 (28 tests):
+  - Referral system (tracking, rewards, code generation)
+  - Invite friends (social sharing, customization, preview)
+  - Navigation & UI (branding, responsive design)
+  - Progress tracking (milestones, stats)
 
 See [docs/E2E_TESTING.md](./docs/E2E_TESTING.md) and [docs/TEST_SUMMARY.md](./docs/TEST_SUMMARY.md) for detailed testing documentation.
 
