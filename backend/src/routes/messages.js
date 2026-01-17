@@ -51,6 +51,7 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     // Generate unique token
     const token = nanoid(32);
     const createdAt = Date.now();
+    // expiresIn is in seconds, convert to milliseconds
     const expiresAt = expiresIn ? createdAt + (expiresIn * 1000) : null;
 
     // Handle custom slug if provided

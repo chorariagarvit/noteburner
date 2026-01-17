@@ -110,50 +110,102 @@ async function encryptMessage(message, password) {
  */
 async function createSecureMessage(message, password, expiresIn = '24') {
   try {
+    console.log('[NoteBurner Extension] Starting message encryption...');
+    console.log('[NoteBurner Extension] Message length:', message.length);
+    console.log('[NoteBurner Extension] Expires in:', expiresIn, 'hours');
+    
     // Encrypt the message
     const encrypted = await encryptMessage(message, password);
+    console.log('[NoteBurner Extension] Encryption complete');
+    console.log('[NoteBurner Extension] Encrypted data length:', encrypted.encryptedData.length);
     
-    // Get API URL (prefer localhost for development)
-    const apiUrl = 'https://noteburner.work/api';
+    // Use Worker URL directly - bypass Pages routing
+    const apiUrl = 'https://noteburner-api.gravity-solutions-cf-account.workers.dev';
+    const endpoint = `${apiUrl}/api/messages`;
+    
+    console.log('[NoteBurner Extension] API endpoint:', endpoint);
+    console.log('[NoteBurner Extension] Request method: POST');
+    
+    // Convert hours to seconds (same as website does)
+    const expirySeconds = parseInt(expiresIn) * 3600;
+    
+    const requestBody = {
+      encryptedData: encrypted.encryptedData,
+      iv: encrypted.iv,
+      salt: encrypted.salt,
+      expiresIn: expirySeconds
+    };
+    
+    console.log('[NoteBurner Extension] Request body:', {
+      encryptedDataLength: requestBody.encryptedData.length,
+      ivLength: requestBody.iv.length,
+      saltLength: requestBody.salt.length,
+      expiresIn: requestBody.expiresIn,
+      expiresInHours: expiresIn
+    });
     
     // Create message via API
-    const response = await fetch(`${apiUrl}/messages`, {
+    console.log('[NoteBurner Extension] Sending request...');
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        encryptedData: encrypted.encryptedData,
-        iv: encrypted.iv,
-        salt: encrypted.salt,
-        expiresIn: parseInt(expiresIn)
-      })
+      body: JSON.stringify(requestBody)
     });
+    
+    console.log('[NoteBurner Extension] Response received');
+    console.log('[NoteBurner Extension] Status:', response.status, response.statusText);
+    console.log('[NoteBurner Extension] Headers:', Object.fromEntries(response.headers.entries()));
+    console.log('[NoteBurner Extension] OK:', response.ok);
     
     if (!response.ok) {
       let errorMessage = 'Failed to create message';
+      let errorDetails = null;
       try {
-        const error = await response.json();
-        errorMessage = error.error || errorMessage;
+        const contentType = response.headers.get('content-type');
+        console.log('[NoteBurner Extension] Error response content-type:', contentType);
+        
+        const errorBody = await response.text();
+        console.log('[NoteBurner Extension] Error response body:', errorBody);
+        
+        if (contentType && contentType.includes('application/json') && errorBody) {
+          errorDetails = JSON.parse(errorBody);
+          errorMessage = errorDetails.error || errorMessage;
+        } else {
+          errorMessage = `${response.status}: ${response.statusText}`;
+        }
       } catch (e) {
-        // Response is not JSON, use status text
+        console.error('[NoteBurner Extension] Failed to parse error response:', e);
         errorMessage = `${response.status}: ${response.statusText}`;
       }
+      console.error('[NoteBurner Extension] Request failed:', errorMessage);
       throw new Error(errorMessage);
     }
     
-    const data = await response.json();
+    const responseText = await response.text();
+    console.log('[NoteBurner Extension] Success response body:', responseText);
     
-    // Construct share URL
-    const shareUrl = `https://noteburner.work/${data.id}`;
+    const data = JSON.parse(responseText);
+    console.log('[NoteBurner Extension] Parsed data:', data);
+    
+    // API returns either 'url' directly or we construct from token/slug
+    // Response format: { success: true, token, slug?, url }
+    const shareUrl = data.url || `https://noteburner.work/m/${data.slug || data.token}`;
+    const messageId = data.slug || data.token;
+    
+    console.log('[NoteBurner Extension] Message created successfully');
+    console.log('[NoteBurner Extension] Message ID:', messageId);
+    console.log('[NoteBurner Extension] Share URL:', shareUrl);
     
     return {
       url: shareUrl,
-      id: data.id,
+      id: messageId,
       expiresAt: data.expiresAt
     };
   } catch (error) {
-    console.error('Error creating secure message:', error);
+    console.error('[NoteBurner Extension] Error creating secure message:', error);
+    console.error('[NoteBurner Extension] Error stack:', error.stack);
     throw error;
   }
 }

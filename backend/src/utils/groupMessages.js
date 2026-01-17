@@ -24,6 +24,7 @@ export async function createGroupMessage(db, messageData, groupOptions) {
 
   const groupId = nanoid(16);
   const createdAt = Date.now();
+  // expiresIn is in seconds, convert to milliseconds
   const expiresAt = expiresIn ? createdAt + (expiresIn * 1000) : null;
 
   // Create group metadata
