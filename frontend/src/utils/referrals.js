@@ -143,7 +143,7 @@ export function isRewardUnlocked(rewardKey) {
  */
 export function getReferralUrl() {
   const code = getReferralCode();
-  const baseUrl = globalThis.location?.origin || 'https://noteburner.com';
+  const baseUrl = globalThis.location?.origin || 'https://noteburner.work';
   return `${baseUrl}?ref=${code}`;
 }
 

@@ -456,7 +456,7 @@ function CreateMessage() {
                   </label>
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">noteburner.com/</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">noteburner.work/m/</span>
                       <input
                         id="custom-url"
                         type="text"
