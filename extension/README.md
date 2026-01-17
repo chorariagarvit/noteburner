@@ -1,6 +1,6 @@
 # NoteBurner Browser Extension
 
-Send self-destructing encrypted messages directly from any webpage.
+🔥 Send self-destructing encrypted messages directly from any webpage.
 
 ## Features
 
@@ -8,11 +8,19 @@ Send self-destructing encrypted messages directly from any webpage.
 - **Floating Action Button**: Quick access button appears when text is selected
 - **Quick Encrypt Popup**: Click extension icon for instant encryption
 - **Password Generation**: Built-in secure password generator
+- **Dark Mode**: Toggle between light and dark themes
 - **Cross-browser**: Works on Chrome, Edge, and Firefox
+- **Privacy-First**: All encryption happens locally in your browser
 
 ## Installation
 
-### Chrome/Edge (Development)
+### From Web Stores (Coming Soon)
+- **Chrome Web Store**: [Add to Chrome](#) (Pending approval)
+- **Firefox Add-ons**: [Add to Firefox](#) (Pending approval)
+
+### Manual Installation (Development)
+
+#### Chrome/Edge
 
 1. Open Chrome/Edge and navigate to `chrome://extensions/`
 2. Enable "Developer mode" (toggle in top-right)
@@ -20,7 +28,7 @@ Send self-destructing encrypted messages directly from any webpage.
 4. Select the `extension` folder from this repository
 5. The NoteBurner extension should now appear in your extensions
 
-### Firefox (Development)
+#### Firefox
 
 1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
 2. Click "Load Temporary Add-on"
@@ -31,7 +39,7 @@ Send self-destructing encrypted messages directly from any webpage.
 
 ### Method 1: Context Menu
 1. Select any text on a webpage
-2. Right-click and choose "Send via NoteBurner"
+2. Right-click and choose "Encrypt with NoteBurner"
 3. NoteBurner will open with the selected text pre-filled
 
 ### Method 2: Floating Button
@@ -42,43 +50,69 @@ Send self-destructing encrypted messages directly from any webpage.
 ### Method 3: Extension Popup
 1. Click the NoteBurner extension icon in your browser toolbar
 2. Type or paste your message
-3. Set a password (or generate one)
-4. Choose expiration time
-5. Click "Create Secure Link"
+3. Set a password (or generate one with 🎲)
+4. Choose expiration time (1h - 7 days)
+5. Click "Encrypt & Create Link"
 6. Copy and share the generated link
+
+### Dark Mode
+- Click the 🌙/☀️ button in the popup header to toggle dark mode
+- Preference is saved across sessions
 
 ## Permissions
 
-- **contextMenus**: For right-click "Send via NoteBurner" option
-- **activeTab**: To read selected text from the current tab
-- **storage**: To save user preferences (future feature)
-- **host_permissions**: To communicate with NoteBurner API
+The extension requires these permissions:
+
+- **contextMenus**: For right-click "Encrypt with NoteBurner" option
+- **activeTab**: To read selected text from the current tab for quick encryption
+- **storage**: To save dark mode preference and user settings
+- **host_permissions (noteburner.work)**: To communicate with NoteBurner API for message creation
+
+See [PRIVACY.md](./PRIVACY.md) for detailed privacy policy.
 
 ## Security
 
-- All encryption happens locally in your browser
-- Messages are encrypted using AES-256-GCM
-- Passwords are never sent to the server
-- Only encrypted data is transmitted
+- ✅ All encryption happens locally in your browser
+- ✅ Messages are encrypted using AES-256-GCM
+- ✅ Passwords never leave your device
+- ✅ Zero-knowledge architecture
+- ✅ Only encrypted ciphertext is transmitted to servers
+- ✅ No tracking, analytics, or data collection
 
-## Building for Production
+## Publishing
 
-To create a production build:
+See [PUBLISHING.md](./PUBLISHING.md) for complete guide to publishing on Chrome Web Store and Firefox Add-ons.
 
-1. Remove localhost from `host_permissions` in `manifest.json`
-2. Create icons (16x16, 48x48, 128x128) and place in `icons/` folder
-3. Zip the extension folder: `zip -r noteburner-extension.zip extension/`
-4. Submit to Chrome Web Store or Firefox Add-ons
+### Quick Build
+
+Generate icons (already done):
+```bash
+node generate-icons.js
+```
+
+Create distribution package:
+```bash
+cd extension
+zip -r noteburner-extension.zip . -x "*.git*" -x "generate-icons.js" -x "icons/create-icons.html"
+```
 
 ## Development
 
-The extension uses Manifest V3 for Chrome/Edge compatibility and is also compatible with Firefox WebExtensions.
+The extension uses **Manifest V3** for Chrome/Edge compatibility and is also compatible with Firefox WebExtensions.
 
 **File Structure:**
-- `manifest.json` - Extension configuration
-- `background.js` - Background service worker
-- `content.js` - Content script for page interaction
-- `popup.html/js/css` - Extension popup UI
+- `manifest.json` - Extension configuration (Manifest V3)
+- `background.js` - Background service worker (context menu)
+- `content.js` - Content script for page interaction (floating button)
+- `popup.html/js/css` - Extension popup UI with dark mode
+- `crypto.js` - Client-side encryption utilities (AES-256-GCM)
+- `icons/` - Extension icons (16, 48, 128px)
+- `PRIVACY.md` - Privacy policy for store submission
+- `PUBLISHING.md` - Complete publishing guide
+
+## License
+
+MIT License - See main repository for details
 - `crypto.js` - Encryption utilities
 
 ## Changelog
