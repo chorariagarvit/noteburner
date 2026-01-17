@@ -1,73 +1,108 @@
 // Crypto utilities for NoteBurner extension
-// Adapted from the main app's crypto module
+// Matches the main app's crypto module implementation
 
 /**
- * Generate a random password
+ * Helper: Convert ArrayBuffer to base64
+ * Uses chunked approach to avoid stack overflow with large files
  */
-function generatePassword(length = 16) {
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const CHUNK_SIZE = 8192; // Process 8KB at a time
+  let binary = '';
   
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    password += charset[array[i] % charset.length];
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    const chunk = bytes.subarray(i, Math.min(i + CHUNK_SIZE, bytes.length));
+    binary += String.fromCharCode.apply(null, chunk);
   }
   
-  return password;
+  return btoa(binary);
 }
 
 /**
- * Encrypt a message using AES-GCM
+ * Helper: Convert base64 to ArrayBuffer
+ * Uses efficient direct conversion without string concatenation
  */
-async function encryptMessage(message, password) {
-  // Generate salt
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  
-  // Derive key from password
+function base64ToArrayBuffer(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+/**
+ * Derive encryption key from password using PBKDF2
+ */
+async function deriveKey(password, salt) {
   const encoder = new TextEncoder();
-  const passwordKey = await crypto.subtle.importKey(
+  const passwordBuffer = encoder.encode(password);
+  
+  const keyMaterial = await crypto.subtle.importKey(
     'raw',
-    encoder.encode(password),
-    'PBKDF2',
+    passwordBuffer,
+    { name: 'PBKDF2' },
     false,
-    ['deriveKey']
+    ['deriveBits', 'deriveKey']
   );
   
-  const key = await crypto.subtle.deriveKey(
+  return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt: salt,
       iterations: 300000,
       hash: 'SHA-256'
     },
-    passwordKey,
+    keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
-    ['encrypt']
+    ['encrypt', 'decrypt']
   );
-  
-  // Generate IV
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  
-  // Encrypt message
-  const encryptedData = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: iv },
-    key,
-    encoder.encode(message)
-  );
-  
-  // Convert to base64
-  const encryptedArray = new Uint8Array(encryptedData);
-  const encryptedBase64 = btoa(String.fromCharCode(...encryptedArray));
-  const ivBase64 = btoa(String.fromCharCode(...iv));
-  const saltBase64 = btoa(String.fromCharCode(...salt));
-  
-  return {
-    encryptedData: encryptedBase64,
-    iv: ivBase64,
-    salt: saltBase64
-  };
+}
+
+/**
+ * Generate strong random password
+ */
+function generatePassword(length = 16) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  const randomValues = crypto.getRandomValues(new Uint8Array(length));
+  return Array.from(randomValues)
+    .map(x => chars[x % chars.length])
+    .join('');
+}
+
+/**
+ * Encrypt message with password
+ */
+async function encryptMessage(message, password) {
+  try {
+    // Generate random salt and IV
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    
+    // Derive key from password
+    const key = await deriveKey(password, salt);
+    
+    // Encrypt message
+    const encoder = new TextEncoder();
+    const messageBuffer = encoder.encode(message);
+    
+    const encryptedBuffer = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      messageBuffer
+    );
+    
+    // Convert to base64 for transmission
+    return {
+      encryptedData: arrayBufferToBase64(encryptedBuffer),
+      iv: arrayBufferToBase64(iv),
+      salt: arrayBufferToBase64(salt)
+    };
+  } catch (error) {
+    console.error('Encryption error:', error);
+    throw new Error('Failed to encrypt message');
+  }
 }
 
 /**

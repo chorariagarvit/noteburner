@@ -1,19 +1,3 @@
-<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  
-  <!-- Background circle -->
-  <circle cx="64" cy="64" r="60" fill="url(#grad)" stroke="#FF4500" stroke-width="3"/>
-  
-  <!-- Flame shape -->
-  <path d="M 64 30 Q 50 50 50 70 Q 50 90 64 100 Q 78 90 78 70 Q 78 50 64 30 Z" 
-        fill="#FFF" stroke="#FFD700" stroke-width="2"/>
-  
-  <!-- Inner flame -->
-  <path d="M 64 45 Q 58 55 58 65 Q 58 75 64 82 Q 70 75 70 65 Q 70 55 64 45 Z" 
-        fill="#FFD700"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
 </svg>
