@@ -131,8 +131,15 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     });
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create message');
+      let errorMessage = 'Failed to create message';
+      try {
+        const error = await response.json();
+        errorMessage = error.error || errorMessage;
+      } catch (e) {
+        // Response is not JSON, use status text
+        errorMessage = `${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();
