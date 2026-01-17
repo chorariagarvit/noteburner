@@ -24,8 +24,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if there's selected text in the active tab
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) {
+    if (tab && tab.id) {
       chrome.tabs.sendMessage(tab.id, { action: 'getSelection' }, (response) => {
+        // Check for errors (e.g., content script not loaded)
+        if (chrome.runtime.lastError) {
+          console.log('Content script not ready:', chrome.runtime.lastError.message);
+          return;
+        }
+        
         if (response && response.text && response.text.trim()) {
           selectedPreview.textContent = response.text;
           selectedTextSection.classList.remove('hidden');

@@ -11,5 +11,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Test icons (will be replaced with real ones)
-icons/
+# Generated files (regenerate with: node generate-icons.js)
+icons/create-icons.html
