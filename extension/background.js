@@ -14,10 +14,13 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'noteburner-encrypt') {
     const selectedText = info.selectionText;
     
-    // Send selected text to content script
+    // Send selected text to content script with error handling
     chrome.tabs.sendMessage(tab.id, {
       action: 'encryptText',
       text: selectedText
+    }).catch((error) => {
+      // Content script not loaded, open popup instead
+      console.log('Content script not available, opening popup');
     });
   }
 });
@@ -28,9 +31,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Request selected text from active tab
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'getSelection' }, (response) => {
-          sendResponse(response);
-        });
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'getSelection' })
+          .then((response) => {
+            sendResponse(response);
+          })
+          .catch((error) => {
+            // Content script not available
+            console.log('Content script not available:', error);
+            sendResponse({ text: '' });
+          });
+      } else {
+        sendResponse({ text: '' });
       }
     });
     return true; // Keep message channel open for async response
