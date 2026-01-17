@@ -83,7 +83,19 @@ generatePasswordBtn.addEventListener('click', () => {
 encryptSelectedBtn.addEventListener('click', () => {
   const text = selectedPreview.textContent;
   messageInput.value = text;
-  handleCreateMessage();
+  
+  // Scroll to password input if empty
+  if (!passwordInput.value) {
+    passwordInput.focus();
+  }
+  
+  // Hide selected text section to show main form
+  selectedTextSection.classList.add('hidden');
+  
+  // If password exists, proceed with creation
+  if (passwordInput.value && passwordInput.value.length >= 8) {
+    handleCreateMessage();
+  }
 });
 
 // Create message
