@@ -27,6 +27,22 @@ app.route('/api/media', mediaRouter);
 app.route('/api/stats', statsRouter);
 app.route('/api/cleanup', cleanupRouter);
 
+// Handle preflight OPTIONS requests
+app.options('/*', (c) => {
+  return c.text('', 204);
+});
+
+// 404 handler
+app.notFound((c) => {
+  return c.json({ error: 'Not found' }, 404);
+});
+
+// Error handler
+app.onError((err, c) => {
+  console.error('Error:', err);
+  return c.json({ error: err.message || 'Internal server error' }, 500);
+});
+
 // Export worker with both fetch and scheduled handlers
 export default {
   async fetch(request, env, ctx) {
