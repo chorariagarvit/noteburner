@@ -19,6 +19,25 @@ const errorMessage = document.getElementById('errorMessage');
 
 let currentShareUrl = '';
 
+// Dark mode toggle
+const darkModeToggle = document.getElementById('darkModeToggle');
+const darkModeIcon = document.querySelector('.dark-mode-icon');
+
+// Initialize dark mode from storage
+chrome.storage.sync.get(['darkMode'], (result) => {
+  if (result.darkMode) {
+    document.body.classList.add('dark-mode');
+    darkModeIcon.textContent = '☀️';
+  }
+});
+
+// Toggle dark mode
+darkModeToggle.addEventListener('click', () => {
+  const isDark = document.body.classList.toggle('dark-mode');
+  darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+  chrome.storage.sync.set({ darkMode: isDark });
+});
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   // Check if there's selected text in the active tab
