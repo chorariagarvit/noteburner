@@ -14,6 +14,12 @@ export const corsConfig = {
   origin: (origin) => {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return true;
+    
+    // Allow Chrome/Firefox extension origins (chrome-extension:// or moz-extension://)
+    if (origin && (origin.startsWith('chrome-extension://') || origin.startsWith('moz-extension://'))) {
+      return origin;
+    }
+    
     // Check if origin is in allowed list
     return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   },
