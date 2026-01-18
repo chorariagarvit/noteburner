@@ -7,6 +7,8 @@ import AchievementsPage from './pages/AchievementsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import ReferralsPage from './pages/ReferralsPage';
 import InviteFriendsPage from './pages/InviteFriendsPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import SupportPage from './pages/SupportPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -52,6 +54,8 @@ function App() {
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/referrals" element={<ReferralsPage />} />
               <Route path="/invite" element={<InviteFriendsPage />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/support" element={<SupportPage />} />
               <Route path="/m/:identifier" element={<ViewMessage />} />
               <Route path="*" element={<HomePage />} />
             </Routes>

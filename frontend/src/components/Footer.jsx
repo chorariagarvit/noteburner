@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Github, Shield } from 'lucide-react';
 
 function Footer() {
@@ -10,15 +11,21 @@ function Footer() {
             <Shield className="w-4 h-4" />
             <span>End-to-end encrypted. Zero knowledge.</span>
           </div>
-          
+
           <div className="text-gray-500 dark:text-gray-400 text-sm">
             © {new Date().getFullYear()} NoteBurner. All messages self-destruct.
           </div>
-          
-          <div className="flex gap-4">
-            <a 
-              href="https://github.com/chorariagarvit/noteburner" 
-              target="_blank" 
+
+          <div className="flex items-center gap-6">
+            <Link to="/privacy" className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+              Privacy
+            </Link>
+            <Link to="/support" className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+              Support
+            </Link>
+            <a
+              href="https://github.com/chorariagarvit/noteburner"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             >
