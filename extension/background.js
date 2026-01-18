@@ -13,15 +13,14 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'noteburner-encrypt') {
     const selectedText = info.selectionText;
-    
-    // Send selected text to content script with error handling
-    chrome.tabs.sendMessage(tab.id, {
-      action: 'encryptText',
-      text: selectedText
-    }).catch((error) => {
-      // Content script not loaded, open popup instead
-      console.log('Content script not available, opening popup');
-    });
+
+    if (selectedText) {
+      const encodedText = encodeURIComponent(selectedText);
+      // Open NoteBurner with pre-filled message
+      // Use correct domain noteburner.work
+      const url = `https://noteburner.work/create?text=${encodedText}`;
+      chrome.tabs.create({ url });
+    }
   }
 });
 
@@ -46,13 +45,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true; // Keep message channel open for async response
   }
-  
+
   if (request.action === 'openNoteBurner') {
     // Open NoteBurner in new tab with encrypted message
     const url = request.url || 'https://noteburner.work/create';
     chrome.tabs.create({ url });
   }
-  
+
   if (request.action === 'showNotification') {
     // Show browser notification
     chrome.notifications.create({

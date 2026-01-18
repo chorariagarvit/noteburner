@@ -28,13 +28,13 @@ function CreateMessage() {
   const [newAchievements, setNewAchievements] = useState([]);
   const [newRewards, setNewRewards] = useState([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  
+
   // Group message state
   const [isGroupMessage, setIsGroupMessage] = useState(false);
   const [recipientCount, setRecipientCount] = useState(2);
   const [burnOnFirstView, setBurnOnFirstView] = useState(false);
   const [groupData, setGroupData] = useState(null);
-  
+
   // Use custom hooks for file upload and slug validation
   const { files, handleFileUpload, removeFile, getTotalSize, clearFiles } = useFileUpload();
   const { customSlug, slugStatus, slugError, handleCustomSlugChange, resetSlug } = useCustomSlug();
@@ -54,6 +54,15 @@ function CreateMessage() {
       globalThis.history.replaceState({}, document.title);
     }
   }, [location.state]);
+
+  // Check for 'text' query parameter (e.g. from extension)
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const textParam = searchParams.get('text');
+    if (textParam) {
+      setMessage(textParam);
+    }
+  }, [location.search]);
 
   const handleGeneratePassword = () => {
     const newPassword = generatePassword(16);
@@ -80,10 +89,10 @@ function CreateMessage() {
 
       // Encrypt message
       const encrypted = await encryptMessage(message, password);
-      
+
       // Create message on server
       const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
-      
+
       let result;
       if (isGroupMessage) {
         // Create group message with multiple links
@@ -126,16 +135,16 @@ function CreateMessage() {
       // Show locking animation
       setLoading(false);
       setLocking(true);
-      
+
       // Wait for lock animation to complete
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       setLocking(false);
-      
+
       if (!isGroupMessage) {
         setShareUrl(result.url);
       }
-      
+
       // Track achievements
       const fileSize = getTotalSize();
       const achievements = updateStatsOnMessageCreate({
@@ -143,7 +152,7 @@ function CreateMessage() {
         expiration: expirySeconds * 1000,
         mysteryMode
       });
-      
+
       if (achievements.length > 0) {
         setNewAchievements(achievements);
       }
@@ -222,7 +231,7 @@ function CreateMessage() {
                 {groupData ? 'Group Message Created!' : 'Message Created Successfully!'}
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
-                {groupData 
+                {groupData
                   ? `${groupData.recipientCount} unique links generated for your recipients`
                   : 'Your encrypted message is ready to share'
                 }
@@ -235,90 +244,90 @@ function CreateMessage() {
             ) : (
               /* Regular Single Message Display */
               <div className="space-y-6">
-              <div>
-                <label htmlFor="share-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Share this URL
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    id="share-url"
-                    type="text"
-                    value={shareUrl}
-                    readOnly
-                    className="input-field font-mono text-sm"
-                  />
+                <div>
+                  <label htmlFor="share-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Share this URL
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="share-url"
+                      type="text"
+                      value={shareUrl}
+                      readOnly
+                      className="input-field font-mono text-sm"
+                    />
+                    <button
+                      onClick={handleCopy}
+                      className="btn-secondary flex items-center gap-2 whitespace-nowrap"
+                    >
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                  <h3 className="font-semibold text-amber-900 dark:text-amber-400 mb-2 flex items-center gap-2">
+                    <Flame className="w-5 h-5" />
+                    Important Security Notice
+                  </h3>
+                  <ul className="text-sm text-amber-800 dark:text-amber-300 space-y-1">
+                    <li>• Share the password separately (not in the same channel as the link)</li>
+                    <li>• The message will be deleted after the first successful decryption</li>
+                    <li>• There are no backups - once it's gone, it's gone forever</li>
+                    {location.state?.filesCount > 0 && <li>• {location.state.filesCount} encrypted file(s) attached</li>}
+                    {expiresIn && <li>• Message expires in {expiresIn} hour(s)</li>}
+                  </ul>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Password</h3>
+                  <div className="font-mono text-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600">
+                    {password}
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Make sure the recipient has this password before sharing the link
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">Share via QR Code</h3>
+                  <QRCodeDisplay url={shareUrl} size={256} />
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
-                    onClick={handleCopy}
-                    className="btn-secondary flex items-center gap-2 whitespace-nowrap"
+                    onClick={handleReset}
+                    className="btn-secondary flex-1 flex items-center justify-center gap-2"
                   >
-                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {copied ? 'Copied!' : 'Copy'}
+                    <Flame className="w-4 h-4" />
+                    Create New Message
+                  </button>
+                  <button
+                    onClick={handleCreateSimilar}
+                    className="btn-primary flex-1 flex items-center justify-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Create Similar Message
                   </button>
                 </div>
-              </div>
 
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 dark:text-amber-400 mb-2 flex items-center gap-2">
-                  <Flame className="w-5 h-5" />
-                  Important Security Notice
-                </h3>
-                <ul className="text-sm text-amber-800 dark:text-amber-300 space-y-1">
-                  <li>• Share the password separately (not in the same channel as the link)</li>
-                  <li>• The message will be deleted after the first successful decryption</li>
-                  <li>• There are no backups - once it's gone, it's gone forever</li>
-                  {location.state?.filesCount > 0 && <li>• {location.state.filesCount} encrypted file(s) attached</li>}
-                  {expiresIn && <li>• Message expires in {expiresIn} hour(s)</li>}
-                </ul>
-              </div>
+                <button
+                  onClick={() => setShowInviteModal(true)}
+                  className="btn-secondary w-full flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                >
+                  <Users className="w-4 h-4" />
+                  Invite Friends to NoteBurner
+                </button>
 
-              <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Password</h3>
-                <div className="font-mono text-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600">
-                  {password}
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Make sure the recipient has this password before sharing the link
+                <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
+                  💡 "Similar" keeps your settings but clears the message
                 </p>
               </div>
-
-              <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">Share via QR Code</h3>
-                <QRCodeDisplay url={shareUrl} size={256} />
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={handleReset}
-                  className="btn-secondary flex-1 flex items-center justify-center gap-2"
-                >
-                  <Flame className="w-4 h-4" />
-                  Create New Message
-                </button>
-                <button
-                  onClick={handleCreateSimilar}
-                  className="btn-primary flex-1 flex items-center justify-center gap-2"
-                >
-                  <Copy className="w-4 h-4" />
-                  Create Similar Message
-                </button>
-              </div>
-              
-              <button
-                onClick={() => setShowInviteModal(true)}
-                className="btn-secondary w-full flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-              >
-                <Users className="w-4 h-4" />
-                Invite Friends to NoteBurner
-              </button>
-              
-              <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
-                💡 "Similar" keeps your settings but clears the message
-              </p>
-            </div>
             )}
           </div>
         </div>
-        
+
         {/* Achievement unlock popup */}
         {newAchievements.map((achievement, index) => {
           const handleCloseAchievement = () => {
@@ -333,7 +342,7 @@ function CreateMessage() {
             />
           );
         })}
-        
+
         {/* Reward unlock popup */}
         {newRewards.map((reward, index) => {
           const handleCloseReward = () => {
@@ -348,7 +357,7 @@ function CreateMessage() {
             />
           );
         })}
-        
+
         {/* Invite Friends Modal */}
         <InviteModal
           isOpen={showInviteModal}
@@ -579,34 +588,34 @@ function CreateMessage() {
                   Attachments (optional, max 2GB per file)
                 </label>
                 <div className="space-y-2">
-                {files.map((file, index) => (
-                  <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                    <span className="text-sm text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mx-2">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                <label htmlFor="file-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
-                  <Upload className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-300">Choose files to encrypt</span>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
+                  {files.map((file, index) => (
+                    <div key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                      <span className="text-sm text-gray-700 dark:text-gray-200 truncate flex-1">{file.name}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 mx-2">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <label htmlFor="file-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+                    <Upload className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    <span className="text-gray-600 dark:text-gray-300">Choose files to encrypt</span>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </div>
-            </div>
             )}
 
             {error && (
