@@ -31,6 +31,7 @@ function CreateMessage() {
   const [recipientCount, setRecipientCount] = useState(2);
   const [burnOnFirstView, setBurnOnFirstView] = useState(false);
   const [groupData, setGroupData] = useState(null);
+  const [filesCount, setFilesCount] = useState(0);
 
   // Use custom hooks for file upload and slug validation
   const { files, handleFileUpload, removeFile, getTotalSize, clearFiles } = useFileUpload();
@@ -47,6 +48,7 @@ function CreateMessage() {
       setShareUrl(location.state.shareUrl);
       setPassword(location.state.password);
       setExpiresIn(location.state.expiresIn || '24');
+      setFilesCount(location.state.filesCount || 0);
       // Clear location state to prevent re-showing on refresh
       globalThis.history.replaceState({}, document.title);
     }
@@ -140,6 +142,7 @@ function CreateMessage() {
 
       if (!isGroupMessage) {
         setShareUrl(result.url);
+        setFilesCount(files.length);
       }
 
       // Track achievements
@@ -216,7 +219,7 @@ function CreateMessage() {
         groupData={groupData}
         password={password}
         expiresIn={expiresIn}
-        filesCount={files.length}
+        filesCount={filesCount}
         onReset={handleReset}
         onCreateSimilar={handleCreateSimilar}
         newAchievements={newAchievements}
