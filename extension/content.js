@@ -2,23 +2,13 @@
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'encryptText') {
-    const text = request.text;
-    
-    // Open NoteBurner with pre-filled message
-    const encodedText = encodeURIComponent(text);
-    const url = `https://noteburner.app/create?text=${encodedText}`;
-    
-    // Open in new tab
-    window.open(url, '_blank');
-    sendResponse({ success: true });
-  }
-  
+  // encryptText handled by background script now
+
   if (request.action === 'getSelection') {
     const selectedText = window.getSelection().toString();
     sendResponse({ text: selectedText });
   }
-  
+
   return true; // Keep message channel open
 });
 
@@ -27,7 +17,7 @@ let floatingButton = null;
 
 function createFloatingButton() {
   if (floatingButton) return;
-  
+
   floatingButton = document.createElement('div');
   floatingButton.id = 'noteburner-fab';
   floatingButton.innerHTML = '🔥';
@@ -49,17 +39,17 @@ function createFloatingButton() {
     z-index: 999999;
     transition: all 0.3s ease;
   `;
-  
+
   floatingButton.addEventListener('mouseenter', () => {
     floatingButton.style.transform = 'scale(1.1)';
     floatingButton.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.5)';
   });
-  
+
   floatingButton.addEventListener('mouseleave', () => {
     floatingButton.style.transform = 'scale(1)';
     floatingButton.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
   });
-  
+
   floatingButton.addEventListener('click', () => {
     const selectedText = window.getSelection().toString();
     if (selectedText) {
@@ -69,18 +59,18 @@ function createFloatingButton() {
       window.open('https://noteburner.work/create', '_blank');
     }
   });
-  
+
   document.body.appendChild(floatingButton);
 }
 
 // Show floating button when text is selected
 document.addEventListener('selectionchange', () => {
   const selectedText = window.getSelection().toString();
-  
+
   if (!floatingButton) {
     createFloatingButton();
   }
-  
+
   if (selectedText && selectedText.length > 0) {
     floatingButton.style.display = 'flex';
   } else {
