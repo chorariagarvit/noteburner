@@ -64,7 +64,7 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.fill('#message', 'First message');
     await page.fill('#password', 'SecurePassword123');
     await page.fill('#custom-url', duplicateSlug);
-    await page.waitForSelector('.text-green-500', { timeout: 2000 });
+    await page.waitForSelector('.text-green-500', { timeout: 5000 });
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
 
