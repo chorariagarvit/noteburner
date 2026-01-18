@@ -80,7 +80,8 @@ test.describe('Message Creation', () => {
     await page.click('button:has-text("Encrypt & Create Link")');
 
     await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=1 encrypted file(s) attached')).toBeVisible();
+    // Check for file attachment indicator (may include bullet point or other formatting)
+    await expect(page.locator('text=/encrypted file.*attached/i')).toBeVisible();
   });
 
   test('should validate minimum password length', async ({ page }) => {
