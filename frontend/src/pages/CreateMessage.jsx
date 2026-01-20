@@ -44,6 +44,42 @@ function CreateMessage() {
   const { files, handleFileUpload, removeFile, getTotalSize, clearFiles } = useFileUpload();
   const { customSlug, slugStatus, slugError, handleCustomSlugChange, resetSlug } = useCustomSlug();
 
+  // Handler functions (defined before keyboard shortcuts)
+  const handleGeneratePassword = () => {
+    const newPassword = generatePassword(16);
+    setPassword(newPassword);
+  };
+
+  const handleReset = () => {
+    setMessage('');
+    setPassword('');
+    clearFiles();
+    setShareUrl('');
+    setGroupData(null);
+    setExpiresIn('24');
+    setError('');
+    resetSlug();
+    setIsGroupMessage(false);
+    setRecipientCount(2);
+    setBurnOnFirstView(false);
+  };
+
+  const handleCreateSimilar = () => {
+    setMessage('');
+    clearFiles();
+    setShareUrl('');
+    setGroupData(null);
+    setError('');
+    resetSlug();
+    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectTemplate = (template) => {
+    setMessage(template.message);
+    setExpiresIn(template.expiration);
+    setShowTemplates(false);
+  };
+
   // Set document title
   useEffect(() => {
     document.title = 'NoteBurner - Create Message';
@@ -92,17 +128,6 @@ function CreateMessage() {
     'ctrl+s': handleCreateSimilar,
     'meta+s': handleCreateSimilar
   }, !loading && !locking);
-
-  const handleSelectTemplate = (template) => {
-    setMessage(template.message);
-    setExpiresIn(template.expiration);
-    setShowTemplates(false);
-  };
-
-  const handleGeneratePassword = () => {
-    const newPassword = generatePassword(16);
-    setPassword(newPassword);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -203,32 +228,6 @@ function CreateMessage() {
       setLoading(false);
       setLocking(false);
     }
-  };
-
-  const handleReset = () => {
-    setMessage('');
-    setPassword('');
-    clearFiles();
-    setShareUrl('');
-    setGroupData(null);
-    setExpiresIn('24'); // Reset to default 24 hours
-    setError('');
-    resetSlug();
-    setIsGroupMessage(false);
-    setRecipientCount(2);
-    setBurnOnFirstView(false);
-  };
-
-  const handleCreateSimilar = () => {
-    // Keep password and expiresIn settings, just clear message and files
-    setMessage('');
-    clearFiles();
-    setShareUrl('');
-    setGroupData(null);
-    setError('');
-    resetSlug();
-    // Scroll to top for better UX
-    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (locking) {
