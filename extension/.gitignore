@@ -13,3 +13,5 @@ Thumbs.db
 
 # Generated files (regenerate with: node generate-icons.js)
 icons/create-icons.html
+noteburner-private-key.pem
+noteburner-public-key.pem
