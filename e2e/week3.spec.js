@@ -3,6 +3,13 @@ import { test, expect } from '@playwright/test';
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const API_URL = process.env.API_URL || 'http://localhost:8787';
 
+test.beforeEach(async ({ page }) => {
+  // Disable onboarding modal for E2E tests
+  await page.addInitScript(() => {
+    localStorage.setItem('noteburner_onboarding_complete', 'true');
+  });
+});
+
 test.describe('Week 3 - Custom URLs', () => {
   test('should allow creating message with custom URL slug', async ({ page }) => {
     await page.goto(BASE_URL);
