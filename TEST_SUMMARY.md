@@ -5,7 +5,7 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 
 ## 📊 Test Coverage Summary
 
-### Total Tests: 52
+### Total Tests: 96
 
 #### 1. Message Creation Tests (8 tests)
 ✅ Simple text message creation  
@@ -69,6 +69,60 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Mystery message tracking for "Mystery Sender"  
 ✅ Streak persistence across page reloads  
 
+#### 6. Week 5 - Network Effects Tests (44 tests)
+
+##### Group Messages Tests (10 tests)
+✅ Group message toggle visible on create page  
+✅ Recipient count slider (1-100 recipients)  
+✅ Group message creation with multiple recipients  
+✅ All unique recipient links displayed  
+✅ Individual copy button for each link  
+✅ Group metadata display (recipients count)  
+✅ Burn-on-first-view checkbox functionality  
+✅ First access triggers burn of all links  
+✅ Subsequent links show "already burned" message  
+✅ File upload disabled for group messages  
+
+##### Referral System Tests (18 tests)
+✅ Referrals page displays unique referral code  
+✅ Copy referral code to clipboard  
+✅ Referral code persists in localStorage  
+✅ URL parameter tracking (?ref=CODE)  
+✅ Message count increments for referrals  
+✅ Self-referral prevention (can't use own code)  
+✅ Bronze reward unlock at 5 messages (100MB file limit)  
+✅ Silver reward unlock at 10 messages (custom expiration)  
+✅ Gold reward unlock at 25 messages (priority badge)  
+✅ Progress bars show completion percentage  
+✅ Reward unlock popup with confetti animation  
+✅ Share buttons (Twitter, WhatsApp, Email, SMS)  
+✅ Referral count displayed on dashboard  
+✅ Empty referral code handling  
+✅ Invalid referral code handling  
+✅ Reward status persistence across sessions  
+✅ Multiple reward unlocks in one session  
+✅ Referral link generation with custom message  
+
+##### Invite Friends Tests (12 tests)
+✅ Invite page renders with customization options  
+✅ Personal message customization  
+✅ Email invitation form (comma-separated)  
+✅ Social share buttons visible (Twitter, LinkedIn, WhatsApp, Facebook)  
+✅ Twitter pre-filled tweet with referral link  
+✅ WhatsApp pre-filled message  
+✅ Email invitation with subject and body  
+✅ Copy invite link to clipboard  
+✅ InviteModal appears after message creation  
+✅ Skip button closes InviteModal  
+✅ InviteModal doesn't block main workflow  
+✅ Web Share API on mobile devices  
+
+##### Integration Tests (4 tests)
+✅ Create group message → Get referral → Invite friends workflow  
+✅ Referral code persistence across sessions  
+✅ Group message + referral code combination  
+✅ Max recipients edge case (100 recipient links)  
+
 ## 🚀 Quick Start
 
 ```bash
@@ -95,6 +149,7 @@ npm run test:report
 - `e2e/viral-mechanics.spec.js` - Viral features and UX enhancements (8 tests)
 - `e2e/week3.spec.js` - Custom URLs, QR codes, countdown timers, Open Graph (14 tests)
 - `e2e/week4.spec.js` - Gamification (achievements, streaks, leaderboard, mystery mode) (12 tests)
+- `e2e/week5.spec.js` - Network effects (group messages, referrals, invites) (44 tests)
 - `playwright.config.js` - Playwright configuration
 - `.github/workflows/e2e-tests.yml` - CI/CD automation
 
@@ -151,6 +206,15 @@ Tests automatically start both frontend and backend dev servers before running.
 - Progress bars for achievements
 - Confetti celebration on unlocks
 
+**Network Effects**
+- Group messages (1-to-many broadcasting)
+- Burn-on-first-view for groups
+- Referral system with reward tiers
+- Privacy-first tracking (client-side only)
+- Browser extension integration
+- Social invitation system
+- Viral growth mechanics
+
 ## 🔧 Configuration
 
 **Browser**: Chromium (Desktop Chrome)  
@@ -178,13 +242,14 @@ Tests automatically start both frontend and backend dev servers before running.
 
 **Test Execution Time**: ~3-4 minutes (local)  
 **CI Execution Time**: ~6-8 minutes (with server startup)  
-**Code Coverage**: All major user flows including Weeks 1-4 features  
+**Code Coverage**: All major user flows including Weeks 1-5 features  
 **Success Rate**: 100% when services are healthy  
 **Latest Additions**:
 - Week 3 (Jan 1, 2026): +14 tests for custom URLs, QR codes, timers, OG tags  
 - Week 4 (Jan 8, 2026): +12 tests for gamification (achievements, streaks, leaderboard)  
+- Week 5 (Jan 14, 2026): +44 tests for network effects (groups, referrals, invites)  
 
-**Last Updated**: Jan 8, 2026  
+**Last Updated**: Jan 20, 2026  
 
 ## 🔮 Future Enhancements
 
@@ -203,11 +268,12 @@ NoteBurner now has enterprise-grade E2E testing coverage ensuring:
 - 🎨 UI/UX flows are smooth and bug-free
 - 🚀 Viral mechanics drive engagement
 - 🎮 Gamification features enhance retention
+- � Network effects enable exponential growth
 - 💪 Confidence in every deployment
 
 ---
 
-**Last Updated**: January 8, 2026  
+**Last Updated**: January 20, 2026  
 **Test Framework**: Playwright v1.57.0  
-**Total Test Files**: 5  
-**Total Test Cases**: 52
+**Total Test Files**: 6  
+**Total Test Cases**: 96
