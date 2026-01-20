@@ -8,9 +8,12 @@ import { updateStatsOnMessageCreate } from '../utils/achievements';
 import { incrementReferralProgress } from '../utils/referrals';
 import { useCustomSlug } from '../hooks/useCustomSlug';
 import { useFileUpload } from '../hooks/useFileUpload';
+import { useSubmitShortcut, useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 import CreateMessageForm from '../components/create/CreateMessageForm';
 import CreateMessageSuccess from '../components/create/CreateMessageSuccess';
+import MessageTemplates from '../components/templates/MessageTemplates';
+import KeyboardShortcutsModal from '../components/keyboard/KeyboardShortcutsModal';
 
 function CreateMessage() {
   const location = useLocation();
@@ -32,6 +35,10 @@ function CreateMessage() {
   const [burnOnFirstView, setBurnOnFirstView] = useState(false);
   const [groupData, setGroupData] = useState(null);
   const [filesCount, setFilesCount] = useState(0);
+
+  // UI state
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
   // Use custom hooks for file upload and slug validation
   const { files, handleFileUpload, removeFile, getTotalSize, clearFiles } = useFileUpload();
@@ -62,6 +69,35 @@ function CreateMessage() {
       setMessage(textParam);
     }
   }, [location.search]);
+
+  // Keyboard shortcuts
+  useSubmitShortcut(() => {
+    if (!loading && !locking && !shareUrl && !groupData) {
+      document.querySelector('form')?.requestSubmit();
+    }
+  }, !loading && !locking && !shareUrl && !groupData);
+
+  useKeyboardShortcuts({
+    '?': () => setShowKeyboardShortcuts(true),
+    'ctrl+k': () => document.querySelector('#message')?.focus(),
+    'meta+k': () => document.querySelector('#message')?.focus(),
+    'ctrl+p': () => document.querySelector('#password')?.focus(),
+    'meta+p': () => document.querySelector('#password')?.focus(),
+    'ctrl+g': handleGeneratePassword,
+    'meta+g': handleGeneratePassword,
+    'ctrl+u': () => document.querySelector('#custom-url')?.focus(),
+    'meta+u': () => document.querySelector('#custom-url')?.focus(),
+    'ctrl+n': handleReset,
+    'meta+n': handleReset,
+    'ctrl+s': handleCreateSimilar,
+    'meta+s': handleCreateSimilar
+  }, !loading && !locking);
+
+  const handleSelectTemplate = (template) => {
+    setMessage(template.message);
+    setExpiresIn(template.expiration);
+    setShowTemplates(false);
+  };
 
   const handleGeneratePassword = () => {
     const newPassword = generatePassword(16);
@@ -261,8 +297,31 @@ function CreateMessage() {
           handleFileUpload={handleFileUpload}
           removeFile={removeFile}
           error={error}
+          showTemplates={showTemplates}
+          setShowTemplates={setShowTemplates}
+          onSelectTemplate={handleSelectTemplate}
         />
       </div>
+
+      {/* Message Templates Modal */}
+      {showTemplates && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
+            <div className="p-6 overflow-y-auto max-h-[90vh]">
+              <MessageTemplates 
+                onSelectTemplate={handleSelectTemplate}
+                onClose={() => setShowTemplates(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={showKeyboardShortcuts}
+        onClose={() => setShowKeyboardShortcuts(false)}
+      />
     </div>
   );
 }
