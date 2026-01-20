@@ -50,3 +50,5 @@ temp/
 # Cloudflare
 .wrangler/
 wrangler.toml.backup
+noteburner-extension.crx
+noteburner-extension.zip
