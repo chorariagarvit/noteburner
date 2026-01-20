@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+  // Disable onboarding modal for E2E tests
+  await page.addInitScript(() => {
+    localStorage.setItem('noteburner_onboarding_complete', 'true');
+  });
+});
+
 test.describe('Week 5 - Network Effects Features', () => {
   test.describe('Referral System', () => {
     test('should display referrals page', async ({ page }) => {

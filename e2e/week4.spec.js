@@ -7,7 +7,11 @@ test.describe('Week 4 - Gamification', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
     await page.goto(BASE_URL);
-    await page.evaluate(() => localStorage.clear());
+    await page.evaluate(() => {
+      localStorage.clear();
+      // Disable onboarding modal for E2E tests
+      localStorage.setItem('noteburner_onboarding_complete', 'true');
+    });
   });
 
   test('should track message creation and update stats', async ({ page }) => {

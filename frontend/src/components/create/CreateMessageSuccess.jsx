@@ -12,14 +12,14 @@ function CreateMessageSuccess({
     shareUrl,
     groupData,
     password,
-    expiresIn,
-    filesCount,
+    expiresIn = '24',
+    filesCount = 0,
     onReset,
     onCreateSimilar,
-    newAchievements,
-    setNewAchievements,
-    newRewards,
-    setNewRewards
+    newAchievements = [],
+    setNewAchievements = () => { },
+    newRewards = [],
+    setNewRewards = () => { }
 }) {
     const [copied, setCopied] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
@@ -192,15 +192,6 @@ CreateMessageSuccess.propTypes = {
     setNewAchievements: PropTypes.func,
     newRewards: PropTypes.array,
     setNewRewards: PropTypes.func,
-};
-
-CreateMessageSuccess.defaultProps = {
-    expiresIn: '24',
-    filesCount: 0,
-    newAchievements: [],
-    setNewAchievements: () => { },
-    newRewards: [],
-    setNewRewards: () => { },
 };
 
 export default CreateMessageSuccess;
