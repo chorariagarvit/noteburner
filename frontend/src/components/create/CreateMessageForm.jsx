@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Flame, Clock, Eye, EyeOff, Upload, X, Link2, CheckCircle, XCircle, Loader, Users } from 'lucide-react';
+import { Flame, Clock, Eye, EyeOff, Upload, X, Link2, CheckCircle, XCircle, Loader, Users, FileText } from 'lucide-react';
 
 function CreateMessageForm(props) {
     const {
@@ -32,7 +32,10 @@ function CreateMessageForm(props) {
         handleFileUpload,
         removeFile,
         error,
-        loadingMessage
+        loadingMessage,
+        showTemplates,
+        setShowTemplates,
+        onSelectTemplate
     } = props;
 
     return (
@@ -49,9 +52,19 @@ function CreateMessageForm(props) {
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Message *
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                        <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Message *
+                        </label>
+                        <button
+                            type="button"
+                            onClick={() => setShowTemplates(true)}
+                            className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1 transition-colors"
+                        >
+                            <FileText className="w-4 h-4" />
+                            Use Template
+                        </button>
+                    </div>
                     <textarea
                         id="message"
                         value={message}
@@ -338,7 +351,10 @@ CreateMessageForm.propTypes = {
     handleFileUpload: PropTypes.func.isRequired,
     removeFile: PropTypes.func.isRequired,
     error: PropTypes.string,
-    loadingMessage: PropTypes.string
+    loadingMessage: PropTypes.string,
+    showTemplates: PropTypes.bool,
+    setShowTemplates: PropTypes.func,
+    onSelectTemplate: PropTypes.func
 };
 
 export default CreateMessageForm;
