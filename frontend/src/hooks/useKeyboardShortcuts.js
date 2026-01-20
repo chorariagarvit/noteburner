@@ -73,5 +73,3 @@ export function useEscapeKey(onClose, enabled = true) {
     'Escape': onClose
   }, enabled);
 }
-
-export default useKeyboardShortcuts;
