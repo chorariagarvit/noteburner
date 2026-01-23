@@ -531,9 +531,95 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🔐 Week 8 - Security Enhancements
-**Branch**: `feature/security-enhancements`
+## 🔌 Week 8 - Platform Integrations & Extensions
+**Branch**: `feature/platform-integrations`
 **Target**: Feb 2, 2026
+
+### Features
+- [ ] **Microsoft Teams Integration**
+  - Teams app for sending secure messages
+  - Message bot for quick encryption
+  - Tab app for creating messages within Teams
+  - Adaptive Cards for message sharing
+  - SSO with Microsoft 365
+
+- [ ] **Zoom App**
+  - In-meeting chat extension
+  - Secure message sharing during calls
+  - Post-meeting summary encryption
+  - OAuth integration
+
+- [ ] **Google Meet Extension**
+  - Chrome extension integration for Meet
+  - Share secure notes during meetings
+  - Meeting chat encryption
+  - Google Workspace SSO
+
+- [ ] **Google Workspace Add-on**
+  - Gmail add-on for secure email content
+  - Google Drive integration (encrypt files before sharing)
+  - Google Calendar - add secure notes to events
+  - Google Docs sidebar for quick encryption
+
+- [ ] **Microsoft 365 Add-ins**
+  - Outlook add-in for secure email attachments
+  - SharePoint integration for document encryption
+  - OneDrive secure file sharing
+  - OneNote integration for private notes
+
+- [ ] **Microsoft Power Automate**
+  - NoteBurner connector for workflows
+  - Automated secure message creation
+  - Integration with 400+ Power Automate services
+  - Trigger actions on message burn events
+
+- [ ] **Slack App**
+  - Slash command: `/noteburner [message]`
+  - Secure message sharing in channels
+  - Direct message encryption
+  - Workflow builder integration
+
+- [ ] **Discord Bot**
+  - Bot commands for secure messages
+  - DM encryption for sensitive info
+  - Server integration for moderation
+  - Role-based access controls
+
+- [ ] **Zapier Integration**
+  - NoteBurner as trigger/action
+  - Connect to 5,000+ apps
+  - Automated workflows
+  - Multi-step Zaps
+
+- [ ] **IFTTT Applet**
+  - Trigger-based automation
+  - Cross-platform message creation
+  - IoT device integration
+
+### Implementation Priorities
+1. **Phase 1** (Weeks 8-9): Microsoft Teams, Google Workspace
+2. **Phase 2** (Weeks 10-11): Zoom, Slack, Discord
+3. **Phase 3** (Weeks 12-13): Power Automate, Zapier, IFTTT
+
+### Technical Requirements
+- OAuth 2.0 implementations for each platform
+- Webhook endpoints for real-time events
+- Platform-specific UI components (adaptive cards, embeds)
+- Rate limiting per platform
+- Dedicated API documentation for integrations
+- SDK creation for common platforms
+
+### Metrics
+- Integration installations per platform
+- Message creation via integrations
+- User retention from integrated platforms
+- Premium conversion from enterprise users
+
+---
+
+## 🔐 Week 9 - Security Enhancements
+**Branch**: `feature/security-enhancements`
+**Target**: Feb 9, 2026
 
 ### Features
 - [ ] **Two-factor authentication** (optional)
@@ -563,9 +649,9 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 💼 Week 9 - Enterprise Features
+## 💼 Week 10 - Enterprise Features
 **Branch**: `feature/enterprise`
-**Target**: Feb 9, 2026
+**Target**: Feb 16, 2026
 
 ### Features
 - [ ] **API access**
@@ -590,9 +676,9 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🚀 Week 10 - Scaling & Performance
+## 🚀 Week 11 - Scaling & Performance
 **Branch**: `feature/scaling`
-**Target**: Feb 16, 2026
+**Target**: Feb 23, 2026
 
 ### Features
 - [ ] **Caching layer**
@@ -622,9 +708,9 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🌐 Week 11 - Internationalization
+## 🌐 Week 12 - Internationalization
 **Branch**: `feature/i18n`
-**Target**: Feb 23, 2026
+**Target**: Mar 2, 2026
 
 ### Features
 - [ ] **Multi-language support**
@@ -644,14 +730,14 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🎁 Week 12 - Premium Features
+## 🎁 Week 13 - Premium Features
 **Branch**: `feature/premium`
-**Target**: Mar 2, 2026
+**Target**: Mar 9, 2026
 
 ### Features
 - [ ] **Premium tier** ($5/month)
-  - Unlimited file size (1GB)
-  - Custom URLs included
+  - Large file uploads (1GB limit vs 100MB free)
+  - Unlimited custom URLs
   - Priority support
   - Ad-free experience
   - Advanced analytics
@@ -730,15 +816,16 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ## � Project Status
 
-**Current Version**: v1.5.0 (Week 5 - Network Effects)  
-**Last Updated**: Jan 14, 2026  
-**Next Release**: Week 6 (UI/UX Polish) - Jan 19, 2026
+**Current Version**: v1.6.0 (Week 6 - UI/UX Polish)  
+**Last Updated**: Jan 21, 2026  
+**Next Release**: Week 7 (Mobile Optimization) - Jan 26, 2026
 
 ### Release History
+- **v1.6.0** - Jan 20, 2026: UI/UX Polish (onboarding flow, message templates, keyboard shortcuts, loading skeletons, enhanced animations, accessibility)
 - **v1.5.0** - Jan 14, 2026: Network Effects (group messages, referral rewards, browser extension, invite friends)
 - **v1.4.0** - Jan 8, 2026: Gamification (achievements, streaks, leaderboard, mystery mode)
 - **v1.3.0** - Jan 1, 2026: Custom URLs & Branding (QR codes, countdown timer, Open Graph)
-- **v1.2.5** - Dec 25, 2025: E2E Testing (96 passing tests)
+- **v1.2.5** - Dec 25, 2025: E2E Testing (80 passing tests)
 - **v1.2.0** - Dec 22, 2025: Viral Mechanics (post-burn CTA, message preview)
 - **v1.1.0** - Dec 15, 2025: Analytics & Social Proof (stats counter, platform stats)
 - **v1.0.0** - Dec 1, 2025: Initial Launch (AES-256-GCM, one-time access, file encryption)
@@ -809,6 +896,6 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 ---
 
-**Last Updated**: January 14, 2026  
-**Current Version**: v1.5.0  
-**Next Release**: Week 6 - UI/UX Polish (Jan 19, 2026)
+**Last Updated**: January 21, 2026  
+**Current Version**: v1.6.0  
+**Next Release**: Week 7 - Mobile Optimization (Jan 26, 2026)

@@ -5,7 +5,7 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 
 ## 📊 Test Coverage Summary
 
-### Total Tests: 96
+### Total Tests: 80
 
 #### 1. Message Creation Tests (8 tests)
 ✅ Simple text message creation  
@@ -69,7 +69,7 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Mystery message tracking for "Mystery Sender"  
 ✅ Streak persistence across page reloads  
 
-#### 6. Week 5 - Network Effects Tests (44 tests)
+#### 6. Week 5 - Network Effects Tests (28 tests)
 
 ##### Group Messages Tests (10 tests)
 ✅ Group message toggle visible on create page  
@@ -83,39 +83,23 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Subsequent links show "already burned" message  
 ✅ File upload disabled for group messages  
 
-##### Referral System Tests (18 tests)
+##### Referral System Tests (8 tests)
 ✅ Referrals page displays unique referral code  
 ✅ Copy referral code to clipboard  
 ✅ Referral code persists in localStorage  
 ✅ URL parameter tracking (?ref=CODE)  
 ✅ Message count increments for referrals  
-✅ Self-referral prevention (can't use own code)  
-✅ Bronze reward unlock at 5 messages (100MB file limit)  
-✅ Silver reward unlock at 10 messages (custom expiration)  
-✅ Gold reward unlock at 25 messages (priority badge)  
+✅ Reward unlock notifications  
 ✅ Progress bars show completion percentage  
-✅ Reward unlock popup with confetti animation  
 ✅ Share buttons (Twitter, WhatsApp, Email, SMS)  
-✅ Referral count displayed on dashboard  
-✅ Empty referral code handling  
-✅ Invalid referral code handling  
-✅ Reward status persistence across sessions  
-✅ Multiple reward unlocks in one session  
-✅ Referral link generation with custom message  
 
-##### Invite Friends Tests (12 tests)
+##### Invite Friends Tests (6 tests)
 ✅ Invite page renders with customization options  
-✅ Personal message customization  
 ✅ Email invitation form (comma-separated)  
 ✅ Social share buttons visible (Twitter, LinkedIn, WhatsApp, Facebook)  
-✅ Twitter pre-filled tweet with referral link  
-✅ WhatsApp pre-filled message  
-✅ Email invitation with subject and body  
 ✅ Copy invite link to clipboard  
 ✅ InviteModal appears after message creation  
 ✅ Skip button closes InviteModal  
-✅ InviteModal doesn't block main workflow  
-✅ Web Share API on mobile devices  
 
 ##### Integration Tests (4 tests)
 ✅ Create group message → Get referral → Invite friends workflow  
@@ -149,7 +133,7 @@ npm run test:report
 - `e2e/viral-mechanics.spec.js` - Viral features and UX enhancements (8 tests)
 - `e2e/week3.spec.js` - Custom URLs, QR codes, countdown timers, Open Graph (14 tests)
 - `e2e/week4.spec.js` - Gamification (achievements, streaks, leaderboard, mystery mode) (12 tests)
-- `e2e/week5.spec.js` - Network effects (group messages, referrals, invites) (44 tests)
+- `e2e/week5.spec.js` - Network effects (group messages, referrals, invites) (28 tests)
 - `playwright.config.js` - Playwright configuration
 - `.github/workflows/e2e-tests.yml` - CI/CD automation
 
@@ -247,7 +231,7 @@ Tests automatically start both frontend and backend dev servers before running.
 **Latest Additions**:
 - Week 3 (Jan 1, 2026): +14 tests for custom URLs, QR codes, timers, OG tags  
 - Week 4 (Jan 8, 2026): +12 tests for gamification (achievements, streaks, leaderboard)  
-- Week 5 (Jan 14, 2026): +44 tests for network effects (groups, referrals, invites)  
+- Week 5 (Jan 14, 2026): +28 tests for network effects (groups, referrals, invites)  
 
 **Last Updated**: Jan 20, 2026  
 
