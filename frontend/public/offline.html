@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - NoteBurner</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 500px;
+    }
+    
+    .icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      background: #dc2626;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #f1f5f9;
+    }
+    
+    p {
+      font-size: 1.125rem;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    
+    .retry-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    
+    .retry-btn:hover {
+      background: #b91c1c;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);
+    }
+    
+    .cached-messages {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #334155;
+    }
+    
+    .cached-messages h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #cbd5e1;
+    }
+    
+    .message-list {
+      text-align: left;
+      background: #1e293b;
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .message-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid #334155;
+      color: #94a3b8;
+    }
+    
+    .message-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">
+      🔥
+    </div>
+    
+    <h1>You're Offline</h1>
+    
+    <p>
+      No internet connection detected. NoteBurner requires an active connection to create and view secure messages.
+    </p>
+    
+    <button class="retry-btn" onclick="window.location.reload()">
+      Retry Connection
+    </button>
+    
+    <div class="cached-messages" style="display: none;">
+      <h2>Recently Viewed Messages</h2>
+      <div class="message-list" id="cachedList">
+        <!-- Cached messages will be inserted here -->
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Check for cached messages in IndexedDB or localStorage
+    window.addEventListener('load', () => {
+      const cachedMessages = localStorage.getItem('noteburner_recent_messages');
+      if (cachedMessages) {
+        const messages = JSON.parse(cachedMessages);
+        if (messages.length > 0) {
+          document.querySelector('.cached-messages').style.display = 'block';
+          const listEl = document.getElementById('cachedList');
+          messages.forEach(msg => {
+            const item = document.createElement('div');
+            item.className = 'message-item';
+            item.textContent = `Message viewed ${msg.timestamp}`;
+            listEl.appendChild(item);
+          });
+        }
+      }
+    });
+    
+    // Auto-retry connection every 5 seconds
+    setInterval(() => {
+      if (navigator.onLine) {
+        window.location.reload();
+      }
+    }, 5000);
+  </script>
+</body>
+</html>
