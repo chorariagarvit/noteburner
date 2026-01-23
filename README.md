@@ -1,5 +1,8 @@
 # NoteBurner 🔥
 
+**Version**: v1.6.0 - Mobile Optimization & PWA  
+**Released**: January 23, 2026
+
 A secure one-time message encryption and decryption application. Messages can only be decrypted once with the correct password, then they're permanently deleted with no backups.
 
 ## Features
@@ -11,6 +14,14 @@ A secure one-time message encryption and decryption application. Messages can on
 - 📎 **Media support** - Encrypt and share files along with text messages (up to 100MB with rewards)
 - ⏰ **Optional expiration** - Set time-based deletion for added security
 - 🚫 **No backups** - Permanent deletion guarantee
+
+### Mobile & PWA (NEW in v1.6)
+- 📱 **Progressive Web App** - Install on mobile, offline support, push notifications
+- 🎨 **Mobile-first UX** - Bottom sheets, swipe gestures, touch-friendly buttons
+- 📷 **Camera integration** - Capture photos/videos directly, instant encryption
+- 🔗 **Share sheet** - Native mobile sharing to WhatsApp, Telegram, Signal, etc.
+- 🔄 **Offline support** - Service worker caching, background sync
+- 🔔 **Push notifications** - Optional updates for message activity
 
 ### Customization & Sharing
 - 🌐 **Custom short URLs** - Choose memorable URLs for your messages
@@ -24,7 +35,7 @@ A secure one-time message encryption and decryption application. Messages can on
 - 📊 **Anonymous leaderboard** - Platform statistics without personal data
 - 🎭 **Mystery mode** - Send completely anonymous messages
 
-### Network Effects (NEW in v1.5)
+### Network Effects (v1.5)
 - 👥 **Group messages** - Create 1-100 unique recipient links from one message
 - 🎁 **Referral rewards** - Unlock perks by sharing (100MB files, custom expiration, badges)
 - 🧩 **Browser extension** - Right-click encrypt on Chrome/Firefox
