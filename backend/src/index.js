@@ -5,19 +5,30 @@ import messagesRouter from './routes/messages.js';
 import mediaRouter from './routes/media.js';
 import statsRouter from './routes/stats.js';
 import cleanupRouter from './routes/cleanup.js';
+import integrationsRouter from './routes/integrations.js';
+import auditRouter from './routes/audit.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
+import { securityHeaders, enhancedRateLimit, ddosProtection } from './middleware/security.js';
 
 const app = new Hono();
 
+// Security middleware (apply first)
+app.use('/*', securityHeaders());
+app.use('/*', ddosProtection());
+
 // CORS middleware
 app.use('/*', cors(corsConfig));
+
+// Rate limiting (different limits for different endpoints - relaxed for testing)
+app.use('/api/messages/*', enhancedRateLimit({ maxRequests: 200, windowMs: 60000 }));
+app.use('/api/integrations/*', enhancedRateLimit({ maxRequests: 200, windowMs: 60000 }));
 
 // Health check
 app.get('/', (c) => {
   return c.json({
     status: 'ok',
     service: 'NoteBurner API',
-    version: '1.0.0'
+    version: '1.8.0'
   });
 });
 
@@ -26,6 +37,8 @@ app.route('/api/messages', messagesRouter);
 app.route('/api/media', mediaRouter);
 app.route('/api/stats', statsRouter);
 app.route('/api/cleanup', cleanupRouter);
+app.route('/api/integrations', integrationsRouter);
+app.route('/api/audit', auditRouter);
 
 // Handle preflight OPTIONS requests
 app.options('/*', (c) => {

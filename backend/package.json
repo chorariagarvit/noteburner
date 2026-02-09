@@ -1,7 +1,7 @@
 {
   "name": "noteburner-backend",
-  "version": "1.6.0",
-  "description": "NoteBurner backend API - Cloudflare Workers (v1.6.0)",
+  "version": "1.8.0",
+  "description": "NoteBurner backend API - Cloudflare Workers (v1.8.0)",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
