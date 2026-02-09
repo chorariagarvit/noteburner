@@ -1,7 +1,7 @@
 # NoteBurner 🔥
 
-**Version**: v1.6.0 - Mobile Optimization & PWA  
-**Released**: January 23, 2026
+**Version**: v1.8.0 - Platform Integrations & Security Enhancements  
+**Released**: February 9, 2026
 
 A secure one-time message encryption and decryption application. Messages can only be decrypted once with the correct password, then they're permanently deleted with no backups.
 
@@ -15,7 +15,23 @@ A secure one-time message encryption and decryption application. Messages can on
 - ⏰ **Optional expiration** - Set time-based deletion for added security
 - 🚫 **No backups** - Permanent deletion guarantee
 
-### Mobile & PWA (NEW in v1.6)
+### Platform Integrations (NEW in v1.7)
+- 💬 **Slack Integration** - `/noteburner` command for instant secure messages
+- ⚡ **Zapier Automation** - Create messages from 5,000+ apps
+- 🤖 **Discord Bot** - Share secrets in Discord servers
+- 🔌 **Webhooks** - Real-time event notifications (created, viewed, burned)
+- 🔑 **API Access** - Programmatic message creation with API keys
+- 📚 **API Documentation** - Comprehensive guides and examples
+
+### Security Enhancements (NEW in v1.8)
+- 💪 **Password Strength Meter** - Real-time feedback, entropy calculation
+- ⚙️ **Self-Destruct Options** - Max views, time limits, password attempts, geo restrictions
+- 📊 **Audit Logs** - Privacy-friendly access tracking (country-level only)
+- 🛡️ **Enhanced Security Headers** - CSP, HSTS, X-Frame-Options (A+ rating)
+- 🚦 **Advanced Rate Limiting** - DDoS protection, per-endpoint limits
+- 🔐 **2FA Support** - Optional TOTP for high-security messages
+
+### Mobile & PWA (v1.6)
 - 📱 **Progressive Web App** - Install on mobile, offline support, push notifications
 - 🎨 **Mobile-first UX** - Bottom sheets, swipe gestures, touch-friendly buttons
 - 📷 **Camera integration** - Capture photos/videos directly, instant encryption

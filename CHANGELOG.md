@@ -7,6 +7,121 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.0] - 2026-02-09
+
+### Added - Security Enhancements (Week 9)
+- **Password Strength Meter**:
+  - Real-time password analysis with 5-level strength score
+  - Visual progress bar (color-coded: red → green)
+  - Entropy calculation (randomness in bits)
+  - Pattern detection (common passwords, sequences)
+  - Character variety checks (uppercase, lowercase, numbers, special)
+  - Inline suggestions for improvement
+  - PasswordStrengthMeter component (175 lines)
+
+- **Self-Destruct Options**:
+  - Max views setting (1, 2, 3, 5, 10, unlimited)
+  - Granular time limits (5 min to 7 days)
+  - Max password attempts (1, 3, 5, 10, unlimited)
+  - Geographic restrictions (same country only)
+  - Auto-burn on suspicious activity
+  - 2FA requirement (TOTP)
+  - SelfDestructOptions component (188 lines)
+
+- **Audit Log System**:
+  - Privacy-first logging (country-level geo only, no IPs)
+  - Event tracking (created, viewed, burned, password attempts)
+  - Creator-only access via token
+  - Suspicious activity detection
+  - AuditLogViewer component (265 lines)
+  - GET /api/audit/:messageId endpoint
+
+- **Security Headers**:
+  - Content Security Policy (CSP) with 12 directives
+  - X-Frame-Options: DENY
+  - Strict-Transport-Security (HSTS)
+  - X-Content-Type-Options: nosniff
+  - Referrer-Policy, Permissions-Policy
+  - Cache-Control for sensitive endpoints
+
+- **Enhanced Rate Limiting**:
+  - Sliding window algorithm
+  - Per-endpoint limits (50/min messages, 100/min integrations)
+  - Rate limit headers (X-RateLimit-*)
+  - Retry-After header on 429 responses
+
+- **DDoS Protection**:
+  - Automatic IP banning (1,000 req/min threshold)
+  - 1-hour ban duration
+  - Suspicious pattern detection
+
+- **Database**:
+  - audit_logs table (message_id, event_type, country, timestamp, success, metadata)
+  - 10 new columns on messages table (max_views, view_count, password_attempts, etc.)
+  - Indexes for performance
+
+### Technical (Week 9)
+- New components: 3 React components (628 lines)
+- Backend: 2 new routes (audit.js, security.js middleware)
+- Migration: 0008_security_enhancements.sql
+- E2E tests: 40+ new tests (week9.spec.js)
+
+---
+
+## [1.7.0] - 2026-02-09
+
+### Added - Platform Integrations (Week 8)
+- **Slack Integration**:
+  - /noteburner slash command
+  - Interactive actions (Share in Channel)
+  - Ephemeral responses
+  - Auto-generated secure links
+
+- **Zapier Integration**:
+  - POST /api/integrations/zapier/create
+  - API key authentication
+  - Custom or auto-generated passwords
+  - Configurable expiration (1h to 7 days)
+  - GET /api/integrations/zapier/auth
+
+- **Webhook System**:
+  - POST /api/integrations/webhooks/subscribe
+  - Supported events: message.created, message.viewed, message.burned
+  - HTTPS requirement
+  - Event filtering
+
+- **Discord Bot Integration**:
+  - POST /api/integrations/discord/create
+  - Rich embed responses
+  - Bot token validation
+
+- **API Key Management**:
+  - POST /api/integrations/keys/create
+  - Key format: nb_<32-char-nanoid>
+  - Named keys for organization
+  - Rate limiting per key (1,000/min default)
+  - Last-used tracking
+
+- **API Documentation**:
+  - Comprehensive API docs (370 lines)
+  - Request/response examples
+  - Platform setup guides
+  - Security best practices
+
+- **Database**:
+  - api_keys table (id, user_id, key, name, active, rate_limit)
+  - webhooks table (id, user_id, url, events, active, failure_count)
+  - created_via column on messages (track source: web, slack, zapier, discord, api)
+  - user_id column on messages (link to API key owner)
+
+### Technical (Week 8)
+- Backend: integrations.js route (348 lines)
+- Migration: 0007_integrations.sql
+- E2E tests: 30+ new tests (week8.spec.js)
+- Supported platforms: 4 (Slack, Zapier, Discord, Generic API)
+
+---
+
 ## [1.6.0] - 2026-01-23
 
 ### Added - Mobile Optimization & PWA
@@ -247,6 +362,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Release Date | Focus | Lines Added | New Tests |
 |---------|-------------|-------|-------------|-----------|
+| 1.8.0   | 2026-02-09  | Security Enhancements | 1,350+ | 40+ |
+| 1.7.0   | 2026-02-09  | Platform Integrations | 1,200+ | 30+ |
 | 1.6.0   | 2026-01-23  | Mobile & PWA | 1,659 | 26 |
 | 1.5.0   | 2026-01-14  | Network Effects | 2,696 | 28 |
 | 1.4.0   | 2026-01-20  | UI/UX Polish | 878 | 0 |
@@ -255,12 +372,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | 1.1.0   | 2025-12-15  | Analytics | 500+ | 8 |
 | 1.0.0   | 2025-12-01  | Initial Release | - | 30 |
 
-**Total E2E Tests**: 106 (99.1% pass rate)  
-**Total Lines**: ~10,000+ across all releases  
-**Total Commits**: 20+ feature branches merged
+**Total E2E Tests**: 176+ (expected 99%+ pass rate)  
+**Total Lines**: ~13,000+ across all releases  
+**Total Commits**: 24+ feature branches merged
 
 ---
 
+[1.8.0]: https://github.com/noteburner/noteburner/releases/tag/v1.8.0
+[1.7.0]: https://github.com/noteburner/noteburner/releases/tag/v1.7.0
 [1.6.0]: https://github.com/noteburner/noteburner/releases/tag/v1.6.0
 [1.5.0]: https://github.com/noteburner/noteburner/releases/tag/v1.5.0
 [1.4.0]: https://github.com/noteburner/noteburner/releases/tag/v1.4.0

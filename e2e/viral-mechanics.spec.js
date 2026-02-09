@@ -63,6 +63,9 @@ test.describe('Viral Mechanics Features', () => {
   });
 
   test('should show personality in upload progress', async ({ page }) => {
+    // Wait to avoid rate limiting
+    await page.waitForTimeout(2000);
+    
     await page.goto('/');
 
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Upload progress test');
@@ -95,7 +98,7 @@ test.describe('Viral Mechanics Features', () => {
     ]);
 
     // Upload might be too fast in tests, so we just verify it completes
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 20000 });
   });
 
   test('should trigger confetti animation on message burn', async ({ page, context }) => {

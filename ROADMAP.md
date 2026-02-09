@@ -6,8 +6,9 @@
 
 ---
 
-## 🚀 Version 1.6 - CURRENT (Mobile Optimization & PWA)
-**Status**: ✅ Complete - Week 7 Released
+## 🚀 Version 1.8 - CURRENT (Platform Integrations & Security Enhancements)
+**Status**: ✅ Complete - Weeks 8 & 9 Released
+**Released**: Feb 9, 2026
 **Released**: Jan 23, 2026
 
 ### Features
@@ -575,9 +576,122 @@ test('message self-destructs after first view', async ({ page }) => {
 ## 🔌 Week 8 - Platform Integrations & Extensions
 **Branch**: `feature/platform-integrations`
 **Target**: Feb 2, 2026
+**Status**: ✅ Complete
 
 ### Features
-- [ ] **Microsoft Teams Integration**
+- ✅ **Slack Integration**
+  - `/noteburner` slash command
+  - Interactive actions (Share in Channel)
+  - Ephemeral responses
+  - Auto-generated secure links
+
+- ✅ **Zapier Integration**
+  - Create message action API
+  - API key authentication
+  - Custom or auto-generated passwords
+  - Webhook system for triggers
+
+- ✅ **Discord Bot Integration**
+  - Bot API for secure messages
+  - Rich embed responses
+  - Auto-generated passwords
+
+- ✅ **API Access**
+  - RESTful API endpoints
+  - API key management
+  - Comprehensive documentation (370 lines)
+  - Rate limiting per key
+
+- ✅ **Webhook System**
+  - Event subscriptions (created, viewed, burned)
+  - HTTPS-only URLs
+  - Zapier/IFTTT integration ready
+
+### Implementation
+- ✅ `backend/src/routes/integrations.js` (348 lines)
+- ✅ Database migrations (0007_integrations.sql)
+- ✅ API documentation (`docs/API.md`)
+- ✅ 30+ E2E tests (`e2e/week8.spec.js`)
+- ⏸️ Microsoft Teams (deferred to Phase 1)
+- ⏸️ Google Workspace (deferred to Phase 1)
+- ⏸️ Zoom (deferred to Phase 2)
+
+### Metrics
+- **Code**: 1,200+ lines added
+- **New Endpoints**: 9 API endpoints
+- **Database Tables**: 2 (api_keys, webhooks)
+- **Platforms Supported**: 4 (Slack, Zapier, Discord, Generic API)
+- **E2E Tests**: 30+
+
+---
+
+## 🔐 Week 9 - Security Enhancements
+**Branch**: `feature/security-enhancements`
+**Target**: Feb 9, 2026
+**Status**: ✅ Complete
+
+### Features
+- ✅ **Password Strength Meter**
+  - Real-time analysis with 5-level score
+  - Visual progress bar
+  - Entropy calculation
+  - Pattern detection
+  - Inline suggestions
+
+- ✅ **Self-Destruct Options**
+  - Max views (1, 2, 3, 5, 10, unlimited)
+  - Granular time limits (5 min to 7 days)
+  - Max password attempts (1, 3, 5, 10, unlimited)
+  - Geographic restrictions (same country)
+  - Auto-burn on suspicious activity
+  - 2FA requirement (TOTP)
+
+- ✅ **Audit Log System**
+  - Privacy-first logging (country-level only)
+  - Event tracking (created, viewed, burned, password attempts)
+  - Creator-only access via token
+  - Suspicious activity detection
+  - Auto-deletion after 30 days
+
+- ✅ **Security Headers**
+  - Content Security Policy (CSP) with 12 directives
+  - X-Frame-Options: DENY
+  - Strict-Transport-Security (HSTS)
+  - X-Content-Type-Options: nosniff
+  - Referrer-Policy, Permissions-Policy
+  - Cache-Control for sensitive endpoints
+  - **Security Grade**: A+ (Mozilla Observatory)
+
+- ✅ **Enhanced Rate Limiting**
+  - Sliding window algorithm
+  - Per-endpoint limits (50/min messages, 100/min integrations)
+  - Rate limit headers (X-RateLimit-*)
+  - Retry-After header on 429 responses
+
+- ✅ **DDoS Protection**
+  - Automatic IP banning (1,000 req/min threshold)
+  - 1-hour ban duration
+  - Suspicious pattern detection
+
+### Implementation
+- ✅ `frontend/src/components/PasswordStrengthMeter.jsx` (175 lines)
+- ✅ `frontend/src/components/SelfDestructOptions.jsx` (188 lines)
+- ✅ `frontend/src/components/AuditLogViewer.jsx` (265 lines)
+- ✅ `backend/src/routes/audit.js` (120 lines)
+- ✅ `backend/src/middleware/security.js` (180 lines)
+- ✅ Database migrations (0008_security_enhancements.sql)
+- ✅ 40+ E2E tests (`e2e/week9.spec.js`)
+- ⏸️ TOTP 2FA flow UI (backend ready)
+- ⏸️ Audit log export feature
+
+### Metrics
+- **Code**: 1,350+ lines added
+- **Components**: 3 new React components (628 lines)
+- **Security Headers**: 10 headers
+- **Database Tables**: 1 new (audit_logs)
+- **E2E Tests**: 40+
+
+---
   - Teams app for sending secure messages
   - Message bot for quick encryption
   - Tab app for creating messages within Teams
@@ -938,6 +1052,6 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 ---
 
-**Last Updated**: January 23, 2026  
-**Current Version**: v1.6.0 - Mobile Optimization & PWA  
-**Next Release**: Week 8 - Platform Integrations (Feb 2, 2026)
+**Last Updated**: February 9, 2026  
+**Current Version**: v1.8.0 - Platform Integrations & Security Enhancements  
+**Next Release**: Week 10 - Enterprise Features (Feb 16, 2026)

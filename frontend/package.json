@@ -1,7 +1,7 @@
 {
   "name": "noteburner-frontend",
-  "version": "1.6.0",
-  "description": "NoteBurner frontend - Mobile Optimization & PWA",
+  "version": "1.8.0",
+  "description": "NoteBurner frontend - Platform Integrations & Security Enhancements",
   "type": "module",
   "scripts": {
     "dev": "vite",
