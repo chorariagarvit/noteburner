@@ -178,7 +178,7 @@ test.describe('Week 3 - Countdown Timer', () => {
     // Create message with 1 hour expiration
     await page.fill('#message', 'Test message with countdown');
     await page.fill('#password', 'SecurePassword123');
-    await page.selectOption('#expiration', '1');
+    await page.selectOption('#time-limit', '60'); // 1 hour = 60 minutes
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
 
@@ -204,7 +204,7 @@ test.describe('Week 3 - Countdown Timer', () => {
     // Create message with 6 hour expiration
     await page.fill('#message', 'Test countdown after decrypt');
     await page.fill('#password', testPassword);
-    await page.selectOption('#expiration', '6');
+    await page.selectOption('#time-limit', '360'); // 6 hours = 360 minutes
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
 
@@ -234,7 +234,7 @@ test.describe('Week 3 - Countdown Timer', () => {
     // Create message with 1 hour expiration
     await page.fill('#message', 'Soon expiring message');
     await page.fill('#password', 'SecurePassword123');
-    await page.selectOption('#expiration', '1');
+    await page.selectOption('#time-limit', '60'); // 1 hour = 60 minutes
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
 
@@ -253,10 +253,10 @@ test.describe('Week 3 - Countdown Timer', () => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
 
-    // Create message without expiration
-    await page.fill('#message', 'No expiration message');
+    // Create message with default expiration (1440 minutes = 24 hours)
+    await page.fill('#message', 'Message with default expiration');
     await page.fill('#password', 'SecurePassword123');
-    await page.selectOption('#expiration', ''); // No expiration
+    // Use default expiration (1440 minutes = 24 hours)
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
 
@@ -267,8 +267,8 @@ test.describe('Week 3 - Countdown Timer', () => {
     // Click unlock button to get past preview screen
     await page.click('text=Unlock Secret Message');
 
-    // Countdown should NOT be visible
-    await expect(page.locator('text=/Message expires in/i')).not.toBeVisible();
+    // Countdown SHOULD be visible since default expiration is set
+    await expect(page.locator('text=/Message expires in/i')).toBeVisible();
   });
 });
 

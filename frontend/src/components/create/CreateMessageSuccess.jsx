@@ -7,6 +7,7 @@ import { GroupMessageLinks } from '../GroupMessageLinks';
 import InviteModal from '../InviteModal';
 import AchievementUnlocked from '../AchievementUnlocked';
 import RewardUnlocked from '../RewardUnlocked';
+import AuditLogViewer from '../AuditLogViewer';
 
 function CreateMessageSuccess({
     shareUrl,
@@ -14,6 +15,8 @@ function CreateMessageSuccess({
     password,
     expiresIn = '24',
     filesCount = 0,
+    messageId,
+    creatorToken,
     onReset,
     onCreateSimilar,
     newAchievements = [],
@@ -106,6 +109,11 @@ function CreateMessageSuccess({
                                 <QRCodeDisplay url={shareUrl} size={256} />
                             </div>
 
+                            {/* Audit Log Viewer - shows who accessed the message */}
+                            {messageId && creatorToken && (
+                                <AuditLogViewer messageId={messageId} creatorToken={creatorToken} />
+                            )}
+
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <button
                                     onClick={onReset}
@@ -186,6 +194,8 @@ CreateMessageSuccess.propTypes = {
     password: PropTypes.string.isRequired,
     expiresIn: PropTypes.string,
     filesCount: PropTypes.number,
+    messageId: PropTypes.string,
+    creatorToken: PropTypes.string,
     onReset: PropTypes.func.isRequired,
     onCreateSimilar: PropTypes.func.isRequired,
     newAchievements: PropTypes.array,

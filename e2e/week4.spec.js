@@ -175,7 +175,7 @@ test.describe('Week 4 - Gamification', () => {
     // Fill form with max expiration
     await page.fill('#message', 'Secure message with max expiration');
     await page.fill('#password', 'TestPassword123!');
-    await page.selectOption('#expiration', '168'); // 7 days
+    await page.selectOption('#time-limit', '10080'); // 7 days = 10080 minutes
     await page.click('button[type="submit"]');
     
     // Wait for success

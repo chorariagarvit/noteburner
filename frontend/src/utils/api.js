@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
 
-export async function createMessage(encryptedData, iv, salt, expiresIn = null, customSlug = null) {
+export async function createMessage(encryptedData, iv, salt, expiresIn = null, customSlug = null, securityOptions = {}) {
   const response = await fetch(`${API_URL}/api/messages`, {
     method: 'POST',
     headers: {
@@ -12,6 +12,7 @@ export async function createMessage(encryptedData, iv, salt, expiresIn = null, c
       salt,
       expiresIn,
       customSlug,
+      ...securityOptions, // maxViews, maxPasswordAttempts, requireGeoMatch, etc.
     }),
   });
 

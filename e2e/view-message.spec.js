@@ -134,7 +134,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.goto('/');
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Expiring message');
     await page.fill('input[placeholder="Enter a strong password"]', 'ExpireTimer123!');
-    await page.selectOption('select', '1'); // 1 hour
+    await page.selectOption('#time-limit', '60'); // 1 hour (60 minutes)
     await page.click('button:has-text("Encrypt & Create Link")');
 
     await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });

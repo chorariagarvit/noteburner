@@ -12,13 +12,14 @@ import { AnimatedCounter } from '../AnimatedCounter';
 import StreakCounter from '../StreakCounter';
 import { useCustomSlug } from '../../hooks/useCustomSlug';
 import { useFileUpload } from '../../hooks/useFileUpload';
+import PasswordStrengthMeter from '../PasswordStrengthMeter';
 
 function HeroSection({ stats, statsLoading }) {
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [expiresIn, setExpiresIn] = useState('24');
+    const [expiresIn, setExpiresIn] = useState('1440'); // Default 24 hours in minutes
     const [loading, setLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState({});
     const [error, setError] = useState('');
@@ -100,7 +101,7 @@ function HeroSection({ stats, statsLoading }) {
             validateForm();
 
             const encrypted = await encryptMessage(message, password);
-            const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
+            const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 60 : null; // Convert minutes to seconds
             const result = await createMessage(
                 encrypted.encryptedData,
                 encrypted.iv,
@@ -255,26 +256,27 @@ function HeroSection({ stats, statsLoading }) {
                                         Generate
                                     </button>
                                 </div>
+                                <PasswordStrengthMeter password={password} />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="expiration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label htmlFor="time-limit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         <Clock className="w-4 h-4 inline mr-1" />
-                                        Expiration
+                                        Time Limit
                                     </label>
                                     <select
-                                        id="expiration"
+                                        id="time-limit"
                                         value={expiresIn}
                                         onChange={(e) => setExpiresIn(e.target.value)}
                                         className="input-field text-sm"
                                     >
                                         <option value="">No expiration</option>
-                                        <option value="1">1 hour</option>
-                                        <option value="6">6 hours</option>
-                                        <option value="24">24 hours</option>
-                                        <option value="72">3 days</option>
-                                        <option value="168">7 days</option>
+                                        <option value="60">1 hour</option>
+                                        <option value="360">6 hours</option>
+                                        <option value="1440">24 hours</option>
+                                        <option value="4320">3 days</option>
+                                        <option value="10080">7 days</option>
                                     </select>
                                 </div>
                                 <div>
