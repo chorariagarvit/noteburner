@@ -42,17 +42,32 @@ app.get('/check-slug/:slug', async (c) => {
 app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
   try {
     const body = await c.req.json();
-    const { encryptedData, iv, salt, expiresIn, customSlug } = body;
+    const { 
+      encryptedData, 
+      iv, 
+      salt, 
+      expiresIn, 
+      customSlug,
+      maxViews = 1,
+      maxPasswordAttempts = 3,
+      requireGeoMatch = 0,
+      autoBurnOnSuspicious = 0,
+      require2FA = 0
+    } = body;
 
     if (!encryptedData || !iv || !salt) {
       return c.json({ error: 'Missing required fields' }, 400);
     }
 
-    // Generate unique token
+    // Generate unique token and creator token
     const token = nanoid(32);
+    const creatorToken = nanoid(32);
     const createdAt = Date.now();
     // expiresIn is in seconds, convert to milliseconds
     const expiresAt = expiresIn ? createdAt + (expiresIn * 1000) : null;
+
+    // Get creator's country from CF headers (for geo-matching)
+    const creatorCountry = c.req.header('cf-ipcountry') || null;
 
     // Handle custom slug if provided
     let finalSlug = null;
@@ -75,11 +90,28 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
       finalSlug = sanitized;
     }
 
-    // Store in D1
+    // Store in D1 with security options
     await c.env.DB.prepare(
-      `INSERT INTO messages (token, encrypted_data, iv, salt, created_at, expires_at, accessed, custom_slug) 
-       VALUES (?, ?, ?, ?, ?, ?, 0, ?)`
-    ).bind(token, encryptedData, iv, salt, createdAt, expiresAt, finalSlug).run();
+      `INSERT INTO messages (
+        token, encrypted_data, iv, salt, created_at, expires_at, accessed, custom_slug,
+        creator_token, max_views, view_count, max_password_attempts, password_attempts,
+        require_geo_match, creator_country, auto_burn_suspicious, require_2fa
+      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?)`
+    ).bind(
+      token, encryptedData, iv, salt, createdAt, expiresAt, finalSlug,
+      creatorToken, maxViews, maxPasswordAttempts, requireGeoMatch, 
+      creatorCountry, autoBurnOnSuspicious, require2FA
+    ).run();
+
+    // Log creation event
+    await c.env.DB.prepare(
+      `INSERT INTO audit_logs (message_id, event_type, country, success, metadata)
+       VALUES (?, 'created', ?, 1, ?)`
+    ).bind(
+      token, 
+      creatorCountry,
+      JSON.stringify({ maxViews, maxPasswordAttempts, requireGeoMatch, autoBurnOnSuspicious })
+    ).run();
 
     // Increment stats
     await incrementStat(c.env.DB, 'messages_created');
@@ -93,6 +125,7 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     return c.json({
       success: true,
       token,
+      creatorToken,
       slug: finalSlug,
       url: `${frontendUrl}${urlPath}`
     }, 201);

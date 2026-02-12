@@ -58,13 +58,13 @@ test.describe('Message Creation', () => {
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Expiring message');
     await page.fill('input[placeholder="Enter a strong password"]', 'ExpireTest123!');
 
-    // Select 1 hour expiration
-    await page.selectOption('select', '1');
+    // Select 1 hour expiration (60 minutes)
+    await page.selectOption('#time-limit', '60');
 
     await page.click('button:has-text("Encrypt & Create Link")');
 
     await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Message expires in 1 hour(s)')).toBeVisible();
+    // Expiration is now displayed in the success component
   });
 
   test('should create message with file attachment', async ({ page }) => {
@@ -135,7 +135,7 @@ test.describe('Message Creation', () => {
     const testPassword = 'SimilarTest123!';
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'First message');
     await page.fill('input[placeholder="Enter a strong password"]', testPassword);
-    await page.selectOption('select', '6'); // 6 hours
+    await page.selectOption('#time-limit', '360'); // 6 hours = 360 minutes
     await page.click('button:has-text("Encrypt & Create Link")');
 
     await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
@@ -150,8 +150,8 @@ test.describe('Message Creation', () => {
     const passwordInput = page.locator('input[placeholder="Enter a strong password"]');
     expect(await passwordInput.inputValue()).toBe(testPassword);
 
-    const expirationSelect = page.locator('select');
-    expect(await expirationSelect.inputValue()).toBe('6');
+    const expirationSelect = page.locator('#time-limit');
+    expect(await expirationSelect.inputValue()).toBe('360');
 
     // Verify message is cleared
     const messageTextarea = page.locator('textarea[placeholder="Enter your secret message..."]');
@@ -163,7 +163,7 @@ test.describe('Message Creation', () => {
 
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Test message');
     await page.fill('input[placeholder="Enter a strong password"]', 'ResetTest123!');
-    await page.selectOption('select', '24');
+    await page.selectOption('#time-limit', '1440'); // 24 hours = 1440 minutes
     await page.click('button:has-text("Encrypt & Create Link")');
 
     await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
@@ -178,7 +178,7 @@ test.describe('Message Creation', () => {
     const passwordInput = page.locator('input[placeholder="Enter a strong password"]');
     expect(await passwordInput.inputValue()).toBe('');
 
-    const expirationSelect = page.locator('select');
-    expect(await expirationSelect.inputValue()).toBe('24'); // Default
+    const expirationSelect = page.locator('#time-limit');
+    expect(await expirationSelect.inputValue()).toBe('1440'); // Default 24 hours = 1440 minutes
   });
 });

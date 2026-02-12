@@ -22,10 +22,11 @@ const SelfDestructOptions = ({ options, onChange }) => {
 
       {/* Max view count */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="max-views" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Maximum Views
         </label>
         <select
+          id="max-views"
           value={options.maxViews || 1}
           onChange={(e) => handleChange('maxViews', parseInt(e.target.value))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -44,10 +45,11 @@ const SelfDestructOptions = ({ options, onChange }) => {
 
       {/* Time-based expiration */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="time-limit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Time Limit
         </label>
         <select
+          id="time-limit"
           value={options.expiresInMinutes || 1440}
           onChange={(e) => handleChange('expiresInMinutes', parseInt(e.target.value))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -69,10 +71,11 @@ const SelfDestructOptions = ({ options, onChange }) => {
 
       {/* Max password attempts */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label htmlFor="max-password-attempts" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Max Password Attempts
         </label>
         <select
+          id="max-password-attempts"
           value={options.maxPasswordAttempts || 3}
           onChange={(e) => handleChange('maxPasswordAttempts', parseInt(e.target.value))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent"

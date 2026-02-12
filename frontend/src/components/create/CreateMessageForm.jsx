@@ -2,6 +2,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Flame, Clock, Eye, EyeOff, Upload, X, Link2, CheckCircle, XCircle, Loader, Users, FileText } from 'lucide-react';
+import PasswordStrengthMeter from '../PasswordStrengthMeter';
+import SelfDestructOptions from '../SelfDestructOptions';
 
 function CreateMessageForm(props) {
     const {
@@ -14,8 +16,6 @@ function CreateMessageForm(props) {
         showPassword,
         setShowPassword,
         handleGeneratePassword,
-        expiresIn,
-        setExpiresIn,
         customSlug,
         handleCustomSlugChange,
         slugStatus,
@@ -35,7 +35,9 @@ function CreateMessageForm(props) {
         loadingMessage,
         showTemplates,
         setShowTemplates,
-        onSelectTemplate
+        onSelectTemplate,
+        selfDestructOptions,
+        setSelfDestructOptions
     } = props;
 
     return (
@@ -111,27 +113,16 @@ function CreateMessageForm(props) {
                             Generate
                         </button>
                     </div>
+                    <PasswordStrengthMeter password={password} />
                 </div>
 
-                <div>
-                    <label htmlFor="expiration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        <Clock className="w-4 h-4 inline mr-1" />
-                        Expiration (optional)
-                    </label>
-                    <select
-                        id="expiration"
-                        value={expiresIn}
-                        onChange={(e) => setExpiresIn(e.target.value)}
-                        className="input-field"
-                    >
-                        <option value="">No expiration</option>
-                        <option value="1">1 hour</option>
-                        <option value="6">6 hours</option>
-                        <option value="24">24 hours</option>
-                        <option value="72">3 days</option>
-                        <option value="168">7 days</option>
-                    </select>
-                </div>
+                {/* Advanced Self-Destruct Options */}
+                {!isGroupMessage && (
+                    <SelfDestructOptions 
+                        options={selfDestructOptions} 
+                        onChange={setSelfDestructOptions} 
+                    />
+                )}
 
                 {!isGroupMessage && (
                     <>
@@ -333,8 +324,6 @@ CreateMessageForm.propTypes = {
     showPassword: PropTypes.bool.isRequired,
     setShowPassword: PropTypes.func.isRequired,
     handleGeneratePassword: PropTypes.func.isRequired,
-    expiresIn: PropTypes.string.isRequired,
-    setExpiresIn: PropTypes.func.isRequired,
     customSlug: PropTypes.string,
     handleCustomSlugChange: PropTypes.func.isRequired,
     slugStatus: PropTypes.string.isRequired,
@@ -354,7 +343,9 @@ CreateMessageForm.propTypes = {
     loadingMessage: PropTypes.string,
     showTemplates: PropTypes.bool,
     setShowTemplates: PropTypes.func,
-    onSelectTemplate: PropTypes.func
+    onSelectTemplate: PropTypes.func,
+    selfDestructOptions: PropTypes.object.isRequired,
+    setSelfDestructOptions: PropTypes.func.isRequired
 };
 
 export default CreateMessageForm;

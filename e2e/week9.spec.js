@@ -276,6 +276,13 @@ test.describe('Week 9 - Security Enhancements', () => {
     test('should display audit log viewer component', async ({ page }) => {
       await page.goto('/');
       
+      // Close onboarding modal if present
+      const modalCloseButton = page.locator('button:has-text("Got it"), button:has-text("Close"), button:has-text("Skip")').first();
+      if (await modalCloseButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await modalCloseButton.click();
+        await page.waitForTimeout(300);
+      }
+      
       // Create a message first
       await page.fill('textarea', 'Test message with audit log');
       const passwordInput = page.locator('input[type="password"]').first();

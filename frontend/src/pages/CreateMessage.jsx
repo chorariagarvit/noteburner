@@ -14,20 +14,30 @@ import CreateMessageForm from '../components/create/CreateMessageForm';
 import CreateMessageSuccess from '../components/create/CreateMessageSuccess';
 import MessageTemplates from '../components/templates/MessageTemplates';
 import KeyboardShortcutsModal from '../components/keyboard/KeyboardShortcutsModal';
+import SelfDestructOptions from '../components/SelfDestructOptions';
 
 function CreateMessage() {
   const location = useLocation();
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [expiresIn, setExpiresIn] = useState('24'); // Default 24 hours
   const [loading, setLoading] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [messageId, setMessageId] = useState('');
+  const [creatorToken, setCreatorToken] = useState('');
   const [error, setError] = useState('');
   const [locking, setLocking] = useState(false);
   const [mysteryMode, setMysteryMode] = useState(false);
   const [newAchievements, setNewAchievements] = useState([]);
   const [newRewards, setNewRewards] = useState([]);
+  const [selfDestructOptions, setSelfDestructOptions] = useState({
+    maxViews: 1,
+    expiresInMinutes: 1440,
+    maxPasswordAttempts: 3,
+    requireGeoMatch: false,
+    autoBurnOnSuspicious: false,
+    require2FA: false
+  });
 
   // Group message state
   const [isGroupMessage, setIsGroupMessage] = useState(false);
@@ -55,19 +65,30 @@ function CreateMessage() {
     setPassword('');
     clearFiles();
     setShareUrl('');
+    setMessageId('');
+    setCreatorToken('');
     setGroupData(null);
-    setExpiresIn('24');
     setError('');
     resetSlug();
     setIsGroupMessage(false);
     setRecipientCount(2);
     setBurnOnFirstView(false);
+    setSelfDestructOptions({
+      maxViews: 1,
+      expiresInMinutes: 1440,
+      maxPasswordAttempts: 3,
+      requireGeoMatch: false,
+      autoBurnOnSuspicious: false,
+      require2FA: false
+    });
   };
 
   const handleCreateSimilar = () => {
     setMessage('');
     clearFiles();
     setShareUrl('');
+    setMessageId('');
+    setCreatorToken('');
     setGroupData(null);
     setError('');
     resetSlug();
@@ -76,7 +97,7 @@ function CreateMessage() {
 
   const handleSelectTemplate = (template) => {
     setMessage(template.message);
-    setExpiresIn(template.expiration);
+    // Templates can set expiration via selfDestructOptions if needed
     setShowTemplates(false);
   };
 
@@ -90,8 +111,14 @@ function CreateMessage() {
     if (location.state?.shareUrl) {
       setShareUrl(location.state.shareUrl);
       setPassword(location.state.password);
-      setExpiresIn(location.state.expiresIn || '24');
       setFilesCount(location.state.filesCount || 0);
+      // Update selfDestructOptions if expiresIn was passed from homepage
+      if (location.state.expiresIn) {
+        setSelfDestructOptions(prev => ({
+          ...prev,
+          expiresInMinutes: Number.parseInt(location.state.expiresIn)
+        }));
+      }
       // Clear location state to prevent re-showing on refresh
       globalThis.history.replaceState({}, document.title);
     }
@@ -151,7 +178,7 @@ function CreateMessage() {
       const encrypted = await encryptMessage(message, password);
 
       // Create message on server
-      const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 3600 : null;
+      const expirySeconds = selfDestructOptions.expiresInMinutes ? selfDestructOptions.expiresInMinutes * 60 : null;
 
       let result;
       if (isGroupMessage) {
@@ -168,12 +195,22 @@ function CreateMessage() {
         setGroupData(result);
       } else {
         // Create regular single message
+        // Convert expiresInMinutes to seconds for the API
+        const expiryFromOptions = selfDestructOptions.expiresInMinutes * 60;
+        
         result = await createMessage(
           encrypted.encryptedData,
           encrypted.iv,
           encrypted.salt,
-          expirySeconds,
-          customSlug || undefined
+          expiryFromOptions, // Use minutes-based expiry from security options
+          customSlug || undefined,
+          {
+            maxViews: selfDestructOptions.maxViews,
+            maxPasswordAttempts: selfDestructOptions.maxPasswordAttempts,
+            requireGeoMatch: selfDestructOptions.requireGeoMatch ? 1 : 0,
+            autoBurnOnSuspicious: selfDestructOptions.autoBurnOnSuspicious ? 1 : 0,
+            require2FA: selfDestructOptions.require2FA ? 1 : 0
+          }
         );
       }
 
@@ -203,6 +240,8 @@ function CreateMessage() {
 
       if (!isGroupMessage) {
         setShareUrl(result.url);
+        setMessageId(result.token);
+        setCreatorToken(result.creatorToken || result.token); // Use creatorToken from API
         setFilesCount(files.length);
       }
 
@@ -253,8 +292,9 @@ function CreateMessage() {
         shareUrl={shareUrl}
         groupData={groupData}
         password={password}
-        expiresIn={expiresIn}
         filesCount={filesCount}
+        messageId={messageId}
+        creatorToken={creatorToken}
         onReset={handleReset}
         onCreateSimilar={handleCreateSimilar}
         newAchievements={newAchievements}
@@ -278,8 +318,6 @@ function CreateMessage() {
           showPassword={showPassword}
           setShowPassword={setShowPassword}
           handleGeneratePassword={handleGeneratePassword}
-          expiresIn={expiresIn}
-          setExpiresIn={setExpiresIn}
           customSlug={customSlug}
           handleCustomSlugChange={handleCustomSlugChange}
           slugStatus={slugStatus}
@@ -299,6 +337,8 @@ function CreateMessage() {
           showTemplates={showTemplates}
           setShowTemplates={setShowTemplates}
           onSelectTemplate={handleSelectTemplate}
+          selfDestructOptions={selfDestructOptions}
+          setSelfDestructOptions={setSelfDestructOptions}
         />
       </div>
 

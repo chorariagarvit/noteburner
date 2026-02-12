@@ -204,7 +204,7 @@ test.describe('Viral Mechanics Features', () => {
     const password = 'RecreateTest123!';
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'First message');
     await page.fill('input[placeholder="Enter a strong password"]', password);
-    await page.selectOption('select', '6'); // 6 hours
+    await page.selectOption('#time-limit', '360'); // 6 hours = 360 minutes
     await page.click('button:has-text("Encrypt & Create Link")');
 
     await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
@@ -219,8 +219,8 @@ test.describe('Viral Mechanics Features', () => {
     const passwordInput = page.locator('input[placeholder="Enter a strong password"]');
     expect(await passwordInput.inputValue()).toBe(password);
 
-    const expirationSelect = page.locator('select');
-    expect(await expirationSelect.inputValue()).toBe('6');
+    const expirationSelect = page.locator('#time-limit');
+    expect(await expirationSelect.inputValue()).toBe('360');
 
     // Message should be cleared for new content
     const messageTextarea = page.locator('textarea[placeholder="Enter your secret message..."]');
