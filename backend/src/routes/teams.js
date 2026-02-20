@@ -37,7 +37,12 @@ async function checkTeamPermission(db, teamId, userId, requiredRole = 'member') 
  * Create a new team
  */
 router.post('/', async (c) => {
-  const userId = getUserId(c); // From auth middleware
+  const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+
   const body = await c.req.json();
 
   const { name, plan = 'free' } = body;
@@ -85,6 +90,10 @@ router.post('/', async (c) => {
  */
 router.get('/', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
 
   const teams = await c.env.DB.prepare(`
     SELECT t.id, t.name, t.plan, t.max_members, t.created_at,
@@ -106,6 +115,11 @@ router.get('/', async (c) => {
  */
 router.get('/:id', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('id');
 
   // Check membership
@@ -135,6 +149,11 @@ router.get('/:id', async (c) => {
  */
 router.put('/:id', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('id');
   const body = await c.req.json();
 
@@ -177,6 +196,11 @@ router.put('/:id', async (c) => {
  */
 router.delete('/:id', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('id');
 
   // Check if user is owner
@@ -204,6 +228,11 @@ router.delete('/:id', async (c) => {
  */
 router.get('/:id/members', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('id');
 
   const hasAccess = await checkTeamPermission(c.env.DB, teamId, userId, 'member');
@@ -227,6 +256,11 @@ router.get('/:id/members', async (c) => {
  */
 router.post('/:id/members', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('id');
   const body = await c.req.json();
 
@@ -291,6 +325,11 @@ router.post('/:id/members', async (c) => {
  */
 router.put('/:teamId/members/:memberId', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('teamId');
   const memberId = c.req.param('memberId');
   const body = await c.req.json();
@@ -320,6 +359,11 @@ router.put('/:teamId/members/:memberId', async (c) => {
  */
 router.delete('/:teamId/members/:memberId', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('teamId');
   const memberId = c.req.param('memberId');
 
@@ -353,6 +397,11 @@ router.delete('/:teamId/members/:memberId', async (c) => {
  */
 router.get('/:id/messages', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('id');
   const limit = parseInt(c.req.query('limit') || '50');
   const offset = parseInt(c.req.query('offset') || '0');
@@ -393,6 +442,11 @@ router.get('/:id/messages', async (c) => {
  */
 router.get('/:id/stats', async (c) => {
   const userId = getUserId(c);
+  
+  if (!userId) {
+    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
+  }
+  
   const teamId = c.req.param('id');
 
   const isAdmin = await checkTeamPermission(c.env.DB, teamId, userId, 'admin');
