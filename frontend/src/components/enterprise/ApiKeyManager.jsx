@@ -16,13 +16,22 @@ export default function ApiKeyManager() {
   const loadApiKeys = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch('/api/api-keys', {
         headers: {
           'X-Session-Token': sessionStorage.getItem('sessionToken') || ''
         }
       });
 
-      if (!response.ok) throw new Error('Failed to load API keys');
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to load API keys');
+        } else {
+          throw new Error(`Failed to load API keys (${response.status})`);
+        }
+      }
 
       const data = await response.json();
       setApiKeys(data.keys || []);
@@ -37,6 +46,7 @@ export default function ApiKeyManager() {
     e.preventDefault();
     
     try {
+      setError(null);
       const response = await fetch('/api/api-keys', {
         method: 'POST',
         headers: {
@@ -49,7 +59,15 @@ export default function ApiKeyManager() {
         })
       });
 
-      if (!response.ok) throw new Error('Failed to create API key');
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create API key');
+        } else {
+          throw new Error(`Failed to create API key (${response.status})`);
+        }
+      }
 
       const data = await response.json();
       setCreatedKey({ key: data.key, ...data.api_key });
@@ -66,6 +84,7 @@ export default function ApiKeyManager() {
     if (!confirm('Are you sure you want to revoke this API key?')) return;
 
     try {
+      setError(null);
       const response = await fetch(`/api/api-keys/${keyId}`, {
         method: 'DELETE',
         headers: {
@@ -73,7 +92,15 @@ export default function ApiKeyManager() {
         }
       });
 
-      if (!response.ok) throw new Error('Failed to revoke API key');
+      if (!response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to revoke API key');
+        } else {
+          throw new Error(`Failed to revoke API key (${response.status})`);
+        }
+      }
 
       loadApiKeys();
     } catch (err) {

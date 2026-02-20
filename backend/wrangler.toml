@@ -8,6 +8,12 @@ compatibility_flags = [
 # Enable logs
 observability = { enabled = true }
 
+# Routes for production deployment
+routes = [
+  { pattern = "noteburner.work/api/*", zone_name = "noteburner.work" },
+  { pattern = "api.noteburner.work/*", zone_name = "noteburner.work" }
+]
+
 # D1 Database binding
 [[ d1_databases ]]
 binding = "DB"
