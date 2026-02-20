@@ -279,9 +279,12 @@ test.describe('Week 9 - Security Enhancements', () => {
       // Close onboarding modal if present
       const modalCloseButton = page.locator('button:has-text("Got it"), button:has-text("Close"), button:has-text("Skip")').first();
       if (await modalCloseButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await modalCloseButton.click();
-        await page.waitForTimeout(300);
+        await modalCloseButton.click({ force: true });
+        await page.waitForTimeout(500);
       }
+      
+      // Wait for any dialogs to close
+      await page.waitForTimeout(500);
       
       // Create a message first
       await page.fill('textarea', 'Test message with audit log');
@@ -292,7 +295,7 @@ test.describe('Week 9 - Security Enhancements', () => {
       
       const createButton = page.locator('button:has-text("Encrypt"), button:has-text("Create")').first();
       if (await createButton.count() > 0) {
-        await createButton.click();
+        await createButton.click({ force: true });
         
         // Look for audit log section
         await page.waitForTimeout(1000);

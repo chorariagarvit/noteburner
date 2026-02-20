@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   metadata TEXT -- JSON for additional non-sensitive data
 );
 
-CREATE INDEX idx_audit_message ON audit_logs(message_id);
-CREATE INDEX idx_audit_timestamp ON audit_logs(timestamp);
-CREATE INDEX idx_audit_event_type ON audit_logs(event_type);
+CREATE INDEX IF NOT EXISTS idx_audit_message ON audit_logs(message_id);
+CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_event_type ON audit_logs(event_type);
 
 -- Add security-related columns to messages table
 ALTER TABLE messages ADD COLUMN creator_token TEXT; -- Token to access audit logs
@@ -27,5 +27,5 @@ ALTER TABLE messages ADD COLUMN auto_burn_suspicious INTEGER DEFAULT 0; -- Auto-
 ALTER TABLE messages ADD COLUMN require_2fa INTEGER DEFAULT 0; -- Requires TOTP code
 ALTER TABLE messages ADD COLUMN totp_secret TEXT; -- TOTP secret (if enabled)
 
-CREATE INDEX idx_messages_view_count ON messages(view_count);
-CREATE INDEX idx_messages_creator_token ON messages(creator_token);
+CREATE INDEX IF NOT EXISTS idx_messages_view_count ON messages(view_count);
+CREATE INDEX IF NOT EXISTS idx_messages_creator_token ON messages(creator_token);

@@ -7,8 +7,14 @@ import statsRouter from './routes/stats.js';
 import cleanupRouter from './routes/cleanup.js';
 import integrationsRouter from './routes/integrations.js';
 import auditRouter from './routes/audit.js';
+import apiV1Router from './routes/api-v1.js';
+import apiKeysRouter from './routes/api-keys.js';
+import teamsRouter from './routes/teams.js';
+import brandingRouter from './routes/branding.js';
+import complianceRouter from './routes/compliance.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
 import { securityHeaders, enhancedRateLimit, ddosProtection } from './middleware/security.js';
+import { requireAuth } from './middleware/auth.js';
 
 const app = new Hono();
 
@@ -28,7 +34,8 @@ app.get('/', (c) => {
   return c.json({
     status: 'ok',
     service: 'NoteBurner API',
-    version: '1.8.0'
+    version: '1.9.0',
+    features: ['enterprise', 'teams', 'api-v1', 'branding', 'compliance']
   });
 });
 
@@ -39,6 +46,13 @@ app.route('/api/stats', statsRouter);
 app.route('/api/cleanup', cleanupRouter);
 app.route('/api/integrations', integrationsRouter);
 app.route('/api/audit', auditRouter);
+
+// Week 10: Enterprise features
+app.route('/api/v1', apiV1Router); // Has its own API key auth
+app.route('/api/api-keys', apiKeysRouter); // Session auth in router
+app.route('/api/teams', teamsRouter); // Session auth in router
+app.route('/api/branding', brandingRouter); // Session auth in router
+app.route('/api/compliance', complianceRouter); // Session auth in router
 
 // Handle preflight OPTIONS requests
 app.options('/*', (c) => {
