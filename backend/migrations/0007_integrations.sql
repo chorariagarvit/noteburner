@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS api_keys (
   rate_limit INTEGER DEFAULT 1000
 );
 
-CREATE INDEX idx_api_keys_key ON api_keys(key);
-CREATE INDEX idx_api_keys_user ON api_keys(user_id);
+CREATE INDEX IF NOT EXISTS idx_api_keys_key ON api_keys(key);
+CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id);
 
 -- Webhooks table
 CREATE TABLE IF NOT EXISTS webhooks (
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS webhooks (
   failure_count INTEGER DEFAULT 0
 );
 
-CREATE INDEX idx_webhooks_user ON webhooks(user_id);
-CREATE INDEX idx_webhooks_active ON webhooks(active);
+CREATE INDEX IF NOT EXISTS idx_webhooks_user ON webhooks(user_id);
+CREATE INDEX IF NOT EXISTS idx_webhooks_active ON webhooks(active);
 
 -- Add created_via column to messages table (if not exists)
 ALTER TABLE messages ADD COLUMN created_via TEXT DEFAULT 'web';
@@ -37,5 +37,5 @@ ALTER TABLE messages ADD COLUMN created_via TEXT DEFAULT 'web';
 -- Add user_id column to messages table (for API tracking)
 ALTER TABLE messages ADD COLUMN user_id TEXT;
 
-CREATE INDEX idx_messages_created_via ON messages(created_via);
-CREATE INDEX idx_messages_user_id ON messages(user_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_via ON messages(created_via);
+CREATE INDEX IF NOT EXISTS idx_messages_user_id ON messages(user_id);

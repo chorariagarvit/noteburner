@@ -23,8 +23,8 @@ export const corsConfig = {
     // Check if origin is in allowed list
     return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   },
-  allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'X-Session-Token', 'X-API-Key'],
   exposeHeaders: ['X-File-IV', 'X-File-Salt', 'X-File-Name', 'Content-Disposition'],
   credentials: false,
 };

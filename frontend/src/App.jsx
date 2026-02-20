@@ -9,8 +9,13 @@ import ReferralsPage from './pages/ReferralsPage';
 import InviteFriendsPage from './pages/InviteFriendsPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import SupportPage from './pages/SupportPage';
+import TeamCreationPage from './pages/TeamCreationPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ApiKeyManager from './components/enterprise/ApiKeyManager';
+import TeamDashboard from './components/enterprise/TeamDashboard';
+import BrandingCustomizer from './components/enterprise/BrandingCustomizer';
+import ComplianceDashboard from './components/enterprise/ComplianceDashboard';
 
 export const ThemeContext = createContext();
 
@@ -56,6 +61,11 @@ function App() {
               <Route path="/invite" element={<InviteFriendsPage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/support" element={<SupportPage />} />
+              <Route path="/api-keys" element={<ApiKeyManager />} />
+              <Route path="/teams/new" element={<TeamCreationPage />} />
+              <Route path="/teams/:teamId" element={<TeamDashboard />} />
+              <Route path="/teams/:teamId/branding" element={<BrandingCustomizer />} />
+              <Route path="/teams/:teamId/compliance" element={<ComplianceDashboard />} />
               <Route path="/m/:identifier" element={<ViewMessage />} />
               <Route path="*" element={<HomePage />} />
             </Routes>
