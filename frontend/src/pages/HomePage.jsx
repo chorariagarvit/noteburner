@@ -7,6 +7,7 @@ import { useStats } from '../hooks/useStats';
 // Page Components
 import HeroSection from '../components/home/HeroSection';
 import FeaturesSection from '../components/home/FeaturesSection';
+import EnterpriseFeaturesSection from '../components/home/EnterpriseFeaturesSection';
 import HowItWorksSection from '../components/home/HowItWorksSection';
 import StatsSection from '../components/home/StatsSection';
 import CTASection from '../components/home/CTASection';
@@ -43,6 +44,7 @@ function HomePage() {
     <div className="min-h-[calc(100vh-8rem)]">
       <HeroSection stats={stats} statsLoading={statsLoading} />
       <FeaturesSection />
+      <EnterpriseFeaturesSection />
       <HowItWorksSection />
       <StatsSection stats={stats} loading={statsLoading} />
       <CTASection />
