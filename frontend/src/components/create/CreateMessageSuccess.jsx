@@ -8,6 +8,7 @@ import InviteModal from '../InviteModal';
 import AchievementUnlocked from '../AchievementUnlocked';
 import RewardUnlocked from '../RewardUnlocked';
 import AuditLogViewer from '../AuditLogViewer';
+import TOTPSetup from '../TOTPSetup';
 
 function CreateMessageSuccess({
     shareUrl,
@@ -17,6 +18,7 @@ function CreateMessageSuccess({
     filesCount = 0,
     messageId,
     creatorToken,
+    totpData,
     onReset,
     onCreateSimilar,
     newAchievements = [],
@@ -103,6 +105,9 @@ function CreateMessageSuccess({
                                     Make sure the recipient has this password before sharing the link
                                 </p>
                             </div>
+
+                            {/* TOTP Setup - shown when 2FA is enabled */}
+                            {totpData && <TOTPSetup totpData={totpData} />}
 
                             <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
                                 <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">Share via QR Code</h3>

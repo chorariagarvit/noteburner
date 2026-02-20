@@ -135,7 +135,7 @@ test.describe('Week 5 - Network Effects Features', () => {
 
       // Verify main nav links
       await expect(page.locator('a[href="/"]').first()).toBeVisible();
-      await expect(page.locator('a[href="/create"]')).toBeVisible();
+      await expect(page.locator('a[href="/create"]').first()).toBeVisible();
     });
 
     test('should show consistent branding across pages', async ({ page }) => {
