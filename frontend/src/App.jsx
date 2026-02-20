@@ -9,6 +9,7 @@ import ReferralsPage from './pages/ReferralsPage';
 import InviteFriendsPage from './pages/InviteFriendsPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import SupportPage from './pages/SupportPage';
+import ChangelogPage from './pages/ChangelogPage';
 import TeamCreationPage from './pages/TeamCreationPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -60,6 +61,7 @@ function App() {
               <Route path="/referrals" element={<ReferralsPage />} />
               <Route path="/invite" element={<InviteFriendsPage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/changelog" element={<ChangelogPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/api-keys" element={<ApiKeyManager />} />
               <Route path="/teams/new" element={<TeamCreationPage />} />

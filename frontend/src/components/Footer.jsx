@@ -20,6 +20,9 @@ function Footer() {
             <Link to="/privacy" className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
               Privacy
             </Link>
+            <Link to="/changelog" className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+              Changelog
+            </Link>
             <Link to="/support" className="text-sm text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
               Support
             </Link>
