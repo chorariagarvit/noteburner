@@ -5,6 +5,7 @@ import { incrementStat } from '../utils/stats.js';
 import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValidation.js';
 import { getMessageByIdentifier, deleteMessageByIdentifier, deleteExpiredMessage } from '../utils/messageHelpers.js';
 import { createGroupMessage, incrementGroupAccess } from '../utils/groupMessages.js';
+import { generateTOTPSecret, generateTOTPUri, verifyTOTP } from '../utils/totp.js';
 
 const app = new Hono();
 
@@ -69,6 +70,16 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     // Get creator's country from CF headers (for geo-matching)
     const creatorCountry = c.req.header('cf-ipcountry') || null;
 
+    // Generate TOTP secret if 2FA is required
+    let totpSecret = null;
+    let totpUri = null;
+    if (require2FA) {
+      totpSecret = generateTOTPSecret();
+      // Create label with short message ID for identification
+      const messageLabel = `Message:${token.substring(0, 8)}`;
+      totpUri = generateTOTPUri(totpSecret, messageLabel, 'NoteBurner');
+    }
+
     // Handle custom slug if provided
     let finalSlug = null;
     if (customSlug?.trim()) {
@@ -90,17 +101,17 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
       finalSlug = sanitized;
     }
 
-    // Store in D1 with security options
+   // Store in D1 with security options
     await c.env.DB.prepare(
       `INSERT INTO messages (
         token, encrypted_data, iv, salt, created_at, expires_at, accessed, custom_slug,
         creator_token, max_views, view_count, max_password_attempts, password_attempts,
-        require_geo_match, creator_country, auto_burn_suspicious, require_2fa
-      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?)`
+        require_geo_match, creator_country, auto_burn_suspicious, require_2fa, totp_secret
+      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?)`
     ).bind(
       token, encryptedData, iv, salt, createdAt, expiresAt, finalSlug,
       creatorToken, maxViews, maxPasswordAttempts, requireGeoMatch, 
-      creatorCountry, autoBurnOnSuspicious, require2FA
+      creatorCountry, autoBurnOnSuspicious, require2FA, totpSecret
     ).run();
 
     // Log creation event
@@ -122,13 +133,24 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     // Both custom slugs and tokens use /m/ prefix
     const urlPath = `/m/${finalSlug || token}`;
 
-    return c.json({
+    const response = {
       success: true,
       token,
       creatorToken,
       slug: finalSlug,
       url: `${frontendUrl}${urlPath}`
-    }, 201);
+    };
+
+    // Include TOTP info if 2FA is enabled
+    if (require2FA && totpUri) {
+      response.totp = {
+        secret: totpSecret,
+        uri: totpUri,
+        qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(totpUri)}`
+      };
+    }
+
+    return c.json(response, 201);
   } catch (error) {
     console.error('Error creating message:', error);
     return c.json({ error: 'Failed to create message' }, 500);
@@ -228,13 +250,59 @@ app.get('/:identifier', async (c) => {
       salt: result.salt,
       mediaFiles: result.media_files ? JSON.parse(result.media_files) : [],
       createdAt: result.created_at,
-      expiresAt: result.expires_at
+      expiresAt: result.expires_at,
+      totpRequired: result.require_2fa === 1
     };
 
     return c.json(response);
   } catch (error) {
     console.error('Error retrieving message:', error);
     return c.json({ error: 'Failed to retrieve message' }, 500);
+  }
+});
+
+// Verify TOTP code for 2FA-protected messages
+app.post('/:identifier/verify-totp', async (c) => {
+  try {
+    const identifier = c.req.param('identifier');
+    const { code } = await c.req.json();
+
+    if (!identifier || !code) {
+      return c.json({ error: 'Identifier and code are required' }, 400);
+    }
+
+    // Validate code format (6 digits)
+    if (!/^\d{6}$/.test(code)) {
+      return c.json({ error: 'Invalid code format. Must be 6 digits.' }, 400);
+    }
+
+    // Retrieve message
+    const result = await getMessageByIdentifier(c.env.DB, identifier);
+
+    if (!result) {
+      return c.json({ error: 'Message not found' }, 404);
+    }
+
+    // Check if 2FA is required
+    if (!result.require_2fa || !result.totp_secret) {
+      return c.json({ error: 'This message does not require 2FA' }, 400);
+    }
+
+    // Verify TOTP code
+    const isValid = verifyTOTP(code, result.totp_secret, 1); // Allow 1 window drift (±30s)
+
+    if (!isValid) {
+      return c.json({ error: 'Invalid or expired code. Please try again.' }, 401);
+    }
+
+    // TOTP verified successfully
+    return c.json({ 
+      success: true, 
+      message: 'TOTP verified successfully' 
+    });
+  } catch (error) {
+    console.error('Error verifying TOTP:', error);
+    return c.json({ error: 'Failed to verify TOTP code' }, 500);
   }
 });
 

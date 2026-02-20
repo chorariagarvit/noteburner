@@ -25,6 +25,7 @@ function CreateMessage() {
   const [shareUrl, setShareUrl] = useState('');
   const [messageId, setMessageId] = useState('');
   const [creatorToken, setCreatorToken] = useState('');
+  const [totpData, setTotpData] = useState(null);
   const [error, setError] = useState('');
   const [locking, setLocking] = useState(false);
   const [mysteryMode, setMysteryMode] = useState(false);
@@ -67,6 +68,7 @@ function CreateMessage() {
     setShareUrl('');
     setMessageId('');
     setCreatorToken('');
+    setTotpData(null);
     setGroupData(null);
     setError('');
     resetSlug();
@@ -89,6 +91,7 @@ function CreateMessage() {
     setShareUrl('');
     setMessageId('');
     setCreatorToken('');
+    setTotpData(null);
     setGroupData(null);
     setError('');
     resetSlug();
@@ -242,6 +245,7 @@ function CreateMessage() {
         setShareUrl(result.url);
         setMessageId(result.token);
         setCreatorToken(result.creatorToken || result.token); // Use creatorToken from API
+        setTotpData(result.totp || null); // Save TOTP data if 2FA is enabled
         setFilesCount(files.length);
       }
 
@@ -295,6 +299,7 @@ function CreateMessage() {
         filesCount={filesCount}
         messageId={messageId}
         creatorToken={creatorToken}
+        totpData={totpData}
         onReset={handleReset}
         onCreateSimilar={handleCreateSimilar}
         newAchievements={newAchievements}

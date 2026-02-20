@@ -7,6 +7,7 @@ import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../ut
 import { useCountdown, formatTimeLeft } from '../hooks/useCountdown';
 import { CountdownTimer } from '../components/CountdownTimer';
 import { setMessageOpenGraph } from '../utils/openGraph';
+import TOTPInput from '../components/TOTPInput';
 
 function ViewMessage() {
   const { identifier } = useParams();
@@ -26,6 +27,9 @@ function ViewMessage() {
   const [unlocking, setUnlocking] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [expiresAt, setExpiresAt] = useState(null);
+  const [totpRequired, setTotpRequired] = useState(false);
+  const [totpVerified, setTotpVerified] = useState(false);
+  const [totpError, setTotpError] = useState('');
   const timeLeft = useCountdown(expiresAt);
   
   // Set Open Graph tags - must be at component level, not in useEffect
@@ -34,12 +38,15 @@ function ViewMessage() {
   useEffect(() => {
     document.title = 'NoteBurner - View Message';
     
-    // Fetch message metadata (including expiration) without decrypting
+    // Fetch message metadata (including expiration and TOTP requirement) without decrypting
     async function fetchMetadata() {
       try {
         const data = await getMessage(messageIdentifier);
         if (data.expiresAt) {
           setExpiresAt(data.expiresAt);
+        }
+        if (data.totpRequired) {
+          setTotpRequired(true);
         }
       } catch (err) {
         // Message not found or error - will be handled during decryption attempt
@@ -55,6 +62,31 @@ function ViewMessage() {
   const handleExpire = () => {
     setError('This message has expired and is no longer available.');
     navigate('/');
+  };
+
+  const handleTOTPVerify = async (code) => {
+    try {
+      setTotpError('');
+      const response = await fetch(`/api/messages/${messageIdentifier}/verify-totp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to verify TOTP code');
+      }
+
+      setTotpVerified(true);
+      setTotpError('');
+    } catch (err) {
+      setTotpError(err.message);
+      throw err; // Re-throw so TOTPInput can handle it
+    }
   };
 
   const handleShare = (platform) => {
@@ -78,6 +110,13 @@ function ViewMessage() {
     try {
       if (!password) {
         throw new Error('Password is required');
+      }
+
+      // Check if TOTP is required but not verified
+      if (totpRequired && !totpVerified) {
+        setError('Please verify the 2FA code first');
+        setLoading(false);
+        return;
       }
 
       // Fetch encrypted message
@@ -417,6 +456,20 @@ function ViewMessage() {
                 </button>
               </div>
             </div>
+
+            {/* TOTP Input - shown if 2FA is required */}
+            {totpRequired && !totpVerified && (
+              <TOTPInput onVerify={handleTOTPVerify} error={totpError} />
+            )}
+
+            {/* TOTP Verified Badge */}
+            {totpRequired && totpVerified && (
+              <div className="p-3 bg-green-100 border border-green-300 rounded-lg">
+                <p className="text-sm text-green-800 text-center">
+                  ✅ Two-factor authentication verified successfully
+                </p>
+              </div>
+            )}
 
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">

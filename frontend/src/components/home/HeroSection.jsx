@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Flame, Lock, Zap, Shield, Clock, Eye, EyeOff, Upload, X, TrendingUp, Link2, CheckCircle, XCircle, Loader } from 'lucide-react';
+import { Flame, Lock, Zap, Shield, Clock, Eye, EyeOff, Upload, X, TrendingUp, Link2, CheckCircle, XCircle, Loader, Settings } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword } from '../../utils/crypto';
 import { createMessage, uploadMedia } from '../../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../../utils/chunkedUpload';
@@ -393,6 +393,18 @@ function HeroSection({ stats, statsLoading }) {
                             >
                                 {loading ? loadingMessage : 'Encrypt & Create Link'}
                             </button>
+
+                            <Link
+                                to="/create"
+                                className="btn-secondary w-full flex items-center justify-center gap-2 text-sm"
+                            >
+                                <Settings className="w-4 h-4" />
+                                Advanced Options
+                            </Link>
+
+                            <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+                                Need more features? Use <span className="font-semibold">Advanced Options</span> for group messages, 2FA, geo-matching, and more
+                            </p>
                         </form>
                     </div>
                 </div>
