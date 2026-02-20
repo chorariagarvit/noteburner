@@ -8,7 +8,7 @@
 
 ## 🚀 Version 1.9 - CURRENT (Enterprise Features)
 **Status**: ✅ Complete - Week 10 Released
-**Released**: Feb 17, 2026
+**Released**: Feb 20, 2026
 
 ### Features
 - ✅ Client-side AES-256-GCM encryption
@@ -696,98 +696,110 @@ test('message self-destructs after first view', async ({ page }) => {
 **Branch**: `feature/enterprise`
 **Target**: Feb 16, 2026
 **Status**: ✅ Complete
+**Released**: Feb 20, 2026
 
 ### Features
-- ✅ **API v1 Access**
-  - RESTful API with /api/v1 endpoints
-  - API key authentication with rate limiting
-  - CRUD operations for messages
-  - Usage statistics and reporting
-  - Per-key rate limits (100-100k requests/day)
-  - Request tracking and analytics
+- ✅ **API Key Management**
+  - Create and manage API keys with custom names
+  - Rate limiting per key (100-10,000 requests/day)
+  - Usage tracking and statistics
+  - One-time key display for security
+  - Revoke keys with confirmation
+  - Daily usage metrics display
+  - Session-based authentication
 
 - ✅ **Team Workspaces**
-  - Create and manage teams
-  - Role-based access control (admin, member, viewer)
-  - Shared message dashboard
-  - Team member management
-  - Usage analytics per team
-  - Team message tracking
-  - Plan-based member limits (5/20/100)
+  - Create and manage teams with unique IDs
+  - Role-based access control (owner, admin, member, viewer)
+  - Shared message dashboard with statistics
+  - Team member invitation and management
+  - Update member roles dynamically
+  - Remove team members
+  - Real-time team statistics (active members, messages, storage)
+  - Tab-based UI (Overview, Members, Messages)
 
 - ✅ **Custom Branding**
-  - Team logo upload
-  - Primary/secondary color customization
-  - Custom favicon support
+  - Team logo URL configuration
+  - Primary and secondary color customization
   - Custom footer text
-  - White-label mode (Enterprise)
-  - Live preview of branding
-  - CSS variable injection
+  - White-label mode toggle (hide NoteBurner branding)
+  - Live preview of branding changes
+  - Persistent branding across team workspace
+  - CSS variable injection for theme customization
 
-- ✅ **Compliance & GDPR**
-  - Configurable data retention policies
-  - Audit log export (JSON/CSV)
-  - Message metadata export
-  - GDPR compliance dashboard
-  - Right to be forgotten (delete all data)
+- ✅ **Compliance & GDPR Dashboard**
+  - Configurable data retention policies (30/60/90 days, custom)
+  - GDPR compliance toggle
+  - Auto-delete expired data setting
   - Minimum password strength enforcement
-  - Auto-delete expired data
+  - Export audit logs (JSON/CSV)
+  - Export message metadata
+  - Compliance overview report
+  - Right to be forgotten implementation
+  - Privacy-first design with no PII collection
 
 ### Implementation
-- ✅ `backend/migrations/0009_enterprise_features.sql` (database schema)
-- ✅ `backend/src/routes/api-v1.js` (285 lines) - API v1 endpoints
-- ✅ `backend/src/routes/teams.js` (420 lines) - Team management
-- ✅ `backend/src/routes/branding.js` (185 lines) - Branding configuration
-- ✅ `backend/src/routes/compliance.js` (345 lines) - Compliance & exports
-- ✅ `backend/src/middleware/auth.js` (115 lines) - Authentication middleware
-- ✅ `frontend/src/components/enterprise/ApiKeyManager.jsx` (280 lines)
-- ✅ `frontend/src/components/enterprise/TeamDashboard.jsx` (420 lines)
-- ✅ `frontend/src/components/enterprise/BrandingCustomizer.jsx` (310 lines)
-- ✅ `frontend/src/components/enterprise/ComplianceDashboard.jsx` (485 lines)
-- ✅ `e2e/week10.spec.js` (280 lines) - E2E tests
+- ✅ `backend/migrations/0009_enterprise_features.sql` (200+ lines) - Complete database schema
+- ✅ `backend/src/routes/api-keys.js` (240 lines) - API key management
+- ✅ `backend/src/routes/teams.js` (450 lines) - Team management with stats
+- ✅ `backend/src/routes/branding.js` (170 lines) - Branding configuration
+- ✅ `backend/src/routes/compliance.js` (380 lines) - Compliance & GDPR features
+- ✅ `backend/src/middleware/auth.js` (95 lines) - Session authentication
+- ✅ `frontend/src/components/enterprise/ApiKeyManager.jsx` (215 lines) - API key UI
+- ✅ `frontend/src/components/enterprise/TeamDashboard.jsx` (385 lines) - Team workspace with tabs
+- ✅ `frontend/src/components/enterprise/BrandingCustomizer.jsx` (290 lines) - Branding editor
+- ✅ `frontend/src/components/enterprise/ComplianceDashboard.jsx` (425 lines) - Compliance UI
+- ✅ `frontend/src/pages/TeamCreationPage.jsx` (120 lines) - Team creation flow
+- ✅ `e2e/week10.spec.js` (674 lines) - Comprehensive E2E tests
 
 ### Database Tables
-- ✅ `teams` - Team configurations
-- ✅ `team_members` - Team membership with roles
+- ✅ `api_keys` - API key management with rate limits and usage tracking
+- ✅ `teams` - Team configurations with name, plan, and timestamps
+- ✅ `team_members` - Team membership with RBAC (owner/admin/member/viewer)
 - ✅ `team_messages` - Message-to-team associations
-- ✅ `branding_config` - Custom branding settings
+- ✅ `branding_config` - Custom branding (logo, colors, footer, white-label)
 - ✅ `compliance_settings` - GDPR and compliance rules
-- ✅ `team_stats` - Daily usage statistics
 
 ### API Endpoints
-- ✅ `GET /api/v1/messages` - List messages
-- ✅ `POST /api/v1/messages` - Create message
-- ✅ `GET /api/v1/messages/:id` - Get message metadata
-- ✅ `DELETE /api/v1/messages/:id` - Delete message
-- ✅ `GET /api/v1/stats` - Usage statistics
-- ✅ `GET /api/v1/api-keys` - List API keys
-- ✅ `POST /api/v1/api-keys` - Create API key
-- ✅ `DELETE /api/v1/api-keys/:id` - Revoke API key
+- ✅ `GET /api/api-keys` - List API keys for authenticated user
+- ✅ `POST /api/api-keys` - Create new API key
+- ✅ `DELETE /api/api-keys/:id` - Revoke API key
 - ✅ `POST /api/teams` - Create team
+- ✅ `GET /api/teams` - List user's teams
 - ✅ `GET /api/teams/:id` - Get team details
 - ✅ `PUT /api/teams/:id` - Update team
 - ✅ `DELETE /api/teams/:id` - Delete team
-- ✅ `GET /api/teams/:id/members` - List members
-- ✅ `POST /api/teams/:id/members` - Add member
-- ✅ `PUT /api/teams/:teamId/members/:memberId` - Update role
+- ✅ `GET /api/teams/:id/members` - List team members
+- ✅ `POST /api/teams/:id/members` - Add team member
+- ✅ `PUT /api/teams/:teamId/members/:memberId` - Update member role
 - ✅ `DELETE /api/teams/:teamId/members/:memberId` - Remove member
 - ✅ `GET /api/teams/:id/messages` - List team messages
-- ✅ `GET /api/teams/:id/stats` - Team statistics
-- ✅ `GET /api/branding/:teamId` - Get branding
-- ✅ `PUT /api/branding/:teamId` - Update branding
-- ✅ `GET /api/compliance/:teamId/settings` - Get settings
-- ✅ `PUT /api/compliance/:teamId/settings` - Update settings
-- ✅ `GET /api/compliance/:teamId/export/audit-logs` - Export logs
-- ✅ `GET /api/compliance/:teamId/export/messages` - Export messages
-- ✅ `POST /api/compliance/:teamId/gdpr/delete-all` - Delete all data
-- ✅ `GET /api/compliance/:teamId/report` - Compliance report
+- ✅ `GET /api/teams/:id/stats` - Team statistics (members, messages, storage)
+- ✅ `GET /api/branding/:teamId` - Get team branding
+- ✅ `PUT /api/branding/:teamId` - Update team branding
+- ✅ `GET /api/compliance/:teamId/settings` - Get compliance settings
+- ✅ `PUT /api/compliance/:teamId/settings` - Update compliance settings
+- ✅ `GET /api/compliance/:teamId/export/audit-logs` - Export audit logs (CSV)
+- ✅ `GET /api/compliance/:teamId/export/messages` - Export message metadata (CSV)
+- ✅ `POST /api/compliance/:teamId/gdpr/delete-all` - GDPR right to deletion
+- ✅ `GET /api/compliance/:teamId/report` - Compliance overview report
+
+### Bug Fixes
+- ✅ Fixed backend SQL queries - removed `burned_at` column references
+- ✅ Fixed Vite proxy configuration to prevent `/api-keys` route conflict
+- ✅ Fixed Week 9 audit log viewer test with force clicks
+- ✅ Added proper wait strategies for component mounting in tests
 
 ### Metrics
-- **Code**: 2,500+ lines added
-- **New Components**: 4 React enterprise components
-- **Database Tables**: 6 new tables
-- **API Endpoints**: 26 new endpoints
-- **E2E Tests**: 50+ test cases
+- **Code**: 2,850+ lines added (backend + frontend + tests)
+- **New Components**: 5 React components (4 enterprise + 1 team creation page)
+- **Database Tables**: 6 new tables with complete schema
+- **API Endpoints**: 22 enterprise endpoints
+- **E2E Tests**: 34 new tests (100% passing)
+- **Total E2E Tests**: 186 passing (7 skipped)
+- **Test Runtime**: 5.7 minutes (full suite)
+- **Files Changed**: 25+ files (15 new, 10+ modified)
+- **Database Migration**: 0009_enterprise_features.sql (6 tables, indexes, relationships)
 
 ---
 
@@ -932,11 +944,11 @@ test('message self-destructs after first view', async ({ page }) => {
 ## � Project Status
 
 **Current Version**: v1.9.0 (Week 10 - Enterprise Features)  
-**Last Updated**: Feb 17, 2026  
+**Last Updated**: Feb 20, 2026  
 **Next Release**: Week 11 (Scaling & Performance) - Feb 23, 2026
 
 ### Release History
-- **v1.9.0** - Feb 17, 2026: Enterprise Features (API v1, team workspaces, custom branding, compliance & GDPR)
+- **v1.9.0** - Feb 20, 2026: Enterprise Features (API key management, team workspaces with RBAC, custom branding, compliance & GDPR dashboard)
 - **v1.8.0** - Feb 9, 2026: Security Enhancements (password strength meter, self-destruct options, audit logging, security headers)
 - **v1.7.0** - Feb 2, 2026: Platform Integrations (Slack, Discord, Zapier, webhooks, API keys)
 - **v1.6.0** - Jan 23, 2026: Mobile Optimization & PWA (Progressive Web App, service worker, offline support, mobile components, camera integration, share sheet, push notifications)
@@ -1015,6 +1027,6 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 ---
 
-**Last Updated**: February 9, 2026  
-**Current Version**: v1.8.0 - Platform Integrations & Security Enhancements  
-**Next Release**: Week 10 - Enterprise Features (Feb 16, 2026)
+**Last Updated**: February 20, 2026  
+**Current Version**: v1.9.0 - Enterprise Features  
+**Next Release**: Week 11 - Scaling & Performance (Feb 23, 2026)
