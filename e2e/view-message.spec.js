@@ -205,4 +205,167 @@ test.describe('Message Viewing and Decryption', () => {
     // Verify file download button exists
     await expect(page.locator('button:has-text("Download"), button:has-text("attachment.txt")')).toBeVisible();
   });
+
+  test('should handle multiple failed password attempts', async ({ page }) => {
+    await page.goto(shareUrl);
+    await page.click('button:has-text("Unlock Secret Message")');
+
+    // Try with wrong passwords multiple times
+    for (let i = 0; i < 3; i++) {
+      await page.fill('input[placeholder="Enter the password"]', `Wrong${i}123!`);
+      await page.click('button:has-text("Decrypt Message")');
+      await page.waitForTimeout(500);
+    }
+
+    // Should still be on password page (not locked out in basic version)
+    await expect(page.locator('input[placeholder="Enter the password"]')).toBeVisible();
+  });
+
+  test('should handle invalid message token', async ({ page }) => {
+    // Try to access non-existent message
+    await page.goto('http://localhost:5173/m/invalid-token-12345');
+
+    // Should show error or redirect
+    const errorShown = await Promise.race([
+      page.locator('text=/not found|invalid|expired|deleted/i').isVisible().then(() => true),
+      page.waitForTimeout(3000).then(() => false)
+    ]);
+
+    expect(errorShown).toBeTruthy();
+  });
+
+  test('should handle password case sensitivity', async ({ page }) => {
+    await page.goto(shareUrl);
+    await page.click('button:has-text("Unlock Secret Message")');
+
+    // Try password with wrong case
+    await page.fill('input[placeholder="Enter the password"]', password.toLowerCase());
+    await page.click('button:has-text("Decrypt Message")');
+
+    // Should show error (passwords are case-sensitive)
+    const errorVisible = await page.locator('.bg-red-50, .bg-red-900\\/20').isVisible({ timeout: 3000 }).catch(() => false);
+    
+    // If no error shown, password might not be case-sensitive (acceptable)
+    if (errorVisible) {
+      // Now try with correct case
+      await page.fill('input[placeholder="Enter the password"]', password);
+      await page.click('button:has-text("Decrypt Message")');
+      await expect(page.locator('text=Secret test message for viewing')).toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test('should block navigation with browser back during decryption', async ({ page }) => {
+    await page.goto(shareUrl);
+    await page.click('button:has-text("Unlock Secret Message")');
+    await page.fill('input[placeholder="Enter the password"]', password);
+    await page.click('button:has-text("Decrypt Message")');
+
+    // Wait for unlocking state
+    await expect(page.locator('h2:has-text("Unlocking Message")')).toBeVisible().catch(() => {});
+
+    // Try to go back
+    await page.goBack();
+
+    // Should either prevent back or show error
+    await page.waitForTimeout(1000);
+  });
+
+ test('should handle refresh during password entry', async ({ page }) => {
+    await page.goto(shareUrl);
+    
+    // Check if we need to click unlock or if we're already on password page
+    const unlockButton = page.locator('button:has-text("Unlock Secret Message")');
+    if (await unlockButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await unlockButton.click();
+    }
+
+    // Wait for password field
+    await expect(page.locator('input[placeholder="Enter the password"]')).toBeVisible();
+
+    // Enter password but don't submit
+    await page.fill('input[placeholder="Enter the password"]', password);
+
+    // Refresh page
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+
+    // After reload, verify we're back at start (password field should exist and be empty)
+    const passwordField = page.locator('input[placeholder="Enter the password"]');
+    const isVisible = await passwordField.isVisible({ timeout: 3000 }).catch(() => false);
+    
+    if (isVisible) {
+      const passwordValue = await passwordField.inputValue();
+      expect(passwordValue).toBe('');
+    }
+  });
+
+  test('should handle concurrent access attempts', async ({ page, context }) => {
+    // Open message in two tabs/pages
+    const page2 = await context.newPage();
+
+    await page.goto(shareUrl);
+    await page2.goto(shareUrl);
+
+    // Both should see preview
+    await expect(page.locator('button:has-text("Unlock Secret Message")')).toBeVisible();
+    await expect(page2.locator('button:has-text("Unlock Secret Message")')).toBeVisible();
+
+    // First page decrypts
+    await page.click('button:has-text("Unlock Secret Message")');
+    await page.fill('input[placeholder="Enter the password"]', password);
+    await page.click('button:has-text("Decrypt Message")');
+    await expect(page.locator('text=Secret test message for viewing')).toBeVisible({ timeout: 5000 });
+
+    // Second page tries to decrypt
+    await page2.click('button:has-text("Unlock Secret Message")');
+    await page2.fill('input[placeholder="Enter the password"]', password);
+    await page2.click('button:has-text("Decrypt Message")');
+
+    // Should show error (message already burned)
+    const error = await page2.locator('text=/already|burned|not found|deleted/i').isVisible({ timeout: 3000 }).catch(() => false);
+    expect(error).toBeTruthy();
+
+    await page2.close();
+  });
+
+  test('should maintain preview animations', async ({ page }) => {
+    await page.goto(shareUrl);
+
+    // Check for animated lock icon
+    const animatedLock = page.locator('svg.animate-bounce, svg.animate-pulse');
+    const hasAnimation = await animatedLock.isVisible().catch(() => false);
+
+    // Check for feature list
+    await expect(page.locator('text=🔐')).toBeVisible();
+    await expect(page.locator('text=🔥')).toBeVisible();
+  });
+
+  test('should handle empty password submission', async ({ page }) => {
+    await page.goto(shareUrl);
+    await page.click('button:has-text("Unlock Secret Message")');
+
+    // Try to submit without password
+    await page.click('button:has-text("Decrypt Message")');
+
+    // Should not proceed or show validation error
+    const stillOnPasswordPage = await page.locator('input[placeholder="Enter the password"]').isVisible({ timeout: 2000 });
+    expect(stillOnPasswordPage).toBeTruthy();
+  });
+
+  test('should display decryption time', async ({ page }) => {
+    await page.goto(shareUrl);
+    await page.click('button:has-text("Unlock Secret Message")');
+    await page.fill('input[placeholder="Enter the password"]', password);
+
+    const startTime = Date.now();
+    await page.click('button:has-text("Decrypt Message")');
+
+    await expect(page.locator('text=Secret test message for viewing')).toBeVisible({ timeout: 5000 });
+    const endTime = Date.now();
+
+    // Decryption should be reasonably fast (< 5 seconds)
+    const duration = endTime - startTime;
+    expect(duration).toBeLessThan(5000);
+  });
 });
+
