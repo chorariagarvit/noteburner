@@ -7,6 +7,136 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.0] - 2026-02-24
+
+### Added - User Authentication System (Week 11)
+- **User Registration & Login**:
+  - Email/password signup with validation
+  - Email verification system (token-based, ready for email integration)
+  - Secure login with bcrypt password hashing (10 rounds)
+  - Session-based authentication with 7-day (default) or 30-day (remember me) expiration
+  - Multi-device session tracking and management
+
+- **Password Management**:
+  - Password reset flow with 1-hour token expiration
+  - Password strength requirements (8+ chars, uppercase, lowercase, number)
+  - Password confirmation validation
+  - Brute force protection (5 failed attempts → 15 minute account lockout)
+
+- **Session Management**:
+  - View all active sessions across devices
+  - Logout from specific session or all devices
+  - Session refresh functionality
+  - Automatic cleanup of expired sessions
+  - Session format: `session_{userId}_{randomToken}` with 256-bit entropy
+
+- **Security Features**:
+  - Login attempt tracking with IP and timestamp
+  - Account lockout with automatic unlock after 15 minutes
+  - Creator token linking for API keys and messages
+  - Form validation and error handling
+  - Security best practices (no email disclosure on password reset)
+
+- **Frontend Components**:
+  - LoginPage.jsx (160 lines) - Email/password login with remember me
+  - SignupPage.jsx (230 lines) - Registration with password strength meter
+  - ForgotPasswordPage.jsx (120 lines) - Password reset request
+  - ResetPasswordPage.jsx (180 lines) - Password reset completion
+  - AuthContext.jsx (160 lines) - Global auth state management
+  - Updated Header with login/signup buttons and user menu dropdown
+
+- **Backend Implementation**:
+  - backend/src/routes/auth.js (550+ lines) - 13 authentication endpoints
+  - backend/src/utils/password.js (130 lines) - Password hashing and validation
+  - backend/src/utils/session.js (200 lines) - Session lifecycle management
+  - backend/src/middleware/requireAuth.js (70 lines) - Auth middleware
+  - Migration 0010_user_authentication.sql - 4 new tables (users, sessions, password_resets, login_attempts)
+
+- **Testing**:
+  - e2e/week11.spec.js (25 tests) - Comprehensive authentication flow testing
+  - User signup (6 tests)
+  - User login (5 tests)
+  - User logout (1 test)
+  - Password reset (3 tests)
+  - Session persistence (2 tests)
+  - Navigation & links (3 tests)
+  - Form validation (3 tests)
+  - Security features (2 tests)
+
+### Security
+- Implemented bcryptjs for password hashing with 10 rounds
+- Session tokens with 32-character random component (256-bit entropy)
+- Rate limiting on authentication endpoints
+- HTTPS-only session cookies (when deployed)
+- No plaintext password storage or transmission
+
+---
+
+## [1.9.0] - 2026-02-20
+
+### Added - Enterprise Features (Week 10)
+- **Team Workspaces**:
+  - Role-based access control (Owner, Admin, Member, Viewer)
+  - Team creation and management API
+  - Team member invitation system
+  - Member role updates and removal
+  - Team dashboard UI with stats
+  - Team message tracking and analytics
+  - TeamDashboard component (210 lines)
+  - TeamCreationPage component (185 lines)
+
+- **API Key Management System**:
+  - API key generation with custom rate limits
+  - Usage tracking and statistics
+  - Key revocation functionality
+  - One-time key display (security best practice)
+  - API key scoping by team
+  - ApiKeyManager component (320 lines)
+  - GET/POST/DELETE /api/keys endpoints
+
+- **Custom Branding**:
+  - Logo upload and display
+  - Color customization (primary, background)
+  - White-label mode toggle
+  - Branding preview functionality
+  - Team-specific branding settings
+  - BrandingSettings component (195 lines)
+  - POST /api/branding endpoint
+
+- **GDPR Compliance Dashboard**:
+  - Data retention policy configuration
+  - GDPR compliance toggle
+  - Audit log export functionality
+  - Message export for data portability
+  - Account deletion confirmation
+  - Privacy-first data handling
+  - ComplianceDashboard component (240 lines)
+  - GET/POST /api/compliance endpoints
+
+- **Backend Infrastructure**:
+  - Migration 0009_enterprise_features.sql - 4 new tables (teams, team_members, branding_settings, compliance_settings)
+  - Enhanced API versioning (/api/v1)
+  - Team-aware message creation
+  - Usage analytics tracking
+  - Data export utilities
+
+- **Testing**:
+  - e2e/week10.spec.js (35 tests) - Comprehensive enterprise feature testing
+  - API v1 endpoints (4 tests)
+  - Team workspaces (7 tests)
+  - Custom branding (5 tests)
+  - Compliance dashboard (6 tests)
+  - Data management (1 test)
+  - API key manager (7 tests)
+  - Integration tests (5 tests)
+
+### Changed
+- Version bumped from 1.8.0 to 1.9.0
+- API structure enhanced with versioning
+- Database schema extended for enterprise features
+
+---
+
 ## [1.8.0] - 2026-02-09
 
 ### Added - Security Enhancements (Week 9)
