@@ -5,7 +5,7 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 
 ## 📊 Test Coverage Summary
 
-### Total Tests: 80
+### Total Tests: 105
 
 #### 1. Message Creation Tests (8 tests)
 ✅ Simple text message creation  
@@ -107,6 +107,49 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Group message + referral code combination  
 ✅ Max recipients edge case (100 recipient links)  
 
+#### 7. Week 11 - User Authentication Tests (25 tests)
+
+##### User Signup Tests (6 tests)
+✅ Signup form display with all required fields  
+✅ Email format validation (HTML5 + backend)  
+✅ Password strength meter with real-time feedback  
+✅ Password confirmation matching validation  
+✅ Successful account creation with verification token  
+✅ Duplicate email prevention with error handling  
+
+##### User Login Tests (5 tests)
+✅ Login form display with remember me option  
+✅ Successful login with valid credentials  
+✅ Login failure with wrong password  
+✅ Login failure with non-existent email  
+✅ Remember me functionality (7-day vs 30-day sessions)  
+
+##### User Logout Tests (1 test)
+✅ Logout with session clearing and redirect  
+
+##### Password Reset Tests (3 tests)
+✅ Forgot password form display  
+✅ Password reset email request  
+✅ Security: No email existence disclosure  
+
+##### Session Persistence Tests (2 tests)
+✅ Session persistence across page reloads  
+✅ Expired session handling with cleanup  
+
+##### Navigation and Links Tests (3 tests)
+✅ Navigation between auth pages (/login, /signup, /forgot-password)  
+✅ Auth buttons in header when logged out  
+✅ User menu in header when logged in  
+
+##### Form Validation Tests (3 tests)
+✅ Required fields in signup form  
+✅ Required fields in login form  
+✅ Password requirements enforcement (8+ chars, uppercase, lowercase, number)  
+
+##### Security Features Tests (2 tests)
+✅ Password masking in input fields  
+✅ Brute force protection (rapid login attempt handling)  
+
 ## 🚀 Quick Start
 
 ```bash
@@ -134,6 +177,7 @@ npm run test:report
 - `e2e/week3.spec.js` - Custom URLs, QR codes, countdown timers, Open Graph (14 tests)
 - `e2e/week4.spec.js` - Gamification (achievements, streaks, leaderboard, mystery mode) (12 tests)
 - `e2e/week5.spec.js` - Network effects (group messages, referrals, invites) (28 tests)
+- `e2e/week11.spec.js` - User authentication (signup, login, logout, password reset, sessions) (25 tests)
 - `playwright.config.js` - Playwright configuration
 - `.github/workflows/e2e-tests.yml` - CI/CD automation
 
@@ -199,6 +243,16 @@ Tests automatically start both frontend and backend dev servers before running.
 - Social invitation system
 - Viral growth mechanics
 
+**User Authentication**
+- Email/password signup and login
+- Session management (7/30 day expiration)
+- Password reset flow (token-based)
+- Email verification system
+- Brute force protection (account lockout)
+- Form validation and password strength
+- Multi-device session tracking
+- Remember me functionality
+
 ## 🔧 Configuration
 
 **Browser**: Chromium (Desktop Chrome)  
@@ -224,16 +278,17 @@ Tests automatically start both frontend and backend dev servers before running.
 
 ## 📊 Metrics
 
-**Test Execution Time**: ~3-4 minutes (local)  
+**Test Execution Time**: ~3-5 minutes (local)  
 **CI Execution Time**: ~6-8 minutes (with server startup)  
-**Code Coverage**: All major user flows including Weeks 1-5 features  
+**Code Coverage**: All major user flows including Weeks 1-5 and Week 11 features  
 **Success Rate**: 100% when services are healthy  
 **Latest Additions**:
 - Week 3 (Jan 1, 2026): +14 tests for custom URLs, QR codes, timers, OG tags  
 - Week 4 (Jan 8, 2026): +12 tests for gamification (achievements, streaks, leaderboard)  
 - Week 5 (Jan 14, 2026): +28 tests for network effects (groups, referrals, invites)  
+- Week 11 (Feb 24, 2026): +25 tests for user authentication (signup, login, sessions, password reset)  
 
-**Last Updated**: Jan 20, 2026  
+**Last Updated**: Feb 24, 2026  
 
 ## 🔮 Future Enhancements
 
@@ -253,11 +308,12 @@ NoteBurner now has enterprise-grade E2E testing coverage ensuring:
 - 🚀 Viral mechanics drive engagement
 - 🎮 Gamification features enhance retention
 - � Network effects enable exponential growth
+- 🔐 User authentication is secure and reliable
 - 💪 Confidence in every deployment
 
 ---
 
-**Last Updated**: January 20, 2026  
+**Last Updated**: February 24, 2026  
 **Test Framework**: Playwright v1.57.0  
-**Total Test Files**: 6  
-**Total Test Cases**: 96
+**Total Test Files**: 7  
+**Total Test Cases**: 105
