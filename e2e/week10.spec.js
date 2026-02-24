@@ -2,8 +2,45 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Week 10: Enterprise Features', () => {
   
-  const testUserId = 'test_user_123';
-  const sessionToken = `session_${testUserId}`;
+  let sessionToken = '';
+  const testUser = {
+    email: `e2e-week10-${Date.now()}@example.com`,
+    password: 'TestPassword123!',
+    displayName: 'E2E Test User'
+  };
+  
+  // Create test user and login before all tests
+  test.beforeAll(async ({ request }) => {
+    // Create user
+    const signupRes = await request.post('http://localhost:8787/api/auth/signup', {
+      data: {
+        email: testUser.email,
+        password: testUser.password,
+        displayName: testUser.displayName
+      }
+    });
+    
+    if (!signupRes.ok()) {
+      console.log('Signup failed:', await signupRes.text());
+    }
+    
+    // Login to get session token
+    const loginRes = await request.post('http://localhost:8787/api/auth/login', {
+      data: {
+        email: testUser.email,
+        password: testUser.password,
+        rememberMe: true
+      }
+    });
+    
+    if (loginRes.ok()) {
+      const loginData = await loginRes.json();
+      sessionToken = loginData.sessionToken;
+      console.log('Week 10: Test user logged in successfully');
+    } else {
+      throw new Error('Failed to login test user for Week 10 tests');
+    }
+  });
   
   // API v1 Tests
   test.describe('API v1 Endpoints', () => {

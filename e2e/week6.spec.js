@@ -271,14 +271,25 @@ test.describe('Week 6: UI/UX Polish', () => {
 
   test.describe('Keyboard Shortcuts', () => {
     
+    test.beforeEach(async ({ page }) => {
+      // Dismiss onboarding modal before each test
+      await page.addInitScript(() => {
+        localStorage.setItem('onboarding_completed', 'true');
+      });
+    });
+    
     test('should show keyboard shortcuts modal with ?', async ({ page }) => {
       await page.goto('/create');
+      
+      // Wait for page to be fully loaded
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
       
       // Press ? (Shift + /)
       await page.keyboard.press('?');
       
       // Modal should appear
-      await expect(page.locator('text=Keyboard Shortcuts').or(page.locator('text=Shortcuts')).first()).toBeVisible({ timeout: 2000 });
+      await expect(page.locator('text=Keyboard Shortcuts').or(page.locator('text=Shortcuts')).first()).toBeVisible({ timeout: 3000 });
       
       // Check for some shortcut categories
       await expect(page.locator('text=General').or(page.locator('text=Navigation')).first()).toBeVisible();
@@ -287,20 +298,29 @@ test.describe('Week 6: UI/UX Polish', () => {
     test('should close shortcuts modal with Escape', async ({ page }) => {
       await page.goto('/create');
       
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
+      
       await page.keyboard.press('?');
-      await expect(page.locator('text=Keyboard Shortcuts').or(page.locator('text=Shortcuts')).first()).toBeVisible({ timeout: 2000 });
+      await expect(page.locator('text=Keyboard Shortcuts').or(page.locator('text=Shortcuts')).first()).toBeVisible({ timeout: 3000 });
       
       await page.keyboard.press('Escape');
       
       // Modal should close
-      await expect(page.locator('text=Keyboard Shortcuts')).not.toBeVisible();
+      await expect(page.locator('text=Keyboard Shortcuts')).not.toBeVisible({ timeout: 2000 });
     });
 
     test('should focus message field with Ctrl+K', async ({ page }) => {
       await page.goto('/create');
       
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
+      
       // Press Ctrl+K
       await page.keyboard.press('Control+k');
+      
+      // Wait a bit for focus
+      await page.waitForTimeout(300);
       
       // Message textarea should be focused
       const messageTextarea = page.locator('#message').or(page.locator('textarea').first());
@@ -310,8 +330,14 @@ test.describe('Week 6: UI/UX Polish', () => {
     test('should focus password field with Ctrl+P', async ({ page }) => {
       await page.goto('/create');
       
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
+      
       // Press Ctrl+P
       await page.keyboard.press('Control+p');
+      
+      // Wait a bit for focus
+      await page.waitForTimeout(300);
       
       // Password input should be focused
       const passwordInput = page.locator('#password').or(page.locator('input[type="password"]').first());
@@ -321,11 +347,14 @@ test.describe('Week 6: UI/UX Polish', () => {
     test('should generate random password with Ctrl+G', async ({ page }) => {
       await page.goto('/create');
       
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
+      
       // Press Ctrl+G
       await page.keyboard.press('Control+g');
       
       // Wait a bit for generation
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(500);
       
       // Password field should have value
       const passwordInput = page.locator('#password').or(page.locator('input[type="password"]').first());
@@ -336,8 +365,14 @@ test.describe('Week 6: UI/UX Polish', () => {
     test('should focus custom URL with Ctrl+U', async ({ page }) => {
       await page.goto('/create');
       
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(500);
+      
       // Press Ctrl+U
       await page.keyboard.press('Control+u');
+      
+      // Wait a bit for focus
+      await page.waitForTimeout(300);
       
       // Custom URL input should be focused (if visible)
       const customUrlInput = page.locator('#customUrl').or(page.locator('input[placeholder*="custom"]').first());
