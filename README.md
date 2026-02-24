@@ -1,7 +1,7 @@
 # NoteBurner 🔥
 
-**Version**: v1.8.0 - Platform Integrations & Security Enhancements  
-**Released**: February 9, 2026
+**Version**: v1.10.0 - User Authentication System  
+**Released**: February 24, 2026
 
 A secure one-time message encryption and decryption application. Messages can only be decrypted once with the correct password, then they're permanently deleted with no backups.
 
@@ -23,7 +23,23 @@ A secure one-time message encryption and decryption application. Messages can on
 - 🔑 **API Access** - Programmatic message creation with API keys
 - 📚 **API Documentation** - Comprehensive guides and examples
 
-### Security Enhancements (NEW in v1.8)
+### User Authentication (NEW in v1.10)
+- 👤 **Email/Password Signup** - User registration with email verification
+- 🔐 **Secure Login** - Session-based authentication with remember me (7/30 day expiration)
+- 🔑 **Password Reset** - Token-based reset flow with 1-hour expiration
+- 🛡️ **Brute Force Protection** - Account lockout after 5 failed login attempts (15 min)
+- 📧 **Email Verification** - Verification tokens ready for email integration
+- 👥 **Multi-device Sessions** - Track and manage sessions across devices
+- 🔄 **Session Management** - View active sessions, logout from all devices
+
+### Enterprise Features (v1.9)
+- 🏢 **Team Workspaces** - RBAC with Owner, Admin, Member, Viewer roles
+- 🔑 **API Key Management** - Custom rate limits, usage tracking, revocation
+- 🎨 **Custom Branding** - Logos, colors, white-label mode
+- ⚖️ **GDPR Compliance** - Data retention policies, export, deletion
+- 📊 **Team Analytics** - Usage stats, member activity tracking
+
+### Security Enhancements (v1.8)
 - 💪 **Password Strength Meter** - Real-time feedback, entropy calculation
 - ⚙️ **Self-Destruct Options** - Max views, time limits, password attempts, geo restrictions
 - 📊 **Audit Logs** - Privacy-friendly access tracking (country-level only)
@@ -38,6 +54,13 @@ A secure one-time message encryption and decryption application. Messages can on
 - 🔗 **Share sheet** - Native mobile sharing to WhatsApp, Telegram, Signal, etc.
 - 🔄 **Offline support** - Service worker caching, background sync
 - 🔔 **Push notifications** - Optional updates for message activity
+
+### UI/UX Polish (v1.6)
+- 🎓 **Onboarding Flow** - Interactive 3-step tutorial for first-time users
+- 📝 **Message Templates** - 6 pre-written templates (work, personal, security)
+- ⌨️ **Keyboard Shortcuts** - 12 shortcuts for power users (Ctrl+Enter, Ctrl+K, etc.)
+- ✨ **Custom Animations** - Fade-in, slide, shimmer, loading skeletons
+- ♿ **Accessibility** - ARIA labels, keyboard navigation, semantic HTML
 
 ### Customization & Sharing
 - 🌐 **Custom short URLs** - Choose memorable URLs for your messages
@@ -185,23 +208,20 @@ npm run test:e2e:ui
 npm run test:report
 ```
 
-**Test Coverage (96 E2E tests):**
-- ✅ Message creation (text, files, passwords, expiration)
-- ✅ Message viewing and decryption
-- ✅ One-time access enforcement
-- ✅ Viral mechanics (confetti, CTAs, loading states)
-- ✅ Custom URLs (validation, profanity filter, reserved slugs)
-- ✅ QR code generation and download
-- ✅ Countdown timers with urgency states
-- ✅ Open Graph meta tags
-- ✅ Gamification (achievements, streaks, leaderboard, mystery mode)
-- ✅ Network Effects - Week 5 (28 tests):
-  - Referral system (tracking, rewards, code generation)
-  - Invite friends (social sharing, customization, preview)
-  - Navigation & UI (branding, responsive design)
-  - Progress tracking (milestones, stats)
+**Test Coverage (267 E2E tests):**
+- ✅ Message creation & viewing (18 tests)
+- ✅ Viral mechanics (8 tests)
+- ✅ Custom URLs & branding (14 tests)
+- ✅ Gamification (12 tests)
+- ✅ Network effects (28 tests)
+- ✅ UI/UX polish (29 tests)
+- ✅ Mobile & PWA (26 tests)
+- ✅ Platform integrations (15 tests)
+- ✅ Security enhancements (32 tests)
+- ✅ Enterprise features (35 tests)
+- ✅ User authentication (25 tests)
 
-See [docs/E2E_TESTING.md](./docs/E2E_TESTING.md) and [docs/TEST_SUMMARY.md](./docs/TEST_SUMMARY.md) for detailed testing documentation.
+See [TEST_SUMMARY.md](./TEST_SUMMARY.md) for detailed testing documentation.
 
 ## License
 
