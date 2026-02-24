@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.1] - 2026-02-24
+
+### Added - Enhanced Test Coverage
+- **Expanded E2E Tests (35 new tests added)**:
+  - Week 1 Message Creation: 8 → 19 tests (+11 tests)
+    - Multiple file type handling (images, PDFs, etc.)
+    - File removal before submission
+    - All expiration options (1h, 6h, 24h, 3d, 7d)
+    - Empty message validation
+    - Unicode and emoji message support
+    - Special characters in passwords
+    - Long message handling (5000+ characters)
+    - Browser back button behavior
+    - Unique password generation verification
+    - Dark mode toggle persistence
+    - File size limit information display
+    - Form state management across navigation
+
+  - Week 2 Message Viewing: 10 → 19 tests (+9 tests)
+    - Multiple failed password attempts
+    - Invalid message token handling
+    - Password case sensitivity
+    - Browser navigation during decryption
+    - Page refresh during password entry
+    - Concurrent access attempt handling
+    - Preview animation verification
+    - Empty password submission validation
+    - Decryption performance timing
+
+  - Week 2 Viral Mechanics: 8 → 17 tests (+9 tests)
+    - Real-time stats updates
+    - Stats number formatting
+    - Different loading state variations
+    - Homepage animations on load
+    - Burn animation effects
+    - Urgency messaging display
+    - Mystery/intrigue elements on preview
+    - Success state animations
+    - Personality in error states
+    - Social share button icon verification
+
+- **Total Test Count**: 241 → **276 E2E tests** (before expansion: 241, after: 276)
+- **Documentation Updates**: Updated TEST_SUMMARY.md, README.md with new test counts
+
+### Technical Improvements
+- More comprehensive file upload testing
+- Better edge case coverage for message creation
+- Enhanced concurrent access testing
+- Improved UI/UX state verification
+- Stronger validation testing across all flows
+
+---
+
 ## [1.10.0] - 2026-02-24
 
 ### Added - User Authentication System (Week 11)

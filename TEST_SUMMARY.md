@@ -5,9 +5,9 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 
 ## 📊 Test Coverage Summary
 
-### Total Tests: 267
+### Total Tests: 276
 
-#### 1. Message Creation Tests (8 tests)
+#### 1. Message Creation Tests (19 tests)
 ✅ Simple text message creation  
 ✅ Random password generation  
 ✅ Message with expiration  
@@ -16,8 +16,20 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Copy URL to clipboard  
 ✅ "Create Similar Message" workflow  
 ✅ "Create New Message" reset functionality  
+✅ Multiple file types handling  
+✅ File removal before submission  
+✅ All expiration options (1h, 6h, 24h, 3d, 7d)  
+✅ Empty message validation  
+✅ Unicode and emoji in messages  
+✅ Special characters in passwords  
+✅ Long message handling (5000+ chars)  
+✅ Browser back button behavior  
+✅ Different password generation each time  
+✅ Dark mode toggle persistence  
+✅ File size limit information  
+✅ Form state management  
 
-#### 2. Message Viewing Tests (10 tests)
+#### 2. Message Viewing Tests (19 tests)
 ✅ Preview page display with animations  
 ✅ Preview → password form transition  
 ✅ Successful decryption flow  
@@ -28,8 +40,17 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Post-burn CTA display  
 ✅ Navigation from CTA to create page  
 ✅ File attachment handling  
+✅ Multiple failed password attempts  
+✅ Invalid message token handling  
+✅ Password case sensitivity  
+✅ Browser back during decryption  
+✅ Refresh during password entry  
+✅ Concurrent access attempts  
+✅ Preview animations (lock icon)  
+✅ Empty password submission validation  
+✅ Decryption performance timing  
 
-#### 3. Viral Mechanics Tests (8 tests)
+#### 3. Viral Mechanics Tests (17 tests)
 ✅ Animated stats counters on homepage  
 ✅ Rotating loading messages during encryption  
 ✅ Personality in upload progress indicators  
@@ -38,6 +59,16 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Animated lock on preview page  
 ✅ Quick recreation workflow  
 ✅ Social share buttons (X/Reddit)  
+✅ Real-time stats updates  
+✅ Stats number formatting  
+✅ Different loading states  
+✅ Homepage animation on load  
+✅ Burn animation effects  
+✅ Urgency messaging display  
+✅ Mystery/intrigue on preview  
+✅ Success state animations  
+✅ Personality in error states  
+✅ Social share button icons  
 
 #### 4. Week 3 - Custom URLs & Branding Tests (14 tests)
 ✅ Custom URL creation with availability checking  
@@ -555,8 +586,7 @@ Tests automatically start both frontend and backend dev servers before running.
 **Code Coverage**: Complete end-to-end coverage across all 11 development weeks  
 **Success Rate**: 100% when services are healthy  
 **Development Timeline**:
-- Week 1 (Dec 15, 2025): Foundation - Analytics, stats, social proof  
-- Week 2 (Dec 22, 2025): Viral mechanics - CTAs, preview, recreation  
+- Week 1 & 2 (Dec 15-22, 2025): Message creation (19 tests), viewing (19 tests), viral mechanics (17 tests)  
 - Week 3 (Jan 1, 2026): +14 tests for custom URLs, QR codes, timers, OG tags  
 - Week 4 (Jan 8, 2026): +12 tests for gamification (achievements, streaks, leaderboard)  
 - Week 5 (Jan 14, 2026): +28 tests for network effects (groups, referrals, invites)  

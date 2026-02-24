@@ -208,9 +208,8 @@ npm run test:e2e:ui
 npm run test:report
 ```
 
-**Test Coverage (267 E2E tests):**
-- ✅ Message creation & viewing (18 tests)
-- ✅ Viral mechanics (8 tests)
+**Test Coverage (276 E2E tests):**
+- ✅ Message creation & viewing (55 tests: 19 creation + 19 viewing + 17 viral mechanics)
 - ✅ Custom URLs & branding (14 tests)
 - ✅ Gamification (12 tests)
 - ✅ Network effects (28 tests)
