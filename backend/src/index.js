@@ -12,6 +12,7 @@ import apiKeysRouter from './routes/api-keys.js';
 import teamsRouter from './routes/teams.js';
 import brandingRouter from './routes/branding.js';
 import complianceRouter from './routes/compliance.js';
+import authRouter from './routes/auth.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
 import { securityHeaders, enhancedRateLimit, ddosProtection } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
@@ -34,8 +35,8 @@ app.get('/', (c) => {
   return c.json({
     status: 'ok',
     service: 'NoteBurner API',
-    version: '1.9.0',
-    features: ['enterprise', 'teams', 'api-v1', 'branding', 'compliance']
+    version: '1.10.0',
+    features: ['authentication', 'enterprise', 'teams', 'api-v1', 'branding', 'compliance']
   });
 });
 
@@ -46,6 +47,9 @@ app.route('/api/stats', statsRouter);
 app.route('/api/cleanup', cleanupRouter);
 app.route('/api/integrations', integrationsRouter);
 app.route('/api/audit', auditRouter);
+
+// Week 11: Authentication
+app.route('/api/auth', authRouter); // User authentication
 
 // Week 10: Enterprise features
 app.route('/api/v1', apiV1Router); // Has its own API key auth
