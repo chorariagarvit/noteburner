@@ -35,6 +35,86 @@ NoteBurner uses [Playwright](https://playwright.dev/) for comprehensive end-to-e
 - ✅ Quick recreation workflow
 - ✅ Social share buttons
 
+### 4. Custom URLs & Branding Tests (`e2e/week3.spec.js`) - 14 tests
+- ✅ Custom URL creation with availability checking
+- ✅ Real-time slug validation with debouncing
+- ✅ Invalid character sanitization
+- ✅ Slug length validation (3-20 chars)
+- ✅ Duplicate slug detection
+- ✅ Reserved slug protection
+- ✅ QR code generation and download
+- ✅ Countdown timer with live updates
+- ✅ Countdown urgency states
+- ✅ Open Graph meta tags
+- ✅ Custom URL navigation
+
+### 5. Gamification Tests (`e2e/week4.spec.js`) - 12 tests
+- ✅ Message creation stats tracking
+- ✅ Achievement unlock detection
+- ✅ Streak counter display
+- ✅ Achievements page rendering
+- ✅ Leaderboard with platform stats
+- ✅ Mystery mode functionality
+- ✅ Achievement progress tracking
+
+### 6. Network Effects Tests (`e2e/week5.spec.js`) - 28 tests
+- ✅ Group messages (1-100 recipients)
+- ✅ Burn-on-first-view functionality
+- ✅ Referral system with rewards
+- ✅ Invite friends with social sharing
+- ✅ Integration workflows
+
+### 7. UI/UX Polish Tests (`e2e/week6.spec.js`) - 29 tests
+- ✅ Onboarding flow (3-step tutorial)
+- ✅ Message templates (6 pre-written)
+- ✅ Keyboard shortcuts (12 shortcuts)
+- ✅ Loading animations and skeletons
+- ✅ Micro-interactions
+- ✅ Accessibility (ARIA, keyboard navigation)
+- ✅ Custom animations
+
+### 8. Mobile & PWA Tests (`e2e/week7.spec.js`) - 26 tests
+- ✅ Progressive Web App features
+- ✅ Service worker registration
+- ✅ Offline mode support
+- ✅ Mobile-first UX
+- ✅ Touch-friendly interface
+- ✅ Performance optimizations
+- ✅ Push notifications
+
+### 9. Platform Integrations Tests (`e2e/week8.spec.js`) - 15 tests
+- ✅ API key management
+- ✅ Zapier integration
+- ✅ Discord bot support
+- ✅ Webhook subscriptions
+- ✅ Rate limiting
+- ✅ Security headers
+
+### 10. Security Enhancements Tests (`e2e/week9.spec.js`) - 32 tests
+- ✅ Password strength meter
+- ✅ Self-destruct options (max views, attempts, geo)
+- ✅ Audit logs with privacy
+- ✅ Enhanced security headers
+- ✅ Advanced rate limiting
+
+### 11. Enterprise Features Tests (`e2e/week10.spec.js`) - 35 tests
+- ✅ Team workspaces with RBAC
+- ✅ API key management system
+- ✅ Custom branding
+- ✅ GDPR compliance dashboard
+- ✅ Data management
+
+### 12. User Authentication Tests (`e2e/week11.spec.js`) - 25 tests
+- ✅ User signup with validation
+- ✅ Login with session management
+- ✅ Logout and session clearing
+- ✅ Password reset flow
+- ✅ Session persistence
+- ✅ Form validation
+- ✅ Security features (brute force protection)
+
+**Total: 267 E2E Tests**
+
 ## Running Tests
 
 ### Prerequisites

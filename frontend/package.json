@@ -1,7 +1,7 @@
 {
   "name": "noteburner-frontend",
-  "version": "1.8.0",
-  "description": "NoteBurner frontend - Platform Integrations & Security Enhancements",
+  "version": "1.10.0",
+  "description": "NoteBurner frontend - User Authentication System",
   "type": "module",
   "scripts": {
     "dev": "vite",
