@@ -803,9 +803,288 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🚀 Week 11 - Scaling & Performance
-**Branch**: `feature/scaling`
+## � Week 11 - User Authentication System
+**Branch**: `feature/auth-system`
 **Target**: Feb 23, 2026
+**Status**: 📋 Planned
+
+### Features
+- [ ] **User Registration & Login**
+  - Email + password signup with validation
+  - Secure password hashing (bcrypt, 10 rounds)
+  - Email verification with confirmation tokens
+  - Login with session token generation
+  - "Remember me" functionality
+  - Password reset flow via email
+  - Account lockout after failed attempts (5 tries)
+
+- [ ] **Session Management**
+  - Secure session token generation (crypto.randomBytes)
+  - Token format: `session_{userId}_{randomToken}`
+  - Session expiration (7 days default, 30 days with "remember me")
+  - Token refresh mechanism
+  - Logout (session invalidation)
+  - Multi-device session tracking
+  - "Log out all devices" functionality
+
+- [ ] **User Profile Management**
+  - Profile page with user information
+  - Update email, password, display name
+  - Profile picture upload (Gravatar integration)
+  - Account deletion with confirmation
+  - Export user data (GDPR compliance)
+  - Two-factor authentication settings toggle
+
+- [ ] **Authentication UI**
+  - LoginPage component with form validation
+  - SignupPage component with password strength meter
+  - ForgotPasswordPage for password reset
+  - ResetPasswordPage for new password entry
+  - ProfilePage for account management
+  - AuthGuard component (protected routes)
+  - Persistent login state (localStorage + sessionStorage)
+
+- [ ] **OAuth Integration (Optional)**
+  - Google Sign-In
+  - GitHub OAuth
+  - Microsoft Account
+  - Single Sign-On (SSO) for enterprise
+
+- [ ] **Security Enhancements**
+  - CSRF token validation
+  - Rate limiting on auth endpoints (5 login attempts per 15 min)
+  - Brute force protection with exponential backoff
+  - Session hijacking prevention (IP + User-Agent validation)
+  - Secure cookie settings (httpOnly, secure, sameSite)
+
+### Implementation
+
+#### Backend Files
+- [ ] `backend/migrations/0010_user_authentication.sql` (180+ lines)
+  - `users` table (id, email, password_hash, display_name, created_at, verified, etc.)
+  - `sessions` table (session_token, user_id, expires_at, device_info, etc.)
+  - `password_resets` table (token, user_id, expires_at, used)
+  - `login_attempts` table (email, ip_address, attempted_at, success)
+  
+- [ ] `backend/src/routes/auth.js` (400+ lines)
+  - POST /api/auth/signup - User registration
+  - POST /api/auth/login - User login with session creation
+  - POST /api/auth/logout - Session invalidation
+  - POST /api/auth/refresh - Token refresh
+  - GET /api/auth/me - Get current user info
+  - POST /api/auth/forgot-password - Request password reset
+  - POST /api/auth/reset-password - Complete password reset
+  - POST /api/auth/verify-email - Email verification
+  - DELETE /api/auth/sessions - Logout all devices
+
+- [ ] `backend/src/utils/password.js` (80 lines)
+  - hashPassword() - bcrypt hashing with salt
+  - verifyPassword() - Compare password with hash
+  - generateResetToken() - Secure random token
+  - validatePasswordStrength() - Enforce minimum requirements
+
+- [ ] `backend/src/utils/session.js` (120 lines)
+  - createSession() - Generate secure session token
+  - validateSession() - Verify token and expiration
+  - refreshSession() - Extend session lifetime
+  - revokeSession() - Invalidate specific session
+  - revokeAllSessions() - Logout from all devices
+
+- [ ] `backend/src/middleware/requireAuth.js` (60 lines)
+  - Authentication middleware for protected routes
+  - Extract session token from header
+  - Validate session and attach user to context
+  - Return 401 if unauthenticated
+
+#### Frontend Files
+- [ ] `frontend/src/pages/LoginPage.jsx` (250 lines)
+  - Email + password form with validation
+  - "Remember me" checkbox
+  - "Forgot password?" link
+  - Redirect to dashboard after login
+  - Error handling for invalid credentials
+
+- [ ] `frontend/src/pages/SignupPage.jsx` (280 lines)
+  - Registration form (email, password, confirm password)
+  - Real-time password strength indicator
+  - Terms of service acceptance checkbox
+  - Email verification notice after signup
+  - Auto-login after verification (optional)
+
+- [ ] `frontend/src/pages/ForgotPasswordPage.jsx` (150 lines)
+  - Email input for password reset
+  - Success message with email sent confirmation
+  - Rate limiting notice (max 3 requests per hour)
+
+- [ ] `frontend/src/pages/ResetPasswordPage.jsx` (180 lines)
+  - New password form with token validation
+  - Password confirmation field
+  - Strength meter for new password
+  - Success redirect to login
+
+- [ ] `frontend/src/pages/ProfilePage.jsx` (320 lines)
+  - User information display
+  - Update email, display name, password
+  - Account deletion with confirmation modal
+  - Export data button (GDPR)
+  - Session management (active devices list)
+  - Logout all devices button
+
+- [ ] `frontend/src/components/auth/AuthGuard.jsx` (90 lines)
+  - Protected route wrapper component
+  - Check authentication status
+  - Redirect to /login if unauthenticated
+  - Loading state during auth check
+
+- [ ] `frontend/src/contexts/AuthContext.jsx` (200 lines)
+  - Global authentication state management
+  - Login, logout, signup functions
+  - Current user state
+  - Session persistence across page reloads
+  - Auto-refresh token mechanism
+
+- [ ] `frontend/src/utils/auth.js` (150 lines)
+  - saveSession() - Store token in localStorage/sessionStorage
+  - getSession() - Retrieve session token
+  - clearSession() - Remove session data
+  - isAuthenticated() - Check if user logged in
+  - getCurrentUser() - Fetch user from API
+
+### Database Tables
+
+#### users
+```sql
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  display_name TEXT,
+  avatar_url TEXT,
+  email_verified INTEGER DEFAULT 0,
+  verification_token TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_login_at DATETIME,
+  failed_login_attempts INTEGER DEFAULT 0,
+  locked_until DATETIME
+);
+```
+
+#### sessions
+```sql
+CREATE TABLE sessions (
+  session_token TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  last_accessed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  ip_address TEXT,
+  user_agent TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+```
+
+#### password_resets
+```sql
+CREATE TABLE password_resets (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  reset_token TEXT UNIQUE NOT NULL,
+  expires_at DATETIME NOT NULL,
+  used INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+```
+
+#### login_attempts
+```sql
+CREATE TABLE login_attempts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  ip_address TEXT,
+  success INTEGER DEFAULT 0,
+  attempted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  error_message TEXT
+);
+```
+
+### API Endpoints
+
+#### Authentication
+- `POST /api/auth/signup` - Register new user (rate: 3/hour)
+- `POST /api/auth/login` - Login and create session (rate: 5/15min)
+- `POST /api/auth/logout` - Logout current session
+- `POST /api/auth/refresh` - Refresh session token (rate: 10/min)
+- `GET /api/auth/me` - Get current user (requires auth)
+- `POST /api/auth/forgot-password` - Request password reset (rate: 3/hour)
+- `POST /api/auth/reset-password` - Reset password with token (rate: 3/hour)
+- `POST /api/auth/verify-email` - Verify email with token
+- `PUT /api/auth/profile` - Update user profile (requires auth)
+- `DELETE /api/auth/account` - Delete user account (requires auth)
+- `GET /api/auth/sessions` - List active sessions (requires auth)
+- `DELETE /api/auth/sessions` - Logout all devices (requires auth)
+- `DELETE /api/auth/sessions/:sessionId` - Logout specific session (requires auth)
+
+### Integration with Existing Features
+
+#### Update Enterprise Features
+- Link API keys to authenticated user accounts (user_id foreign key)
+- Link teams to user accounts via team_members.user_id
+- Replace temporary "session_testuser" with real user sessions
+- Update all enterprise endpoints to use requireAuth middleware
+
+#### Update Message Creation
+- Add optional "created_by" user_id to messages table
+- Show user's message history in profile (if authenticated)
+- Allow anonymous message creation (user_id = NULL)
+
+#### Frontend Navigation
+- Add "Login" and "Signup" buttons to header (when logged out)
+- Show "Profile" and "Logout" menu when logged in
+- Display user avatar/display name in header
+- Protected routes: /teams, /profile, /compliance
+
+### Security Considerations
+- Password requirements: min 8 chars, 1 uppercase, 1 lowercase, 1 number
+- bcrypt with 10 rounds for password hashing
+- Session tokens: 32-byte random + user ID (256-bit entropy)
+- HTTPS-only cookies with httpOnly and secure flags
+- CSRF protection for state-changing operations
+- Rate limiting on all auth endpoints
+- Email verification required before accessing enterprise features
+- Account lockout after 5 failed login attempts (15-minute cooldown)
+
+### Testing
+- [ ] E2E tests for signup flow (e2e/week11.spec.js)
+- [ ] Login flow with various scenarios (success, wrong password, locked account)
+- [ ] Password reset flow end-to-end
+- [ ] Session expiration and refresh
+- [ ] Protected routes redirect to login
+- [ ] Multi-device session management
+- [ ] Account deletion and data export
+- [ ] Rate limiting on auth endpoints
+- [ ] OAuth integration (if implemented)
+
+### Metrics (Estimated)
+- **Code**: 2,200+ lines (backend + frontend + tests)
+- **New Components**: 7 React components (Login, Signup, Profile, etc.)
+- **Database Tables**: 4 new tables (users, sessions, password_resets, login_attempts)
+- **API Endpoints**: 13 authentication endpoints
+- **E2E Tests**: 25+ new tests
+- **Files Changed**: 20+ files (12 new, 8+ modified)
+- **Database Migration**: 0010_user_authentication.sql (4 tables, indexes, constraints)
+
+### Dependencies
+- `bcryptjs@2.4.3` - Password hashing (native bcrypt alternative for Workers)
+- `jsonwebtoken@9.0.2` - JWT tokens (optional, if using JWT instead of random tokens)
+- `nodemailer` or Cloudflare Email Workers - Email sending for verification/reset
+
+---
+
+## 🚀 Week 12 - Scaling & Performance
+**Branch**: `feature/scaling`
+**Target**: Mar 2, 2026
 
 ### Features
 - [ ] **Caching layer**
@@ -835,9 +1114,9 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🌐 Week 12 - Internationalization
+## 🌐 Week 13 - Internationalization
 **Branch**: `feature/i18n`
-**Target**: Mar 2, 2026
+**Target**: Mar 9, 2026
 
 ### Features
 - [ ] **Multi-language support**
@@ -857,9 +1136,9 @@ test('message self-destructs after first view', async ({ page }) => {
 
 ---
 
-## 🎁 Week 13 - Premium Features
+## 🎁 Week 14 - Premium Features
 **Branch**: `feature/premium`
-**Target**: Mar 9, 2026
+**Target**: Mar 16, 2026
 
 ### Features
 - [ ] **Premium tier** ($5/month)
@@ -945,7 +1224,7 @@ test('message self-destructs after first view', async ({ page }) => {
 
 **Current Version**: v1.9.0 (Week 10 - Enterprise Features)  
 **Last Updated**: Feb 20, 2026  
-**Next Release**: Week 11 (Scaling & Performance) - Feb 23, 2026
+**Next Release**: Week 11 (User Authentication System) - Feb 23, 2026
 
 ### Release History
 - **v1.9.0** - Feb 20, 2026: Enterprise Features (API key management, team workspaces with RBAC, custom branding, compliance & GDPR dashboard)
@@ -1029,4 +1308,4 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 **Last Updated**: February 20, 2026  
 **Current Version**: v1.9.0 - Enterprise Features  
-**Next Release**: Week 11 - Scaling & Performance (Feb 23, 2026)
+**Next Release**: Week 11 - User Authentication System (Feb 23, 2026)
