@@ -1,19 +1,8 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
+import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 
 const router = new Hono();
-
-// Helper to extract userId from session token
-function getUserId(c) {
-  const authHeader = c.req.header('Authorization');
-  const sessionToken = authHeader?.replace('Bearer ', '') || c.req.header('X-Session-Token');
-  
-  if (!sessionToken || !sessionToken.startsWith('session_')) {
-    return null;
-  }
-  
-  return sessionToken.replace('session_', '');
-}
 
 /**
  * Helper: Check team admin permission
@@ -64,8 +53,8 @@ router.get('/:teamId', async (c) => {
  * PUT /api/branding/:teamId
  * Update branding configuration (admin only)
  */
-router.put('/:teamId', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.put('/:teamId', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
   const body = await c.req.json();
 
@@ -188,8 +177,8 @@ router.put('/:teamId', async (c) => {
  * POST /api/branding/:teamId/upload-logo
  * Upload logo (placeholder - would integrate with R2/S3)
  */
-router.post('/:teamId/upload-logo', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.post('/:teamId/upload-logo', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
 
   const isAdmin = await checkTeamAdmin(c.env.DB, teamId, userId);
@@ -216,8 +205,8 @@ router.post('/:teamId/upload-logo', async (c) => {
  * DELETE /api/branding/:teamId/logo
  * Remove custom logo
  */
-router.delete('/:teamId/logo', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.post('/:teamId/logo', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
 
   const isAdmin = await checkTeamAdmin(c.env.DB, teamId, userId);

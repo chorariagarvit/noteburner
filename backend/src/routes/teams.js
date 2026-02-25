@@ -1,19 +1,8 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
+import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 
 const router = new Hono();
-
-// Helper to extract userId from session token
-function getUserId(c) {
-  const authHeader = c.req.header('Authorization');
-  const sessionToken = authHeader?.replace('Bearer ', '') || c.req.header('X-Session-Token');
-  
-  if (!sessionToken || !sessionToken.startsWith('session_')) {
-    return null;
-  }
-  
-  return sessionToken.replace('session_', '');
-}
 
 /**
  * Helper: Check if user has permission for team action
@@ -36,12 +25,8 @@ async function checkTeamPermission(db, teamId, userId, requiredRole = 'member') 
  * POST /api/teams
  * Create a new team
  */
-router.post('/', async (c) => {
+router.post('/', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
 
   const body = await c.req.json();
 
@@ -88,12 +73,8 @@ router.post('/', async (c) => {
  * GET /api/teams
  * List user's teams
  */
-router.get('/', async (c) => {
+router.get('/', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
 
   const teams = await c.env.DB.prepare(`
     SELECT t.id, t.name, t.plan, t.max_members, t.created_at,
@@ -113,12 +94,8 @@ router.get('/', async (c) => {
  * GET /api/teams/:id
  * Get team details
  */
-router.get('/:id', async (c) => {
+router.get('/:id', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('id');
 
@@ -147,12 +124,8 @@ router.get('/:id', async (c) => {
  * PUT /api/teams/:id
  * Update team settings
  */
-router.put('/:id', async (c) => {
+router.put('/:id', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('id');
   const body = await c.req.json();
@@ -194,12 +167,8 @@ router.put('/:id', async (c) => {
  * DELETE /api/teams/:id
  * Delete team (admin only)
  */
-router.delete('/:id', async (c) => {
+router.delete('/:id', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('id');
 
@@ -226,12 +195,8 @@ router.delete('/:id', async (c) => {
  * GET /api/teams/:id/members
  * List team members
  */
-router.get('/:id/members', async (c) => {
+router.get('/:id/members', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('id');
 
@@ -254,12 +219,8 @@ router.get('/:id/members', async (c) => {
  * POST /api/teams/:id/members
  * Add team member (admin only)
  */
-router.post('/:id/members', async (c) => {
+router.post('/:id/members', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('id');
   const body = await c.req.json();
@@ -323,12 +284,8 @@ router.post('/:id/members', async (c) => {
  * PUT /api/teams/:teamId/members/:memberId
  * Update member role (admin only)
  */
-router.put('/:teamId/members/:memberId', async (c) => {
+router.put('/:teamId/members/:memberId', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('teamId');
   const memberId = c.req.param('memberId');
@@ -357,12 +314,8 @@ router.put('/:teamId/members/:memberId', async (c) => {
  * DELETE /api/teams/:teamId/members/:memberId
  * Remove team member (admin only)
  */
-router.delete('/:teamId/members/:memberId', async (c) => {
+router.delete('/:teamId/members/:memberId', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('teamId');
   const memberId = c.req.param('memberId');
@@ -395,12 +348,8 @@ router.delete('/:teamId/members/:memberId', async (c) => {
  * GET /api/teams/:id/messages
  * List team messages
  */
-router.get('/:id/messages', async (c) => {
+router.get('/:id/messages', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('id');
   const limit = parseInt(c.req.query('limit') || '50');
@@ -440,12 +389,8 @@ router.get('/:id/messages', async (c) => {
  * GET /api/teams/:id/stats
  * Get team usage statistics
  */
-router.get('/:id/stats', async (c) => {
+router.get('/:id/stats', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   
   const teamId = c.req.param('id');
 

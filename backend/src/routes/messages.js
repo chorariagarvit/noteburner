@@ -57,7 +57,21 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     } = body;
 
     if (!encryptedData || !iv || !salt) {
+      console.error('Missing required fields:', { 
+        hasEncryptedData: !!encryptedData, 
+        hasIv: !!iv, 
+        hasSalt: !!salt 
+      });
       return c.json({ error: 'Missing required fields' }, 400);
+    }
+
+    // Log sizes for debugging
+    if (encryptedData.length > 50000) {
+      console.log('Large message detected:', { 
+        encryptedDataLength: encryptedData.length,
+        ivLength: iv.length,
+        saltLength: salt.length
+      });
     }
 
     // Generate unique token and creator token

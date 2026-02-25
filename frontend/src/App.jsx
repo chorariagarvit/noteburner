@@ -10,6 +10,7 @@ import InviteFriendsPage from './pages/InviteFriendsPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import SupportPage from './pages/SupportPage';
 import ChangelogPage from './pages/ChangelogPage';
+import APIDocumentationPage from './pages/APIDocumentationPage';
 import TeamCreationPage from './pages/TeamCreationPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -77,6 +78,7 @@ function App() {
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/changelog" element={<ChangelogPage />} />
                 <Route path="/support" element={<SupportPage />} />
+                <Route path="/docs/api" element={<APIDocumentationPage />} />
                 
                 {/* Enterprise features */}
                 <Route path="/api-keys" element={<ApiKeyManager />} />

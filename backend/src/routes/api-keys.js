@@ -1,30 +1,15 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
+import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 
 const router = new Hono();
-
-// Helper to extract userId from session token
-function getUserId(c) {
-  const authHeader = c.req.header('Authorization');
-  const sessionToken = authHeader?.replace('Bearer ', '') || c.req.header('X-Session-Token');
-  
-  if (!sessionToken || !sessionToken.startsWith('session_')) {
-    return null;
-  }
-  
-  return sessionToken.replace('session_', '');
-}
 
 /**
  * GET /api/api-keys
  * List all API keys for the authenticated user
  */
-router.get('/', async (c) => {
+router.get('/', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
 
   const keys = await c.env.DB.prepare(`
     SELECT id, name, rate_limit, active, created_at, last_used_at,
@@ -41,12 +26,8 @@ router.get('/', async (c) => {
  * POST /api/api-keys
  * Create a new API key
  */
-router.post('/', async (c) => {
+router.post('/', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   const body = await c.req.json();
 
   const { name, rate_limit = 1000 } = body;
@@ -89,12 +70,8 @@ router.post('/', async (c) => {
  * DELETE /api/api-keys/:id
  * Revoke an API key
  */
-router.delete('/:id', async (c) => {
+router.delete('/:id', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
-  if (!userId) {
-    return c.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, 401);
-  }
   const keyId = c.req.param('id');
 
   const result = await c.env.DB.prepare(`
