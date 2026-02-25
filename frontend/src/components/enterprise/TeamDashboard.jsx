@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { getSessionToken, getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 
 export default function TeamDashboard() {
   const { teamId } = useParams();
@@ -22,32 +23,32 @@ export default function TeamDashboard() {
   const loadTeamData = async () => {
     try {
       setLoading(true);
-      const sessionToken = sessionStorage.getItem('sessionToken');
+      const sessionToken = getSessionToken();
       
       // Load team details
       const teamRes = await fetch(`/api/teams/${teamId}`, {
-        headers: { 'X-Session-Token': sessionToken }
+        headers: getAuthHeaders()
       });
       const teamData = await teamRes.json();
       setTeam(teamData.team);
 
       // Load members
       const membersRes = await fetch(`/api/teams/${teamId}/members`, {
-        headers: { 'X-Session-Token': sessionToken }
+        headers: getAuthHeaders()
       });
       const membersData = await membersRes.json();
       setMembers(membersData.members || []);
 
       // Load messages
       const messagesRes = await fetch(`/api/teams/${teamId}/messages?limit=20`, {
-        headers: { 'X-Session-Token': sessionToken }
+        headers: getAuthHeaders()
       });
       const messagesData = await messagesRes.json();
       setMessages(messagesData.messages || []);
 
       // Load stats
       const statsRes = await fetch(`/api/teams/${teamId}/stats`, {
-        headers: { 'X-Session-Token': sessionToken }
+        headers: getAuthHeaders()
       });
       const statsData = await statsRes.json();
       setStats(statsData.stats);
@@ -65,10 +66,7 @@ export default function TeamDashboard() {
     try {
       const response = await fetch(`/api/teams/${teamId}/members`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Token': sessionStorage.getItem('sessionToken')
-        },
+        headers: getAuthHeadersWithJSON(),
         body: JSON.stringify({
           email: newMemberEmail,
           role: newMemberRole

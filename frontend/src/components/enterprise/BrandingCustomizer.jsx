@@ -40,10 +40,7 @@ export default function BrandingCustomizer() {
     try {
       const response = await fetch(`/api/branding/${teamId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Token': sessionStorage.getItem('sessionToken')
-        },
+        headers: getAuthHeadersWithJSON(),
         body: JSON.stringify(branding)
       });
 
