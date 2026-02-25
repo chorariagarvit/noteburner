@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Shield, Download, Trash2, Clock, MapPin, User } from 'lucide-react';
+import { getSessionToken, getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 
 export default function ComplianceDashboard() {
   const { teamId } = useParams();
