@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
-import { Calendar, Package, CheckCircle, Code, Database, TestTube } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Calendar, Package, CheckCircle, Code, Database, TestTube, Shield, Wrench } from 'lucide-react';
+import changelogRaw from '../../../CHANGELOG.md?raw';
+import { parseChangelog, getVersionStatus } from '../utils/parseChangelog';
 
-function VersionCard({ version, date, title, features, technical, status = 'released' }) {
+function VersionCard({ version, date, title, features, technical, security, changed, fixed, status = 'released' }) {
   const statusColors = {
     released: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
     beta: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
@@ -55,6 +57,57 @@ function VersionCard({ version, date, title, features, technical, status = 'rele
             {technical.map((item, index) => (
               <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-gray-400 mt-1">›</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {security && security.length > 0 && (
+        <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+          <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-red-500" />
+            Security
+          </h5>
+          <ul className="space-y-1">
+            {security.map((item, index) => (
+              <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+                <span className="text-red-400 mt-1">›</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {changed && changed.length > 0 && (
+        <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+          <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+            <Wrench className="w-4 h-4 text-blue-500" />
+            Changed
+          </h5>
+          <ul className="space-y-1">
+            {changed.map((item, index) => (
+              <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+                <span className="text-blue-400 mt-1">›</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {fixed && fixed.length > 0 && (
+        <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+          <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-500" />
+            Fixed
+          </h5>
+          <ul className="space-y-1">
+            {fixed.map((item, index) => (
+              <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+                <span className="text-green-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
             ))}

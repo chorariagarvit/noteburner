@@ -1,19 +1,8 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
+import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 
 const router = new Hono();
-
-// Helper to extract userId from session token
-function getUserId(c) {
-  const authHeader = c.req.header('Authorization');
-  const sessionToken = authHeader?.replace('Bearer ', '') || c.req.header('X-Session-Token');
-  
-  if (!sessionToken || !sessionToken.startsWith('session_')) {
-    return null;
-  }
-  
-  return sessionToken.replace('session_', '');
-}
 
 /**
  * Helper: Check team admin permission
@@ -30,8 +19,8 @@ async function checkTeamAdmin(db, teamId, userId) {
  * GET /api/compliance/:teamId/settings
  * Get compliance settings for a team
  */
-router.get('/:teamId/settings', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.get('/:teamId/settings', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
 
   const isAdmin = await checkTeamAdmin(c.env.DB, teamId, userId);
@@ -71,8 +60,8 @@ router.get('/:teamId/settings', async (c) => {
  * PUT /api/compliance/:teamId/settings
  * Update compliance settings
  */
-router.put('/:teamId/settings', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.put('/:teamId/settings', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
   const body = await c.req.json();
 
@@ -145,8 +134,8 @@ router.put('/:teamId/settings', async (c) => {
  * GET /api/compliance/:teamId/export/audit-logs
  * Export audit logs for a team (CSV or JSON)
  */
-router.get('/:teamId/export/audit-logs', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.get('/:teamId/export/audit-logs', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
   const format = c.req.query('format') || 'json'; // json or csv
   const startDate = c.req.query('start_date');
@@ -218,8 +207,8 @@ router.get('/:teamId/export/audit-logs', async (c) => {
  * GET /api/compliance/:teamId/export/messages
  * Export message metadata for compliance (GDPR data export)
  */
-router.get('/:teamId/export/messages', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.get('/:teamId/export/messages', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
   const format = c.req.query('format') || 'json';
 
@@ -288,8 +277,8 @@ router.get('/:teamId/export/messages', async (c) => {
  * POST /api/compliance/:teamId/gdpr/delete-all
  * GDPR Right to be Forgotten - Delete all team data
  */
-router.post('/:teamId/gdpr/delete-all', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.post('/:teamId/gdpr/delete-all', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
   const body = await c.req.json();
 
@@ -326,8 +315,8 @@ router.post('/:teamId/gdpr/delete-all', async (c) => {
  * GET /api/compliance/:teamId/report
  * Generate compliance report
  */
-router.get('/:teamId/report', async (c) => {
-  const userId = getUserId(c); if (!userId) return c.json({ error: "Authentication required", code: "AUTH_REQUIRED" }, 401);
+router.get('/:teamId/report', requireAuth, async (c) => {
+  const userId = getUserId(c);
   const teamId = c.req.param('teamId');
 
   const isAdmin = await checkTeamAdmin(c.env.DB, teamId, userId);
