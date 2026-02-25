@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Palette, Upload, Eye, Save } from 'lucide-react';
+import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 
 export default function BrandingCustomizer() {
   const { teamId } = useParams();

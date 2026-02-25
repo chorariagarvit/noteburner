@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Key, Trash2, AlertCircle, CheckCircle, Copy, ExternalLink } from 'lucide-react';
+import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 
 export default function ApiKeyManager() {
   const [apiKeys, setApiKeys] = useState([]);
