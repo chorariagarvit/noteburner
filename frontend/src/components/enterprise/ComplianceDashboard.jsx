@@ -17,18 +17,18 @@ export default function ComplianceDashboard() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const sessionToken = sessionStorage.getItem('sessionToken');
+      const sessionToken = getSessionToken();
 
       // Load compliance settings
       const settingsRes = await fetch(`/api/compliance/${teamId}/settings`, {
-        headers: { 'X-Session-Token': sessionToken }
+        headers: getAuthHeaders()
       });
       const settingsData = await settingsRes.json();
       setSettings(settingsData.settings);
 
       // Load compliance report
       const reportRes = await fetch(`/api/compliance/${teamId}/report`, {
-        headers: { 'X-Session-Token': sessionToken }
+        headers: getAuthHeaders()
       });
       const reportData = await reportRes.json();
       setReport(reportData.report);
@@ -47,10 +47,7 @@ export default function ComplianceDashboard() {
     try {
       const response = await fetch(`/api/compliance/${teamId}/settings`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Token': sessionStorage.getItem('sessionToken')
-        },
+        headers: getAuthHeadersWithJSON(),
         body: JSON.stringify(settings)
       });
 
@@ -67,11 +64,11 @@ export default function ComplianceDashboard() {
 
   const handleExport = async (type, format = 'json') => {
     try {
-      const sessionToken = sessionStorage.getItem('sessionToken');
+      const sessionToken = getSessionToken();
       const url = `/api/compliance/${teamId}/export/${type}?format=${format}`;
       
       const response = await fetch(url, {
-        headers: { 'X-Session-Token': sessionToken }
+        headers: getAuthHeaders()
       });
 
       if (format === 'csv') {

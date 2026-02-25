@@ -18,9 +18,7 @@ export default function ApiKeyManager() {
       setLoading(true);
       setError(null);
       const response = await fetch('/api/api-keys', {
-        headers: {
-          'X-Session-Token': sessionStorage.getItem('sessionToken') || ''
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {
@@ -49,10 +47,7 @@ export default function ApiKeyManager() {
       setError(null);
       const response = await fetch('/api/api-keys', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Token': sessionStorage.getItem('sessionToken') || ''
-        },
+        headers: getAuthHeadersWithJSON(),
         body: JSON.stringify({
           name: newKeyName,
           rate_limit: newKeyRateLimit
@@ -87,9 +82,7 @@ export default function ApiKeyManager() {
       setError(null);
       const response = await fetch(`/api/api-keys/${keyId}`, {
         method: 'DELETE',
-        headers: {
-          'X-Session-Token': sessionStorage.getItem('sessionToken') || ''
-        }
+        headers: getAuthHeaders()
       });
 
       if (!response.ok) {
