@@ -74,14 +74,14 @@ export default function BrandingCustomizer() {
   };
 
   if (loading) {
-    return <div className="text-center py-12">Loading branding settings...</div>;
+    return <div className="text-center py-12 text-gray-900 dark:text-gray-100">Loading branding settings...</div>;
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Brand Customization</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Brand Customization</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-2">
           Customize the look and feel of NoteBurner for your team
         </p>
       </div>
@@ -89,8 +89,8 @@ export default function BrandingCustomizer() {
       {message && (
         <div className={`mb-6 px-4 py-3 rounded-lg ${
           message.type === 'success' 
-            ? 'bg-green-50 border border-green-200 text-green-800'
-            : 'bg-red-50 border border-red-200 text-red-800'
+            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
+            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
         }`}>
           {message.text}
         </div>
@@ -100,12 +100,12 @@ export default function BrandingCustomizer() {
         {/* Settings Panel */}
         <div className="space-y-6">
           {/* Colors */}
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-            <h2 className="text-xl font-bold mb-4">Colors</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Colors</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Primary Color
                 </label>
                 <div className="flex gap-2">
@@ -113,20 +113,20 @@ export default function BrandingCustomizer() {
                     type="color"
                     value={branding.primary_color}
                     onChange={(e) => setBranding({ ...branding, primary_color: e.target.value })}
-                    className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                    className="h-10 w-20 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
                   />
                   <input
                     type="text"
                     value={branding.primary_color}
                     onChange={(e) => setBranding({ ...branding, primary_color: e.target.value })}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="#f59e0b"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Secondary Color
                 </label>
                 <div className="flex gap-2">
@@ -134,13 +134,13 @@ export default function BrandingCustomizer() {
                     type="color"
                     value={branding.secondary_color}
                     onChange={(e) => setBranding({ ...branding, secondary_color: e.target.value })}
-                    className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                    className="h-10 w-20 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
                   />
                   <input
                     type="text"
                     value={branding.secondary_color}
                     onChange={(e) => setBranding({ ...branding, secondary_color: e.target.value })}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="#1f2937"
                   />
                 </div>
@@ -149,8 +149,8 @@ export default function BrandingCustomizer() {
           </div>
 
           {/* Logo */}
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-            <h2 className="text-xl font-bold mb-4">Logo</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Logo</h2>
             
             {branding.logo_url ? (
               <div>
@@ -161,7 +161,7 @@ export default function BrandingCustomizer() {
                 />
                 <button
                   onClick={handleRemoveLogo}
-                  className="text-red-600 hover:text-red-800 text-sm"
+                  className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
                 >
                   Remove Logo
                 </button>
@@ -173,9 +173,9 @@ export default function BrandingCustomizer() {
                   value={branding.logo_url || ''}
                   onChange={(e) => setBranding({ ...branding, logo_url: e.target.value })}
                   placeholder="https://example.com/logo.png"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Enter a URL to your logo image (PNG, SVG, or JPG)
                 </p>
               </div>
@@ -183,22 +183,22 @@ export default function BrandingCustomizer() {
           </div>
 
           {/* Footer */}
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-            <h2 className="text-xl font-bold mb-4">Custom Footer</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Custom Footer</h2>
             <textarea
               value={branding.custom_footer || ''}
               onChange={(e) => setBranding({ ...branding, custom_footer: e.target.value })}
               placeholder="© 2026 Your Company. All rights reserved."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg h-24 text-sm"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg h-24 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           {/* White Label */}
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold mb-2">White Label</h2>
-                <p className="text-sm text-gray-600 mb-3">
+                <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">White Label</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   Remove all NoteBurner branding (Enterprise only)
                 </p>
               </div>
@@ -218,7 +218,7 @@ export default function BrandingCustomizer() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-6 py-3 bg-amber-500 dark:bg-amber-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-amber-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
@@ -226,24 +226,24 @@ export default function BrandingCustomizer() {
 
         {/* Preview Panel */}
         <div className="sticky top-6">
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-            <h2 className="text-xl font-bold mb-4">Preview</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Preview</h2>
             
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6"
+              className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6"
               style={{
                 '--color-primary': branding.primary_color,
                 '--color-secondary': branding.secondary_color
               }}
             >
               {/* Header Preview */}
-              <div className="mb-6 pb-4 border-b border-gray-200">
+              <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 {branding.logo_url ? (
                   <img src={branding.logo_url} alt="Logo" className="h-8 mb-2" />
                 ) : !branding.white_label ? (
-                  <div className="text-xl font-bold mb-2">🔥 NoteBurner</div>
+                  <div className="text-xl font-bold mb-2 text-gray-900 dark:text-white">🔥 NoteBurner</div>
                 ) : (
-                  <div className="text-xl font-bold mb-2">Your Brand</div>
+                  <div className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Your Brand</div>
                 )}
                 <div className="h-1 rounded" style={{ backgroundColor: branding.primary_color, width: '60px' }}></div>
               </div>
@@ -272,14 +272,14 @@ export default function BrandingCustomizer() {
               </div>
 
               {/* Footer Preview */}
-              <div className="mt-6 pt-4 border-t border-gray-200 text-xs text-gray-600 text-center">
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 text-center">
                 {branding.custom_footer || (
                   branding.white_label ? '' : '© 2026 NoteBurner. All rights reserved.'
                 )}
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-800 dark:text-blue-200">
               💡 Changes will apply to all team message pages
             </div>
           </div>
