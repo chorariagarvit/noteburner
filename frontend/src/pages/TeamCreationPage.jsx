@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAuthHeadersWithJSON } from '../utils/session';
 
 export default function TeamCreationPage() {
   const navigate = useNavigate();
@@ -14,13 +15,9 @@ export default function TeamCreationPage() {
     setMessage(null);
 
     try {
-      const sessionToken = sessionStorage.getItem('sessionToken');
       const response = await fetch('/api/teams', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Token': sessionToken
-        },
+        headers: getAuthHeadersWithJSON(),
         body: JSON.stringify({
           name: teamName,
           plan: plan
