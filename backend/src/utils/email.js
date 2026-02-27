@@ -25,12 +25,23 @@ export async function sendEmail(env, { to, subject, html, text }) {
     }
 
     // Send email using Cloudflare Email Workers
+    const fromEmail = env.EMAIL_FROM || 'hello@noteburner.work';
     const message = {
-      from: env.EMAIL_FROM || 'no-reply@noteburner.work',
+      from: {
+        email: fromEmail,
+        name: 'NoteBurner'
+      },
       to: [to],
       subject,
       html,
-      text: text || stripHtml(html)
+      text: text || stripHtml(html),
+      headers: {
+        'Reply-To': fromEmail,
+        'X-Entity-Ref-ID': `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        'X-Mailer': 'NoteBurner Email Service',
+        'List-Unsubscribe': `<mailto:unsubscribe@noteburner.work?subject=unsubscribe>`,
+        'Precedence': 'bulk'
+      }
     };
 
     await env.EMAIL_SENDER.send(message);

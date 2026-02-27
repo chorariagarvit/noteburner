@@ -33,7 +33,7 @@ name = "EMAIL_SENDER"
 # Environment variables
 [vars]
 FRONTEND_URL = "https://noteburner.work"
-EMAIL_FROM = "no-reply@noteburner.work"  # Sender email address
+EMAIL_FROM = "hello@noteburner.work"  # Sender email address (use hello@/team@/support@ for better deliverability)
 DEFAULT_EXPIRY_HOURS = "24"  # Default expiration time in hours
 MAX_MESSAGE_SIZE = "10485760"  # 10MB
 MAX_FILE_SIZE = "2147483648"   # 2GB (uses chunked uploads for files >100MB)
