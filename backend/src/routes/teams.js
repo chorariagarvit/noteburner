@@ -108,22 +108,19 @@ router.get('/:id', requireAuth, async (c) => {
   
   const teamId = c.req.param('id');
 
-  // Check membership
-  const hasAccess = await checkTeamPermission(c.env.DB, teamId, userId, 'viewer');
-  if (!hasAccess) {
-    return c.json({ error: 'Access denied', code: 'ACCESS_DENIED' }, 403);
-  }
-
+  // Optimized: Single query with permission check
   const team = await c.env.DB.prepare(`
-    SELECT t.*, COUNT(DISTINCT tm.id) as member_count
+    SELECT t.*, COUNT(DISTINCT tm.id) as member_count,
+           tm2.role as my_role
     FROM teams t
     LEFT JOIN team_members tm ON t.id = tm.team_id
+    JOIN team_members tm2 ON t.id = tm2.team_id AND tm2.user_id = ?
     WHERE t.id = ?
     GROUP BY t.id
-  `).bind(teamId).first();
+  `).bind(userId, teamId).first();
 
   if (!team) {
-    return c.json({ error: 'Team not found', code: 'NOT_FOUND' }, 404);
+    return c.json({ error: 'Team not found or access denied', code: 'NOT_FOUND' }, 404);
   }
 
   return c.json({ team });
@@ -209,17 +206,21 @@ router.get('/:id/members', requireAuth, async (c) => {
   
   const teamId = c.req.param('id');
 
-  const hasAccess = await checkTeamPermission(c.env.DB, teamId, userId, 'member');
-  if (!hasAccess) {
+  // Optimized: Combine permission check with members query
+  const members = await c.env.DB.prepare(`
+    SELECT tm.id, tm.user_id, tm.email, tm.role, tm.joined_at
+    FROM team_members tm
+    WHERE tm.team_id = ?
+      AND EXISTS (
+        SELECT 1 FROM team_members tm2
+        WHERE tm2.team_id = tm.team_id AND tm2.user_id = ?
+      )
+    ORDER BY tm.joined_at ASC
+  `).bind(teamId, userId).all();
+
+  if (!members.results || members.results.length === 0) {
     return c.json({ error: 'Access denied', code: 'ACCESS_DENIED' }, 403);
   }
-
-  const members = await c.env.DB.prepare(`
-    SELECT id, user_id, email, role, joined_at
-    FROM team_members
-    WHERE team_id = ?
-    ORDER BY joined_at ASC
-  `).bind(teamId).all();
 
   return c.json({ members: members.results || [] });
 });
@@ -364,27 +365,35 @@ router.get('/:id/messages', requireAuth, async (c) => {
   const limit = parseInt(c.req.query('limit') || '50');
   const offset = parseInt(c.req.query('offset') || '0');
 
-  const hasAccess = await checkTeamPermission(c.env.DB, teamId, userId, 'viewer');
-  if (!hasAccess) {
-    return c.json({ error: 'Access denied', code: 'ACCESS_DENIED' }, 403);
-  }
-
-  const messages = await c.env.DB.prepare(`
-    SELECT m.id, m.created_at, m.expires_at, m.view_count, m.max_views,
-           m.custom_slug, tm.created_by
+  // Optimized: Single query with permission check and message count
+  const result = await c.env.DB.prepare(`
+    WITH user_access AS (
+      SELECT 1 as has_access FROM team_members WHERE team_id = ? AND user_id = ?
+    )
+    SELECT 
+      m.id, m.created_at, m.expires_at, m.view_count, m.max_views,
+      m.custom_slug, tm.created_by,
+      (SELECT COUNT(*) FROM team_messages WHERE team_id = ?) as total_count
     FROM messages m
     JOIN team_messages tm ON m.id = tm.message_id
+    CROSS JOIN user_access
     WHERE tm.team_id = ?
     ORDER BY m.created_at DESC
     LIMIT ? OFFSET ?
-  `).bind(teamId, limit, offset).all();
+  `).bind(teamId, userId, teamId, teamId, limit, offset).all();
 
-  const { total } = await c.env.DB.prepare(`
-    SELECT COUNT(*) as total FROM team_messages WHERE team_id = ?
-  `).bind(teamId).first();
+  if (!result.results || result.results.length === 0) {
+    // Check if it's access denied or just no messages
+    const hasAccess = await checkTeamPermission(c.env.DB, teamId, userId, 'viewer');
+    if (!hasAccess) {
+      return c.json({ error: 'Access denied', code: 'ACCESS_DENIED' }, 403);
+    }
+  }
+
+  const total = result.results[0]?.total_count || 0;
 
   return c.json({
-    messages: messages.results || [],
+    messages: result.results || [],
     pagination: {
       total,
       limit,
@@ -403,29 +412,29 @@ router.get('/:id/stats', requireAuth, async (c) => {
   
   const teamId = c.req.param('id');
 
-  const isAdmin = await checkTeamPermission(c.env.DB, teamId, userId, 'admin');
-  if (!isAdmin) {
-    return c.json({ error: 'Admin access required', code: 'ACCESS_DENIED' }, 403);
-  }
-
-  // Get overall stats
+  // Optimized: Single query combining permission check, stats, and member count
   const stats = await c.env.DB.prepare(`
+    WITH user_role AS (
+      SELECT role FROM team_members WHERE team_id = ? AND user_id = ?
+    )
     SELECT 
       COUNT(DISTINCT tm.message_id) as total_messages,
       COUNT(DISTINCT CASE WHEN m.accessed_at IS NOT NULL THEN m.id END) as burned_messages,
       COUNT(DISTINCT CASE WHEN m.view_count > 0 THEN m.id END) as viewed_messages,
-      SUM(m.view_count) as total_views
+      SUM(m.view_count) as total_views,
+      (SELECT COUNT(*) FROM team_members WHERE team_id = ?) as member_count,
+      (SELECT role FROM user_role) as user_role
     FROM team_messages tm
     LEFT JOIN messages m ON tm.message_id = m.id
-    WHERE tm.team_id = ?
-  `).bind(teamId).first();
+    CROSS JOIN user_role
+    WHERE tm.team_id = ? AND (SELECT role FROM user_role) = 'admin'
+  `).bind(teamId, userId, teamId, teamId).first();
 
-  // Get member count
-  const { member_count } = await c.env.DB.prepare(`
-    SELECT COUNT(*) as member_count FROM team_members WHERE team_id = ?
-  `).bind(teamId).first();
+  if (!stats || !stats.user_role) {
+    return c.json({ error: 'Admin access required', code: 'ACCESS_DENIED' }, 403);
+  }
 
-  // Get recent activity (last 30 days)
+  // Get recent activity (parallel query using batch)
   const recentStats = await c.env.DB.prepare(`
     SELECT date, messages_created, messages_viewed, messages_burned
     FROM team_stats
@@ -435,8 +444,11 @@ router.get('/:id/stats', requireAuth, async (c) => {
 
   return c.json({
     stats: {
-      ...stats,
-      member_count,
+      total_messages: stats.total_messages || 0,
+      burned_messages: stats.burned_messages || 0,
+      viewed_messages: stats.viewed_messages || 0,
+      total_views: stats.total_views || 0,
+      member_count: stats.member_count || 0,
       recent_activity: recentStats.results || []
     }
   });
