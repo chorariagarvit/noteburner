@@ -53,6 +53,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip non-http(s) requests (chrome-extension, file, etc.)
+  if (!request.url.startsWith('http://') && !request.url.startsWith('https://')) {
+    return;
+  }
+
   // Skip API requests (always fetch fresh)
   if (request.url.includes('/api/')) {
     return;
@@ -63,10 +68,12 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone and cache the response
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE)
-            .then((cache) => cache.put(request, responseClone));
+          // Clone and cache the response (only for http/https)
+          if (request.url.startsWith('http://') || request.url.startsWith('https://')) {
+            const responseClone = response.clone();
+            caches.open(DYNAMIC_CACHE)
+              .then((cache) => cache.put(request, responseClone));
+          }
           return response;
         })
         .catch(() => {
@@ -98,9 +105,12 @@ self.addEventListener('fetch', (event) => {
             if (!response || response.status !== 200 || response.type === 'error') {
               return response;
             }
-            const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => cache.put(request, responseClone));
+            // Only cache http/https URLs
+            if (request.url.startsWith('http://') || request.url.startsWith('https://')) {
+              const responseClone = response.clone();
+              caches.open(DYNAMIC_CACHE)
+                .then((cache) => cache.put(request, responseClone));
+            }
             return response;
           });
       })
