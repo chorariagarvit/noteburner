@@ -20,11 +20,11 @@ CREATE INDEX IF NOT EXISTS idx_messages_accessed ON messages(accessed_at);
 -- Composite index for team stats date range queries
 CREATE INDEX IF NOT EXISTS idx_team_stats_team_date ON team_stats(team_id, date DESC);
 
--- Index for sessions cleanup (expired sessions)
-CREATE INDEX IF NOT EXISTS idx_sessions_expires_cleanup ON sessions(expires_at) WHERE expires_at < CURRENT_TIMESTAMP;
+-- Index for sessions expiration (for cleanup jobs)
+CREATE INDEX IF NOT EXISTS idx_sessions_expires_cleanup ON sessions(expires_at);
 
 -- Index for password resets cleanup (expired tokens)
-CREATE INDEX IF NOT EXISTS idx_password_resets_expires_cleanup ON password_resets(expires_at, used);
+CREATE INDEX IF NOT EXISTS idx_password_resets_expires_used ON password_resets(expires_at, used);
 
 -- Index for team messages by creator (for tracking user activity)
 CREATE INDEX IF NOT EXISTS idx_team_messages_creator ON team_messages(created_by, team_id);
