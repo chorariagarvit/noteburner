@@ -20,6 +20,11 @@ import {
   getUserSessions,
   refreshSession
 } from '../utils/session.js';
+import { 
+  sendVerificationEmail, 
+  sendPasswordResetEmail, 
+  sendWelcomeEmail 
+} from '../utils/email.js';
 import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 
 const router = new Hono();
@@ -76,20 +81,30 @@ router.post('/signup', async (c) => {
       VALUES (?, ?, ?, ?, ?, 0)
     `).bind(userId, email.toLowerCase(), passwordHash, displayName || null, verificationToken).run();
 
-    // TODO: Send verification email (implement email service)
-    console.log(`Verification token for ${email}: ${verificationToken}`);
+    // Send verification email
+    const emailSent = await sendVerificationEmail(
+      c.env, 
+      email.toLowerCase(), 
+      displayName || email.split('@')[0], 
+      verificationToken
+    );
+
+    // Fallback: log token if email fails (dev mode)
+    if (!emailSent) {
+      console.log(`[DEV] Verification token for ${email}: ${verificationToken}`);
+    }
 
     return c.json({
       success: true,
-      message: 'Account created successfully. Please verify your email.',
+      message: 'Account created successfully. Please check your email to verify your account.',
       user: {
         id: userId,
         email: email.toLowerCase(),
         displayName: displayName || null,
         emailVerified: false
       },
-      // In production, remove this and send via email
-      verificationToken: verificationToken
+      // In development, include token for testing
+      ...(process.env.NODE_ENV !== 'production' && { verificationToken })
     }, 201);
   } catch (error) {
     console.error('Signup error:', error);
@@ -364,14 +379,29 @@ router.post('/forgot-password', async (c) => {
       VALUES (?, ?, ?, ?)
     `).bind(resetId, user.id, resetToken, expiresAt).run();
 
-    // TODO: Send reset email
-    console.log(`Password reset token for ${email}: ${resetToken}`);
+    // Get user's display name for email
+    const userDetails = await c.env.DB.prepare(`
+      SELECT display_name FROM users WHERE id = ?
+    `).bind(user.id).first();
+
+    // Send password reset email
+    const emailSent = await sendPasswordResetEmail(
+      c.env,
+      email.toLowerCase(),
+      userDetails?.display_name || email.split('@')[0],
+      resetToken
+    );
+
+    // Fallback: log token if email fails (dev mode)
+    if (!emailSent) {
+      console.log(`[DEV] Password reset token for ${email}: ${resetToken}`);
+    }
 
     return c.json({
       success: true,
       message: 'If an account exists with this email, a password reset link has been sent',
-      // In production, remove this and send via email
-      resetToken: resetToken
+      // In development, include token for testing
+      ...(process.env.NODE_ENV !== 'production' && { resetToken })
     });
   } catch (error) {
     console.error('Forgot password error:', error);
