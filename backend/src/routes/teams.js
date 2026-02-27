@@ -39,17 +39,26 @@ router.post('/', requireAuth, async (c) => {
   const teamId = nanoid(16);
   const maxMembers = plan === 'enterprise' ? 100 : plan === 'team' ? 20 : 5;
 
+  // Get user's email from users table
+  const user = await c.env.DB.prepare(`
+    SELECT email FROM users WHERE id = ?
+  `).bind(userId).first();
+
+  if (!user) {
+    return c.json({ error: 'User not found', code: 'USER_NOT_FOUND' }, 404);
+  }
+
   // Create team
   await c.env.DB.prepare(`
     INSERT INTO teams (id, name, owner_id, plan, max_members)
     VALUES (?, ?, ?, ?, ?)
   `).bind(teamId, name.trim(), userId, plan, maxMembers).run();
 
-  // Add creator as admin
+  // Add creator as admin with their actual email
   await c.env.DB.prepare(`
     INSERT INTO team_members (id, team_id, user_id, email, role)
     VALUES (?, ?, ?, ?, 'admin')
-  `).bind(nanoid(16), teamId, userId, 'owner@team.local').run();
+  `).bind(nanoid(16), teamId, userId, user.email).run();
 
   // Create default compliance settings
   await c.env.DB.prepare(`
