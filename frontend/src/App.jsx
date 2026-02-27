@@ -12,6 +12,7 @@ import SupportPage from './pages/SupportPage';
 import ChangelogPage from './pages/ChangelogPage';
 import APIDocumentationPage from './pages/APIDocumentationPage';
 import TeamCreationPage from './pages/TeamCreationPage';
+import MyTeamsPage from './pages/MyTeamsPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -82,6 +83,7 @@ function App() {
                 
                 {/* Enterprise features */}
                 <Route path="/api-keys" element={<ApiKeyManager />} />
+                <Route path="/teams" element={<MyTeamsPage />} />
                 <Route path="/teams/new" element={<TeamCreationPage />} />
                 <Route path="/teams/:teamId" element={<TeamDashboard />} />
                 <Route path="/teams/:teamId/branding" element={<BrandingCustomizer />} />
