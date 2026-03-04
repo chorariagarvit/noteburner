@@ -13,6 +13,7 @@ import teamsRouter from './routes/teams.js';
 import brandingRouter from './routes/branding.js';
 import complianceRouter from './routes/compliance.js';
 import authRouter from './routes/auth.js';
+import healthRouter from './routes/health.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
 import { securityHeaders, enhancedRateLimit, ddosProtection } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
@@ -35,12 +36,13 @@ app.get('/', (c) => {
   return c.json({
     status: 'ok',
     service: 'NoteBurner API',
-    version: '1.10.0',
-    features: ['authentication', 'enterprise', 'teams', 'api-v1', 'branding', 'compliance']
+    version: '1.11.0',
+    features: ['authentication', 'enterprise', 'teams', 'api-v1', 'branding', 'compliance', 'caching', 'monitoring']
   });
 });
 
 // Mount route modules
+app.route('/api/health', healthRouter); // Week 12: Health monitoring
 app.route('/api/messages', messagesRouter);
 app.route('/api/media', mediaRouter);
 app.route('/api/stats', statsRouter);
