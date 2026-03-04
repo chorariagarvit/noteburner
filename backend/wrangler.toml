@@ -46,20 +46,6 @@ MAX_FILE_SIZE = "2147483648"   # 2GB (uses chunked uploads for files >100MB)
 RATE_LIMIT_REQUESTS = "10"
 RATE_LIMIT_WINDOW = "60"       # seconds
 
-# CDN & Performance Configuration (Week 12)
-[build]
-command = ""
-
-[site]
-bucket = ""
-
-# Custom routes for caching optimization
-[[rules]]
-# Cache static assets for 1 year
-action = "route"
-pattern = "noteburner.work/assets/*"
-cache_level = "aggressive_cache"
-
 # Scheduled cleanup job (runs every hour)
 [triggers]
 crons = ["0 * * * *"]
