@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { PERIOD_ALL_TIME, PERIOD_TODAY, PERIOD_THIS_WEEK, ALL_TIME_DATE } from '../utils/stats.js';
+import { cacheAside, getStatsCacheKey, CACHE_TTL } from '../utils/cache.js';
 
 const app = new Hono();
 
@@ -12,31 +13,43 @@ app.get('/', async (c) => {
     weekStart.setDate(now.getDate() - now.getDay());
     const weekDate = weekStart.toISOString().split('T')[0];
 
-    // Get all stats
-    const stats = await c.env.DB.prepare(
-      `SELECT metric, value, period FROM stats 
-       WHERE (period = ? AND date = ?) 
-          OR (period = ? AND date = ?)
-          OR (period = ? AND date = ?)`
-    ).bind(PERIOD_ALL_TIME, ALL_TIME_DATE, PERIOD_TODAY, today, PERIOD_THIS_WEEK, weekDate).all();
+    // Use cache-aside pattern with 1 minute TTL for stats
+    const cacheKey = getStatsCacheKey('combined');
+    
+    const response = await cacheAside(
+      c.env.CACHE,
+      cacheKey,
+      async () => {
+        // Get all stats from database
+        const stats = await c.env.DB.prepare(
+          `SELECT metric, value, period FROM stats 
+           WHERE (period = ? AND date = ?) 
+              OR (period = ? AND date = ?)
+              OR (period = ? AND date = ?)`
+        ).bind(PERIOD_ALL_TIME, ALL_TIME_DATE, PERIOD_TODAY, today, PERIOD_THIS_WEEK, weekDate).all();
 
-    // Format response
-    const response = {
-      [PERIOD_ALL_TIME]: {},
-      [PERIOD_TODAY]: {},
-      [PERIOD_THIS_WEEK]: {}
-    };
+        // Format response
+        const formattedResponse = {
+          [PERIOD_ALL_TIME]: {},
+          [PERIOD_TODAY]: {},
+          [PERIOD_THIS_WEEK]: {}
+        };
 
-    for (const stat of stats.results) {
-      response[stat.period][stat.metric] = stat.value;
-    }
+        for (const stat of stats.results) {
+          formattedResponse[stat.period][stat.metric] = stat.value;
+        }
 
-    // Calculate average file size
-    if (response[PERIOD_ALL_TIME].files_encrypted > 0) {
-      response[PERIOD_ALL_TIME].avg_file_size = Math.round(
-        response[PERIOD_ALL_TIME].total_file_size / response[PERIOD_ALL_TIME].files_encrypted
-      );
-    }
+        // Calculate average file size
+        if (formattedResponse[PERIOD_ALL_TIME].files_encrypted > 0) {
+          formattedResponse[PERIOD_ALL_TIME].avg_file_size = Math.round(
+            formattedResponse[PERIOD_ALL_TIME].total_file_size / formattedResponse[PERIOD_ALL_TIME].files_encrypted
+          );
+        }
+
+        return formattedResponse;
+      },
+      CACHE_TTL.STATS
+    );
 
     return c.json(response);
   } catch (error) {
