@@ -9,10 +9,10 @@ import { healthCheck, getPerformanceStats } from '../utils/monitoring.js';
 const app = new Hono();
 
 /**
- * GET /health
+ * GET /
  * Health check endpoint for uptime monitoring
  */
-app.get('/health', async (c) => {
+app.get('/', async (c) => {
   const health = await healthCheck(c.env);
   
   const statusCode = health.status === 'healthy' ? 200 : 
@@ -22,10 +22,10 @@ app.get('/health', async (c) => {
 });
 
 /**
- * GET /health/deep
+ * GET /deep
  * Deep health check with detailed metrics
  */
-app.get('/health/deep', async (c) => {
+app.get('/deep', async (c) => {
   const stats = await getPerformanceStats(c.env);
   return c.json(stats);
 });
