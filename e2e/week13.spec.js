@@ -134,12 +134,18 @@ test.describe('Week 13: Internationalization', () => {
 
       page.on('pageerror', (err) => errors.push(err.message));
 
+      // First navigation: establish a proper origin so localStorage is accessible
+      await page.goto(APP_URL);
+      await page.waitForLoadState('domcontentloaded');
+
       for (const locale of locales) {
+        // Set locale while the page already has a valid origin context
         await page.evaluate((l) => {
           localStorage.setItem('noteburner_locale', l);
         }, locale);
 
-        await page.goto(APP_URL);
+        // Reload to test the app with that locale active
+        await page.reload();
         await page.waitForLoadState('domcontentloaded');
       }
 
