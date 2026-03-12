@@ -1,0 +1,205 @@
+{
+  "nav": {
+    "createMessage": "Crear Mensaje",
+    "achievements": "Logros",
+    "rewards": "Recompensas",
+    "invite": "Invitar",
+    "leaderboard": "Clasificación",
+    "stats": "Estadísticas",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse",
+    "profile": "Perfil",
+    "logout": "Cerrar Sesión",
+    "premium": "Premium"
+  },
+  "home": {
+    "hero": {
+      "title": "Envía Mensajes que se",
+      "titleHighlight": "Autodestruyen",
+      "subtitle": "Mensajes cifrados de extremo a extremo, acceso único. Sin cuenta requerida. Privacidad por diseño.",
+      "cta": "Crear Mensaje Secreto",
+      "learnMore": "Cómo Funciona"
+    },
+    "stats": {
+      "title": "Estadísticas de la Plataforma",
+      "burnedToday": "destruidos hoy",
+      "burnedThisWeek": "destruidos esta semana",
+      "messagesCreated": "Mensajes Creados",
+      "messagesBurned": "Mensajes Destruidos",
+      "filesEncrypted": "Archivos Cifrados",
+      "totalSent": "Total Enviados"
+    },
+    "features": {
+      "title": "¿Por qué NoteBurner?",
+      "e2e": {
+        "title": "Cifrado de Extremo a Extremo",
+        "desc": "Los mensajes se cifran en tu navegador. Nunca vemos tu contenido."
+      },
+      "oneTime": {
+        "title": "Acceso Único",
+        "desc": "El mensaje se elimina permanentemente después del primer acceso."
+      },
+      "noAccount": {
+        "title": "Sin Cuenta Requerida",
+        "desc": "Envía mensajes de forma anónima. Sin registro, sin rastreo."
+      },
+      "autoExpire": {
+        "title": "Expiración Automática",
+        "desc": "Configura mensajes para que expiren de 1 hora a 7 días."
+      }
+    }
+  },
+  "create": {
+    "title": "Crear Mensaje Secreto",
+    "messagePlaceholder": "Escribe tu mensaje secreto aquí...",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Establecer contraseña (opcional)",
+    "expiryLabel": "Expira en",
+    "submitButton": "Crear Mensaje Seguro",
+    "customUrlLabel": "URL Personalizada (opcional)",
+    "customUrlPlaceholder": "mi-url-secreta",
+    "groupToggle": "Mensaje Grupal",
+    "recipientsLabel": "Número de destinatarios",
+    "anonymousToggle": "Enviar Anónimamente",
+    "fileLabel": "Adjuntar Archivo",
+    "fileHint": "Se admite cualquier tipo de archivo",
+    "creating": "Creando...",
+    "errors": {
+      "messageRequired": "El mensaje es obligatorio",
+      "messageTooLong": "El mensaje supera la longitud máxima",
+      "passwordTooWeak": "La contraseña es demasiado débil",
+      "urlTaken": "Esta URL ya está en uso",
+      "urlInvalid": "La URL debe tener entre 3 y 20 caracteres."
+    }
+  },
+  "view": {
+    "loading": "Cargando mensaje...",
+    "enterPassword": "Ingresar Contraseña",
+    "passwordPlaceholder": "Ingresa la contraseña del mensaje",
+    "decryptButton": "Descifrar Mensaje",
+    "decrypting": "Descifrando...",
+    "burned": "El mensaje ha sido destruido",
+    "burnedDesc": "Este mensaje ha sido eliminado permanentemente.",
+    "notFound": "Mensaje no encontrado",
+    "notFoundDesc": "Este mensaje puede haber expirado o ya fue visto.",
+    "expired": "El mensaje ha expirado",
+    "wrongPassword": "Contraseña incorrecta",
+    "attemptsRemaining": "intentos restantes",
+    "createOwn": "Crea Tu Propio Mensaje Secreto",
+    "expiresIn": "Expira en",
+    "messageBurned": "🔥 Este mensaje ha sido destruido",
+    "fileDownload": "Descargar Archivo",
+    "downloading": "Descargando..."
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de Nuevo",
+      "subtitle": "Inicia sesión en tu cuenta NoteBurner",
+      "emailLabel": "Correo Electrónico",
+      "emailPlaceholder": "tú@ejemplo.com",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Tu contraseña",
+      "rememberMe": "Recuérdame",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submitButton": "Iniciar Sesión",
+      "signingIn": "Iniciando sesión...",
+      "noAccount": "¿No tienes una cuenta?",
+      "signupLink": "Regístrate",
+      "errors": {
+        "invalidCredentials": "Correo o contraseña inválidos",
+        "accountLocked": "Cuenta bloqueada. Intenta de nuevo en 15 minutos.",
+        "emailRequired": "El correo es obligatorio",
+        "passwordRequired": "La contraseña es obligatoria"
+      }
+    },
+    "signup": {
+      "title": "Crear Cuenta",
+      "subtitle": "Únete a NoteBurner gratis",
+      "displayNameLabel": "Nombre (opcional)",
+      "displayNamePlaceholder": "Tu nombre",
+      "emailLabel": "Correo Electrónico",
+      "emailPlaceholder": "tú@ejemplo.com",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Mín 8 caracteres",
+      "confirmPasswordLabel": "Confirmar Contraseña",
+      "confirmPasswordPlaceholder": "Repite tu contraseña",
+      "termsAccept": "Acepto los",
+      "termsLink": "Términos de Servicio",
+      "andText": "y la",
+      "privacyLink": "Política de Privacidad",
+      "submitButton": "Crear Cuenta",
+      "creating": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "loginLink": "Iniciar sesión",
+      "errors": {
+        "emailTaken": "El correo ya está registrado",
+        "passwordMismatch": "Las contraseñas no coinciden",
+        "passwordWeak": "La contraseña debe tener al menos 8 caracteres con mayúscula, minúscula y número",
+        "termsRequired": "Debes aceptar los términos"
+      }
+    },
+    "forgotPassword": {
+      "title": "Restablecer Contraseña",
+      "subtitle": "Ingresa tu correo para recibir un enlace de restablecimiento",
+      "emailLabel": "Correo Electrónico",
+      "submitButton": "Enviar Enlace",
+      "sending": "Enviando...",
+      "successMessage": "Revisa tu correo para el enlace de restablecimiento",
+      "backToLogin": "Volver al inicio de sesión"
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "¡Éxito!",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "download": "Descargar",
+    "share": "Compartir",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Omitir",
+    "done": "Listo",
+    "yes": "Sí",
+    "no": "No",
+    "or": "o",
+    "and": "y",
+    "by": "por",
+    "at": "en",
+    "ago": "hace",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "daysAgo": "hace {n} días",
+    "justNow": "Justo ahora",
+    "notAvailable": "N/D"
+  },
+  "compliance": {
+    "gdpr": {
+      "title": "Cumplimiento GDPR",
+      "desc": "Cumplimos con el Reglamento General de Protección de Datos de la UE",
+      "dataRetention": "Retención de Datos",
+      "exportData": "Exportar Mis Datos",
+      "deleteData": "Eliminar Mis Datos",
+      "cookieConsent": "Este sitio no usa cookies de rastreo. Tus datos están cifrados en tu dispositivo."
+    },
+    "ccpa": {
+      "title": "Cumplimiento CCPA",
+      "desc": "Cumplimiento de la Ley de Privacidad del Consumidor de California",
+      "doNotSell": "No vendemos tus datos personales",
+      "optOut": "Cancelar el Procesamiento de Datos"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी"
+  }
+}
