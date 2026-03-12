@@ -6,7 +6,7 @@
  */
 
 import { Hono } from 'hono';
-import { requireAuth, optionalAuth } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/requireAuth.js';
 import { nanoid } from 'nanoid';
 
 const app = new Hono();
@@ -25,9 +25,10 @@ app.get('/plans', async (c) => {
   return c.json({
     plans: plans.results.map((p) => ({
       ...p,
-      features: JSON.parse(p.features || '[]'),
-      price_monthly_usd: (p.price_monthly / 100).toFixed(2),
-      price_lifetime_usd: (p.price_lifetime / 100).toFixed(2)
+      // Normalize cents → dollars for API consumers
+      price_monthly: p.price_monthly / 100,
+      price_lifetime: p.price_lifetime / 100,
+      features: JSON.parse(p.features || '[]')
     }))
   });
 });
@@ -68,7 +69,14 @@ app.get('/status', requireAuth, async (c) => {
         custom_urls_limit: freePlan?.custom_urls_limit || 5,
         api_calls_limit: freePlan?.api_calls_limit || 1000
       },
-      subscription: null
+      subscription: {
+        plan_id: 'free',
+        status: 'active',
+        payment_method: null,
+        current_period_start: null,
+        current_period_end: null,
+        expires_at: null
+      }
     });
   }
 
