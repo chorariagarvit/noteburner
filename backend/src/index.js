@@ -14,15 +14,18 @@ import brandingRouter from './routes/branding.js';
 import complianceRouter from './routes/compliance.js';
 import authRouter from './routes/auth.js';
 import healthRouter from './routes/health.js';
+import premiumRouter from './routes/premium.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
 import { securityHeaders, enhancedRateLimit, ddosProtection } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
+import { detectLocale } from './middleware/locale.js';
 
 const app = new Hono();
 
 // Security middleware (apply first)
 app.use('/*', securityHeaders());
 app.use('/*', ddosProtection());
+app.use('/*', detectLocale());
 
 // CORS middleware
 app.use('/*', cors(corsConfig));
@@ -36,8 +39,8 @@ app.get('/', (c) => {
   return c.json({
     status: 'ok',
     service: 'NoteBurner API',
-    version: '1.11.0',
-    features: ['authentication', 'enterprise', 'teams', 'api-v1', 'branding', 'compliance', 'caching', 'monitoring']
+    version: '1.12.0',
+    features: ['authentication', 'enterprise', 'teams', 'api-v1', 'branding', 'compliance', 'caching', 'monitoring', 'i18n', 'premium']
   });
 });
 
@@ -52,6 +55,9 @@ app.route('/api/audit', auditRouter);
 
 // Week 11: Authentication
 app.route('/api/auth', authRouter); // User authentication
+
+// Week 14: Premium features
+app.route('/api/premium', premiumRouter);
 
 // Week 10: Enterprise features
 app.route('/api/v1', apiV1Router); // Has its own API key auth
