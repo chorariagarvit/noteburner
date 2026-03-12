@@ -1,0 +1,205 @@
+{
+  "nav": {
+    "createMessage": "创建消息",
+    "achievements": "成就",
+    "rewards": "奖励",
+    "invite": "邀请",
+    "leaderboard": "排行榜",
+    "stats": "统计",
+    "login": "登录",
+    "signup": "注册",
+    "profile": "个人资料",
+    "logout": "退出登录",
+    "premium": "高级版"
+  },
+  "home": {
+    "hero": {
+      "title": "发送会",
+      "titleHighlight": "自毁的消息",
+      "subtitle": "端对端加密，一次性访问消息。无需账户。隐私优先设计。",
+      "cta": "创建秘密消息",
+      "learnMore": "了解工作原理"
+    },
+    "stats": {
+      "title": "平台统计",
+      "burnedToday": "今日已销毁",
+      "burnedThisWeek": "本周已销毁",
+      "messagesCreated": "已创建消息",
+      "messagesBurned": "已销毁消息",
+      "filesEncrypted": "已加密文件",
+      "totalSent": "总发送量"
+    },
+    "features": {
+      "title": "为什么选择 NoteBurner？",
+      "e2e": {
+        "title": "端对端加密",
+        "desc": "消息在您的浏览器中加密。我们永远看不到您的内容。"
+      },
+      "oneTime": {
+        "title": "一次性访问",
+        "desc": "消息在首次访问后被永久删除。"
+      },
+      "noAccount": {
+        "title": "无需账户",
+        "desc": "匿名发送消息。无注册，无追踪。"
+      },
+      "autoExpire": {
+        "title": "自动过期",
+        "desc": "设置消息在 1 小时到 7 天内过期。"
+      }
+    }
+  },
+  "create": {
+    "title": "创建秘密消息",
+    "messagePlaceholder": "在此输入您的秘密消息...",
+    "passwordLabel": "密码",
+    "passwordPlaceholder": "设置密码（可选）",
+    "expiryLabel": "过期时间",
+    "submitButton": "创建安全消息",
+    "customUrlLabel": "自定义网址（可选）",
+    "customUrlPlaceholder": "我的秘密网址",
+    "groupToggle": "群组消息",
+    "recipientsLabel": "收件人数量",
+    "anonymousToggle": "匿名发送",
+    "fileLabel": "附加文件",
+    "fileHint": "支持任何文件类型",
+    "creating": "创建中...",
+    "errors": {
+      "messageRequired": "消息为必填项",
+      "messageTooLong": "消息超过最大长度",
+      "passwordTooWeak": "密码太弱",
+      "urlTaken": "此网址已被使用",
+      "urlInvalid": "网址必须为 3-20 个字符"
+    }
+  },
+  "view": {
+    "loading": "正在加载消息...",
+    "enterPassword": "输入密码",
+    "passwordPlaceholder": "输入消息密码",
+    "decryptButton": "解密消息",
+    "decrypting": "解密中...",
+    "burned": "消息已被销毁",
+    "burnedDesc": "此消息已被永久删除。",
+    "notFound": "未找到消息",
+    "notFoundDesc": "此消息可能已过期或已被查看。",
+    "expired": "消息已过期",
+    "wrongPassword": "密码错误",
+    "attemptsRemaining": "次尝试剩余",
+    "createOwn": "创建您自己的秘密消息",
+    "expiresIn": "过期时间",
+    "messageBurned": "🔥 此消息已被销毁",
+    "fileDownload": "下载文件",
+    "downloading": "下载中..."
+  },
+  "auth": {
+    "login": {
+      "title": "欢迎回来",
+      "subtitle": "登录您的 NoteBurner 账户",
+      "emailLabel": "电子邮件地址",
+      "emailPlaceholder": "您的邮箱@示例.com",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "您的密码",
+      "rememberMe": "记住我",
+      "forgotPassword": "忘记密码？",
+      "submitButton": "登录",
+      "signingIn": "登录中...",
+      "noAccount": "还没有账户？",
+      "signupLink": "注册",
+      "errors": {
+        "invalidCredentials": "邮箱或密码无效",
+        "accountLocked": "账户已锁定，请在 15 分钟后重试。",
+        "emailRequired": "邮箱为必填项",
+        "passwordRequired": "密码为必填项"
+      }
+    },
+    "signup": {
+      "title": "创建账户",
+      "subtitle": "免费加入 NoteBurner",
+      "displayNameLabel": "显示名称（可选）",
+      "displayNamePlaceholder": "您的姓名",
+      "emailLabel": "电子邮件地址",
+      "emailPlaceholder": "您的邮箱@示例.com",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "至少 8 个字符",
+      "confirmPasswordLabel": "确认密码",
+      "confirmPasswordPlaceholder": "重复您的密码",
+      "termsAccept": "我同意",
+      "termsLink": "服务条款",
+      "andText": "和",
+      "privacyLink": "隐私政策",
+      "submitButton": "创建账户",
+      "creating": "创建账户中...",
+      "hasAccount": "已有账户？",
+      "loginLink": "登录",
+      "errors": {
+        "emailTaken": "邮箱已注册",
+        "passwordMismatch": "密码不匹配",
+        "passwordWeak": "密码必须至少包含 8 个字符，包括大写、小写和数字",
+        "termsRequired": "您必须接受条款"
+      }
+    },
+    "forgotPassword": {
+      "title": "重置密码",
+      "subtitle": "输入您的邮箱以接收重置链接",
+      "emailLabel": "电子邮件地址",
+      "submitButton": "发送重置链接",
+      "sending": "发送中...",
+      "successMessage": "请检查您的邮箱以获取重置链接",
+      "backToLogin": "返回登录"
+    }
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "success": "成功！",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "confirm": "确认",
+    "close": "关闭",
+    "copy": "复制",
+    "copied": "已复制！",
+    "download": "下载",
+    "share": "分享",
+    "back": "返回",
+    "next": "下一步",
+    "skip": "跳过",
+    "done": "完成",
+    "yes": "是",
+    "no": "否",
+    "or": "或",
+    "and": "和",
+    "by": "由",
+    "at": "在",
+    "ago": "前",
+    "today": "今天",
+    "yesterday": "昨天",
+    "daysAgo": "{n} 天前",
+    "justNow": "刚刚",
+    "notAvailable": "不适用"
+  },
+  "compliance": {
+    "gdpr": {
+      "title": "GDPR 合规",
+      "desc": "我们符合欧盟通用数据保护条例",
+      "dataRetention": "数据保留",
+      "exportData": "导出我的数据",
+      "deleteData": "删除我的数据",
+      "cookieConsent": "本网站不使用追踪 Cookie。您的数据在您的设备上加密。"
+    },
+    "ccpa": {
+      "title": "CCPA 合规",
+      "desc": "加利福尼亚州消费者隐私法合规",
+      "doNotSell": "我们不出售您的个人数据",
+      "optOut": "退出数据处理"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी"
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "nav": {
+    "createMessage": "Nachricht erstellen",
+    "achievements": "Erfolge",
+    "rewards": "Belohnungen",
+    "invite": "Einladen",
+    "leaderboard": "Rangliste",
+    "stats": "Statistiken",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "profile": "Profil",
+    "logout": "Abmelden",
+    "premium": "Premium"
+  },
+  "home": {
+    "hero": {
+      "title": "Nachrichten senden, die sich",
+      "titleHighlight": "Selbst Zerstören",
+      "subtitle": "Ende-zu-Ende verschlüsselte Nachrichten mit einmaligem Zugang. Kein Konto erforderlich. Privatsphäre durch Design.",
+      "cta": "Geheime Nachricht erstellen",
+      "learnMore": "So funktioniert es"
+    },
+    "stats": {
+      "title": "Plattform-Statistiken",
+      "burnedToday": "heute vernichtet",
+      "burnedThisWeek": "diese Woche vernichtet",
+      "messagesCreated": "Nachrichten erstellt",
+      "messagesBurned": "Nachrichten vernichtet",
+      "filesEncrypted": "Dateien verschlüsselt",
+      "totalSent": "Insgesamt gesendet"
+    },
+    "features": {
+      "title": "Warum NoteBurner?",
+      "e2e": {
+        "title": "Ende-zu-Ende verschlüsselt",
+        "desc": "Nachrichten werden in Ihrem Browser verschlüsselt. Wir sehen Ihren Inhalt nie."
+      },
+      "oneTime": {
+        "title": "Einmaliger Zugang",
+        "desc": "Die Nachricht wird nach dem ersten Zugriff dauerhaft gelöscht."
+      },
+      "noAccount": {
+        "title": "Kein Konto erforderlich",
+        "desc": "Nachrichten anonym senden. Keine Registrierung, kein Tracking."
+      },
+      "autoExpire": {
+        "title": "Automatisches Ablaufen",
+        "desc": "Legen Sie fest, dass Nachrichten nach 1 Stunde bis 7 Tagen ablaufen."
+      }
+    }
+  },
+  "create": {
+    "title": "Geheime Nachricht erstellen",
+    "messagePlaceholder": "Geben Sie hier Ihre geheime Nachricht ein...",
+    "passwordLabel": "Passwort",
+    "passwordPlaceholder": "Passwort festlegen (optional)",
+    "expiryLabel": "Läuft ab in",
+    "submitButton": "Sichere Nachricht erstellen",
+    "customUrlLabel": "Benutzerdefinierte URL (optional)",
+    "customUrlPlaceholder": "meine-geheime-url",
+    "groupToggle": "Gruppennachricht",
+    "recipientsLabel": "Anzahl der Empfänger",
+    "anonymousToggle": "Anonym senden",
+    "fileLabel": "Datei anhängen",
+    "fileHint": "Alle Dateitypen unterstützt",
+    "creating": "Erstelle...",
+    "errors": {
+      "messageRequired": "Nachricht ist erforderlich",
+      "messageTooLong": "Nachricht überschreitet maximale Länge",
+      "passwordTooWeak": "Passwort ist zu schwach",
+      "urlTaken": "Diese URL ist bereits vergeben",
+      "urlInvalid": "URL muss 3-20 Zeichen lang sein"
+    }
+  },
+  "view": {
+    "loading": "Nachricht wird geladen...",
+    "enterPassword": "Passwort eingeben",
+    "passwordPlaceholder": "Nachrichten-Passwort eingeben",
+    "decryptButton": "Nachricht entschlüsseln",
+    "decrypting": "Entschlüsseln...",
+    "burned": "Nachricht wurde vernichtet",
+    "burnedDesc": "Diese Nachricht wurde dauerhaft gelöscht.",
+    "notFound": "Nachricht nicht gefunden",
+    "notFoundDesc": "Diese Nachricht ist möglicherweise abgelaufen oder wurde bereits angesehen.",
+    "expired": "Nachricht ist abgelaufen",
+    "wrongPassword": "Falsches Passwort",
+    "attemptsRemaining": "Versuche übrig",
+    "createOwn": "Erstellen Sie Ihre eigene geheime Nachricht",
+    "expiresIn": "Läuft ab in",
+    "messageBurned": "🔥 Diese Nachricht wurde verbrannt",
+    "fileDownload": "Datei herunterladen",
+    "downloading": "Herunterladen..."
+  },
+  "auth": {
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melden Sie sich bei Ihrem NoteBurner-Konto an",
+      "emailLabel": "E-Mail-Adresse",
+      "emailPlaceholder": "sie@beispiel.de",
+      "passwordLabel": "Passwort",
+      "passwordPlaceholder": "Ihr Passwort",
+      "rememberMe": "Angemeldet bleiben",
+      "forgotPassword": "Passwort vergessen?",
+      "submitButton": "Anmelden",
+      "signingIn": "Anmelden...",
+      "noAccount": "Kein Konto?",
+      "signupLink": "Registrieren",
+      "errors": {
+        "invalidCredentials": "E-Mail oder Passwort ungültig",
+        "accountLocked": "Konto gesperrt. Versuchen Sie es in 15 Minuten erneut.",
+        "emailRequired": "E-Mail ist erforderlich",
+        "passwordRequired": "Passwort ist erforderlich"
+      }
+    },
+    "signup": {
+      "title": "Konto erstellen",
+      "subtitle": "Treten Sie NoteBurner kostenlos bei",
+      "displayNameLabel": "Anzeigename (optional)",
+      "displayNamePlaceholder": "Ihr Name",
+      "emailLabel": "E-Mail-Adresse",
+      "emailPlaceholder": "sie@beispiel.de",
+      "passwordLabel": "Passwort",
+      "passwordPlaceholder": "Mind. 8 Zeichen",
+      "confirmPasswordLabel": "Passwort bestätigen",
+      "confirmPasswordPlaceholder": "Passwort wiederholen",
+      "termsAccept": "Ich stimme den",
+      "termsLink": "Nutzungsbedingungen",
+      "andText": "und der",
+      "privacyLink": "Datenschutzrichtlinie",
+      "submitButton": "Konto erstellen",
+      "creating": "Konto wird erstellt...",
+      "hasAccount": "Bereits ein Konto?",
+      "loginLink": "Anmelden",
+      "errors": {
+        "emailTaken": "E-Mail bereits registriert",
+        "passwordMismatch": "Passwörter stimmen nicht überein",
+        "passwordWeak": "Passwort muss mindestens 8 Zeichen mit Groß-, Kleinbuchstaben und Zahl haben",
+        "termsRequired": "Sie müssen die Bedingungen akzeptieren"
+      }
+    },
+    "forgotPassword": {
+      "title": "Passwort zurücksetzen",
+      "subtitle": "Geben Sie Ihre E-Mail ein, um einen Reset-Link zu erhalten",
+      "emailLabel": "E-Mail-Adresse",
+      "submitButton": "Reset-Link senden",
+      "sending": "Wird gesendet...",
+      "successMessage": "Überprüfen Sie Ihre E-Mail für einen Reset-Link",
+      "backToLogin": "Zurück zur Anmeldung"
+    }
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Ein Fehler ist aufgetreten",
+    "success": "Erfolg!",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "confirm": "Bestätigen",
+    "close": "Schließen",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "download": "Herunterladen",
+    "share": "Teilen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "done": "Fertig",
+    "yes": "Ja",
+    "no": "Nein",
+    "or": "oder",
+    "and": "und",
+    "by": "von",
+    "at": "um",
+    "ago": "vor",
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "daysAgo": "vor {n} Tagen",
+    "justNow": "Gerade eben",
+    "notAvailable": "N/V"
+  },
+  "compliance": {
+    "gdpr": {
+      "title": "DSGVO-Konformität",
+      "desc": "Wir entsprechen der EU-Datenschutz-Grundverordnung",
+      "dataRetention": "Datenspeicherung",
+      "exportData": "Meine Daten exportieren",
+      "deleteData": "Meine Daten löschen",
+      "cookieConsent": "Diese Website verwendet keine Tracking-Cookies. Ihre Daten werden auf Ihrem Gerät verschlüsselt."
+    },
+    "ccpa": {
+      "title": "CCPA-Konformität",
+      "desc": "Konformität mit dem California Consumer Privacy Act",
+      "doNotSell": "Wir verkaufen Ihre persönlichen Daten nicht",
+      "optOut": "Datenverarbeitung ablehnen"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी"
+  }
+}
