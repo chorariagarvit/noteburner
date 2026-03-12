@@ -28,8 +28,8 @@ bucket_name = "noteburner-media"
 # KV Namespace for caching (Week 12 - Performance optimization)
 [[ kv_namespaces ]]
 binding = "CACHE"
-id = "your_kv_namespace_id"  # Run: wrangler kv:namespace create "CACHE"
-preview_id = "your_preview_kv_namespace_id"  # Run: wrangler kv:namespace create "CACHE" --preview
+id = "b9797c1d6b9547eb8e42b2a9ac0c3ad8"
+preview_id = "6042dca04d5f4fb09e37ca89ec9e37ed"
 
 # Email Worker binding (Cloudflare Email Routing)
 # Run: wrangler types --env-interface CloudflareBindings
