@@ -1,12 +1,15 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Flame, Moon, Sun, Trophy, Gift, Users, UserCircle, LogOut, LogIn } from 'lucide-react';
+import { Flame, Moon, Sun, Trophy, Gift, Users, UserCircle, LogOut, LogIn, Star } from 'lucide-react';
 import { ThemeContext } from '../App';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 function Header() {
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
   const { user, isAuthenticated, logout } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -32,36 +35,45 @@ function Header() {
               to="/create" 
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors"
             >
-              Create Message
+              {t('nav.createMessage')}
             </Link>
             <Link 
               to="/achievements" 
               className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 font-medium transition-colors"
             >
               <Trophy className="w-4 h-4" />
-              <span className="hidden sm:inline">Achievements</span>
+              <span className="hidden sm:inline">{t('nav.achievements')}</span>
             </Link>
             <Link 
               to="/referrals" 
               className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
             >
               <Gift className="w-4 h-4" />
-              <span className="hidden sm:inline">Rewards</span>
+              <span className="hidden sm:inline">{t('nav.rewards')}</span>
             </Link>
             <Link 
               to="/invite" 
               className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
             >
               <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">Invite</span>
+              <span className="hidden sm:inline">{t('nav.invite')}</span>
             </Link>
             <Link 
               to="/leaderboard" 
               className="text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 font-medium transition-colors"
             >
-              <span className="hidden sm:inline">Leaderboard</span>
-              <span className="sm:hidden">Stats</span>
+              <span className="hidden sm:inline">{t('nav.leaderboard')}</span>
+              <span className="sm:hidden">{t('nav.stats')}</span>
             </Link>
+            <Link
+              to="/pricing"
+              className="flex items-center gap-1 text-amber-500 hover:text-amber-600 font-medium transition-colors"
+            >
+              <Star className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('nav.premium')}</span>
+            </Link>
+            
+            <LanguageSwitcher />
             
             <button
               onClick={toggleDarkMode}
