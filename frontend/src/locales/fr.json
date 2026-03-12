@@ -1,0 +1,205 @@
+{
+  "nav": {
+    "createMessage": "Créer un Message",
+    "achievements": "Succès",
+    "rewards": "Récompenses",
+    "invite": "Inviter",
+    "leaderboard": "Classement",
+    "stats": "Stats",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "premium": "Premium"
+  },
+  "home": {
+    "hero": {
+      "title": "Envoyez des Messages qui",
+      "titleHighlight": "S'Auto-Détruisent",
+      "subtitle": "Messages chiffrés de bout en bout, accès unique. Sans compte requis. Vie privée par conception.",
+      "cta": "Créer un Message Secret",
+      "learnMore": "Comment ça marche"
+    },
+    "stats": {
+      "title": "Statistiques de la Plateforme",
+      "burnedToday": "détruits aujourd'hui",
+      "burnedThisWeek": "détruits cette semaine",
+      "messagesCreated": "Messages Créés",
+      "messagesBurned": "Messages Détruits",
+      "filesEncrypted": "Fichiers Chiffrés",
+      "totalSent": "Total Envoyés"
+    },
+    "features": {
+      "title": "Pourquoi NoteBurner ?",
+      "e2e": {
+        "title": "Chiffrement de Bout en Bout",
+        "desc": "Les messages sont chiffrés dans votre navigateur. Nous ne voyons jamais votre contenu."
+      },
+      "oneTime": {
+        "title": "Accès Unique",
+        "desc": "Le message est définitivement supprimé après le premier accès."
+      },
+      "noAccount": {
+        "title": "Sans Compte Requis",
+        "desc": "Envoyez des messages anonymement. Sans inscription, sans traçage."
+      },
+      "autoExpire": {
+        "title": "Expiration Automatique",
+        "desc": "Définissez l'expiration de 1 heure à 7 jours."
+      }
+    }
+  },
+  "create": {
+    "title": "Créer un Message Secret",
+    "messagePlaceholder": "Tapez votre message secret ici...",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Définir un mot de passe (optionnel)",
+    "expiryLabel": "Expire dans",
+    "submitButton": "Créer un Message Sécurisé",
+    "customUrlLabel": "URL Personnalisée (optionnel)",
+    "customUrlPlaceholder": "mon-url-secret",
+    "groupToggle": "Message de Groupe",
+    "recipientsLabel": "Nombre de destinataires",
+    "anonymousToggle": "Envoyer Anonymement",
+    "fileLabel": "Joindre un Fichier",
+    "fileHint": "Tous types de fichiers acceptés",
+    "creating": "Création en cours...",
+    "errors": {
+      "messageRequired": "Le message est obligatoire",
+      "messageTooLong": "Le message dépasse la longueur maximale",
+      "passwordTooWeak": "Le mot de passe est trop faible",
+      "urlTaken": "Cette URL est déjà prise",
+      "urlInvalid": "L'URL doit contenir entre 3 et 20 caractères."
+    }
+  },
+  "view": {
+    "loading": "Chargement du message...",
+    "enterPassword": "Entrez le Mot de Passe",
+    "passwordPlaceholder": "Entrez le mot de passe du message",
+    "decryptButton": "Déchiffrer le Message",
+    "decrypting": "Déchiffrement...",
+    "burned": "Le message a été détruit",
+    "burnedDesc": "Ce message a été définitivement supprimé.",
+    "notFound": "Message introuvable",
+    "notFoundDesc": "Ce message a peut-être expiré ou a déjà été consulté.",
+    "expired": "Le message a expiré",
+    "wrongPassword": "Mot de passe incorrect",
+    "attemptsRemaining": "tentatives restantes",
+    "createOwn": "Créez Votre Propre Message Secret",
+    "expiresIn": "Expire dans",
+    "messageBurned": "🔥 Ce message a été brûlé",
+    "fileDownload": "Télécharger le Fichier",
+    "downloading": "Téléchargement..."
+  },
+  "auth": {
+    "login": {
+      "title": "Bon Retour",
+      "subtitle": "Connectez-vous à votre compte NoteBurner",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "rememberMe": "Se souvenir de moi",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submitButton": "Se Connecter",
+      "signingIn": "Connexion en cours...",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signupLink": "S'inscrire",
+      "errors": {
+        "invalidCredentials": "Email ou mot de passe invalide",
+        "accountLocked": "Compte bloqué. Réessayez dans 15 minutes.",
+        "emailRequired": "L'email est obligatoire",
+        "passwordRequired": "Le mot de passe est obligatoire"
+      }
+    },
+    "signup": {
+      "title": "Créer un Compte",
+      "subtitle": "Rejoignez NoteBurner gratuitement",
+      "displayNameLabel": "Nom d'affichage (optionnel)",
+      "displayNamePlaceholder": "Votre nom",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Min 8 caractères",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Répétez votre mot de passe",
+      "termsAccept": "J'accepte les",
+      "termsLink": "Conditions d'utilisation",
+      "andText": "et la",
+      "privacyLink": "Politique de confidentialité",
+      "submitButton": "Créer un Compte",
+      "creating": "Création du compte...",
+      "hasAccount": "Vous avez déjà un compte ?",
+      "loginLink": "Se connecter",
+      "errors": {
+        "emailTaken": "Email déjà enregistré",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "passwordWeak": "Le mot de passe doit contenir au moins 8 caractères avec majuscule, minuscule et chiffre",
+        "termsRequired": "Vous devez accepter les conditions"
+      }
+    },
+    "forgotPassword": {
+      "title": "Réinitialiser le Mot de Passe",
+      "subtitle": "Entrez votre email pour recevoir un lien de réinitialisation",
+      "emailLabel": "Adresse e-mail",
+      "submitButton": "Envoyer le Lien",
+      "sending": "Envoi en cours...",
+      "successMessage": "Vérifiez votre email pour un lien de réinitialisation",
+      "backToLogin": "Retour à la connexion"
+    }
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "success": "Succès !",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "download": "Télécharger",
+    "share": "Partager",
+    "back": "Retour",
+    "next": "Suivant",
+    "skip": "Passer",
+    "done": "Terminé",
+    "yes": "Oui",
+    "no": "Non",
+    "or": "ou",
+    "and": "et",
+    "by": "par",
+    "at": "à",
+    "ago": "il y a",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "daysAgo": "il y a {n} jours",
+    "justNow": "À l'instant",
+    "notAvailable": "N/D"
+  },
+  "compliance": {
+    "gdpr": {
+      "title": "Conformité RGPD",
+      "desc": "Nous respectons le Règlement Général sur la Protection des Données de l'UE",
+      "dataRetention": "Conservation des Données",
+      "exportData": "Exporter Mes Données",
+      "deleteData": "Supprimer Mes Données",
+      "cookieConsent": "Ce site n'utilise pas de cookies de suivi. Vos données sont chiffrées sur votre appareil."
+    },
+    "ccpa": {
+      "title": "Conformité CCPA",
+      "desc": "Conformité à la loi californienne sur la vie privée des consommateurs",
+      "doNotSell": "Nous ne vendons pas vos données personnelles",
+      "optOut": "Se désinscrire du traitement des données"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी"
+  }
+}

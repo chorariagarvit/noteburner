@@ -24,6 +24,9 @@ import TeamDashboard from './components/enterprise/TeamDashboard';
 import BrandingCustomizer from './components/enterprise/BrandingCustomizer';
 import ComplianceDashboard from './components/enterprise/ComplianceDashboard';
 import { AuthProvider } from './contexts/AuthContext';
+import { I18nProvider } from './contexts/I18nContext';
+import PricingPage from './pages/PricingPage';
+import PremiumPage from './pages/PremiumPage';
 
 export const ThemeContext = createContext();
 
@@ -56,6 +59,7 @@ function App() {
 
   return (
     <ThemeContext.Provider value={contextValue}>
+      <I18nProvider>
       <AuthProvider>
         <Router>
           <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors">
@@ -91,6 +95,11 @@ function App() {
                 
                 {/* Message routes */}
                 <Route path="/m/:identifier" element={<ViewMessage />} />
+
+                {/* Week 13/14: Pricing & Premium */}
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/premium" element={<PremiumPage />} />
+
                 <Route path="*" element={<HomePage />} />
               </Routes>
             </main>
@@ -98,7 +107,8 @@ function App() {
           </div>
         </Router>
       </AuthProvider>
-    </ThemeContext.Provider>
+    </I18nProvider>
+  </ThemeContext.Provider>
   );
 }
 

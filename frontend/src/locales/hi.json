@@ -1,0 +1,205 @@
+{
+  "nav": {
+    "createMessage": "संदेश बनाएं",
+    "achievements": "उपलब्धियां",
+    "rewards": "पुरस्कार",
+    "invite": "आमंत्रित करें",
+    "leaderboard": "लीडरबोर्ड",
+    "stats": "आँकड़े",
+    "login": "लॉग इन",
+    "signup": "साइन अप",
+    "profile": "प्रोफ़ाइल",
+    "logout": "लॉग आउट",
+    "premium": "प्रीमियम"
+  },
+  "home": {
+    "hero": {
+      "title": "ऐसे संदेश भेजें जो",
+      "titleHighlight": "स्वयं नष्ट हो जाते हैं",
+      "subtitle": "एंड-टू-एंड एन्क्रिप्टेड, एकल-एक्सेस संदेश। कोई खाता आवश्यक नहीं। डिज़ाइन द्वारा गोपनीयता।",
+      "cta": "गुप्त संदेश बनाएं",
+      "learnMore": "यह कैसे काम करता है"
+    },
+    "stats": {
+      "title": "प्लेटफ़ॉर्म आँकड़े",
+      "burnedToday": "आज नष्ट किए",
+      "burnedThisWeek": "इस सप्ताह नष्ट किए",
+      "messagesCreated": "संदेश बनाए गए",
+      "messagesBurned": "संदेश नष्ट किए गए",
+      "filesEncrypted": "फ़ाइलें एन्क्रिप्ट की गईं",
+      "totalSent": "कुल भेजे गए"
+    },
+    "features": {
+      "title": "NoteBurner क्यों?",
+      "e2e": {
+        "title": "एंड-टू-एंड एन्क्रिप्टेड",
+        "desc": "संदेश आपके ब्राउज़र में एन्क्रिप्ट होते हैं। हम आपकी सामग्री कभी नहीं देखते।"
+      },
+      "oneTime": {
+        "title": "एकल एक्सेस",
+        "desc": "पहले देखने के बाद संदेश स्थायी रूप से हटा दिया जाता है।"
+      },
+      "noAccount": {
+        "title": "कोई खाता आवश्यक नहीं",
+        "desc": "गुमनाम रूप से संदेश भेजें। कोई पंजीकरण नहीं, कोई ट्रैकिंग नहीं।"
+      },
+      "autoExpire": {
+        "title": "स्वचालित समाप्ति",
+        "desc": "1 घंटे से 7 दिनों में समाप्त होने के लिए संदेश सेट करें।"
+      }
+    }
+  },
+  "create": {
+    "title": "गुप्त संदेश बनाएं",
+    "messagePlaceholder": "यहाँ अपना गुप्त संदेश टाइप करें...",
+    "passwordLabel": "पासवर्ड",
+    "passwordPlaceholder": "पासवर्ड सेट करें (वैकल्पिक)",
+    "expiryLabel": "समाप्त होता है",
+    "submitButton": "सुरक्षित संदेश बनाएं",
+    "customUrlLabel": "कस्टम URL (वैकल्पिक)",
+    "customUrlPlaceholder": "मेरा-गुप्त-url",
+    "groupToggle": "समूह संदेश",
+    "recipientsLabel": "प्राप्तकर्ताओं की संख्या",
+    "anonymousToggle": "गुमनाम रूप से भेजें",
+    "fileLabel": "फ़ाइल संलग्न करें",
+    "fileHint": "सभी फ़ाइल प्रकार समर्थित हैं",
+    "creating": "बनाया जा रहा है...",
+    "errors": {
+      "messageRequired": "संदेश आवश्यक है",
+      "messageTooLong": "संदेश अधिकतम लंबाई से अधिक है",
+      "passwordTooWeak": "पासवर्ड बहुत कमज़ोर है",
+      "urlTaken": "यह URL पहले से लिया गया है",
+      "urlInvalid": "URL 3-20 अक्षर का होना चाहिए"
+    }
+  },
+  "view": {
+    "loading": "संदेश लोड हो रहा है...",
+    "enterPassword": "पासवर्ड दर्ज करें",
+    "passwordPlaceholder": "संदेश पासवर्ड दर्ज करें",
+    "decryptButton": "संदेश डिक्रिप्ट करें",
+    "decrypting": "डिक्रिप्ट किया जा रहा है...",
+    "burned": "संदेश नष्ट कर दिया गया है",
+    "burnedDesc": "यह संदेश स्थायी रूप से हटा दिया गया है।",
+    "notFound": "संदेश नहीं मिला",
+    "notFoundDesc": "यह संदेश समाप्त हो सकता है या पहले ही देखा जा चुका है।",
+    "expired": "संदेश समाप्त हो गया है",
+    "wrongPassword": "गलत पासवर्ड",
+    "attemptsRemaining": "प्रयास शेष",
+    "createOwn": "अपना गुप्त संदेश बनाएं",
+    "expiresIn": "समाप्त होता है",
+    "messageBurned": "🔥 यह संदेश जला दिया गया है",
+    "fileDownload": "फ़ाइल डाउनलोड करें",
+    "downloading": "डाउनलोड हो रहा है..."
+  },
+  "auth": {
+    "login": {
+      "title": "वापस स्वागत है",
+      "subtitle": "अपने NoteBurner खाते में साइन इन करें",
+      "emailLabel": "ईमेल पता",
+      "emailPlaceholder": "आप@उदाहरण.com",
+      "passwordLabel": "पासवर्ड",
+      "passwordPlaceholder": "आपका पासवर्ड",
+      "rememberMe": "मुझे याद रखें",
+      "forgotPassword": "पासवर्ड भूल गए?",
+      "submitButton": "साइन इन करें",
+      "signingIn": "साइन इन हो रहे हैं...",
+      "noAccount": "खाता नहीं है?",
+      "signupLink": "साइन अप करें",
+      "errors": {
+        "invalidCredentials": "अमान्य ईमेल या पासवर्ड",
+        "accountLocked": "खाता लॉक है। 15 मिनट में पुनः प्रयास करें।",
+        "emailRequired": "ईमेल आवश्यक है",
+        "passwordRequired": "पासवर्ड आवश्यक है"
+      }
+    },
+    "signup": {
+      "title": "खाता बनाएं",
+      "subtitle": "NoteBurner में मुफ्त में जुड़ें",
+      "displayNameLabel": "प्रदर्शन नाम (वैकल्पिक)",
+      "displayNamePlaceholder": "आपका नाम",
+      "emailLabel": "ईमेल पता",
+      "emailPlaceholder": "आप@उदाहरण.com",
+      "passwordLabel": "पासवर्ड",
+      "passwordPlaceholder": "न्यूनतम 8 अक्षर",
+      "confirmPasswordLabel": "पासवर्ड की पुष्टि करें",
+      "confirmPasswordPlaceholder": "अपना पासवर्ड दोहराएं",
+      "termsAccept": "मैं सहमत हूँ",
+      "termsLink": "सेवा की शर्तें",
+      "andText": "और",
+      "privacyLink": "गोपनीयता नीति",
+      "submitButton": "खाता बनाएं",
+      "creating": "खाता बनाया जा रहा है...",
+      "hasAccount": "पहले से खाता है?",
+      "loginLink": "साइन इन करें",
+      "errors": {
+        "emailTaken": "ईमेल पहले से पंजीकृत है",
+        "passwordMismatch": "पासवर्ड मेल नहीं खाते",
+        "passwordWeak": "पासवर्ड में कम से कम 8 अक्षर होने चाहिए जिनमें अपरकेस, लोअरकेस और संख्या हो",
+        "termsRequired": "आपको शर्तें स्वीकार करनी होंगी"
+      }
+    },
+    "forgotPassword": {
+      "title": "पासवर्ड रीसेट करें",
+      "subtitle": "रीसेट लिंक पाने के लिए अपना ईमेल दर्ज करें",
+      "emailLabel": "ईमेल पता",
+      "submitButton": "रीसेट लिंक भेजें",
+      "sending": "भेजा जा रहा है...",
+      "successMessage": "रीसेट लिंक के लिए अपना ईमेल जांचें",
+      "backToLogin": "लॉगिन पर वापस जाएं"
+    }
+  },
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "एक त्रुटि हुई",
+    "success": "सफलता!",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "confirm": "पुष्टि करें",
+    "close": "बंद करें",
+    "copy": "कॉपी करें",
+    "copied": "कॉपी किया गया!",
+    "download": "डाउनलोड करें",
+    "share": "साझा करें",
+    "back": "वापस",
+    "next": "अगला",
+    "skip": "छोड़ें",
+    "done": "हो गया",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "or": "या",
+    "and": "और",
+    "by": "द्वारा",
+    "at": "पर",
+    "ago": "पहले",
+    "today": "आज",
+    "yesterday": "कल",
+    "daysAgo": "{n} दिन पहले",
+    "justNow": "अभी",
+    "notAvailable": "उपलब्ध नहीं"
+  },
+  "compliance": {
+    "gdpr": {
+      "title": "GDPR अनुपालन",
+      "desc": "हम EU सामान्य डेटा संरक्षण विनियमन का पालन करते हैं",
+      "dataRetention": "डेटा प्रतिधारण",
+      "exportData": "मेरा डेटा निर्यात करें",
+      "deleteData": "मेरा डेटा हटाएं",
+      "cookieConsent": "यह साइट ट्रैकिंग कुकीज़ का उपयोग नहीं करती। आपका डेटा आपके डिवाइस पर एन्क्रिप्टेड है।"
+    },
+    "ccpa": {
+      "title": "CCPA अनुपालन",
+      "desc": "कैलिफोर्निया उपभोक्ता गोपनीयता अधिनियम अनुपालन",
+      "doNotSell": "हम आपका व्यक्तिगत डेटा नहीं बेचते",
+      "optOut": "डेटा प्रसंस्करण से बाहर निकलें"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch",
+    "zh": "中文",
+    "hi": "हिन्दी"
+  }
+}
