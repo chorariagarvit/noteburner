@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function ForgotPasswordPage() {
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -47,17 +49,17 @@ export default function ForgotPasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
-              Check your email
+              {t('auth.forgotPassword.successMessage')}
             </h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              If an account exists with this email, we've sent password reset instructions.
+              {t('auth.forgotPassword.subtitle')}
             </p>
             <div className="mt-6">
               <Link 
                 to="/login"
                 className="text-amber-500 hover:text-amber-600 font-medium"
               >
-                Return to login
+                {t('auth.forgotPassword.backToLogin')}
               </Link>
             </div>
           </div>
@@ -71,10 +73,10 @@ export default function ForgotPasswordPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            Reset your password
+            {t('auth.forgotPassword.title')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Enter your email and we'll send you reset instructions
+            {t('auth.forgotPassword.subtitle')}
           </p>
         </div>
 
@@ -89,7 +91,7 @@ export default function ForgotPasswordPage() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email address
+              {t('auth.forgotPassword.emailLabel')}
             </label>
             <input
               id="email"
@@ -110,13 +112,13 @@ export default function ForgotPasswordPage() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Sending...' : 'Send reset instructions'}
+              {loading ? t('auth.forgotPassword.sending') : t('auth.forgotPassword.submitButton')}
             </button>
           </div>
 
           <div className="text-center">
             <Link to="/login" className="text-sm font-medium text-amber-500 hover:text-amber-600">
-              Back to login
+              {t('auth.forgotPassword.backToLogin')}
             </Link>
           </div>
         </form>

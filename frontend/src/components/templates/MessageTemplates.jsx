@@ -1,5 +1,6 @@
 import { FileText, Gift, Heart, Briefcase, Key, Star } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { useI18n } from '../../contexts/I18nContext';
 
 export const MESSAGE_TEMPLATES = [
   {
@@ -59,10 +60,22 @@ export const MESSAGE_TEMPLATES = [
 ];
 
 function MessageTemplates({ onSelectTemplate, onClose }) {
+  const { t } = useI18n();
+
+  const toCamel = (id) => id.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
   const categories = {
-    work: 'Work & Professional',
-    personal: 'Personal',
-    security: 'Security'
+    work: t('templates.categoryWork'),
+    personal: t('templates.categoryPersonal'),
+    security: t('templates.categorySecurity')
+  };
+
+  const getExpirationLabel = (exp) => {
+    if (exp === '1') return t('templates.duration1h');
+    if (exp === '24') return t('templates.duration24h');
+    if (exp === '72') return t('templates.duration3d');
+    if (exp === '168') return t('templates.duration7d');
+    return t('templates.durationCustom');
   };
 
   const groupedTemplates = MESSAGE_TEMPLATES.reduce((acc, template) => {
@@ -77,8 +90,8 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
     <div className="space-y-6" role="dialog" aria-labelledby="templates-title" aria-describedby="templates-description">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 id="templates-title" className="text-lg font-bold text-gray-900 dark:text-white">Message Templates</h3>
-          <p id="templates-description" className="text-sm text-gray-600 dark:text-gray-400">Choose a template to get started quickly</p>
+          <h3 id="templates-title" className="text-lg font-bold text-gray-900 dark:text-white">{t('templates.title')}</h3>
+          <p id="templates-description" className="text-sm text-gray-600 dark:text-gray-400">{t('templates.subtitle')}</p>
         </div>
       </div>
 
@@ -98,7 +111,7 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
                     if (onClose) onClose();
                   }}
                   role="listitem"
-                  aria-label={`Use ${template.name} template: ${template.description}`}
+                  aria-label={`${t(`templates.${toCamel(template.id)}_name`, {}, template.name)}: ${t(`templates.${toCamel(template.id)}_desc`, {}, template.description)}`}
                   className="group p-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-red-500 dark:hover:border-red-500 hover:shadow-lg transition-all duration-200"
                 >
                   <div className="flex items-start gap-3">
@@ -107,17 +120,14 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h5 className="font-semibold text-gray-900 dark:text-white mb-1">
-                        {template.name}
+                        {t(`templates.${toCamel(template.id)}_name`, {}, template.name)}
                       </h5>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {template.description}
+                        {t(`templates.${toCamel(template.id)}_desc`, {}, template.description)}
                       </p>
                       <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
-                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded" aria-label={`Expires in ${template.expiration === '1' ? '1 hour' : template.expiration === '24' ? '24 hours' : template.expiration === '72' ? '3 days' : template.expiration === '168' ? '7 days' : 'custom time'}`}>
-                          {template.expiration === '1' ? '1 hour' : 
-                           template.expiration === '24' ? '24 hours' :
-                           template.expiration === '72' ? '3 days' :
-                           template.expiration === '168' ? '7 days' : 'Custom'}
+                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded" aria-label={`Expires in: ${getExpirationLabel(template.expiration)}`}>
+                          {getExpirationLabel(template.expiration)}
                         </span>
                       </div>
                     </div>
@@ -131,7 +141,7 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
 
       <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
         <p className="text-sm text-blue-800 dark:text-blue-300">
-          💡 <strong>Tip:</strong> All templates are customizable. Fill in the placeholders with your information before sending.
+          💡 <strong>{t('templates.tip')}</strong>
         </p>
       </div>
     </div>

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Copy, Check, Mail, Share2, Twitter, Linkedin, MessageCircle } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -79,8 +81,8 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
             <div className="flex items-center gap-3">
               <Share2 className="w-8 h-8" />
               <div>
-                <h2 className="text-2xl font-bold">Share Your Message</h2>
-                <p className="text-sm opacity-90">Invite others to view your secure message</p>
+                <h2 className="text-2xl font-bold">{t('inviteModal.title')}</h2>
+                <p className="text-sm opacity-90">{t('inviteModal.subtitle')}</p>
               </div>
             </div>
             <button
@@ -97,7 +99,7 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
         <div className="p-6 space-y-6">
           {/* Message Preview */}
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Message Preview</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('inviteModal.previewTitle')}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-words">
               {inviteMessage}
             </p>
@@ -105,7 +107,7 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
 
           {/* Quick Actions */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Share</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t('inviteModal.quickShareTitle')}</h3>
             
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -113,7 +115,7 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
                 className="btn-secondary flex items-center justify-center gap-2 py-3"
               >
                 {emailSent ? <Check className="w-5 h-5" /> : <Mail className="w-5 h-5" />}
-                {emailSent ? 'Opened!' : 'Email'}
+                {emailSent ? t('inviteModal.emailOpened') : t('inviteModal.email')}
               </button>
 
               <button
@@ -121,7 +123,7 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
                 className="btn-secondary flex items-center justify-center gap-2 py-3"
               >
                 <MessageCircle className="w-5 h-5" />
-                SMS
+                {t('inviteModal.sms')}
               </button>
 
               <button
@@ -129,7 +131,7 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
                 className="btn-secondary flex items-center justify-center gap-2 py-3"
               >
                 💬
-                WhatsApp
+                {t('inviteModal.whatsapp')}
               </button>
 
               <button
@@ -137,14 +139,14 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
                 className="btn-secondary flex items-center justify-center gap-2 py-3"
               >
                 <Share2 className="w-5 h-5" />
-                Share
+                {t('inviteModal.share')}
               </button>
             </div>
           </div>
 
           {/* Social Media */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Share on Social Media</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t('inviteModal.socialTitle')}</h3>
             
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -152,7 +154,7 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
                 className="flex items-center justify-center gap-2 py-3 px-4 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white rounded-lg font-medium transition-colors"
               >
                 <Twitter className="w-5 h-5" />
-                Twitter
+                {t('inviteModal.twitter')}
               </button>
 
               <button
@@ -160,32 +162,32 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
                 className="flex items-center justify-center gap-2 py-3 px-4 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-lg font-medium transition-colors"
               >
                 <Linkedin className="w-5 h-5" />
-                LinkedIn
+                {t('inviteModal.linkedin')}
               </button>
             </div>
           </div>
 
           {/* Copy Message */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Copy to Clipboard</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t('inviteModal.copyTitle')}</h3>
             
             <button
               onClick={handleCopy}
               className="btn-primary w-full flex items-center justify-center gap-2 py-3"
             >
               {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-              {copied ? 'Copied!' : 'Copy Full Message'}
+              {copied ? t('inviteModal.copied') : t('inviteModal.copyFull')}
             </button>
           </div>
 
           {/* Tips */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-400 mb-2">💡 Sharing Tips</h3>
+            <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-400 mb-2">{t('inviteModal.tipsTitle')}</h3>
             <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-              <li>• The recipient will need the password you set to view the message</li>
-              <li>• Share the password through a different channel for security</li>
-              <li>• The message will self-destruct after being viewed</li>
-              <li>• Link expires based on the time you selected</li>
+              <li>• {t('inviteModal.tip1')}</li>
+              <li>• {t('inviteModal.tip2')}</li>
+              <li>• {t('inviteModal.tip3')}</li>
+              <li>• {t('inviteModal.tip4')}</li>
             </ul>
           </div>
         </div>

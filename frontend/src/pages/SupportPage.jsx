@@ -1,30 +1,21 @@
 
 import React, { useEffect } from 'react';
 import { HelpCircle, Mail, Github, MessageSquare, AlertCircle } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 function SupportPage() {
+    const { t } = useI18n();
+
     useEffect(() => {
         document.title = 'NoteBurner - Support';
         window.scrollTo(0, 0);
     }, []);
 
     const faqs = [
-        {
-            q: "Can I recover a message after it's been burned?",
-            a: "No. Once a message is viewed (burned) or expired, it is permanently deleted from our servers. There are no backups."
-        },
-        {
-            q: "I lost my password. Can you recover it?",
-            a: "No. NoteBurner uses a zero-knowledge architecture. Your password never leaves your device, so we don't have it and cannot recover it for you."
-        },
-        {
-            q: "Is the browser extension safe?",
-            a: "Yes. The extension encrypts selected text locally on your machine before sending only the encrypted data to our servers. It is open source and can be audited on GitHub."
-        },
-        {
-            q: "How long can a message last?",
-            a: "You can set messages to expire anywhere from 1 hour to 7 days. If not viewed by then, they are automatically deleted."
-        }
+        { q: t('support.faq1q'), a: t('support.faq1a') },
+        { q: t('support.faq2q'), a: t('support.faq2a') },
+        { q: t('support.faq3q'), a: t('support.faq3a') },
+        { q: t('support.faq4q'), a: t('support.faq4a') }
     ];
 
     return (
@@ -34,10 +25,10 @@ function SupportPage() {
                     <div className="text-center mb-10">
                         <HelpCircle className="w-16 h-16 text-blue-600 dark:text-blue-500 mx-auto mb-4" />
                         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                            Support Center
+                            {t('support.title')}
                         </h1>
                         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                            Need help? Check our frequently asked questions or get in touch.
+                            {t('support.subtitle')}
                         </p>
                     </div>
 
@@ -51,10 +42,10 @@ function SupportPage() {
                         >
                             <Github className="w-8 h-8 text-gray-900 dark:text-white mb-4" />
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                                Report a Bug
+                                {t('support.bugTitle')}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                Found a technical issue? Open an issue on our GitHub repository.
+                                {t('support.bugDesc')}
                             </p>
                         </a>
 
@@ -65,10 +56,10 @@ function SupportPage() {
                         >
                             <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-4" />
                             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                                Contact Support
+                                {t('support.contactTitle')}
                             </h3>
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
-                                For general questions or feedback, send us an email.
+                                {t('support.contactDesc')}
                             </p>
                         </a>
                     </div>
@@ -77,7 +68,7 @@ function SupportPage() {
                     <section>
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                             <MessageSquare className="w-6 h-6 text-emerald-500" />
-                            Frequently Asked Questions
+                            {t('support.faqTitle')}
                         </h2>
 
                         <div className="space-y-4">
@@ -100,10 +91,10 @@ function SupportPage() {
                     <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-1" />
                     <div>
                         <h3 className="text-lg font-bold text-amber-900 dark:text-amber-400 mb-2">
-                            Security Disclosure
+                            {t('support.securityTitle')}
                         </h3>
                         <p className="text-amber-800 dark:text-amber-300 text-sm leading-relaxed mb-3">
-                            If you discover a security vulnerability, please do NOT report it publicly on GitHub. Email us directly so we can address it responsibly.
+                            {t('support.securityDesc')}
                         </p>
                         <a
                             href="mailto:security@noteburner.work"

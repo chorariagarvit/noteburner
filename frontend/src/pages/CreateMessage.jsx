@@ -15,8 +15,10 @@ import CreateMessageSuccess from '../components/create/CreateMessageSuccess';
 import MessageTemplates from '../components/templates/MessageTemplates';
 import KeyboardShortcutsModal from '../components/keyboard/KeyboardShortcutsModal';
 import SelfDestructOptions from '../components/SelfDestructOptions';
+import { useI18n } from '../contexts/I18nContext';
 
 function CreateMessage() {
+  const { t } = useI18n();
   const location = useLocation();
   const [message, setMessage] = useState('');
   const [password, setPassword] = useState('');
@@ -283,8 +285,8 @@ function CreateMessage() {
               <Lock className="w-16 h-16 text-blue-600 dark:text-blue-400 animate-pulse" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">Securing Message...</h2>
-          <p className="text-gray-600 dark:text-gray-300">Encrypting with AES-256</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">{t('create.securing')}</h2>
+          <p className="text-gray-600 dark:text-gray-300">{t('create.encryptingAES')}</p>
         </div>
       </div>
     );

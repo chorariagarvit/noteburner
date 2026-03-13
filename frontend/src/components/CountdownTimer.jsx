@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Clock, AlertCircle } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 /**
  * Calculate time remaining until expiration
@@ -51,6 +52,7 @@ function formatTimeRemaining(timeRemaining) {
 }
 
 export function CountdownTimer({ expiresAt, onExpire }) {
+  const { t } = useI18n();
   const [timeRemaining, setTimeRemaining] = useState(() => calculateTimeRemaining(expiresAt));
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export function CountdownTimer({ expiresAt, onExpire }) {
     return (
       <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold">
         <AlertCircle className="h-5 w-5" />
-        <span>Message Expired</span>
+        <span>{t('countdown.messageExpired')}</span>
       </div>
     );
   }
@@ -118,7 +120,7 @@ export function CountdownTimer({ expiresAt, onExpire }) {
       {isUrgent && (
         <p className="text-sm text-orange-600 dark:text-orange-400 flex items-center gap-1">
           <AlertCircle className="h-4 w-4" />
-          {isCritical ? 'Hurry! Message expires very soon!' : 'Message expires in less than an hour!'}
+          {isCritical ? t('countdown.urgentSoon') : t('countdown.urgentHour')}
         </p>
       )}
     </div>

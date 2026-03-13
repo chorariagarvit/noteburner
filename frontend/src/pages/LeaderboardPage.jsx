@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Trophy, TrendingUp, Shield, Clock } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function LeaderboardPage() {
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
   
   useEffect(() => {
     document.title = 'NoteBurner - Leaderboard';
@@ -44,10 +46,10 @@ export default function LeaderboardPage() {
             <Trophy className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Global Leaderboard
+            {t('leaderboard.title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Anonymous platform statistics - Privacy first, always
+            {t('leaderboard.subtitle')}
           </p>
         </div>
 
@@ -56,19 +58,19 @@ export default function LeaderboardPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border-2 border-blue-500 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Today
+                {t('leaderboard.today')}
               </h3>
               <Clock className="w-6 h-6 text-blue-500" />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Messages Created</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesCreated')}</span>
                 <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {stats.today?.messages_created || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Messages Burned</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesBurned')}</span>
                 <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {stats.today?.messages_burned || 0}
                 </span>
@@ -79,19 +81,19 @@ export default function LeaderboardPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border-2 border-purple-500 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                This Week
+                {t('leaderboard.thisWeek')}
               </h3>
               <TrendingUp className="w-6 h-6 text-purple-500" />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Messages Created</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesCreated')}</span>
                 <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                   {stats.this_week?.messages_created || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Messages Burned</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesBurned')}</span>
                 <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {stats.this_week?.messages_burned || 0}
                 </span>
@@ -102,19 +104,19 @@ export default function LeaderboardPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border-2 border-green-500 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                All Time
+                {t('leaderboard.allTime')}
               </h3>
               <Trophy className="w-6 h-6 text-green-500" />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Messages Created</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesCreated')}</span>
                 <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {stats.all_time?.messages_created?.toLocaleString() || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Messages Burned</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesBurned')}</span>
                 <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {stats.all_time?.messages_burned?.toLocaleString() || 0}
                 </span>
@@ -127,14 +129,14 @@ export default function LeaderboardPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
             <Shield className="w-6 h-6 text-primary-500" />
-            Platform Statistics
+            {t('leaderboard.platformStats')}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-2">
                 {stats.all_time?.files_encrypted?.toLocaleString() || 0}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Files Encrypted</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.filesEncrypted')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
@@ -142,7 +144,7 @@ export default function LeaderboardPage() {
                   ? `${(stats.all_time.avg_file_size / (1024 * 1024)).toFixed(1)}MB`
                   : '0MB'}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Avg File Size</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.avgFileSize')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-red-600 dark:text-red-400 mb-2">
@@ -150,13 +152,13 @@ export default function LeaderboardPage() {
                   ? `${((stats.all_time.messages_burned / stats.all_time.messages_created) * 100).toFixed(1)}%`
                   : '0%'}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Burn Rate</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.burnRate')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
                 100%
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Privacy Protected</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.privacyProtected')}</div>
             </div>
           </div>
         </div>
@@ -165,11 +167,10 @@ export default function LeaderboardPage() {
         <div className="mt-12 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
           <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-2 flex items-center justify-center gap-2">
             <Shield className="w-5 h-5" />
-            Privacy First
+            {t('leaderboard.privacyTitle')}
           </h3>
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            All statistics are completely anonymous. We track platform usage, not individual users.
-            No personal information is collected or stored. Ever.
+            {t('leaderboard.privacyDesc')}
           </p>
         </div>
       </div>

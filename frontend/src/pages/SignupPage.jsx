@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function SignupPage() {
   const navigate = useNavigate();
   const { signup } = useAuth();
+  const { t } = useI18n();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -61,10 +63,10 @@ export default function SignupPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
-              Account created successfully!
+              {t('common.success')}
             </h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              Please check your email to verify your account.
+              {t('auth.signup.errors.emailTaken') ? t('auth.forgotPassword.successMessage') : ''}
             </p>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
               Redirecting to login...
@@ -80,10 +82,10 @@ export default function SignupPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            Create your account
+            {t('auth.signup.title')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Start sending secure self-destructing messages
+            {t('auth.signup.subtitle')}
           </p>
         </div>
 
@@ -103,7 +105,7 @@ export default function SignupPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email address
+                {t('auth.signup.emailLabel')}
               </label>
               <input
                 id="email"
@@ -120,7 +122,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Display name (optional)
+                {t('auth.signup.displayNameLabel')}
               </label>
               <input
                 id="displayName"
@@ -136,7 +138,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
+                {t('auth.signup.passwordLabel')}
               </label>
               <input
                 id="password"
@@ -161,7 +163,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Confirm password
+                {t('auth.signup.confirmPasswordLabel')}
               </label>
               <input
                 id="confirmPassword"
@@ -176,7 +178,7 @@ export default function SignupPage() {
               />
               {formData.confirmPassword && formData.password !== formData.confirmPassword && (
                 <p className="mt-1 text-xs text-red-600 dark:text-red-400">
-                  Passwords do not match
+                  {t('auth.signup.errors.passwordMismatch')}
                 </p>
               )}
             </div>
@@ -188,15 +190,15 @@ export default function SignupPage() {
               disabled={loading || formData.password !== formData.confirmPassword}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? t('auth.signup.creating') : t('auth.signup.submitButton')}
             </button>
           </div>
 
           <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Already have an account?{' '}
+              {t('auth.signup.hasAccount')}{' '}
               <Link to="/login" className="font-medium text-amber-500 hover:text-amber-600">
-                Sign in
+                {t('auth.signup.loginLink')}
               </Link>
             </p>
           </div>

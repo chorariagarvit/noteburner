@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useI18n } from '../contexts/I18nContext';
 
 /**
  * Audit Log Viewer
@@ -8,6 +9,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
   const [auditData, setAuditData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     fetchAuditLogs();
@@ -94,14 +96,14 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
     const diffMs = now - date;
     const diffMins = Math.floor(diffMs / 60000);
     
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    if (diffMins < 1) return t('auditLog.justNow');
+    if (diffMins < 60) return t('auditLog.minutesAgo', { n: diffMins, s: diffMins > 1 ? 's' : '' });
     
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return t('auditLog.hoursAgo', { n: diffHours, s: diffHours > 1 ? 's' : '' });
     
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return t('auditLog.daysAgo', { n: diffDays, s: diffDays > 1 ? 's' : '' });
     
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
@@ -111,10 +113,10 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
       {/* Header */}
       <div>
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          📊 Message Activity Log
+          {t('auditLog.title')}
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Privacy-friendly access tracking (country-level geo data only)
+          {t('auditLog.subtitle')}
         </p>
       </div>
 
@@ -125,7 +127,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
             {message.view_count} / {message.max_views === -1 ? '∞' : message.max_views}
           </div>
           <div className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-            Views
+            {t('auditLog.views')}
           </div>
         </div>
 
@@ -134,7 +136,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
             {message.password_attempts}
           </div>
           <div className="text-xs text-purple-700 dark:text-purple-300 mt-1">
-            Password Attempts
+            {t('auditLog.passwordAttempts')}
           </div>
         </div>
 
@@ -143,7 +145,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
             {formatTimestamp(message.created_at)}
           </div>
           <div className="text-xs text-green-700 dark:text-green-300 mt-1">
-            Created
+            {t('auditLog.created')}
           </div>
         </div>
 
@@ -152,7 +154,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
             {formatTimestamp(message.expires_at)}
           </div>
           <div className="text-xs text-orange-700 dark:text-orange-300 mt-1">
-            Expires
+            {t('auditLog.expires')}
           </div>
         </div>
       </div>
@@ -160,12 +162,12 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
       {/* Event timeline */}
       <div>
         <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
-          Activity Timeline
+          {t('auditLog.timelineTitle')}
         </h4>
         
         {events.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p>No activity recorded yet</p>
+            <p>{t('auditLog.noActivity')}</p>
           </div>
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -225,10 +227,9 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
           <div className="text-sm text-blue-700 dark:text-blue-300">
-            <p className="font-medium mb-1">🔒 Privacy First</p>
+            <p className="font-medium mb-1">{t('auditLog.privacyTitle')}</p>
             <p className="text-xs">
-              We only log country-level location (no IPs, no cities). 
-              Audit logs are automatically deleted 30 days after message expiration.
+              {t('auditLog.privacyDesc')}
             </p>
           </div>
         </div>

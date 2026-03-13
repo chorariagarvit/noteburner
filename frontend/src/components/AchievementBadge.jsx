@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function AchievementBadge({ achievement, unlocked = false, progress = null }) {
+  const { t } = useI18n();
   return (
     <div 
       className={`
@@ -26,7 +28,7 @@ export default function AchievementBadge({ achievement, unlocked = false, progre
           {!unlocked && progress && progress.percentage > 0 && (
             <div className="mt-2">
               <div className="flex justify-between text-xs text-gray-500 mb-1">
-                <span>Progress</span>
+                <span>{t('achievementBadge.progress')}</span>
                 <span>{Math.round(progress.percentage)}%</span>
               </div>
               <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -42,7 +44,7 @@ export default function AchievementBadge({ achievement, unlocked = false, progre
       {unlocked && (
         <div className="absolute top-2 right-2">
           <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-            ✓ Unlocked
+            {t('achievementBadge.unlocked')}
           </div>
         </div>
       )}

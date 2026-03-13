@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Copy, Check, Users, Link2, Clock, Shield } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { useI18n } from '../contexts/I18nContext';
 
 export function GroupMessageLinks({ groupData }) {
+  const { t } = useI18n();
   const [copiedIndex, setCopiedIndex] = useState(null);
 
   const copyToClipboard = async (url, index) => {
@@ -40,10 +42,10 @@ export function GroupMessageLinks({ groupData }) {
           <Users className="w-8 h-8 text-primary-600 dark:text-primary-400" />
           <div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              Group Message Created!
+              {t('groupLinks.title')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              {groupData.recipientCount} unique link{groupData.recipientCount > 1 ? 's' : ''} generated
+              {t('groupLinks.linksGenerated', {count: groupData.recipientCount, s: groupData.recipientCount > 1 ? 's' : ''})}
             </p>
           </div>
         </div>
@@ -52,7 +54,7 @@ export function GroupMessageLinks({ groupData }) {
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
               <Clock className="w-4 h-4" />
-              Expiration
+              {t('groupLinks.expirationLabel')}
             </div>
             <div className="font-semibold text-gray-900 dark:text-white">
               {formatExpiration(groupData.expiresAt)}
@@ -62,20 +64,20 @@ export function GroupMessageLinks({ groupData }) {
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
               <Shield className="w-4 h-4" />
-              Burn Mode
+              {t('groupLinks.burnModeLabel')}
             </div>
             <div className="font-semibold text-gray-900 dark:text-white">
-              {groupData.burnOnFirstView ? 'All on first view' : 'Individual'}
+              {groupData.burnOnFirstView ? t('groupLinks.burnOnFirstView') : t('groupLinks.individualBurn')}
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
               <Link2 className="w-4 h-4" />
-              Max Views
+              {t('groupLinks.maxViewsLabel')}
             </div>
             <div className="font-semibold text-gray-900 dark:text-white">
-              {groupData.maxViews || 'Unlimited'}
+              {groupData.maxViews || t('groupLinks.unlimited')}
             </div>
           </div>
         </div>
@@ -84,7 +86,7 @@ export function GroupMessageLinks({ groupData }) {
           <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-sm text-red-800 dark:text-red-300 flex items-center gap-2">
               <Shield className="w-4 h-4" />
-              <strong>Warning:</strong> All links will burn after the first recipient opens the message
+              {t('groupLinks.burnWarning')}
             </p>
           </div>
         )}
@@ -94,10 +96,10 @@ export function GroupMessageLinks({ groupData }) {
       <div className="space-y-3">
         <h4 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <Link2 className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-          Recipient Links
+          {t('groupLinks.recipientLinksTitle')}
         </h4>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Share each link with a different recipient. Each link works only once.
+          {t('groupLinks.recipientLinksDesc')}
         </p>
 
         <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -109,7 +111,7 @@ export function GroupMessageLinks({ groupData }) {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Recipient #{link.recipientIndex}
+                    {t('groupLinks.recipientLabel', {n: link.recipientIndex})}
                   </div>
                   <div className="text-xs font-mono bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700 break-all">
                     {link.url}
@@ -123,12 +125,12 @@ export function GroupMessageLinks({ groupData }) {
                   {copiedIndex === index ? (
                     <>
                       <Check className="w-4 h-4" />
-                      Copied!
+                      {t('groupLinks.copiedBtn')}
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4" />
-                      Copy
+                      {t('groupLinks.copyBtn')}
                     </>
                   )}
                 </button>
@@ -140,12 +142,12 @@ export function GroupMessageLinks({ groupData }) {
 
       {/* Tips */}
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-        <h5 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">💡 Tips</h5>
+        <h5 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">{t('groupLinks.tipsTitle')}</h5>
         <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-          <li>• Each link is unique and can only be used once</li>
-          <li>• Share links separately to maintain security</li>
-          <li>• Recipients will need the same password to decrypt</li>
-          <li>• Consider using different passwords for each recipient for maximum security</li>
+          <li>• {t('groupLinks.tip1')}</li>
+          <li>• {t('groupLinks.tip2')}</li>
+          <li>• {t('groupLinks.tip3')}</li>
+          <li>• {t('groupLinks.tip4')}</li>
         </ul>
       </div>
     </div>

@@ -6,8 +6,10 @@ import {
   getNextReward,
   getUnlockedRewards 
 } from '../utils/referrals';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function ReferralsPage() {
+  const { t } = useI18n();
   const [stats, setStats] = useState(null);
   const [copied, setCopied] = useState(false);
   const [referralUrl, setReferralUrl] = useState('');
@@ -46,7 +48,7 @@ export default function ReferralsPage() {
       <div className="min-h-[calc(100vh-8rem)] bg-gray-50 dark:bg-gray-900 py-12 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading rewards...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">{t('referrals.loading')}</p>
         </div>
       </div>
     );
@@ -59,10 +61,10 @@ export default function ReferralsPage() {
         <div className="text-center mb-8">
           <Gift className="w-16 h-16 text-primary-600 dark:text-primary-400 mx-auto mb-4" />
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Referrals & Rewards
+            {t('referrals.title')}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
-            Create messages to unlock exclusive features
+            {t('referrals.subtitle')}
           </p>
         </div>
 
@@ -71,7 +73,7 @@ export default function ReferralsPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Your Progress
+                {t('referrals.progressTitle')}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
                 {stats.messagesCreated} message{stats.messagesCreated !== 1 ? 's' : ''} created
@@ -82,7 +84,7 @@ export default function ReferralsPage() {
                 {unlockedRewards.length}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Rewards Unlocked
+                {t('referrals.rewardsUnlocked')}
               </div>
             </div>
           </div>
@@ -91,7 +93,7 @@ export default function ReferralsPage() {
             <div className="mt-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Next Reward: {nextReward.title}
+                  {t('referrals.nextReward').replace('{title}', nextReward.title)}
                 </span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   {nextReward.progress} / {nextReward.threshold}
@@ -113,10 +115,10 @@ export default function ReferralsPage() {
         {/* Share Referral Link */}
         <div className="card mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Share NoteBurner
+            {t('referrals.shareTitle')}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4">
-            Share your unique referral link to help others discover secure messaging!
+            {t('referrals.shareSubtitle')}
           </p>
           
           <div className="flex gap-2">
@@ -131,7 +133,7 @@ export default function ReferralsPage() {
               className="btn-primary flex items-center gap-2 whitespace-nowrap"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? t('common.copied') : t('common.copy')}
             </button>
           </div>
 
@@ -186,12 +188,12 @@ export default function ReferralsPage() {
                         ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                     }`}>
-                      {reward.unlocked ? 'Unlocked!' : `${reward.threshold} messages required`}
+                      {reward.unlocked ? t('referrals.unlocked') : t('referrals.required').replace('{n}', reward.threshold)}
                     </span>
                     
                     {!reward.unlocked && stats.messagesCreated > 0 && (
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {Math.round((stats.messagesCreated / reward.threshold) * 100)}% complete
+                        {Math.round((stats.messagesCreated / reward.threshold) * 100)}{t('referrals.complete').replace('{pct}', '').trimStart()}
                       </span>
                     )}
                   </div>
@@ -204,13 +206,13 @@ export default function ReferralsPage() {
         {/* Info Card */}
         <div className="card mt-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-700">
           <h3 className="font-bold text-purple-900 dark:text-purple-300 mb-2">
-            How It Works
+            {t('referrals.howTitle')}
           </h3>
           <ul className="text-sm text-purple-800 dark:text-purple-300 space-y-1">
-            <li>✅ Create encrypted messages to earn rewards</li>
-            <li>✅ All rewards are automatically unlocked when you reach the threshold</li>
-            <li>✅ No server tracking - everything is stored locally in your browser</li>
-            <li>✅ Privacy-first: your referral code is just for sharing, not tracking</li>
+            <li>{t('referrals.how1')}</li>
+            <li>{t('referrals.how2')}</li>
+            <li>{t('referrals.how3')}</li>
+            <li>{t('referrals.how4')}</li>
           </ul>
         </div>
       </div>

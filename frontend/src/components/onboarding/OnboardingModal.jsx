@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Lock, Share2, Flame, ChevronRight, ChevronLeft } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { useI18n } from '../../contexts/I18nContext';
 
 const ONBOARDING_STEPS = [
   {
@@ -42,6 +43,7 @@ const ONBOARDING_STEPS = [
 ];
 
 function OnboardingModal({ isOpen, onClose, onComplete }) {
+  const { t } = useI18n();
   const [currentStep, setCurrentStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -109,7 +111,7 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
               <Flame className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
             <h2 id="onboarding-title" className="text-xl font-bold text-gray-900 dark:text-white">
-              Getting Started
+              {t('onboarding.header')}
             </h2>
           </div>
           <button
@@ -179,7 +181,7 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
             className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             aria-label="Skip onboarding tutorial"
           >
-            Skip tutorial
+            {t('onboarding.skip')}
           </button>
           <div className="flex items-center gap-3">
             {!isFirstStep && (
@@ -189,7 +191,7 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
                 aria-label="Go to previous step"
               >
                 <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-                Previous
+                {t('onboarding.prevBtn')}
               </button>
             )}
             <button
@@ -197,7 +199,7 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
               className="px-6 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all flex items-center gap-2 font-medium"
               aria-label={isLastStep ? 'Complete onboarding and get started' : 'Go to next step'}
             >
-              {isLastStep ? 'Get Started' : 'Next'}
+              {isLastStep ? t('onboarding.getStartedBtn') : t('onboarding.nextBtn')}
               {!isLastStep && <ChevronRight className="w-4 h-4" aria-hidden="true" />}
             </button>
           </div>

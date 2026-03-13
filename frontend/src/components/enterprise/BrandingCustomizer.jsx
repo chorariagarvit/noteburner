@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Palette, Upload, Eye, Save } from 'lucide-react';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
+import { useI18n } from '../../contexts/I18nContext';
 
 export default function BrandingCustomizer() {
   const { teamId } = useParams();
+  const { t } = useI18n();
   const [branding, setBranding] = useState({
     primary_color: '#f59e0b',
     secondary_color: '#1f2937',
@@ -74,15 +76,15 @@ export default function BrandingCustomizer() {
   };
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-900 dark:text-gray-100">Loading branding settings...</div>;
+    return <div className="text-center py-12 text-gray-900 dark:text-gray-100">{t('branding.loading')}</div>;
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Brand Customization</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('branding.title')}</h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
-          Customize the look and feel of NoteBurner for your team
+          {t('branding.subtitle')}
         </p>
       </div>
 
@@ -101,12 +103,12 @@ export default function BrandingCustomizer() {
         <div className="space-y-6">
           {/* Colors */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Colors</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t('branding.colorsTitle')}</h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Primary Color
+                  {t('branding.primaryColor')}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -127,7 +129,7 @@ export default function BrandingCustomizer() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Secondary Color
+                  {t('branding.secondaryColor')}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -150,7 +152,7 @@ export default function BrandingCustomizer() {
 
           {/* Logo */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Logo</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t('branding.logoTitle')}</h2>
             
             {branding.logo_url ? (
               <div>
@@ -163,7 +165,7 @@ export default function BrandingCustomizer() {
                   onClick={handleRemoveLogo}
                   className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
                 >
-                  Remove Logo
+                  {t('branding.removeLogo')}
                 </button>
               </div>
             ) : (
@@ -172,11 +174,11 @@ export default function BrandingCustomizer() {
                   type="url"
                   value={branding.logo_url || ''}
                   onChange={(e) => setBranding({ ...branding, logo_url: e.target.value })}
-                  placeholder="https://example.com/logo.png"
+                  placeholder={t('branding.logoPlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Enter a URL to your logo image (PNG, SVG, or JPG)
+                  {t('branding.logoHint')}
                 </p>
               </div>
             )}
@@ -184,11 +186,11 @@ export default function BrandingCustomizer() {
 
           {/* Footer */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Custom Footer</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t('branding.footerTitle')}</h2>
             <textarea
               value={branding.custom_footer || ''}
               onChange={(e) => setBranding({ ...branding, custom_footer: e.target.value })}
-              placeholder="© 2026 Your Company. All rights reserved."
+              placeholder={t('branding.footerPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg h-24 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </div>
@@ -197,9 +199,9 @@ export default function BrandingCustomizer() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">White Label</h2>
+                <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{t('branding.whiteLabelTitle')}</h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  Remove all NoteBurner branding (Enterprise only)
+                  {t('branding.whiteLabelDesc')}
                 </p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -220,14 +222,14 @@ export default function BrandingCustomizer() {
             disabled={saving}
             className="w-full px-6 py-3 bg-amber-500 dark:bg-amber-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-amber-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? t('branding.saving') : t('branding.saveBtn')}
           </button>
         </div>
 
         {/* Preview Panel */}
         <div className="sticky top-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Preview</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t('branding.previewTitle')}</h2>
             
             <div
               className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6"
@@ -280,7 +282,7 @@ export default function BrandingCustomizer() {
             </div>
 
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-800 dark:text-blue-200">
-              💡 Changes will apply to all team message pages
+              {t('branding.previewHint')}
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useI18n } from '../../contexts/I18nContext';
 
 function StepCard({ number, title, description }) {
     return (
@@ -21,30 +22,31 @@ StepCard.propTypes = {
 };
 
 function HowItWorksSection() {
+    const { t } = useI18n();
     return (
         <section className="py-20 bg-gray-50 dark:bg-gray-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-                    How It Works
+                    {t('home.howItWorks.title')}
                 </h2>
 
                 <div className="grid md:grid-cols-3 gap-8">
                     <StepCard
-                        number="1"
-                        title="Create & Encrypt"
-                        description="Write your message, set a password. Everything is encrypted in your browser before being sent."
+                        number={t('home.howItWorks.step1Number')}
+                        title={t('home.howItWorks.step1Title')}
+                        description={t('home.howItWorks.step1Desc')}
                     />
 
                     <StepCard
-                        number="2"
-                        title="Share Link"
-                        description="Get a unique shareable link. Send it along with the password (separately!) to your recipient."
+                        number={t('home.howItWorks.step2Number')}
+                        title={t('home.howItWorks.step2Title')}
+                        description={t('home.howItWorks.step2Desc')}
                     />
 
                     <StepCard
-                        number="3"
-                        title="Read & Burn"
-                        description="Recipient enters password to decrypt and read once. Message is permanently deleted immediately."
+                        number={t('home.howItWorks.step3Number')}
+                        title={t('home.howItWorks.step3Title')}
+                        description={t('home.howItWorks.step3Desc')}
                     />
                 </div>
             </div>
