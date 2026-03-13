@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Calendar, Package, CheckCircle, Code, Database, TestTube, Shield, Wrench } from 'lucide-react';
 import changelogRaw from '../../../CHANGELOG.md?raw';
 import { parseChangelog, getVersionStatus } from '../utils/parseChangelog';
+import { useI18n } from '../contexts/I18nContext';
 
 function VersionCard({ version, date, title, features, technical, security, changed, fixed, status = 'released' }) {
+  const { t } = useI18n();
   const statusColors = {
     released: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
     beta: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
@@ -34,7 +36,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
         <div className="mb-4">
           <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
             <CheckCircle className="w-4 h-4" />
-            Features
+            {t('changelog.sectionFeatures')}
           </h5>
           <ul className="space-y-1">
             {features.map((feature, index) => (
@@ -51,7 +53,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
         <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
           <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
             <Code className="w-4 h-4" />
-            Technical Details
+            {t('changelog.sectionTechnical')}
           </h5>
           <ul className="space-y-1">
             {technical.map((item, index) => (
@@ -68,7 +70,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
         <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
           <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
             <Shield className="w-4 h-4 text-red-500" />
-            Security
+            {t('changelog.sectionSecurity')}
           </h5>
           <ul className="space-y-1">
             {security.map((item, index) => (
@@ -85,7 +87,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
         <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
           <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
             <Wrench className="w-4 h-4 text-blue-500" />
-            Changed
+            {t('changelog.sectionChanged')}
           </h5>
           <ul className="space-y-1">
             {changed.map((item, index) => (
@@ -102,7 +104,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
         <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
           <h5 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-green-500" />
-            Fixed
+            {t('changelog.sectionFixed')}
           </h5>
           <ul className="space-y-1">
             {fixed.map((item, index) => (
@@ -119,6 +121,8 @@ function VersionCard({ version, date, title, features, technical, security, chan
 }
 
 function ChangelogPage() {
+  const { t } = useI18n();
+
   useEffect(() => {
     document.title = 'Changelog - NoteBurner';
     window.scrollTo(0, 0);
@@ -130,10 +134,10 @@ function ChangelogPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Changelog
+            {t('changelog.title')}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
-            Track every feature, improvement, and update to NoteBurner
+            {t('changelog.subtitle')}
           </p>
         </div>
 
@@ -402,7 +406,7 @@ function ChangelogPage() {
           <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
             <TestTube className="w-5 h-5" />
             <p className="text-sm">
-              All features are thoroughly tested with 186 E2E tests before release
+              {t('changelog.footerDesc')}
             </p>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">

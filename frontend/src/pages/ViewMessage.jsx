@@ -8,11 +8,13 @@ import { useCountdown, formatTimeLeft } from '../hooks/useCountdown';
 import { CountdownTimer } from '../components/CountdownTimer';
 import { setMessageOpenGraph } from '../utils/openGraph';
 import TOTPInput from '../components/TOTPInput';
+import { useI18n } from '../contexts/I18nContext';
 
 function ViewMessage() {
   const { identifier } = useParams();
   const messageIdentifier = identifier; // Can be either token or custom slug
   const navigate = useNavigate();
+  const { t } = useI18n();
   
   // State declarations MUST come before useEffect
   const [password, setPassword] = useState('');
@@ -280,7 +282,7 @@ function ViewMessage() {
                       className="btn-secondary flex items-center gap-2"
                     >
                       <Download className="w-4 h-4" />
-                      {downloading[index] ? 'Downloading...' : 'Download'}
+                      {downloading[index] ? t('view.downloading') : t('view.fileDownload')}
                     </button>
                   </div>
                 ))}
@@ -304,10 +306,10 @@ function ViewMessage() {
                   <Flame className="w-8 h-8 text-primary-600 dark:text-primary-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Your secret has self-destructed! 🔥
+                  {t('view.afterBurnTitle')}
                 </h3>
                 <p className="text-base text-gray-600 dark:text-gray-400 mb-1">
-                  Want to send your own encrypted message?
+                  {t('view.afterBurnSendOwn')}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-500">
                   No registration. No tracking. Just pure privacy.
@@ -320,7 +322,7 @@ function ViewMessage() {
                   className="btn-primary flex items-center justify-center gap-2 text-lg px-6 py-3"
                 >
                   <Flame className="w-5 h-5" />
-                  Create Your Secret Message
+                  {t('view.afterBurnCta')}
                 </button>
               </div>
               
@@ -360,8 +362,8 @@ function ViewMessage() {
               <Lock className="w-16 h-16 text-green-600 dark:text-green-400 animate-bounce" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">Unlocking Message...</h2>
-          <p className="text-gray-600 dark:text-gray-300">Decryption successful!</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">{t('view.unlocking')}</h2>
+          <p className="text-gray-600 dark:text-gray-300">{t('view.decryptionSuccess')}</p>
         </div>
       </div>
     );
@@ -383,7 +385,7 @@ function ViewMessage() {
             </div>
 
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-primary-600 to-pink-600 dark:from-primary-400 dark:to-pink-400 bg-clip-text text-transparent">
-              Someone sent you a secret message...
+              {t('view.previewTitle')}
             </h1>
             
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-3">
@@ -401,7 +403,7 @@ function ViewMessage() {
               className="btn-primary text-xl px-8 py-4 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
             >
               <Lock className="w-6 h-6 inline-block mr-2" />
-              Unlock Secret Message
+              {t('view.previewUnlock')}
             </button>
 
             <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
@@ -424,17 +426,17 @@ function ViewMessage() {
           <div className="text-center mb-8">
             <Lock className="w-12 h-12 text-primary-600 dark:text-primary-500 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Encrypted Message
+              {t('view.encryptedTitle')}
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              Enter the password to decrypt and view this message
+              {t('view.decryptPrompt')}
             </p>
           </div>
 
           <form onSubmit={handleDecrypt} className="space-y-6">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
+                {t('view.enterPassword')}
               </label>
               <div className="relative">
                 <input
@@ -442,7 +444,7 @@ function ViewMessage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter the password"
+                  placeholder={t('view.passwordPlaceholder')}
                   className="input-field pr-10"
                   required
                   autoFocus
@@ -482,7 +484,7 @@ function ViewMessage() {
               disabled={loading}
               className="btn-primary w-full text-lg"
             >
-              {loading ? 'Decrypting...' : 'Decrypt Message'}
+              {loading ? t('view.decrypting') : t('view.decryptButton')}
             </button>
           </form>
 
@@ -492,7 +494,7 @@ function ViewMessage() {
                 <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400 animate-pulse" />
                 <div className="text-center">
                   <p className="text-sm font-semibold text-orange-900 dark:text-orange-300">
-                    Message expires in
+                    {t('view.expiresIn')}
                   </p>
                   <p className="text-2xl font-mono font-bold text-orange-700 dark:text-orange-400">
                     {formatTimeLeft(timeLeft)}
@@ -517,8 +519,8 @@ function ViewMessage() {
             <div className="flex items-start gap-3">
               <Flame className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800 dark:text-amber-300">
-                <p className="font-semibold mb-1">Warning: One-Time Access Only</p>
-                <p>Once you decrypt this message, it will be permanently deleted from our servers. There are no backups or second chances.</p>
+                  <p className="font-semibold mb-1">{t('view.warningTitle')}</p>
+                  <p>{t('view.warningDesc')}</p>
               </div>
             </div>
           </div>

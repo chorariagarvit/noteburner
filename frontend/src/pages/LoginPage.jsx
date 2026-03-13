@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { t } = useI18n();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -43,10 +45,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome back
+            {t('auth.login.title')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Sign in to your account
+            {t('auth.login.subtitle')}
           </p>
         </div>
 
@@ -66,7 +68,7 @@ export default function LoginPage() {
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email address
+                {t('auth.login.emailLabel')}
               </label>
               <input
                 id="email"
@@ -83,7 +85,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
+                {t('auth.login.passwordLabel')}
               </label>
               <input
                 id="password"
@@ -110,13 +112,13 @@ export default function LoginPage() {
                 className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                Remember me
+                {t('auth.login.rememberMe')}
               </label>
             </div>
 
             <div className="text-sm">
               <Link to="/forgot-password" className="font-medium text-amber-500 hover:text-amber-600">
-                Forgot password?
+                {t('auth.login.forgotPassword')}
               </Link>
             </div>
           </div>
@@ -127,15 +129,15 @@ export default function LoginPage() {
               disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? t('auth.login.signingIn') : t('auth.login.submitButton')}
             </button>
           </div>
 
           <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
+              {t('auth.login.noAccount')}{' '}
               <Link to="/signup" className="font-medium text-amber-500 hover:text-amber-600">
-                Sign up
+                {t('auth.login.signupLink')}
               </Link>
             </p>
           </div>

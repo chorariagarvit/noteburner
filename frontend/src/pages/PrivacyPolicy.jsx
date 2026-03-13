@@ -1,8 +1,11 @@
 
 import React, { useEffect } from 'react';
 import { Shield, Lock, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 function PrivacyPolicy() {
+    const { t } = useI18n();
+
     useEffect(() => {
         document.title = 'NoteBurner - Privacy Policy';
         window.scrollTo(0, 0);
@@ -15,13 +18,13 @@ function PrivacyPolicy() {
                     <div className="text-center mb-10">
                         <Shield className="w-16 h-16 text-emerald-600 dark:text-emerald-500 mx-auto mb-4" />
                         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                            Privacy Policy
+                            {t('privacy.title')}
                         </h1>
                         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                            We believe privacy is a fundamental right. That's why NoteBurner is built with a zero-knowledge architecture.
+                            {t('privacy.subtitle')}
                         </p>
                         <div className="mt-4 inline-block px-4 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm text-gray-500 dark:text-gray-400">
-                            Last Updated: January 17, 2026
+                            {t('privacy.lastUpdated')}
                         </div>
                     </div>
 
@@ -30,10 +33,10 @@ function PrivacyPolicy() {
                         <section>
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                                 <FileText className="w-6 h-6 text-blue-500" />
-                                Overview
+                                {t('privacy.overviewTitle')}
                             </h2>
                             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                                NoteBurner respects your privacy. Our browser extension and web application process your data locally in your browser and only communicate with NoteBurner servers to create encrypted messages. We have no way to decrypt your messages.
+                                {t('privacy.overviewText')}
                             </p>
                         </section>
 
@@ -42,16 +45,16 @@ function PrivacyPolicy() {
                             <div className="bg-red-50 dark:bg-red-900/10 p-6 rounded-xl border border-red-100 dark:border-red-900/30">
                                 <h3 className="text-xl font-semibold text-red-700 dark:text-red-400 mb-4 flex items-center gap-2">
                                     <XCircle className="w-5 h-5" />
-                                    We DO NOT Collect
+                                    {t('privacy.doNotCollectTitle')}
                                 </h3>
                                 <ul className="space-y-3">
                                     {[
-                                        'Your personal information or identity',
-                                        'Browsing history or website visits',
-                                        'Passwords or encryption keys',
-                                        'Message content before encryption',
-                                        'Analytics or tracking data',
-                                        'Cookies or device identifiers'
+                                        t('privacy.doNotCollect1'),
+                                        t('privacy.doNotCollect2'),
+                                        t('privacy.doNotCollect3'),
+                                        t('privacy.doNotCollect4'),
+                                        t('privacy.doNotCollect5'),
+                                        t('privacy.doNotCollect6')
                                     ].map((item, i) => (
                                         <li key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                                             <span className="text-red-500 mt-1">✕</span>
@@ -64,14 +67,14 @@ function PrivacyPolicy() {
                             <div className="bg-emerald-50 dark:bg-emerald-900/10 p-6 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
                                 <h3 className="text-xl font-semibold text-emerald-700 dark:text-emerald-400 mb-4 flex items-center gap-2">
                                     <CheckCircle className="w-5 h-5" />
-                                    We ONLY Receive
+                                    {t('privacy.onlyReceiveTitle')}
                                 </h3>
                                 <ul className="space-y-3">
                                     {[
-                                        'Encrypted ciphertext (already encrypted by you)',
-                                        'Expiration timestamp',
-                                        'Random access token (not linked to you)',
-                                        'Optional metadata (size, creation time)'
+                                        t('privacy.onlyReceive1'),
+                                        t('privacy.onlyReceive2'),
+                                        t('privacy.onlyReceive3'),
+                                        t('privacy.onlyReceive4')
                                     ].map((item, i) => (
                                         <li key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                                             <span className="text-emerald-500 mt-1">✓</span>
@@ -86,34 +89,34 @@ function PrivacyPolicy() {
                         <section>
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                                 <Lock className="w-6 h-6 text-purple-500" />
-                                Encryption & Security
+                                {t('privacy.encryptionTitle')}
                             </h2>
                             <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700">
                                 <ul className="space-y-4">
                                     <li className="flex gap-4">
                                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">1</div>
                                         <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white">Client-Side Encryption</h4>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white">{t('privacy.enc1Title')}</h4>
                                             <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
-                                                All encryption happens in your browser using AES-256-GCM before any data leaves your device.
+                                                {t('privacy.enc1Desc')}
                                             </p>
                                         </div>
                                     </li>
                                     <li className="flex gap-4">
                                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">2</div>
                                         <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white">Zero-Knowledge Architecture</h4>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white">{t('privacy.enc2Title')}</h4>
                                             <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
-                                                Your password never leaves your device. We store only the encrypted ciphertext. We cannot decrypt your messages even if compelled to do so.
+                                                {t('privacy.enc2Desc')}
                                             </p>
                                         </div>
                                     </li>
                                     <li className="flex gap-4">
                                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">3</div>
                                         <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white">secure Transmission</h4>
+                                            <h4 className="font-semibold text-gray-900 dark:text-white">{t('privacy.enc3Title')}</h4>
                                             <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
-                                                All data is transmitted over HTTPS (TLS 1.3) with HSTS enabled.
+                                                {t('privacy.enc3Desc')}
                                             </p>
                                         </div>
                                     </li>
@@ -124,32 +127,32 @@ function PrivacyPolicy() {
                         {/* Data Retention */}
                         <section>
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                                Data Retention & Deletion
+                                {t('privacy.retentionTitle')}
                             </h2>
                             <p className="text-gray-600 dark:text-gray-300 mb-4">
-                                Your data is ephemeral by design. We strictly enforce deletion policies:
+                                {t('privacy.retentionDesc')}
                             </p>
                             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
-                                <li><strong>Automatic Deletion:</strong> Messages are deleted immediately after the first successful decryption (for "Burn on read" messages).</li>
-                                <li><strong>Expiration:</strong> All messages have a hard expiration time (default 24 hours, max 7 days).</li>
-                                <li><strong>Permanent Removal:</strong> When a message is deleted, it is permanently purged from our database. No backups are retained.</li>
+                                <li>{t('privacy.retentionItem1')}</li>
+                                <li>{t('privacy.retentionItem2')}</li>
+                                <li>{t('privacy.retentionItem3')}</li>
                             </ul>
                         </section>
 
                         {/* Contact */}
                         <section className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                                Questions?
+                                {t('privacy.questionsTitle')}
                             </h2>
                             <p className="text-gray-600 dark:text-gray-300 mb-4">
-                                If you have any questions about our privacy practices, please contact us.
+                                {t('privacy.questionsDesc')}
                             </p>
                             <div className="flex flex-wrap gap-4">
                                 <a href="mailto:privacy@noteburner.work" className="text-blue-600 dark:text-blue-400 hover:underline">
                                     privacy@noteburner.work
                                 </a>
                                 <a href="https://github.com/chorariagarvit/noteburner" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                                    Source Code on GitHub
+                                    {t('privacy.sourceCode')}
                                 </a>
                             </div>
                         </section>

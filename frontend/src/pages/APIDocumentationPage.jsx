@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Code, Key, Lock, Send, Database, Shield, Zap } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 function EndpointCard({ method, path, description, authRequired, requestBody, responseExample, headers }) {
+  const { t } = useI18n();
   const [showRequest, setShowRequest] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
 
@@ -26,7 +28,7 @@ function EndpointCard({ method, path, description, authRequired, requestBody, re
               {authRequired && (
                 <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
                   <Lock className="w-3 h-3" />
-                  Auth Required
+                  {t('apiDocs.authRequired')}
                 </span>
               )}
             </div>
@@ -36,7 +38,7 @@ function EndpointCard({ method, path, description, authRequired, requestBody, re
 
         {headers && (
           <div className="mt-3">
-            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Headers:</h4>
+            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('apiDocs.headersLabel')}</h4>
             <div className="bg-white dark:bg-gray-900 rounded p-2 space-y-1">
               {headers.map((header, idx) => (
                 <div key={idx} className="text-xs font-mono text-gray-700 dark:text-gray-300">
@@ -54,7 +56,7 @@ function EndpointCard({ method, path, description, authRequired, requestBody, re
             onClick={() => setShowRequest(!showRequest)}
             className="w-full px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex justify-between items-center"
           >
-            Request Body
+            {t('apiDocs.requestBody')}
             <span className="text-xs">{showRequest ? '▼' : '▶'}</span>
           </button>
           {showRequest && (
@@ -73,7 +75,7 @@ function EndpointCard({ method, path, description, authRequired, requestBody, re
             onClick={() => setShowResponse(!showResponse)}
             className="w-full px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex justify-between items-center"
           >
-            Response Example
+            {t('apiDocs.responseExample')}
             <span className="text-xs">{showResponse ? '▼' : '▶'}</span>
           </button>
           {showResponse && (
@@ -90,6 +92,8 @@ function EndpointCard({ method, path, description, authRequired, requestBody, re
 }
 
 export default function APIDocumentationPage() {
+  const { t } = useI18n();
+
   useEffect(() => {
     document.title = 'API Documentation - NoteBurner';
     window.scrollTo(0, 0);
@@ -102,10 +106,10 @@ export default function APIDocumentationPage() {
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             <Code className="inline w-10 h-10 mr-3 text-amber-500" />
-            API Documentation
+            {t('apiDocs.title')}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-            Integrate NoteBurner's secure messaging into your applications
+            {t('apiDocs.subtitle')}
           </p>
 
           {/* Quick Stats */}

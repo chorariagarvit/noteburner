@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthHeadersWithJSON } from '../utils/session';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function TeamCreationPage() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export default function TeamCreationPage() {
   const [plan, setPlan] = useState('free');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const { t } = useI18n();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +29,7 @@ export default function TeamCreationPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage({ type: 'success', text: 'Team created successfully!' });
+        setMessage({ type: 'success', text: t('teamCreation.successMessage') });
         setTimeout(() => {
           navigate(`/teams/${data.team.id}`);
         }, 1500);
@@ -45,7 +47,7 @@ export default function TeamCreationPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Create New Team</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('teamCreation.title')}</h1>
 
           {message && (
             <div className={`p-4 rounded-md mb-6 ${
@@ -60,7 +62,7 @@ export default function TeamCreationPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="team-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Team Name
+                {t('teamCreation.nameLabel')}
               </label>
               <input
                 type="text"
@@ -70,13 +72,13 @@ export default function TeamCreationPage() {
                 onChange={(e) => setTeamName(e.target.value)}
                 required
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 dark:bg-gray-700 dark:text-white"
-                placeholder="My Awesome Team"
+                placeholder={t('teamCreation.namePlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="plan" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Plan
+                {t('teamCreation.planLabel')}
               </label>
               <select
                 id="plan"
@@ -85,9 +87,9 @@ export default function TeamCreationPage() {
                 onChange={(e) => setPlan(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 dark:bg-gray-700 dark:text-white"
               >
-                <option value="free">Free (5 members)</option>
-                <option value="team">Team (20 members)</option>
-                <option value="enterprise">Enterprise (100 members)</option>
+                <option value="free">{t('teamCreation.planFree')}</option>
+                <option value="team">{t('teamCreation.planTeam')}</option>
+                <option value="enterprise">{t('teamCreation.planEnterprise')}</option>
               </select>
             </div>
 
@@ -96,7 +98,7 @@ export default function TeamCreationPage() {
               disabled={loading || !teamName}
               className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
-              {loading ? 'Creating...' : 'Create Team'}
+              {loading ? t('teamCreation.creating') : t('teamCreation.createBtn')}
             </button>
           </form>
         </div>

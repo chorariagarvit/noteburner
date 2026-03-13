@@ -9,6 +9,7 @@ import AchievementUnlocked from '../AchievementUnlocked';
 import RewardUnlocked from '../RewardUnlocked';
 import AuditLogViewer from '../AuditLogViewer';
 import TOTPSetup from '../TOTPSetup';
+import { useI18n } from '../../contexts/I18nContext';
 
 function CreateMessageSuccess({
     shareUrl,
@@ -26,6 +27,7 @@ function CreateMessageSuccess({
     newRewards = [],
     setNewRewards = () => { }
 }) {
+    const { t } = useI18n();
     const [copied, setCopied] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
 
@@ -44,12 +46,12 @@ function CreateMessageSuccess({
                             {groupData ? <Users className="w-8 h-8" /> : <Check className="w-8 h-8" />}
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                            {groupData ? 'Group Message Created!' : 'Message Created Successfully!'}
+                            {groupData ? t('createSuccess.groupTitle') : t('createSuccess.title')}
                         </h2>
                         <p className="text-gray-600 dark:text-gray-300">
                             {groupData
-                                ? `${groupData.recipientCount} unique links generated for your recipients`
-                                : 'Your encrypted message is ready to share'
+                                ? t('createSuccess.groupSubtitle').replace('{count}', groupData.recipientCount)
+                                : t('createSuccess.subtitle')
                             }
                         </p>
                     </div>
@@ -62,7 +64,7 @@ function CreateMessageSuccess({
                         <div className="space-y-6">
                             <div>
                                 <label htmlFor="share-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Share this URL
+                                    {t('createSuccess.shareLabel')}
                                 </label>
                                 <div className="flex gap-2">
                                     <input
@@ -77,7 +79,7 @@ function CreateMessageSuccess({
                                         className="btn-secondary flex items-center gap-2 whitespace-nowrap"
                                     >
                                         {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                        {copied ? 'Copied!' : 'Copy'}
+                                    {copied ? t('common.copied') : t('common.copy')}
                                     </button>
                                 </div>
                             </div>
@@ -85,24 +87,24 @@ function CreateMessageSuccess({
                             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                                 <h3 className="font-semibold text-amber-900 dark:text-amber-400 mb-2 flex items-center gap-2">
                                     <Flame className="w-5 h-5" />
-                                    Important Security Notice
+                                    {t('createSuccess.securityTitle')}
                                 </h3>
                                 <ul className="text-sm text-amber-800 dark:text-amber-300 space-y-1">
-                                    <li>• Share the password separately (not in the same channel as the link)</li>
-                                    <li>• The message will be deleted after the first successful decryption</li>
-                                    <li>• There are no backups - once it's gone, it's gone forever</li>
-                                    {filesCount > 0 && <li>• {filesCount} encrypted file(s) attached</li>}
-                                    {expiresIn && <li>• Message expires in {expiresIn} hour(s)</li>}
+                                    <li>• {t('createSuccess.tip1')}</li>
+                                    <li>• {t('createSuccess.tip2')}</li>
+                                    <li>• {t('createSuccess.tip3')}</li>
+                                    {filesCount > 0 && <li>• {t('createSuccess.filesAttached').replace('{count}', filesCount)}</li>}
+                                    {expiresIn && <li>• {t('createSuccess.expiresIn').replace('{n}', expiresIn)}</li>}
                                 </ul>
                             </div>
 
                             <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
-                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Password</h3>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{t('createSuccess.passwordLabel')}</h3>
                                 <div className="font-mono text-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600">
                                     {password}
                                 </div>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                    Make sure the recipient has this password before sharing the link
+                                    {t('createSuccess.passwordHint')}
                                 </p>
                             </div>
 
@@ -110,7 +112,7 @@ function CreateMessageSuccess({
                             {totpData && <TOTPSetup totpData={totpData} />}
 
                             <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-6">
-                                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">Share via QR Code</h3>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-center">{t('createSuccess.qrTitle')}</h3>
                                 <QRCodeDisplay url={shareUrl} size={256} />
                             </div>
 
@@ -125,14 +127,14 @@ function CreateMessageSuccess({
                                     className="btn-secondary flex-1 flex items-center justify-center gap-2"
                                 >
                                     <Flame className="w-4 h-4" />
-                                    Create New Message
+                                    {t('createSuccess.createNew')}
                                 </button>
                                 <button
                                     onClick={onCreateSimilar}
                                     className="btn-primary flex-1 flex items-center justify-center gap-2"
                                 >
                                     <Copy className="w-4 h-4" />
-                                    Create Similar Message
+                                    {t('createSuccess.createSimilar')}
                                 </button>
                             </div>
 
@@ -141,11 +143,11 @@ function CreateMessageSuccess({
                                 className="btn-secondary w-full flex items-center justify-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
                             >
                                 <UserPlus className="w-4 h-4" />
-                                Invite Friends to NoteBurner
+                                {t('createSuccess.inviteFriends')}
                             </button>
 
                             <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2">
-                                💡 &quot;Similar&quot; keeps your settings but clears the message
+                                💡 {t('createSuccess.similarHint')}
                             </p>
                         </div>
                     )}

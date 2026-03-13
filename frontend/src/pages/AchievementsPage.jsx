@@ -4,8 +4,10 @@ import { Trophy, TrendingUp } from 'lucide-react';
 import AchievementBadge from '../components/AchievementBadge';
 import StreakCounter from '../components/StreakCounter';
 import { getUserStats, getAchievementProgress } from '../utils/achievements';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function AchievementsPage() {
+  const { t } = useI18n();
   const stats = getUserStats();
   const progress = getAchievementProgress();
   const unlocked = progress.filter(p => p.unlocked);
@@ -24,10 +26,10 @@ export default function AchievementsPage() {
             <Trophy className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Your Achievements
+            {t('achievements.title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Unlock badges as you use NoteBurner
+            {t('achievements.subtitle')}
           </p>
           <div className="mt-4">
             <StreakCounter />
@@ -41,7 +43,7 @@ export default function AchievementsPage() {
               {stats.messagesCreated}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Messages Created
+              {t('achievements.statMessages')}
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center">
@@ -49,7 +51,7 @@ export default function AchievementsPage() {
               {unlocked.length}/{progress.length}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Achievements
+              {t('achievements.statAchievements')}
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center">
@@ -57,7 +59,7 @@ export default function AchievementsPage() {
               {stats.currentStreak}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Day Streak
+              {t('achievements.statStreak')}
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center">
@@ -65,7 +67,7 @@ export default function AchievementsPage() {
               {stats.filesUploaded}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Files Encrypted
+              {t('achievements.statFiles')}
             </div>
           </div>
         </div>
@@ -75,7 +77,7 @@ export default function AchievementsPage() {
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <Trophy className="w-6 h-6 text-yellow-500" />
-              Unlocked ({unlocked.length})
+              {t('achievements.unlockedTitle').replace('{count}', unlocked.length)}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {unlocked.map(({ achievement }) => (
@@ -94,7 +96,7 @@ export default function AchievementsPage() {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               <TrendingUp className="w-6 h-6 text-gray-500" />
-              In Progress ({locked.length})
+              {t('achievements.inProgressTitle').replace('{count}', locked.length)}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {locked.map((item) => (
@@ -115,7 +117,7 @@ export default function AchievementsPage() {
             to="/create"
             className="btn-primary inline-flex items-center gap-2"
           >
-            Create Message to Earn More
+            {t('achievements.createCta')}
           </Link>
         </div>
       </div>

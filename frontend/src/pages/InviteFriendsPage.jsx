@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Users, Mail, Copy, Check, Share2, Send, Twitter, Linkedin, MessageCircle, Facebook } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function InviteFriendsPage() {
+  const { t } = useI18n();
   const [emails, setEmails] = useState('');
   const [personalMessage, setPersonalMessage] = useState('');
   const [copied, setCopied] = useState(false);
@@ -73,10 +75,10 @@ Try it out: ${inviteUrl}`;
         <div className="text-center mb-8">
           <Users className="w-16 h-16 text-primary-600 dark:text-primary-400 mx-auto mb-4" />
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Invite Friends
+            {t('invite.title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Share NoteBurner with friends and help them keep their messages secure and private!
+            {t('invite.subtitle')}
           </p>
         </div>
 
@@ -85,17 +87,17 @@ Try it out: ${inviteUrl}`;
           {/* Personal Message */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Add a Personal Message (Optional)
+              {t('invite.personalMessageLabel')}
             </label>
             <textarea
               value={personalMessage}
               onChange={(e) => setPersonalMessage(e.target.value)}
-              placeholder="Add your own message here..."
+              placeholder={t('invite.personalMessagePlaceholder')}
               rows="3"
               className="input-field resize-none"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              This will be added before the default invitation message
+              {t('invite.personalMessageHint')}
             </p>
           </div>
 
@@ -103,17 +105,17 @@ Try it out: ${inviteUrl}`;
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Mail className="w-4 h-4 inline mr-1" />
-              Email Addresses (Optional)
+              {t('invite.emailLabel')}
             </label>
             <input
               type="text"
               value={emails}
               onChange={(e) => setEmails(e.target.value)}
-              placeholder="friend1@example.com, friend2@example.com"
+              placeholder={t('invite.emailPlaceholder')}
               className="input-field"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Separate multiple emails with commas
+              {t('invite.emailHint')}
             </p>
           </div>
 
@@ -124,7 +126,7 @@ Try it out: ${inviteUrl}`;
               className="btn-primary flex items-center justify-center gap-2"
             >
               {sent ? <Check className="w-5 h-5" /> : <Send className="w-5 h-5" />}
-              {sent ? 'Email Opened!' : 'Send via Email'}
+              {sent ? t('invite.sendEmailSent') : t('invite.sendEmailBtn')}
             </button>
 
             <button
@@ -132,7 +134,7 @@ Try it out: ${inviteUrl}`;
               className="btn-secondary flex items-center justify-center gap-2"
             >
               <Share2 className="w-5 h-5" />
-              Share
+              {t('invite.shareBtn')}
             </button>
 
             <button
@@ -140,14 +142,14 @@ Try it out: ${inviteUrl}`;
               className="btn-secondary flex items-center justify-center gap-2"
             >
               {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-              {copied ? 'Copied!' : 'Copy Message'}
+              {copied ? t('invite.copiedBtn') : t('invite.copyBtn')}
             </button>
           </div>
 
           {/* Preview */}
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Preview
+              {t('invite.previewTitle')}
             </h3>
             <div className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
               {personalMessage && (
@@ -166,7 +168,7 @@ Try it out: ${inviteUrl}`;
         {/* Quick Share Card */}
         <div className="card mt-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Quick Share Link
+            {t('invite.quickShareTitle')}
           </h2>
           
           <div className="space-y-4">
@@ -198,7 +200,7 @@ Try it out: ${inviteUrl}`;
                 className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
                 <Twitter className="w-4 h-4" />
-                Twitter
+                {t('invite.twitter')}
               </a>
               
               <a
@@ -208,7 +210,7 @@ Try it out: ${inviteUrl}`;
                 className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
                 <Linkedin className="w-4 h-4" />
-                LinkedIn
+                {t('invite.linkedin')}
               </a>
               
               <a
@@ -218,7 +220,7 @@ Try it out: ${inviteUrl}`;
                 className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
                 <MessageCircle className="w-4 h-4" />
-                WhatsApp
+                {t('invite.whatsapp')}
               </a>
               
               <a
@@ -228,7 +230,7 @@ Try it out: ${inviteUrl}`;
                 className="btn-secondary flex items-center justify-center gap-2 py-2"
               >
                 <Facebook className="w-4 h-4" />
-                Facebook
+                {t('invite.facebook')}
               </a>
             </div>
           </div>
@@ -237,7 +239,7 @@ Try it out: ${inviteUrl}`;
         {/* Why Invite Section */}
         <div className="card mt-6 bg-gradient-to-br from-primary-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 border-2 border-primary-200 dark:border-primary-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-            Why Invite Friends?
+            {t('invite.whyTitle')}
           </h2>
           
           <div className="grid md:grid-cols-2 gap-4">
@@ -245,10 +247,10 @@ Try it out: ${inviteUrl}`;
               <span className="text-2xl">🔒</span>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                  Help Protect Privacy
+                  {t('invite.why1Title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  The more people use encryption, the safer everyone's communications become
+                  {t('invite.why1Desc')}
                 </p>
               </div>
             </div>
@@ -257,10 +259,10 @@ Try it out: ${inviteUrl}`;
               <span className="text-2xl">🌐</span>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                  Spread the Word
+                  {t('invite.why2Title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Help friends discover a better way to share sensitive information
+                  {t('invite.why2Desc')}
                 </p>
               </div>
             </div>
@@ -269,10 +271,10 @@ Try it out: ${inviteUrl}`;
               <span className="text-2xl">🎯</span>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                  Simple & Free
+                  {t('invite.why3Title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  No accounts, no subscriptions - just secure messaging
+                  {t('invite.why3Desc')}
                 </p>
               </div>
             </div>
@@ -281,10 +283,10 @@ Try it out: ${inviteUrl}`;
               <span className="text-2xl">🚀</span>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                  Open Source
+                  {t('invite.why4Title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Transparent, auditable security anyone can trust
+                  {t('invite.why4Desc')}
                 </p>
               </div>
             </div>

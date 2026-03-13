@@ -4,8 +4,10 @@ import PropTypes from 'prop-types';
 import { Flame, Clock, Eye, EyeOff, Upload, X, Link2, CheckCircle, XCircle, Loader, Users, FileText } from 'lucide-react';
 import PasswordStrengthMeter from '../PasswordStrengthMeter';
 import SelfDestructOptions from '../SelfDestructOptions';
+import { useI18n } from '../../contexts/I18nContext';
 
 function CreateMessageForm(props) {
+    const { t } = useI18n();
     const {
         handleSubmit,
         loading,
@@ -45,10 +47,10 @@ function CreateMessageForm(props) {
             <div className="text-center mb-8">
                 <Flame className="w-12 h-12 text-red-600 dark:text-red-500 mx-auto mb-4" />
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    Create Encrypted Message
+                    {t('create.heading')}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-300">
-                    Write your message, set a password, and get a one-time shareable link
+                    {t('create.subheading')}
                 </p>
             </div>
 
@@ -56,7 +58,7 @@ function CreateMessageForm(props) {
                 <div>
                     <div className="flex items-center justify-between mb-2">
                         <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Message *
+                            {t('create.messageLabel')} *
                         </label>
                         <button
                             type="button"
@@ -64,7 +66,7 @@ function CreateMessageForm(props) {
                             className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1 transition-colors"
                         >
                             <FileText className="w-4 h-4" />
-                            Use Template
+                            {t('create.useTemplate')}
                         </button>
                     </div>
                     <textarea
@@ -77,13 +79,13 @@ function CreateMessageForm(props) {
                         required
                     />
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {message.length} characters
+                        {message.length} {t('create.messageLabel').toLowerCase()}
                     </p>
                 </div>
 
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Password * (min 8 characters)
+                        {t('create.passwordMin')}
                     </label>
                     <div className="flex gap-2">
                         <div className="relative flex-1">
@@ -110,7 +112,7 @@ function CreateMessageForm(props) {
                             onClick={handleGeneratePassword}
                             className="btn-secondary whitespace-nowrap"
                         >
-                            Generate
+                            {t('create.generateButton')}
                         </button>
                     </div>
                     <PasswordStrengthMeter password={password} />
@@ -129,7 +131,7 @@ function CreateMessageForm(props) {
                         <div>
                             <label htmlFor="custom-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 <Link2 className="w-4 h-4 inline mr-1" />
-                                Custom URL (optional)
+                                {t('create.customUrlLabel')}
                             </label>
                             <div className="relative">
                                 <div className="flex items-center gap-2 mb-2">
@@ -156,7 +158,7 @@ function CreateMessageForm(props) {
                                 )}
                                 {!customSlug && (
                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        3-20 chars: letters, numbers, hyphens, underscores
+                                        {t('create.customUrlHint')}
                                     </p>
                                 )}
                             </div>
@@ -175,7 +177,7 @@ function CreateMessageForm(props) {
                     <label htmlFor="mystery-mode" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 cursor-pointer">
                         <span className="text-2xl">🎭</span>
                         {' '}
-                        Mystery Message Mode (completely anonymous)
+                        {t('create.mysteryToggle')}
                     </label>
                 </div>
 
@@ -197,7 +199,7 @@ function CreateMessageForm(props) {
                         />
                         <label htmlFor="group-message" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 cursor-pointer">
                             <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            Group Message (create multiple unique links)
+                            {t('create.groupToggle')}
                         </label>
                     </div>
 
@@ -205,7 +207,7 @@ function CreateMessageForm(props) {
                         <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                             <div>
                                 <label htmlFor="recipient-count" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Number of Recipients (1-100)
+                                    {t('create.recipientsLabel')}
                                 </label>
                                 <input
                                     id="recipient-count"
@@ -217,7 +219,7 @@ function CreateMessageForm(props) {
                                     className="input-field"
                                 />
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    Each recipient will get a unique, one-time-use link
+                                    {t('create.recipientsHint')}
                                 </p>
                             </div>
 
@@ -231,19 +233,17 @@ function CreateMessageForm(props) {
                                 />
                                 <label htmlFor="burn-on-first-view" className="flex-1">
                                     <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        🔥 Burn all copies after first view
+                                        {t('create.burnAllToggle')}
                                     </div>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        When enabled, ALL recipient links will be deleted as soon as the first person views the message.
-                                        This ensures maximum security but only one recipient can see it.
+                                        {t('create.burnAllDesc')}
                                     </p>
                                 </label>
                             </div>
 
                             <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                                 <p className="text-sm text-blue-800 dark:text-blue-300">
-                                    <strong>Note:</strong> Custom URLs and file attachments are not available for group messages.
-                                    Each recipient will use the same password to decrypt.
+                                    {t('create.groupNote')}
                                 </p>
                             </div>
                         </div>
@@ -253,7 +253,7 @@ function CreateMessageForm(props) {
                 {!isGroupMessage && (
                     <div>
                         <label htmlFor="attachments-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Attachments (optional, max 2GB per file)
+                            {t('create.attachmentsLabel')}
                         </label>
                         <div className="space-y-2">
                             {files.map((file, index) => (
@@ -273,7 +273,7 @@ function CreateMessageForm(props) {
                             ))}
                             <label htmlFor="file-upload" className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
                                 <Upload className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                                <span className="text-gray-600 dark:text-gray-300">Choose files to encrypt</span>
+                                <span className="text-gray-600 dark:text-gray-300">{t('create.chooseFiles')}</span>
                                 <input
                                     id="file-upload"
                                     type="file"
@@ -297,17 +297,17 @@ function CreateMessageForm(props) {
                     disabled={loading}
                     className="btn-primary w-full text-lg"
                 >
-                    {loading ? (loadingMessage || 'Encrypting...') : 'Encrypt & Create Link'}
+                    {loading ? (loadingMessage || t('create.encrypting')) : t('create.submitButton')}
                 </button>
             </form>
 
             <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">How it works</h3>
+                <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">{t('create.howItWorksTitle')}</h3>
                 <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-                    <li>• Your message is encrypted in your browser with AES-256-GCM</li>
-                    <li>• Password never leaves your device</li>
-                    <li>• Share the link and password separately for maximum security</li>
-                    <li>• Message deletes permanently after first successful decryption</li>
+                    <li>• {t('create.howItWorks1')}</li>
+                    <li>• {t('create.howItWorks2')}</li>
+                    <li>• {t('create.howItWorks3')}</li>
+                    <li>• {t('create.howItWorks4')}</li>
                 </ul>
             </div>
         </div>

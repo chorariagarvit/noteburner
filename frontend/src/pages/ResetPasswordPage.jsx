@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
@@ -17,7 +19,7 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (!token) {
-      setError('Invalid reset link');
+      setError(t('auth.resetPassword.errorInvalid'));
     }
   }, [token]);
 
@@ -68,13 +70,13 @@ export default function ResetPasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
-              Password reset successfully!
+              {t('auth.resetPassword.successTitle')}
             </h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              You can now login with your new password.
+              {t('auth.resetPassword.successDesc')}
             </p>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
-              Redirecting to login...
+              {t('auth.resetPassword.redirecting')}
             </p>
           </div>
         </div>
@@ -87,10 +89,10 @@ export default function ResetPasswordPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
-            Set new password
+            {t('auth.resetPassword.title')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Enter your new password below
+            {t('auth.resetPassword.subtitle')}
           </p>
         </div>
 
@@ -106,7 +108,7 @@ export default function ResetPasswordPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                New password
+                {t('auth.resetPassword.newPasswordLabel')}
               </label>
               <input
                 id="newPassword"
@@ -131,7 +133,7 @@ export default function ResetPasswordPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Confirm new password
+                {t('auth.resetPassword.confirmPasswordLabel')}
               </label>
               <input
                 id="confirmPassword"
@@ -158,7 +160,7 @@ export default function ResetPasswordPage() {
               disabled={loading || !token || formData.newPassword !== formData.confirmPassword}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Resetting password...' : 'Reset password'}
+              {loading ? t('auth.resetPassword.resetting') : t('auth.resetPassword.submitButton')}
             </button>
           </div>
         </form>

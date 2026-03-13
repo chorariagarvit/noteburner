@@ -13,9 +13,11 @@ import StreakCounter from '../StreakCounter';
 import { useCustomSlug } from '../../hooks/useCustomSlug';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import PasswordStrengthMeter from '../PasswordStrengthMeter';
+import { useI18n } from '../../contexts/I18nContext';
 
 function HeroSection({ stats, statsLoading }) {
     const navigate = useNavigate();
+    const { t } = useI18n();
     const [message, setMessage] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -139,12 +141,11 @@ function HeroSection({ stats, statsLoading }) {
                         <div className="flex items-center gap-3 mb-6">
                             <Flame className="w-12 md:w-16 h-12 md:h-16 text-red-600 dark:text-red-500" />
                             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-                                Burn After Reading
+                                {t('home.hero.tagline')}
                             </h1>
                         </div>
                         <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 mb-6">
-                            Send encrypted messages and files that self-destruct after one read.
-                            No traces. No backups. Complete privacy.
+                            {t('home.hero.description')}
                         </p>
 
                         {/* Live Stats Counter */}
@@ -160,10 +161,10 @@ function HeroSection({ stats, statsLoading }) {
                                         if (stats) {
                                             return (
                                                 <>
-                                                    <AnimatedCounter value={stats.today?.messages_burned || 0} /> messages burned today
+                                                    <AnimatedCounter value={stats.today?.messages_burned || 0} /> {t('home.stats.burnedToday')}
                                                     {(stats.this_week?.messages_burned || 0) > 0 && (
                                                         <span className="text-xs text-primary-700 dark:text-primary-300 ml-2">
-                                                            · <AnimatedCounter value={stats.this_week.messages_burned} /> this week
+                                                            · <AnimatedCounter value={stats.this_week.messages_burned} /> {t('home.stats.burnedThisWeek')}
                                                         </span>
                                                     )}
                                                 </>
@@ -181,15 +182,15 @@ function HeroSection({ stats, statsLoading }) {
                             <div className="flex items-start gap-3">
                                 <Shield className="w-6 h-6 text-primary-600 dark:text-primary-500 mt-1 flex-shrink-0" />
                                 <div>
-                                    <h3 className="font-semibold text-gray-900 dark:text-white">Military-Grade Encryption</h3>
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm">AES-256-GCM with 300,000 PBKDF2 iterations</p>
+                                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('home.features.e2e.title')}</h3>
+                                    <p className="text-gray-600 dark:text-gray-300 text-sm">{t('home.features.e2e.desc')}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
                                 <Lock className="w-6 h-6 text-primary-600 dark:text-primary-500 mt-1 flex-shrink-0" />
                                 <div>
-                                    <h3 className="font-semibold text-gray-900 dark:text-white">One-Time Access</h3>
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm">Permanently deleted after first read</p>
+                                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('home.features.oneTime.title')}</h3>
+                                    <p className="text-gray-600 dark:text-gray-300 text-sm">{t('home.features.oneTime.desc')}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
@@ -205,7 +206,7 @@ function HeroSection({ stats, statsLoading }) {
                     {/* Right: Create Message Form */}
                     <div className="card">
                         <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6">
-                            Create Secure Message
+                            {t('home.hero.formTitle')}
                         </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
