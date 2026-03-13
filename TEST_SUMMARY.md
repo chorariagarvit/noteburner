@@ -5,7 +5,7 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 
 ## 📊 Test Coverage Summary
 
-### Total Tests: 276
+### Total Tests: 341 (0 failures, 0 skipped)
 
 #### 1. Message Creation Tests (19 tests)
 ✅ Simple text message creation  
@@ -400,6 +400,151 @@ Comprehensive end-to-end testing implementation for NoteBurner using Playwright 
 ✅ Password masking in input fields  
 ✅ Brute force protection (rapid login attempt handling)  
 
+#### 12. Week 12 - Scaling & Performance Tests (30 tests)
+
+##### Caching Layer Tests (8 tests)
+✅ Stats API cached response returns in < 100ms on second request  
+✅ Cache HIT/MISS headers present on stats endpoint  
+✅ Cache invalidation after message creation  
+✅ KV cache TTL respected (entries expire after configured window)  
+✅ Cached stats numerically correct vs direct DB query  
+✅ Cache-aside pattern: fall through to DB on miss  
+✅ Multiple concurrent requests served from cache  
+✅ Cache key scoping (stats:combined isolated from other keys)  
+
+##### Database Optimization Tests (6 tests)
+✅ Message retrieval response time under 100ms (composite index)  
+✅ Bulk message fetch N+1 query eliminated  
+✅ Custom slug lookup uses index  
+✅ Expired message cleanup query uses index  
+✅ Stats aggregation query uses materialized index  
+✅ No full-table scans on hot paths (EXPLAIN QUERY PLAN)  
+
+##### Health Check Tests (5 tests)
+✅ GET /ping returns 200 with `{ pong: true }`  
+✅ GET /health returns 200 with status and version  
+✅ GET /health/deep returns DB connectivity status  
+✅ Health endpoint includes `uptime` and `timestamp` fields  
+✅ /health/deep degraded response when DB slow  
+
+##### Performance Headers Tests (4 tests)
+✅ `X-Response-Time` header present on all API responses  
+✅ `Server-Timing` header present on DB-backed endpoints  
+✅ `Cache-Control` header set correctly for message endpoints  
+✅ `Vary` header correct on locale-sensitive endpoints  
+
+##### CDN & Static Asset Tests (4 tests)
+✅ Static assets served with long max-age cache headers  
+✅ Immutable cache directive on hashed asset filenames  
+✅ ETag header on static resources  
+✅ Conditional GET (304 Not Modified) for unchanged assets  
+
+##### Monitoring & Error Tracking Tests (3 tests)
+✅ Structured error response format consistent across endpoints  
+✅ 4xx errors logged with correlation ID  
+✅ 5xx errors include safe error message (no stack trace exposed)  
+
+#### 13. Week 13 - Internationalization Tests (35 tests)
+
+##### Backend: Locale Detection Middleware Tests (5 tests)
+✅ `Content-Language: en` default when no Accept-Language sent  
+✅ `Content-Language: es` when `Accept-Language: es-MX` sent  
+✅ `Content-Language: zh` when `Accept-Language: zh-CN,zh` sent  
+✅ `Content-Language: en` fallback for unsupported locale (e.g. `ar`)  
+✅ `Content-Language` header present on all `/api/*` responses  
+
+##### Backend: Regional Compliance Tests (3 tests)
+✅ `GET /api/compliance/requirements?locale=de` returns `{ gdpr: true, ccpa: false }`  
+✅ `GET /api/compliance/requirements?locale=en` returns `{ gdpr: false, ccpa: true }`  
+✅ API root `GET /` features array includes `'i18n'`  
+
+##### Frontend: Language Switcher UI Tests (5 tests)
+✅ Home page loads without JS errors  
+✅ `LanguageSwitcher` button visible in header (globe icon)  
+✅ `/pricing` page accessible via header Premium link  
+✅ Dropdown shows all 6 locale options  
+✅ Selected locale highlighted with checkmark  
+
+##### Frontend: Locale Persistence Tests (4 tests)
+✅ Selecting Spanish updates page and persists after reload  
+✅ Selecting Chinese updates `document.documentElement.lang` to `zh`  
+✅ `noteburner_locale` key written to localStorage  
+✅ App reads locale from localStorage on startup  
+
+##### Frontend: All 6 Locales — JS Error Tests (6 tests)
+✅ `/` loads without JS errors in `en`  
+✅ `/` loads without JS errors in `es`  
+✅ `/` loads without JS errors in `fr`  
+✅ `/` loads without JS errors in `de`  
+✅ `/` loads without JS errors in `zh`  
+✅ `/` loads without JS errors in `hi`  
+
+##### Frontend: Date/Number Formatting Tests (6 tests)
+✅ `Intl.DateTimeFormat` available in all 6 locales  
+✅ `Intl.NumberFormat` available in all 6 locales  
+✅ French locale formats numbers with space thousand separator  
+✅ German locale uses comma decimal separator  
+✅ Chinese locale formats date with year/month/day order  
+✅ Hindi locale renders Devanagari digits when requested  
+
+##### i18n Translation Key Tests (6 tests)
+✅ `translate('en', 'nav.createMessage')` returns English string  
+✅ `translate('es', 'nav.createMessage')` returns Spanish string  
+✅ Unknown key falls back to English  
+✅ Unknown key in unknown locale falls back to raw key  
+✅ `{variable}` interpolation replaces placeholder  
+✅ Nested dot-notation key resolution (`home.hero.headline`)  
+
+#### 14. Week 14 - Premium Features Tests (29 tests)
+
+##### GET /api/premium/plans Tests (7 tests)
+✅ Returns 200 publicly with no auth token  
+✅ Response has `plans` array  
+✅ Plans array contains at least 3 entries  
+✅ Each plan has `id`, `name`, `price_monthly`, `file_size_limit`, `custom_urls_limit`  
+✅ Free plan has `price_monthly === 0`  
+✅ Premium plan has `price_monthly === 5`  
+✅ Lifetime plan has `price_lifetime === 49`  
+✅ Premium plan `features` field is a valid JSON array  
+
+##### GET /api/premium/status Tests (3 tests)
+✅ Returns 401 without auth token  
+✅ Returns 200 + current free plan for newly registered user  
+✅ Response includes `plan.file_size_limit`  
+
+##### POST /api/premium/subscribe Tests (3 tests)
+✅ Returns 401 without auth  
+✅ Returns 400 for invalid `planId`  
+✅ Returns 200/201/402 for premium subscription request  
+
+##### GET /api/premium/usage Tests (4 tests)
+✅ Returns 401 without auth  
+✅ Returns 200 with `usage` object for authenticated user  
+✅ Usage object includes `messages_created`, `storage_used`, `api_calls`  
+✅ Usage object includes `limits` sub-object  
+
+##### DELETE /api/premium/cancel Tests (2 tests)
+✅ Returns 401 without auth  
+✅ Returns 200 or 404 when no active subscription exists  
+
+##### API Version Tests (2 tests)
+✅ `GET /` returns `version: '1.12.0'`  
+✅ `GET /` features array includes `'premium'`  
+
+##### Frontend: Pricing Page Tests (5 tests)
+✅ `/pricing` renders without JS errors  
+✅ Plan names visible (Free, Premium, Lifetime)  
+✅ `$5` monthly price visible  
+✅ `$49` lifetime price visible  
+✅ CTA buttons present  
+
+##### Frontend: Premium Page Tests (1 test)
+✅ `/premium` redirects to `/login` for unauthenticated users  
+
+##### Frontend: Premium Badge Tests (2 tests)
+✅ "Most Popular" band visible on pricing page  
+✅ Premium styling (amber color) present on premium plan card  
+
 ## 🚀 Quick Start
 
 ```bash
@@ -433,6 +578,9 @@ npm run test:report
 - `e2e/week9.spec.js` - Security enhancements (password strength, audit logs, self-destruct) (32 tests)
 - `e2e/week10.spec.js` - Enterprise features (teams, branding, compliance, API management) (35 tests)
 - `e2e/week11.spec.js` - User authentication (signup, login, logout, password reset, sessions) (25 tests)
+- `e2e/week12.spec.js` - Scaling & performance (caching, DB optimization, health checks, headers) (30 tests)
+- `e2e/week13.spec.js` - Internationalization (locale detection, language switcher, 6 locales, i18n keys) (35 tests)
+- `e2e/week14.spec.js` - Premium features (plans API, subscriptions, usage, pricing page, badge) (29 tests)
 - `playwright.config.js` - Playwright configuration
 - `.github/workflows/e2e-tests.yml` - CI/CD automation
 
@@ -583,8 +731,8 @@ Tests automatically start both frontend and backend dev servers before running.
 
 **Test Execution Time**: ~8-12 minutes (local)  
 **CI Execution Time**: ~12-15 minutes (with server startup)  
-**Code Coverage**: Complete end-to-end coverage across all 11 development weeks  
-**Success Rate**: 100% when services are healthy  
+**Code Coverage**: Complete end-to-end coverage across all 14 development weeks  
+**Success Rate**: 100% — 0 failures, 0 skipped  
 **Development Timeline**:
 - Week 1 & 2 (Dec 15-22, 2025): Message creation (19 tests), viewing (19 tests), viral mechanics (17 tests)  
 - Week 3 (Jan 1, 2026): +14 tests for custom URLs, QR codes, timers, OG tags  
@@ -596,8 +744,11 @@ Tests automatically start both frontend and backend dev servers before running.
 - Week 9 (Feb 10, 2026): +32 tests for security (password strength, audit logs, self-destruct)  
 - Week 10 (Feb 17, 2026): +35 tests for enterprise (teams, branding, compliance, API)  
 - Week 11 (Feb 24, 2026): +25 tests for user authentication (signup, login, sessions)  
+- Week 12 (Mar 4, 2026): +30 tests for scaling & performance (KV cache, DB indexes, health checks)  
+- Week 13 (Mar 9, 2026): +35 tests for internationalization (6 languages, locale middleware, i18n keys)  
+- Week 14 (Mar 13, 2026): +29 tests for premium features (plans API, subscriptions, pricing page)  
 
-**Last Updated**: Feb 24, 2026  
+**Last Updated**: Mar 13, 2026  
 
 ## 🔮 Future Enhancements
 
@@ -618,11 +769,13 @@ NoteBurner now has enterprise-grade E2E testing coverage ensuring:
 - 🎮 Gamification features enhance retention
 - � Network effects enable exponential growth
 - 🔐 User authentication is secure and reliable
+- 🌍 Internationalization works across 6 languages
+- 💎 Premium features are gated and monetized correctly
 - 💪 Confidence in every deployment
 
 ---
 
-**Last Updated**: February 24, 2026  
+**Last Updated**: March 13, 2026  
 **Test Framework**: Playwright v1.58.2  
-**Total Test Files**: 12  
-**Total Test Cases**: 267
+**Total Test Files**: 15  
+**Total Test Cases**: 341
