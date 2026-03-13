@@ -1,4 +1,4 @@
-# NoteBurner Setup Guide
+ # NoteBurner Setup Guide
 
 ## Prerequisites
 
@@ -47,6 +47,53 @@ wrangler d1 migrations apply noteburner-db --remote
 ```bash
 wrangler r2 bucket create noteburner-media
 ```
+
+#### Create KV Namespace (Caching)
+
+```bash
+wrangler kv namespace create CACHE
+wrangler kv namespace create CACHE --preview
+```
+
+Copy the `id` and `preview_id` values from the output and update `backend/wrangler.toml`:
+
+```toml
+[[ kv_namespaces ]]
+binding = "CACHE"
+id = "YOUR_KV_ID_HERE"
+preview_id = "YOUR_KV_PREVIEW_ID_HERE"
+```
+
+The KV namespace is used for caching hot messages and stats (cache-aside pattern with configurable TTL). Without it the backend will log a binding error and fall back to direct DB queries on every request.
+
+#### Configure Email (Cloudflare Email Routing)
+
+Email is used for account verification, password resets, and team invitations.
+
+1. **Enable Cloudflare Email Routing** for your domain in the Cloudflare dashboard → *Email* → *Email Routing* → Enable.
+
+2. **Add a destination address** (the inbox where you want to receive forwarded mail) and verify it.
+
+3. **Add `send_email` binding** in `backend/wrangler.toml` (already present — just ensure your domain is active):
+
+```toml
+[[ send_email ]]
+name = "EMAIL_SENDER"
+```
+
+4. **Set the sender address** in `backend/wrangler.toml` `[vars]` section:
+
+```toml
+EMAIL_FROM = "hello@yourdomain.com"
+```
+
+Emails sent:
+- **Verification** — on signup, token valid 24 hours
+- **Password reset** — token valid 1 hour
+- **Welcome** — after email verification
+- **Team invitation** — when a team member is added
+
+> **Local dev**: `EMAIL_SENDER` is not available in the local Wrangler dev server. The `sendEmail()` utility detects this and logs `[DEV] Would send email to ...` instead of throwing — auth flows still work, the email step is simply skipped.
 
 #### Login to Cloudflare
 
@@ -132,6 +179,7 @@ Or manually deploy to Cloudflare Pages:
 - `MAX_FILE_SIZE`: Maximum file size in bytes (default: 2GB, uses chunked uploads for files >100MB)
 - `RATE_LIMIT_REQUESTS`: Max requests per window (default: 10)
 - `RATE_LIMIT_WINDOW`: Rate limit window in seconds (default: 60)
+- `EMAIL_FROM`: Sender address for transactional emails (default: `hello@noteburner.work`)
 
 ### Frontend (.env)
 
@@ -208,6 +256,8 @@ Verify R2 bucket is created and bound correctly in `wrangler.toml`.
 
 - [ ] D1 database created and migrations applied
 - [ ] R2 bucket created
+- [ ] KV namespace created and bound (`CACHE`)
+- [ ] Cloudflare Email Routing enabled and `EMAIL_FROM` configured
 - [ ] Backend deployed to Workers
 - [ ] Frontend deployed to Pages
 - [ ] Environment variables configured

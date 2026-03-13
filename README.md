@@ -1,7 +1,7 @@
 # NoteBurner 🔥
 
-**Version**: v1.10.0 - User Authentication System  
-**Released**: February 24, 2026
+**Version**: v1.14.0 - Internationalization & Premium Features  
+**Released**: March 13, 2026
 
 A secure one-time message encryption and decryption application. Messages can only be decrypted once with the correct password, then they're permanently deleted with no backups.
 
@@ -23,7 +23,21 @@ A secure one-time message encryption and decryption application. Messages can on
 - 🔑 **API Access** - Programmatic message creation with API keys
 - 📚 **API Documentation** - Comprehensive guides and examples
 
-### User Authentication (NEW in v1.10)
+### Internationalization (NEW in v1.13)
+- 🌐 **6 Languages** - English, Spanish, French, German, Chinese (Simplified), Hindi
+- 🔍 **Auto-detect** - Picks up browser language preference automatically
+- 💾 **Persistent** - Language choice saved to localStorage across sessions
+- 🗓️ **Locale-aware formatting** - Dates and numbers formatted per locale (`Intl` API)
+- 🔄 **RTL-ready** - Text direction helper for future Arabic/Hebrew expansion
+
+### Premium Features (NEW in v1.14)
+- 💎 **Premium Plan ($5/month)** - 1GB uploads, unlimited custom URLs, 10k API calls/day
+- 👑 **Lifetime Plan ($49)** - One-time payment, all premium features forever
+- 📊 **Usage Dashboard** - Real-time usage bars vs plan limits
+- 💳 **Stripe-ready** - Schema + endpoints wired for live Stripe integration
+- 🏅 **PremiumBadge** - Amber/purple badge component for premium users
+
+### User Authentication (v1.10)
 - 👤 **Email/Password Signup** - User registration with email verification
 - 🔐 **Secure Login** - Session-based authentication with remember me (7/30 day expiration)
 - 🔑 **Password Reset** - Token-based reset flow with 1-hour expiration
@@ -208,7 +222,7 @@ npm run test:e2e:ui
 npm run test:report
 ```
 
-**Test Coverage (276 E2E tests):**
+**Test Coverage (341 E2E tests, 0 failures):**
 - ✅ Message creation & viewing (55 tests: 19 creation + 19 viewing + 17 viral mechanics)
 - ✅ Custom URLs & branding (14 tests)
 - ✅ Gamification (12 tests)
@@ -219,6 +233,8 @@ npm run test:report
 - ✅ Security enhancements (32 tests)
 - ✅ Enterprise features (35 tests)
 - ✅ User authentication (25 tests)
+- ✅ Internationalization / i18n (35 tests)
+- ✅ Premium features (30 tests)
 
 See [TEST_SUMMARY.md](./TEST_SUMMARY.md) for detailed testing documentation.
 

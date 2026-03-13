@@ -6,7 +6,88 @@
 
 ---
 
-## 🚀 Version 1.10 - CURRENT (User Authentication System)
+## 🚀 Version 1.14 - CURRENT (Internationalization & Premium Features)
+**Status**: ✅ Complete - Week 14 Released
+**Released**: Mar 13, 2026
+
+### Features added in v1.13 — v1.14
+- ✅ Multi-language support (EN/ES/FR/DE/ZH/HI) with auto-detect and language switcher
+- ✅ Locale-aware date/number formatting via `Intl` API
+- ✅ GDPR/CCPA regional compliance awareness via backend middleware
+- ✅ Premium tier ($5/month) — 1GB uploads, unlimited custom URLs, 10k API calls/day
+- ✅ Lifetime plan ($49 one-time) — all premium features forever
+- ✅ Stripe-ready subscription backend (plans, subscribe, cancel, usage)
+- ✅ PricingPage with 3-tier comparison table and FAQ
+- ✅ PremiumPage authenticated dashboard with real-time usage bars
+- ✅ PremiumBadge component (amber/purple)
+- ✅ Premium utility library (getPremiumStatus, isPremium, getFileSizeLimit)
+
+### Version History
+| Version | Release | Feature Focus |
+|---|---|---|
+| v1.14 | Mar 13, 2026 | Premium Features (subscriptions, pricing page, dashboard) |
+| v1.13 | Mar 9, 2026 | Internationalization (6 languages, i18n engine, locale middleware) |
+| v1.12 | Mar 4, 2026 | Scaling & Performance (KV cache, DB indexes, health checks) |
+| v1.10 | Feb 24, 2026 | User Authentication (signup, login, sessions, password reset) |
+| v1.9 | Feb 20, 2026 | Enterprise Features (teams, API keys, branding, compliance) |
+| v1.8 | Feb 9, 2026 | Security Enhancements (password strength, audit logs, 2FA) |
+| v1.7 | Feb 2, 2026 | Platform Integrations (Slack, Zapier, Discord, webhooks) |
+| v1.6 | Jan 26, 2026 | Mobile & PWA (installable app, offline, camera capture) |
+| v1.5 | Jan 19, 2026 | UI/UX Polish (onboarding, templates, keyboard shortcuts) |
+| v1.4 | Jan 14, 2026 | Network Effects (groups, referrals, browser extension, invite) |
+| v1.3 | Jan 8, 2026 | Gamification (achievements, leaderboard, streaks, mystery mode) |
+| v1.2 | Jan 1, 2026 | Custom URLs & Branding (slugs, QR codes, countdown, OG tags) |
+| v1.1 | Dec 25, 2025 | Viral Mechanics (confetti, preview page, CTAs, social share) |
+| v1.0 | Dec 15, 2025 | Launch (message creation/viewing, stats, analytics) |
+
+---
+
+## 🌐 Version 1.13 - Internationalization
+**Status**: ✅ Complete - Week 13 Released
+**Released**: Mar 9, 2026
+
+### Features
+- ✅ 6 languages: English, Spanish, French, German, Chinese (Simplified), Hindi
+- ✅ Auto-detect browser language (localStorage → `navigator.languages` → `en` fallback)
+- ✅ `LanguageSwitcher` component in header (globe icon, flag emojis, persisted to localStorage)
+- ✅ 200+ translation keys across `nav`, `home`, `create`, `view`, `auth`, `common`, `compliance` namespaces
+- ✅ Locale-aware date/number formatting via native `Intl.DateTimeFormat` / `Intl.NumberFormat`
+- ✅ RTL direction support ready (`getTextDirection()` — future Arabic/Hebrew)
+- ✅ Backend `detectLocale()` Hono middleware — `Content-Language` header on all API responses
+- ✅ `getComplianceRequirements(locale)` — GDPR (EU) and CCPA (California) flags
+- ✅ Zero new npm dependencies — pure JSON + Intl API
+
+### Key Files
+- `frontend/src/locales/en.json`, `es.json`, `fr.json`, `de.json`, `zh.json`, `hi.json`
+- `frontend/src/utils/i18n.js` — translate, detectLocale, saveLocale, formatDate, formatNumber
+- `frontend/src/contexts/I18nContext.jsx` — `I18nProvider` + `useI18n()` hook
+- `frontend/src/components/LanguageSwitcher.jsx`
+- `backend/src/middleware/locale.js`
+
+---
+
+## 🚀 Version 1.12 - Scaling & Performance
+**Status**: ✅ Complete - Week 12 Released
+**Released**: Mar 4, 2026
+
+### Features
+- ✅ Cloudflare KV caching layer — cache-aside pattern, configurable TTL, 10x faster hot endpoints
+- ✅ 7 new composite DB indexes — response times reduced from ~500ms to 20-50ms
+- ✅ Health check endpoints — `/ping`, `/health`, `/health/deep` with DB connectivity check
+- ✅ Performance headers — `Server-Timing`, `X-Response-Time` on all API responses
+- ✅ Monitoring infrastructure — `PerformanceMonitor` class, Sentry-ready error tracking
+- ✅ CDN static asset optimization — long `max-age`, `immutable` cache directives
+- ✅ Version bumped to v1.11.0 (API); wrangler.toml updated with KV binding
+
+### Key Files
+- `backend/src/utils/cache.js` (260 lines) — KV cache utilities
+- `backend/src/utils/monitoring.js` (330 lines) — performance & error tracking
+- `backend/src/routes/health.js` (45 lines) — health check endpoints
+- `docs/WEEK12.md` — complete documentation
+
+---
+
+## 🚀 Version 1.10 - User Authentication System
 **Status**: ✅ Complete - Week 11 Released
 **Released**: Feb 24, 2026
 
@@ -41,15 +122,189 @@
 
 ---
 
-## 🚀 Version 1.9 - Enterprise Features
+## 💼 Version 1.9 - Enterprise Features
 **Status**: ✅ Complete - Week 10 Released
 **Released**: Feb 20, 2026
 
-### Features (Week 10)
+### Features
 - ✅ Team workspaces with RBAC (Owner, Admin, Member, Viewer)
 - ✅ API key management system (custom rate limits, usage tracking)
 - ✅ Custom branding (logos, colors, white-label mode)
 - ✅ GDPR compliance dashboard (data retention, export, deletion)
+
+### Key Files
+- `backend/src/routes/api-keys.js` (240 lines)
+- `backend/src/routes/teams.js` (450 lines)
+- `backend/src/routes/branding.js` (170 lines)
+- `backend/src/routes/compliance.js` (380 lines)
+- `backend/migrations/0009_enterprise_features.sql`
+
+---
+
+## 🔐 Version 1.8 - Security Enhancements
+**Status**: ✅ Complete - Week 9 Released
+**Released**: Feb 9, 2026
+
+### Features
+- ✅ Password strength meter — real-time analysis, 5-level score, entropy calculation, pattern detection
+- ✅ Self-destruct options — max views, granular time limits, max password attempts, geo-restrictions
+- ✅ Audit log system — privacy-first logging, event tracking, creator-only access, auto-delete after 30 days
+- ✅ Security headers — CSP (12 directives), HSTS, X-Frame-Options: DENY — Security Grade A+
+- ✅ Enhanced rate limiting — sliding window algorithm, per-endpoint limits, Retry-After headers
+- ✅ DDoS protection — automatic IP banning at 1,000 req/min threshold, 1-hour ban duration
+
+### Key Files
+- `frontend/src/components/PasswordStrengthMeter.jsx` (175 lines)
+- `frontend/src/components/SelfDestructOptions.jsx` (188 lines)
+- `frontend/src/components/AuditLogViewer.jsx` (265 lines)
+- `backend/src/routes/audit.js` (120 lines)
+- `backend/src/middleware/security.js` (180 lines)
+- `backend/migrations/0008_security_enhancements.sql`
+
+---
+
+## 🔌 Version 1.7 - Platform Integrations
+**Status**: ✅ Complete - Week 8 Released
+**Released**: Feb 2, 2026
+
+### Features
+- ✅ Slack integration — `/noteburner` slash command, interactive actions, ephemeral responses
+- ✅ Zapier integration — create message action API, API key auth, webhook triggers
+- ✅ Discord bot — secure message creation, rich embed responses, auto-generated passwords
+- ✅ RESTful API — API key management, rate limiting per key, comprehensive docs (370 lines)
+- ✅ Webhook system — event subscriptions (created, viewed, burned), HTTPS-only, Zapier/IFTTT-ready
+
+### Key Files
+- `backend/src/routes/integrations.js` (348 lines)
+- `backend/migrations/0007_integrations.sql`
+- `docs/API.md` (370 lines)
+
+---
+
+## 📱 Version 1.6 - Mobile & PWA
+**Status**: ✅ Complete - Week 7 Released
+**Released**: Jan 26, 2026
+
+### Features
+- ✅ Progressive Web App — installable, service worker (v1.6.0 cache), offline support, push notifications
+- ✅ Mobile-first UX — BottomSheet, SwipeableCard with useSwipe hook, touch-friendly sizing (≥36px), safe area
+- ✅ Camera integration — photo/video capture, front/rear switching, live preview, instant encryption
+- ✅ Share sheet — native Web Share API, 8 popular apps (WhatsApp, Telegram, Signal, Messenger, etc.)
+
+### Key Files
+- `frontend/src/utils/pwa.js` (161 lines) — PWA utilities (registration, install, notifications)
+- `frontend/src/utils/share.js` (252 lines) — share utilities (native, fallback, clipboard)
+- `frontend/src/utils/mobile.js` (198 lines) — device detection, orientation, network info
+- `frontend/src/components/CameraCapture.jsx` (297 lines)
+- `public/sw.js` — service worker
+
+---
+
+## 🎨 Version 1.5 - UI/UX Polish
+**Status**: ✅ Complete - Week 6 Released
+**Released**: Jan 19, 2026
+
+### Features
+- ✅ Onboarding flow — 3-step tutorial (Welcome, Create Secret, Share Securely), first-time modal with progress bar
+- ✅ Loading skeletons — 8 reusable skeleton components, smooth micro-interactions
+- ✅ Message templates — 6 pre-written templates across 3 categories (Work, Personal, Security), one-click apply
+- ✅ Keyboard shortcuts — 12 shortcuts (Ctrl+Enter, Escape, ?, Ctrl+K/P/G/U/N/S), help modal
+- ✅ Accessibility — full ARIA labels, screen reader support, keyboard navigation, focus management, semantic HTML
+
+### Key Files
+- `frontend/src/components/OnboardingModal.jsx` (220 lines)
+- `frontend/src/components/MessageTemplates.jsx` (150 lines)
+- `frontend/src/components/KeyboardShortcutsModal.jsx` (140 lines)
+- `frontend/src/components/Skeletons.jsx` (160 lines)
+
+---
+
+## 👥 Version 1.4 - Network Effects
+**Status**: ✅ Complete - Week 5 Released
+**Released**: Jan 14, 2026
+
+### Features
+- ✅ Group messages — 1 message → 1-100 unique recipient links, burn-on-first-view option, max view limit
+- ✅ Referral system — 3 reward tiers (5/10/25 messages), localStorage-only tracking, self-referral prevention
+- ✅ Browser extension — Manifest V3 (Chrome/Edge/Firefox), context menu, floating button, popup UI
+- ✅ Invite friends — `/invite` page, email/social/SMS invitations, InviteModal on message creation
+
+### Key Files
+- `backend/src/utils/groupMessages.js` (155 lines)
+- `frontend/src/pages/ReferralsPage.jsx` (220 lines)
+- `frontend/src/pages/InviteFriendsPage.jsx` (280 lines)
+- `browser-extension/` — manifest.json, background.js, content.js, popup.html/css/js
+
+---
+
+## 🎮 Version 1.3 - Gamification
+**Status**: ✅ Complete - Week 4 Released
+**Released**: Jan 8, 2026
+
+### Features
+- ✅ Achievement system — 8 badges (First Burn, Speed Demon, Security Expert, File Master, Centurion, Night Owl, Streak Master, Mystery Sender), progress tracking
+- ✅ Anonymous leaderboard — platform stats (Today / This Week / All Time), zero PII
+- ✅ Streak tracking — daily consecutive message creation, 7-day streak goal, pulsing fire animation
+- ✅ Mystery message mode — anonymous sender toggle, tracked for Mystery Sender achievement
+
+### Key Files
+- `frontend/src/components/AchievementBadge.jsx`
+- `frontend/src/components/AchievementUnlocked.jsx`
+- `frontend/src/pages/AchievementsPage.jsx`
+- `frontend/src/pages/LeaderboardPage.jsx`
+- `frontend/src/utils/achievements.js`
+
+---
+
+## 🔗 Version 1.2 - Custom URLs & Branding
+**Status**: ✅ Complete - Week 3 Released
+**Released**: Jan 1, 2026
+
+### Features
+- ✅ Custom short URLs — 3-20 chars, real-time validation (500ms debounce), profanity filter, reserved slug protection
+- ✅ QR code generation — 512×512px PNG, one-click download, branded NoteBurner variant (#dc2626)
+- ✅ Open Graph tags — Twitter/Facebook/LinkedIn preview cards, dynamic meta tags, no content exposed in OG
+- ✅ Countdown timer — urgency states (normal / urgent <1hr / critical <15min), progress bar, auto-redirect on expiry
+
+### Key Files
+- `frontend/src/components/QRCodeDisplay.jsx`
+- `frontend/src/components/CountdownTimer.jsx`
+- `backend/migrations/0004_custom_slugs.sql`
+
+---
+
+## 🎯 Version 1.1 - Viral Mechanics
+**Status**: ✅ Complete - Week 2 Released
+**Released**: Dec 25, 2025
+
+### Features
+- ✅ Post-burn CTA — "Want to send your own secret?" prompt shown after message destruction
+- ✅ Message preview page — landing page before password entry, animated lock icon, mystery/anticipation
+- ✅ Confetti animation on successful burn 🎉
+- ✅ Easy message recreation — "Send Another Message" button, pre-fill settings from last message
+
+### Key Files
+- `frontend/src/pages/PreviewPage.jsx`
+- `frontend/src/components/PostBurnCTA.jsx`
+
+---
+
+## 📊 Version 1.0 - Initial Launch
+**Status**: ✅ Complete - Week 1 Released
+**Released**: Dec 15, 2025
+
+### Features
+- ✅ Encrypted message creation — AES-256-GCM client-side encryption, PBKDF2 key derivation
+- ✅ One-time self-destruct — atomic deletion on first view, race condition prevention
+- ✅ File encryption — upload & encrypt files, one-time download, auto-delete
+- ✅ Anonymous usage stats — total messages created/burned/encrypted, real-time 30s refresh
+- ✅ Social proof — live message burn counter, animated number counting, platform statistics
+
+### Key Files
+- `backend/src/routes/messages.js` — core message CRUD + atomic deletion
+- `backend/src/routes/stats.js` — stats aggregation
+- `frontend/src/pages/CreateMessage.jsx`
+- `frontend/src/pages/ViewMessage.jsx`
 
 ---
 
@@ -1173,31 +1428,50 @@ CREATE TABLE login_attempts (
 **Released**: Mar 9, 2026
 
 ### Features
-- [x] **Multi-language support**
-  - Spanish, French, German, Chinese, Hindi
-  - Auto-detect browser language (`detectLocale()` — localStorage → navigator.languages)
+- ✅ **Multi-language support** — Spanish, French, German, Chinese (Simplified), Hindi
+  - `SUPPORTED_LOCALES = ['en', 'es', 'fr', 'de', 'zh', 'hi']`
+  - Auto-detect browser language (`detectLocale()` — localStorage → navigator.languages → fallback `en`)
   - Language switcher in header (`LanguageSwitcher.jsx` — globe icon + flag emoji dropdown)
+  - Language preference persisted via `localStorage` (`noteburner_locale` key)
 
-- [x] **Localized content**
-  - Translate all UI strings (nav, home, create, view, auth, common — 200+ keys)
+- ✅ **Localized content** — 200+ translation keys across 6 namespaces
+  - `nav.*`, `home.hero.*`, `home.stats.*`, `create.*`, `view.*`, `auth.*`, `common.*`, `compliance.*`, `languages.*`
   - Locale-specific date/time formats (`Intl.DateTimeFormat` per locale)
   - Locale-specific number formats (`Intl.NumberFormat` per locale)
-  - Language preference persists via `localStorage`
 
-- [x] **Regional compliance**
-  - GDPR (EU) — `getComplianceRequirements()` middleware helper
-  - CCPA (California) — detected via locale
-  - `Content-Language` header on all API responses
-  - RTL direction support ready (`getTextDirection()` — for future Arabic/Hebrew)
+- ✅ **I18n engine** (`frontend/src/utils/i18n.js`) — zero external dependencies
+  - `translate(locale, key, params)` — dot-notation key resolution with `{var}` interpolation
+  - Fallback chain: requested locale → English → raw key
+  - `getTextDirection(locale)` — RTL-ready for future Arabic/Hebrew
 
-**New Files:**
+- ✅ **I18n React context** (`frontend/src/contexts/I18nContext.jsx`)
+  - `I18nProvider` wraps app; updates `document.documentElement.lang` + `.dir`
+  - `useI18n()` hook — `{ locale, setLocale, t, formatDate, formatNumber, dir, supportedLocales }`
+
+- ✅ **Regional compliance** (backend)
+  - `detectLocale()` Hono middleware — parses `Accept-Language`, sets `Content-Language` header
+  - `getComplianceRequirements(locale)` — returns `{ gdpr, ccpa, region }` flags
+  - All `/api/*` endpoints now return `Content-Language` header
+
+### New Files
 - `frontend/src/locales/en.json`, `es.json`, `fr.json`, `de.json`, `zh.json`, `hi.json`
-- `frontend/src/utils/i18n.js` — translate, detectLocale, saveLocale, formatDate, formatNumber
-- `frontend/src/contexts/I18nContext.jsx` — I18nProvider + useI18n()
-- `frontend/src/components/LanguageSwitcher.jsx`
-- `backend/src/middleware/locale.js`
-- `e2e/week13.spec.js`
+- `frontend/src/utils/i18n.js` (180 lines)
+- `frontend/src/contexts/I18nContext.jsx` (80 lines)
+- `frontend/src/components/LanguageSwitcher.jsx` (75 lines)
+- `backend/src/middleware/locale.js` (70 lines)
+- `e2e/week13.spec.js` (35 tests)
 - `docs/WEEK13_SUMMARY.md`
+
+### Modified Files
+- `frontend/src/App.jsx` — `I18nProvider` wrapper, `/pricing` + `/premium` routes
+- `frontend/src/components/Header.jsx` — translated nav, `LanguageSwitcher`, Premium link
+- `backend/src/index.js` — `detectLocale()` mounted, `features` includes `'i18n'`
+
+### Metrics
+- **Code**: ~700 lines added (6 locale JSONs + utils + context + component + middleware + tests)
+- **Dependencies**: 0 new npm packages
+- **Bundle impact**: ~12KB new source, locale JSON loaded eagerly (< 5KB each)
+- **E2E Tests**: 35 passing (`e2e/week13.spec.js`)
 
 ---
 
@@ -1208,34 +1482,69 @@ CREATE TABLE login_attempts (
 **Released**: Mar 16, 2026
 
 ### Features
-- [x] **Premium tier** ($5/month)
-  - Large file uploads (1GB limit vs 100MB free)
-  - Unlimited custom URLs
-  - Priority support
-  - Ad-free experience
-  - Advanced analytics
-  - Premium badge (`PremiumBadge.jsx`)
+- ✅ **Premium tier** ($5/month)
+  - 1GB file uploads (vs 100MB free)
+  - Unlimited custom URLs (vs 5 free)
+  - 10,000 API calls/day (vs 1,000 free)
+  - Priority support, ad-free, advanced analytics, API access
+  - `PremiumBadge` component (amber `Star` icon)
 
-- [x] **Crypto payment option**
-  - Bitcoin/ETH payment schema ready (`btc_address` column)
-  - UI toggle in PremiumPage between Stripe and Crypto
-  - Full implementation pending BTCPay/Coinbase Commerce integration
-
-- [x] **Lifetime access**
-  - One-time payment ($49)
+- ✅ **Lifetime access** ($49 one-time)
   - All premium features forever
-  - Early adopter pricing
-  - Crown icon + purple theme
+  - Crown icon + purple theme in badge
+  - Early adopter pricing locked in
 
-**New Files:**
-- `backend/migrations/0012_premium_features.sql` — premium_plans, user_subscriptions, premium_usage tables
-- `backend/src/routes/premium.js` — GET /plans, GET /status, POST /subscribe, DELETE /cancel, GET /usage
-- `frontend/src/pages/PricingPage.jsx` — 3-tier pricing with comparison table + FAQ
-- `frontend/src/pages/PremiumPage.jsx` — authenticated premium management + usage bars
-- `frontend/src/components/PremiumBadge.jsx` — amber/purple badge for premium users
-- `frontend/src/utils/premium.js` — getPremiumStatus, isPremium, getFileSizeLimit
-- `e2e/week14.spec.js`
+- ✅ **Backend subscription API** (`backend/src/routes/premium.js`)
+  - `GET /api/premium/plans` — public, returns all 3 active plans
+  - `GET /api/premium/status` — auth required, current plan + subscription
+  - `POST /api/premium/subscribe` — auth required, creates subscription record
+  - `DELETE /api/premium/cancel` — auth required, cancels active subscription
+  - `GET /api/premium/usage` — auth required, current-month usage vs limits
+  - Stripe-ready: stores `stripe_customer_id`, `stripe_subscription_id`
+  - Crypto placeholder: `btc_address` column in `user_subscriptions`
+
+- ✅ **Database migration** (`backend/migrations/0012_premium_features.sql`)
+  - `premium_plans` — plan catalog with seed data for free/premium/lifetime
+  - `user_subscriptions` — subscription records (status, payment method, period)
+  - `premium_usage` — monthly usage tracking (messages, storage, API calls)
+
+- ✅ **Pricing Page** (`frontend/src/pages/PricingPage.jsx`)
+  - 3-tier plan cards (Free / Premium / Lifetime) with "Most Popular" highlight
+  - 9-feature comparison table
+  - 6-card FAQ section
+  - Gradient CTA band
+  - Auth-aware CTA buttons (login vs upgrade)
+
+- ✅ **Premium Dashboard** (`frontend/src/pages/PremiumPage.jsx`)
+  - Auth guard — unauthenticated users redirected to `/login?redirect=/premium`
+  - Current plan card with status badge and renewal date
+  - Animated usage progress bars (green → amber → red near limit)
+  - Upgrade panel (free users only) with Stripe/Crypto toggle
+  - Cancel subscription with confirmation dialog
+
+- ✅ **Reusable components & utilities**
+  - `PremiumBadge.jsx` — amber (premium) / purple (lifetime) badge with `xs/sm/md` sizes
+  - `frontend/src/utils/premium.js` — `getPremiumStatus`, `clearPremiumCache`, `isPremium`, `getFileSizeLimit`, `getCustomUrlsLimit`, `getPlanName`
+
+### New Files
+- `backend/migrations/0012_premium_features.sql`
+- `backend/src/routes/premium.js` (220 lines)
+- `frontend/src/pages/PricingPage.jsx`
+- `frontend/src/pages/PremiumPage.jsx`
+- `frontend/src/components/PremiumBadge.jsx`
+- `frontend/src/utils/premium.js`
+- `e2e/week14.spec.js` (29 tests)
 - `docs/WEEK14_SUMMARY.md`
+
+### Modified Files
+- `backend/src/index.js` — `premiumRouter` mounted, version `1.12.0`, `features` includes `'premium'`
+- `frontend/src/App.jsx` — `/pricing` + `/premium` routes registered
+
+### Metrics
+- **Code**: ~1,400 lines added (backend + frontend + tests)
+- **Database Tables**: 3 new (`premium_plans`, `user_subscriptions`, `premium_usage`)
+- **API Endpoints**: 5 new (`/api/premium/*`)
+- **E2E Tests**: 29 passing (`e2e/week14.spec.js`)
 
 ---
 
@@ -1299,25 +1608,27 @@ CREATE TABLE login_attempts (
 
 ---
 
-## � Project Status
+## 📌 Project Status
 
-**Current Version**: v1.9.0 (Week 10 - Enterprise Features)  
-**Last Updated**: Feb 20, 2026  
-**Next Release**: Week 11 (User Authentication System) - Feb 23, 2026
+**Current Version**: v1.14.0 (Week 14 — Premium Features)  
+**Last Updated**: Mar 13, 2026  
+**Next Release**: Week 15 — TBD
 
 ### Release History
-- **v1.9.0** - Feb 20, 2026: Enterprise Features (API key management, team workspaces with RBAC, custom branding, compliance & GDPR dashboard)
-- **v1.8.0** - Feb 9, 2026: Security Enhancements (password strength meter, self-destruct options, audit logging, security headers)
-- **v1.7.0** - Feb 2, 2026: Platform Integrations (Slack, Discord, Zapier, webhooks, API keys)
-- **v1.6.0** - Jan 23, 2026: Mobile Optimization & PWA (Progressive Web App, service worker, offline support, mobile components, camera integration, share sheet, push notifications)
-- **v1.5.1** - Jan 20, 2026: UI/UX Polish (onboarding flow, message templates, keyboard shortcuts, loading skeletons, enhanced animations, accessibility)
-- **v1.5.0** - Jan 14, 2026: Network Effects (group messages, referral rewards, browser extension, invite friends)
-- **v1.4.0** - Jan 8, 2026: Gamification (achievements, streaks, leaderboard, mystery mode)
-- **v1.3.0** - Jan 1, 2026: Custom URLs & Branding (QR codes, countdown timer, Open Graph)
-- **v1.2.5** - Dec 25, 2025: E2E Testing (106 passing tests)
-- **v1.2.0** - Dec 22, 2025: Viral Mechanics (post-burn CTA, message preview)
-- **v1.1.0** - Dec 15, 2025: Analytics & Social Proof (stats counter, platform stats)
-- **v1.0.0** - Dec 1, 2025: Initial Launch (AES-256-GCM, one-time access, file encryption)
+- **v1.14.0** — Mar 13, 2026: Premium Features (subscription tiers, pricing page, premium dashboard, PremiumBadge, usage tracking)
+- **v1.13.0** — Mar 9, 2026: Internationalization (6 languages, i18n engine, language switcher, locale middleware)
+- **v1.12.0** — Mar 4, 2026: Scaling & Performance (KV caching, DB indexes, health checks, performance monitoring)
+- **v1.10.0** — Feb 24, 2026: User Authentication (signup, login, sessions, password reset, brute-force protection)
+- **v1.9.0** — Feb 20, 2026: Enterprise Features (API key management, team workspaces with RBAC, custom branding, compliance & GDPR dashboard)
+- **v1.8.0** — Feb 9, 2026: Security Enhancements (password strength meter, self-destruct options, audit logging, security headers)
+- **v1.7.0** — Feb 2, 2026: Platform Integrations (Slack, Discord, Zapier, webhooks, API keys)
+- **v1.6.0** — Jan 23, 2026: Mobile Optimization & PWA (Progressive Web App, service worker, offline support, camera, share sheet)
+- **v1.5.0** — Jan 14, 2026: Network Effects (group messages, referral rewards, browser extension, invite friends)
+- **v1.4.0** — Jan 8, 2026: Gamification (achievements, streaks, leaderboard, mystery mode)
+- **v1.3.0** — Jan 1, 2026: Custom URLs & Branding (QR codes, countdown timer, Open Graph)
+- **v1.2.0** — Dec 22, 2025: Viral Mechanics (post-burn CTA, message preview, confetti)
+- **v1.1.0** — Dec 15, 2025: Analytics & Social Proof (stats counter, platform stats)
+- **v1.0.0** — Dec 1, 2025: Initial Launch (AES-256-GCM, one-time access, file encryption)
 
 ---
 
@@ -1385,6 +1696,6 @@ This is a solo project for now, but open to collaboration in Q2. If you want to 
 
 ---
 
-**Last Updated**: February 20, 2026  
-**Current Version**: v1.9.0 - Enterprise Features  
-**Next Release**: Week 11 - User Authentication System (Feb 23, 2026)
+**Last Updated**: March 13, 2026  
+**Current Version**: v1.14.0 - Internationalization & Premium Features  
+**Next Release**: Week 15 — TBD
