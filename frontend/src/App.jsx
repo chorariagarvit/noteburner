@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CreateMessage from './pages/CreateMessage';
@@ -25,10 +25,10 @@ import BrandingCustomizer from './components/enterprise/BrandingCustomizer';
 import ComplianceDashboard from './components/enterprise/ComplianceDashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import { I18nProvider } from './contexts/I18nContext';
+import { ThemeContext } from './contexts/ThemeContext';
 import PricingPage from './pages/PricingPage';
 import PremiumPage from './pages/PremiumPage';
 
-export const ThemeContext = createContext();
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {

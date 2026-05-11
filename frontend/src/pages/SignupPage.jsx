@@ -63,13 +63,13 @@ export default function SignupPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
-              {t('common.success')}
+              {t('auth.signup.successTitle')}
             </h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
-              {t('auth.signup.errors.emailTaken') ? t('auth.forgotPassword.successMessage') : ''}
+              {t('auth.signup.successMessage')}
             </p>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
-              Redirecting to login...
+              {t('auth.signup.redirecting')}
             </p>
           </div>
         </div>

@@ -9,7 +9,7 @@
     "login": "लॉग इन",
     "signup": "साइन अप",
     "profile": "प्रोफ़ाइल",
-    "logout": "लॉग आउट",
+    "logout": "साइन आउट",
     "premium": "प्रीमियम"
   },
   "home": {
@@ -92,9 +92,9 @@
   },
   "create": {
     "title": "गुप्त संदेश बनाएं",
-    "messagePlaceholder": "यहाँ अपना गुप्त संदेश टाइप करें...",
+    "messagePlaceholder": "अपना गुप्त संदेश टाइप करें...",
     "passwordLabel": "पासवर्ड",
-    "passwordPlaceholder": "पासवर्ड सेट करें (वैकल्पिक)",
+    "passwordPlaceholder": "मजबूत पासवर्ड दर्ज करें",
     "expiryLabel": "समाप्त होता है",
     "submitButton": "सुरक्षित संदेश बनाएं",
     "customUrlLabel": "कस्टम URL (वैकल्पिक)",
@@ -164,7 +164,11 @@
     "previewUnlock": "गुप्त संदेश अनलॉक करें",
     "afterBurnTitle": "आपका रहस्य स्वयं नष्ट हो गया! 🔥",
     "afterBurnSendOwn": "क्या आप अपना खुद का एन्क्रिप्टेड संदेश भेजना चाहते हैं?",
-    "afterBurnCta": "अपना गुप्त संदेश बनाएं"
+    "afterBurnCta": "अपना गुप्त संदेश बनाएं",
+    "decryptedTitle": "संदेश डिक्रिप्ट हो गया",
+    "decryptedDesc": "यह संदेश स्थायी रूप से हटा दिया गया है",
+    "shareX": "X पर शेयर करें",
+    "shareReddit": "Reddit पर शेयर करें"
   },
   "auth": {
     "login": {
@@ -211,7 +215,10 @@
         "passwordMismatch": "पासवर्ड मेल नहीं खाते",
         "passwordWeak": "पासवर्ड में कम से कम 8 अक्षर होने चाहिए जिनमें अपरकेस, लोअरकेस और संख्या हो",
         "termsRequired": "आपको शर्तें स्वीकार करनी होंगी"
-      }
+      },
+      "successTitle": "खाता सफलतापूर्वक बनाया गया",
+      "successMessage": "कृपया अपना खाता सत्यापित करने के लिए अपना ईमेल देखें",
+      "redirecting": "लॉगिन पर रीडायरेक्ट हो रहा है..."
     },
     "forgotPassword": {
       "title": "पासवर्ड रीसेट करें",

@@ -191,12 +191,22 @@ function base64ToArrayBuffer(base64) {
 }
 
 /**
- * Generate strong random password
+ * Generate strong random password using rejection sampling to avoid modulo bias.
+ * Characters with index >= floor(256/chars.length)*chars.length are discarded
+ * so every character has exactly equal probability.
  */
 export function generatePassword(length = 16) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  const randomValues = crypto.getRandomValues(new Uint8Array(length));
-  return Array.from(randomValues)
-    .map(x => chars[x % chars.length])
-    .join('');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+  const limit = Math.floor(256 / chars.length) * chars.length;
+  const result = [];
+  while (result.length < length) {
+    const randomValues = crypto.getRandomValues(new Uint8Array(length * 2));
+    for (const byte of randomValues) {
+      if (result.length >= length) break;
+      if (byte < limit) {
+        result.push(chars[byte % chars.length]);
+      }
+    }
+  }
+  return result.join('');
 }

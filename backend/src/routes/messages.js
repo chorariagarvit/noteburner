@@ -57,21 +57,20 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     } = body;
 
     if (!encryptedData || !iv || !salt) {
-      console.error('Missing required fields:', { 
-        hasEncryptedData: !!encryptedData, 
-        hasIv: !!iv, 
-        hasSalt: !!salt 
-      });
       return c.json({ error: 'Missing required fields' }, 400);
     }
 
-    // Log sizes for debugging
-    if (encryptedData.length > 50000) {
-      console.log('Large message detected:', { 
-        encryptedDataLength: encryptedData.length,
-        ivLength: iv.length,
-        saltLength: salt.length
-      });
+    // Validate field sizes
+    // iv and salt must each be exactly 16 bytes = 24 base64 chars (or 16 raw chars)
+    if (iv.length !== 16 && iv.length !== 24) {
+      return c.json({ error: 'Invalid iv length' }, 400);
+    }
+    if (salt.length !== 16 && salt.length !== 24) {
+      return c.json({ error: 'Invalid salt length' }, 400);
+    }
+    // encryptedData max 2MB base64
+    if (encryptedData.length > 2 * 1024 * 1024 * 1.4) {
+      return c.json({ error: 'Message too large' }, 413);
     }
 
     // Generate unique token and creator token
@@ -155,12 +154,11 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
       url: `${frontendUrl}${urlPath}`
     };
 
-    // Include TOTP info if 2FA is enabled
+    // Include TOTP info if 2FA is enabled — QR code generated client-side from the URI
     if (require2FA && totpUri) {
       response.totp = {
         secret: totpSecret,
-        uri: totpUri,
-        qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(totpUri)}`
+        uri: totpUri
       };
     }
 
@@ -252,11 +250,6 @@ app.get('/:identifier', async (c) => {
       return c.json({ error: 'Message has expired' }, 410);
     }
 
-    // Increment incorrect attempts (will be reset on successful decryption)
-    await c.env.DB.prepare(
-      `UPDATE messages SET incorrect_attempts = incorrect_attempts + 1 WHERE token = ?`
-    ).bind(result.token).run();
-
     // Return message data for decryption attempt
     const response = {
       encryptedData: result.encrypted_data,
@@ -302,17 +295,38 @@ app.post('/:identifier/verify-totp', async (c) => {
       return c.json({ error: 'This message does not require 2FA' }, 400);
     }
 
+    // Brute-force protection: max 5 attempts per 5 minutes per identifier
+    const kv = c.env.CACHE;
+    const attemptsKey = `totp_attempts:${identifier}`;
+    if (kv) {
+      const attempts = await kv.get(attemptsKey);
+      const count = attempts ? parseInt(attempts, 10) : 0;
+      if (count >= 5) {
+        return c.json({ error: 'Too many attempts. Please try again later.' }, 429);
+      }
+    }
+
     // Verify TOTP code
     const isValid = verifyTOTP(code, result.totp_secret, 1); // Allow 1 window drift (±30s)
 
     if (!isValid) {
+      // Increment attempt counter on failure
+      if (kv) {
+        const attempts = await kv.get(attemptsKey);
+        const count = attempts ? parseInt(attempts, 10) : 0;
+        await kv.put(attemptsKey, String(count + 1), { expirationTtl: 300 });
+      }
       return c.json({ error: 'Invalid or expired code. Please try again.' }, 401);
     }
 
-    // TOTP verified successfully
-    return c.json({ 
-      success: true, 
-      message: 'TOTP verified successfully' 
+    // TOTP verified — clear attempt counter
+    if (kv) {
+      await kv.delete(attemptsKey);
+    }
+
+    return c.json({
+      success: true,
+      message: 'TOTP verified successfully'
     });
   } catch (error) {
     console.error('Error verifying TOTP:', error);
@@ -321,12 +335,32 @@ app.post('/:identifier/verify-totp', async (c) => {
 });
 
 // Delete message after successful decryption (called by frontend)
+// Optionally accepts X-Creator-Token for creator-initiated early burns.
+// Normal self-destruct (recipient burns after decryption) requires no token.
 app.delete('/:identifier', async (c) => {
   try {
     const identifier = c.req.param('identifier');
 
     if (!identifier) {
       return c.json({ error: 'Invalid identifier' }, 400);
+    }
+
+    // If a creator token is provided, verify it before allowing deletion.
+    // This supports creator-initiated early burns. If not provided, allow
+    // the normal self-destruct flow (recipient burns after decryption).
+    const creatorToken = c.req.header('X-Creator-Token');
+    if (creatorToken) {
+      const message = await c.env.DB.prepare(
+        `SELECT creator_token FROM messages WHERE token = ? OR custom_slug = ?`
+      ).bind(identifier, identifier).first();
+
+      if (!message) {
+        return c.json({ error: 'Message not found or already deleted' }, 404);
+      }
+
+      if (message.creator_token !== creatorToken) {
+        return c.json({ error: 'Invalid creator token', code: 'INVALID_CREATOR_TOKEN' }, 403);
+      }
     }
 
     // Atomically mark as accessed and get message to prevent race condition

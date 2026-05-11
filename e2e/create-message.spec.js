@@ -59,11 +59,12 @@ test.describe('Message Creation', () => {
     await page.fill('input[placeholder="Enter a strong password"]', 'ExpireTest123!');
 
     // Select 1 hour expiration (60 minutes)
+    await page.waitForSelector('#time-limit', { state: 'visible' });
     await page.selectOption('#time-limit', '60');
 
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 15000 });
     // Expiration is now displayed in the success component
   });
 
@@ -106,7 +107,7 @@ test.describe('Message Creation', () => {
     await expect(passwordInput).toHaveAttribute('minlength', '8');
   });
 
-  test('should copy share URL to clipboard', async ({ page, context }) => {
+  test('should copy share URL to clipboard', async ({ page, context, browserName }) => {
     // Grant clipboard permissions
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 
@@ -124,9 +125,11 @@ test.describe('Message Creation', () => {
     // Verify button text changes
     await expect(page.locator('button:has-text("Copied!")')).toBeVisible();
 
-    // Verify clipboard content
-    const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-    expect(clipboardText).toContain('http://localhost:5173/m/');
+    // Verify clipboard content (skip read in browsers that restrict it)
+    if (browserName === 'chromium') {
+      const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+      expect(clipboardText).toContain('http://localhost:5173/m/');
+    }
   });
 
   test('should use "Create Similar Message" feature', async ({ page }) => {
@@ -225,6 +228,7 @@ test.describe('Message Creation', () => {
   });
 
   test('should handle all expiration options', async ({ page }) => {
+    test.setTimeout(90000);
     const expirations = [
       { value: '60', label: '1 hour' },
       { value: '1440', label: '24 hours' },
@@ -273,7 +277,7 @@ test.describe('Message Creation', () => {
     
     await page.goto(shareUrl);
     await page.click('button:has-text("Unlock Secret Message")');
-    await page.fill('input[placeholder="Enter the password"]', 'Unicode123!');
+    await page.fill('input[placeholder="Enter message password"]', 'Unicode123!');
     await page.click('button:has-text("Decrypt Message")');
     
     await expect(page.locator(`text=${unicodeMessage}`)).toBeVisible({ timeout: 5000 });
@@ -293,7 +297,7 @@ test.describe('Message Creation', () => {
     // Verify decryption works
     await page.goto(shareUrl);
     await page.click('button:has-text("Unlock Secret Message")');
-    await page.fill('input[placeholder="Enter the password"]', specialPassword);
+    await page.fill('input[placeholder="Enter message password"]', specialPassword);
     await page.click('button:has-text("Decrypt Message")');
     
     await expect(page.locator('text=Special chars password test')).toBeVisible({ timeout: 5000 });

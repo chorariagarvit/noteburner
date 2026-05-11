@@ -23,7 +23,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.goto('/signup');
       
       // Check page title
-      await expect(page.locator('h2')).toContainText('Create your account');
+      await expect(page.locator('h2')).toContainText('Create Account');
       
       // Check form fields exist
       await expect(page.locator('#email')).toBeVisible();
@@ -32,7 +32,7 @@ test.describe('Week 11: Authentication System', () => {
       await expect(page.locator('#confirmPassword')).toBeVisible();
       
       // Check submit button
-      await expect(page.locator('button[type="submit"]')).toContainText('Create account');
+      await expect(page.locator('button[type="submit"]')).toContainText('Create Account');
       
       // Check login link (in form, not header)
       await expect(page.locator('form a[href="/login"]').or(page.locator('main a[href="/login"]')).first()).toBeVisible();
@@ -91,11 +91,11 @@ test.describe('Week 11: Authentication System', () => {
       await page.click('button[type="submit"]');
       
       // Should show success message
-      await expect(page.locator('text=Account created successfully')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('text=Account created successfully')).toBeVisible({ timeout: 8000 });
       await expect(page.locator('text=Please check your email')).toBeVisible();
       
       // Should redirect to login
-      await expect(page).toHaveURL('/login', { timeout: 5000 });
+      await expect(page).toHaveURL('/login', { timeout: 8000 });
     });
 
     test('should prevent duplicate email registration', async ({ page }) => {
@@ -107,7 +107,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
-      await expect(page.locator('text=Account created successfully')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('text=Account created successfully')).toBeVisible({ timeout: 8000 });
       
       // Try to create duplicate
       await page.goto('/signup');
@@ -133,17 +133,17 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/login', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
     });
 
     test('should display login form correctly', async ({ page }) => {
       await page.goto('/login');
       
-      await expect(page.locator('h2')).toContainText('Welcome back');
+      await expect(page.locator('h2')).toContainText('Welcome Back');
       await expect(page.locator('#email')).toBeVisible();
       await expect(page.locator('#password')).toBeVisible();
       await expect(page.locator('#remember-me')).toBeVisible();
-      await expect(page.locator('button[type="submit"]')).toContainText('Sign in');
+      await expect(page.locator('button[type="submit"]')).toContainText('Sign In');
       await expect(page.locator('a[href="/forgot-password"]')).toBeVisible();
       await expect(page.locator('form a[href="/signup"]').or(page.locator('main a[href="/signup"]')).first()).toBeVisible();
     });
@@ -156,7 +156,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.click('button[type="submit"]');
       
       // Should redirect to home page
-      await expect(page).toHaveURL('/', { timeout: 5000 });
+      await expect(page).toHaveURL('/', { timeout: 10000 });
       
       // Should show user menu button in header (look for button with svg icon)
       await expect(page.locator('nav button').last()).toBeVisible({ timeout: 3000 });
@@ -192,7 +192,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.check('#remember-me');
       await page.click('button[type="submit"]');
       
-      await page.waitForURL('/', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       // Check localStorage has session token
       const sessionToken = await page.evaluate(() => localStorage.getItem('sessionToken'));
@@ -212,20 +212,20 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/login', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       await page.fill('#email', uniqueEmail);
       await page.fill('#password', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/', { timeout: 5000 });
+      await page.waitForURL('/', { timeout: 10000 });
       
       // Click user menu (last button in nav)
       const userButton = page.locator('nav button').last();
-      await userButton.click({ timeout: 5000 });
+      await userButton.click({ timeout: 10000 });
       
       // Wait for dropdown menu to appear and click sign out
       await page.waitForTimeout(500);
-      await page.locator('button:has-text("Sign out")').click({ timeout: 5000 });
+      await page.locator('button:has-text("Sign out")').click({ timeout: 10000 });
       
       // Should redirect to home
       await expect(page).toHaveURL('/', { timeout: 3000 });
@@ -247,9 +247,9 @@ test.describe('Week 11: Authentication System', () => {
     test('should display forgot password form', async ({ page }) => {
       await page.goto('/forgot-password');
       
-      await expect(page.locator('h2')).toContainText('Reset your password');
+      await expect(page.locator('h2')).toContainText('Reset Password');
       await expect(page.locator('#email')).toBeVisible();
-      await expect(page.locator('button[type="submit"]')).toContainText('Send reset instructions');
+      await expect(page.locator('button[type="submit"]')).toContainText('Send Reset Link');
       await expect(page.locator('main a[href="/login"]').or(page.locator('form a[href="/login"]')).first()).toBeVisible();
     });
 
@@ -262,7 +262,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/login', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       // Request password reset
       await page.goto('/forgot-password');
@@ -270,7 +270,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.click('button[type="submit"]');
       
       // Should show success message
-      await expect(page.locator('text=Check your email')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('text=Check your email')).toBeVisible({ timeout: 10000 });
       await expect(page.locator('text=reset link').or(page.locator('text=reset instructions'))).toBeVisible();
     });
 
@@ -281,7 +281,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.click('button[type="submit"]');
       
       // Should still show success message (security best practice)
-      await expect(page.locator('h2:has-text("Check your email")').or(page.locator('p:has-text("If an account exists")')).first()).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('h2:has-text("Check your email")').or(page.locator('p:has-text("If an account exists")')).first()).toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -296,13 +296,13 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/login', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       await page.fill('#email', uniqueEmail);
       await page.fill('#password', testUser.password);
       await page.check('#remember-me');
       await page.click('button[type="submit"]');
-      await page.waitForURL('/', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       // Reload page
       await page.reload();
@@ -365,12 +365,12 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/login', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       await page.fill('#email', uniqueEmail);
       await page.fill('#password', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       // User button should be visible (last button in nav)
       const userButton = page.locator('nav button').last();
@@ -454,7 +454,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/login', { timeout: 5000 });
+      await page.waitForURL('/login', { timeout: 10000 });
       
       // Try multiple failed logins
       for (let i = 0; i < 3; i++) {

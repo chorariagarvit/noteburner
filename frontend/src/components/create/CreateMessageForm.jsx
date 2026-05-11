@@ -73,7 +73,7 @@ function CreateMessageForm(props) {
                         id="message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Enter your secret message..."
+                        placeholder={t('create.messagePlaceholder')}
                         rows={6}
                         className="input-field resize-none"
                         required
@@ -94,7 +94,7 @@ function CreateMessageForm(props) {
                                 type={showPassword ? 'text' : 'password'}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter a strong password"
+                                placeholder={t('create.passwordPlaceholder')}
                                 className="input-field pr-10"
                                 required
                                 minLength={8}

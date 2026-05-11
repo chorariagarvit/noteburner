@@ -1,34 +1,28 @@
-// Rate limiting middleware
-const rateLimitMap = new Map();
+// Rate limiting middleware — backed by Cloudflare KV for cross-isolate persistence
 
-export function checkRateLimit(ip, limit = 10, window = 60000, env = {}) {
-  // Skip rate limiting in local development mode
-  if (env.FRONTEND_URL === 'http://localhost:5173') {
-    return true;
-  }
-
-  const now = Date.now();
-  const userRequests = rateLimitMap.get(ip) || [];
-  const recentRequests = userRequests.filter(time => now - time < window);
-
-  if (recentRequests.length >= limit) {
-    return false;
-  }
-
-  recentRequests.push(now);
-  rateLimitMap.set(ip, recentRequests);
-  return true;
-}
-
-// Middleware wrapper for routes
-export function rateLimitMiddleware(limit = 10, window = 60000) {
+export function rateLimitMiddleware(limit = 10, windowSeconds = 60) {
   return async (c, next) => {
     const ip = c.req.header('CF-Connecting-IP') || 'unknown';
-    
-    if (!checkRateLimit(ip, limit, window, c.env)) {
-      return c.json({ error: 'Rate limit exceeded' }, 429);
+    const kv = c.env.CACHE;
+
+    if (!kv) {
+      // KV not configured — fail open with a warning
+      console.warn('[RateLimit] KV namespace not available, skipping rate limit');
+      await next();
+      return;
     }
-    
+
+    const key = `rl:ip:${ip}:${limit}:${windowSeconds}`;
+    const current = await kv.get(key);
+    const count = current ? parseInt(current, 10) : 0;
+
+    if (count >= limit) {
+      return c.json({ error: 'Rate limit exceeded. Please try again later.' }, 429);
+    }
+
+    // Increment counter; set TTL only on first write to avoid window reset on every request
+    await kv.put(key, String(count + 1), { expirationTtl: windowSeconds });
+
     await next();
   };
 }

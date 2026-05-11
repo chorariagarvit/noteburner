@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, Twitter, MessageSquare, Clock } from 'lucide-react';
+import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, X as XIcon, MessageSquare, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { decryptMessage, decryptFile } from '../utils/crypto';
 import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
@@ -249,10 +249,10 @@ function ViewMessage() {
             <div className="text-center mb-6">
               <Flame className="w-16 h-16 text-primary-600 dark:text-primary-500 mx-auto mb-4 animate-pulse" />
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Message Decrypted
+                {t('view.decryptedTitle')}
               </h2>
               <p className="text-gray-600 dark:text-gray-300">
-                This message has been permanently deleted
+                {t('view.decryptedDesc')}
               </p>
             </div>
 
@@ -333,15 +333,15 @@ function ViewMessage() {
                     onClick={() => handleShare('twitter')}
                     className="btn-secondary flex items-center gap-2 text-sm"
                   >
-                    <Twitter className="w-4 h-4" />
-                    Share on X
+                    <XIcon className="w-4 h-4" />
+                    {t('view.shareX')}
                   </button>
                   <button
                     onClick={() => handleShare('reddit')}
                     className="btn-secondary flex items-center gap-2 text-sm"
                   >
                     <MessageSquare className="w-4 h-4" />
-                    Share on Reddit
+                    {t('view.shareReddit')}
                   </button>
                 </div>
               </div>
