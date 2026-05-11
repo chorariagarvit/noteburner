@@ -126,3 +126,17 @@ export function generateVerificationToken() {
   const nanoid = customAlphabet(alphabet, 32);
   return nanoid();
 }
+
+/**
+ * Compute SHA-256 hex digest of a string
+ * Used to hash API keys before DB storage/lookup so raw keys are never stored
+ * @param {string} str - Input string
+ * @returns {Promise<string>} - Hex digest
+ */
+export async function sha256hex(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}

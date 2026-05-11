@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Flame, Moon, Sun, Trophy, Gift, Users, UserCircle, LogOut, LogIn, Star } from 'lucide-react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -140,7 +140,7 @@ function Header() {
                         className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign out
+                        {t('nav.logout')}
                       </button>
                     </div>
                   </>

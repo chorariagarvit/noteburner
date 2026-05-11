@@ -26,6 +26,8 @@ import {
   sendWelcomeEmail 
 } from '../utils/email.js';
 import { requireAuth, getUserId } from '../middleware/requireAuth.js';
+import { rateLimitMiddleware } from '../middleware/rateLimit.js';
+import { deleteCache, getSessionCacheKey } from '../utils/cache.js';
 
 const router = new Hono();
 
@@ -89,9 +91,9 @@ router.post('/signup', async (c) => {
       verificationToken
     );
 
-    // Fallback: log token if email fails (dev mode)
+    // Fallback: log generic message if email fails (dev mode)
     if (!emailSent) {
-      console.log(`[DEV] Verification token for ${email}: ${verificationToken}`);
+      console.log(`[DEV] Verification email not sent for ${email} - check email service config`);
     }
 
     return c.json({
@@ -102,9 +104,7 @@ router.post('/signup', async (c) => {
         email: email.toLowerCase(),
         displayName: displayName || null,
         emailVerified: false
-      },
-      // In development, include token for testing
-      ...(process.env.NODE_ENV !== 'production' && { verificationToken })
+      }
     }, 201);
   } catch (error) {
     console.error('Signup error:', error);
@@ -180,11 +180,7 @@ router.post('/login', async (c) => {
         VALUES (?, ?, 0, 'Invalid password')
       `).bind(user.email, ipAddress).run();
 
-      return c.json({ 
-        error: 'Invalid email or password', 
-        code: 'INVALID_CREDENTIALS',
-        attemptsRemaining: Math.max(0, 5 - failedAttempts)
-      }, 401);
+      return c.json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }, 401);
     }
 
     // Password correct - reset failed attempts and update last login
@@ -232,6 +228,8 @@ router.post('/logout', requireAuth, async (c) => {
   try {
     const sessionToken = c.get('sessionToken');
     await revokeSession(c.env.DB, sessionToken);
+    // Invalidate KV session cache so the token stops working immediately
+    await deleteCache(c.env.CACHE, getSessionCacheKey(sessionToken));
 
     return c.json({
       success: true,
@@ -312,7 +310,7 @@ router.get('/me', requireAuth, async (c) => {
  * POST /api/auth/verify-email
  * Verify email with token
  */
-router.post('/verify-email', async (c) => {
+router.post('/verify-email', rateLimitMiddleware(10, 300), async (c) => {
   try {
     const body = await c.req.json();
     const { token } = body;
@@ -348,7 +346,7 @@ router.post('/verify-email', async (c) => {
  * POST /api/auth/forgot-password
  * Request password reset
  */
-router.post('/forgot-password', async (c) => {
+router.post('/forgot-password', rateLimitMiddleware(5, 300), async (c) => {
   try {
     const body = await c.req.json();
     const { email } = body;
@@ -392,16 +390,14 @@ router.post('/forgot-password', async (c) => {
       resetToken
     );
 
-    // Fallback: log token if email fails (dev mode)
+    // Fallback: log generic message if email fails (dev mode)
     if (!emailSent) {
-      console.log(`[DEV] Password reset token for ${email}: ${resetToken}`);
+      console.log(`[DEV] Password reset email not sent for ${email} - check email service config`);
     }
 
     return c.json({
       success: true,
-      message: 'If an account exists with this email, a password reset link has been sent',
-      // In development, include token for testing
-      ...(process.env.NODE_ENV !== 'production' && { resetToken })
+      message: 'If an account exists with this email, a password reset link has been sent'
     });
   } catch (error) {
     console.error('Forgot password error:', error);
@@ -413,7 +409,7 @@ router.post('/forgot-password', async (c) => {
  * POST /api/auth/reset-password
  * Reset password with token
  */
-router.post('/reset-password', async (c) => {
+router.post('/reset-password', rateLimitMiddleware(5, 300), async (c) => {
   try {
     const body = await c.req.json();
     const { token, newPassword } = body;
@@ -432,17 +428,16 @@ router.post('/reset-password', async (c) => {
       }, 400);
     }
 
-    //Get reset token
+    // Atomically mark the token as used — prevents race conditions where two
+    // concurrent requests with the same token both pass the used=0 check
     const reset = await c.env.DB.prepare(`
-      SELECT id, user_id, expires_at, used FROM password_resets WHERE reset_token = ?
+      UPDATE password_resets SET used = 1
+      WHERE reset_token = ? AND used = 0
+      RETURNING id, user_id, expires_at
     `).bind(token).first();
 
     if (!reset) {
-      return c.json({ error: 'Invalid reset token', code: 'INVALID_TOKEN' }, 400);
-    }
-
-    if (reset.used === 1) {
-      return c.json({ error: 'Reset token already used', code: 'TOKEN_USED' }, 400);
+      return c.json({ error: 'Invalid or already-used reset token', code: 'INVALID_TOKEN' }, 400);
     }
 
     const expiresAt = new Date(reset.expires_at);
@@ -457,11 +452,6 @@ router.post('/reset-password', async (c) => {
     await c.env.DB.prepare(`
       UPDATE users SET password_hash = ?, failed_login_attempts = 0, locked_until = NULL WHERE id = ?
     `).bind(passwordHash, reset.user_id).run();
-
-    // Mark token as used
-    await c.env.DB.prepare(`
-      UPDATE password_resets SET used = 1 WHERE id = ?
-    `).bind(reset.id).run();
 
     // Revoke all existing sessions for security
     await revokeAllUserSessions(c.env.DB, reset.user_id);
@@ -490,11 +480,28 @@ router.put('/profile', requireAuth, async (c) => {
     const values = [];
 
     if (displayName !== undefined) {
+      if (typeof displayName !== 'string' || displayName.length > 100) {
+        return c.json({ error: 'Display name must be 100 characters or fewer', code: 'INVALID_DISPLAY_NAME' }, 400);
+      }
       updates.push('display_name = ?');
-      values.push(displayName);
+      values.push(displayName.trim());
     }
 
     if (avatarUrl !== undefined) {
+      // Must be a valid https:// URL — no data URIs, javascript:, or private IPs
+      try {
+        const parsed = new URL(avatarUrl);
+        if (parsed.protocol !== 'https:') {
+          return c.json({ error: 'Avatar URL must use HTTPS', code: 'INVALID_AVATAR_URL' }, 400);
+        }
+        // Block private IP ranges
+        const privatePattern = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
+        if (privatePattern.test(parsed.hostname)) {
+          return c.json({ error: 'Avatar URL must be a public HTTPS URL', code: 'INVALID_AVATAR_URL' }, 400);
+        }
+      } catch {
+        return c.json({ error: 'Invalid avatar URL', code: 'INVALID_AVATAR_URL' }, 400);
+      }
       updates.push('avatar_url = ?');
       values.push(avatarUrl);
     }
@@ -527,11 +534,25 @@ router.put('/profile', requireAuth, async (c) => {
 router.delete('/account', requireAuth, async (c) => {
   try {
     const userId = getUserId(c);
+    const body = await c.req.json().catch(() => ({}));
+    const { password } = body;
+
+    if (!password) {
+      return c.json({ error: 'Password is required to delete your account', code: 'PASSWORD_REQUIRED' }, 400);
+    }
+
+    // Re-authenticate before permanent deletion
+    const user = await c.env.DB.prepare(`SELECT password_hash FROM users WHERE id = ?`).bind(userId).first();
+    if (!user) {
+      return c.json({ error: 'User not found', code: 'USER_NOT_FOUND' }, 404);
+    }
+    const passwordValid = await verifyPassword(password, user.password_hash);
+    if (!passwordValid) {
+      return c.json({ error: 'Incorrect password', code: 'INVALID_PASSWORD' }, 403);
+    }
 
     // Delete user (CASCADE will delete sessions, password_resets, etc.)
-    await c.env.DB.prepare(`
-      DELETE FROM users WHERE id = ?
-    `).bind(userId).run();
+    await c.env.DB.prepare(`DELETE FROM users WHERE id = ?`).bind(userId).run();
 
     return c.json({
       success: true,

@@ -118,7 +118,8 @@ export function AuthProvider({ children }) {
 
       if (response.ok) {
         const data = await response.json();
-        const rememberMe = localStorage.getItem('sessionToken') ? true : false;
+        // Read the explicitly-persisted preference rather than inferring from storage state
+        const rememberMe = localStorage.getItem('rememberMe') === 'true';
         saveSession(data.sessionToken, data.expiresAt, rememberMe);
         return true;
       } else {
@@ -155,6 +156,8 @@ export function useAuth() {
 
 // Helper functions for session management
 function saveSession(sessionToken, expiresAt, rememberMe) {
+  // Persist the rememberMe preference explicitly so refreshSession can honour it
+  localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
   const storage = rememberMe ? localStorage : sessionStorage;
   storage.setItem('sessionToken', sessionToken);
   storage.setItem('expiresAt', expiresAt);
@@ -167,6 +170,7 @@ function getSessionToken() {
 function clearSession() {
   localStorage.removeItem('sessionToken');
   localStorage.removeItem('expiresAt');
+  localStorage.removeItem('rememberMe');
   sessionStorage.removeItem('sessionToken');
   sessionStorage.removeItem('expiresAt');
 }

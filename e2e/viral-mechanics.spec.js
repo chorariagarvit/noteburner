@@ -118,7 +118,7 @@ test.describe('Viral Mechanics Features', () => {
     // View and decrypt
     await page.goto(shareUrl);
     await page.click('button:has-text("Unlock Secret Message")');
-    await page.fill('input[placeholder="Enter the password"]', password);
+    await page.fill('input[placeholder="Enter message password"]', password);
     await page.click('button:has-text("Decrypt Message")');
 
     // Wait for decryption
@@ -141,7 +141,7 @@ test.describe('Viral Mechanics Features', () => {
 
     await page.goto(shareUrl);
     await page.click('button:has-text("Unlock Secret Message")');
-    await page.fill('input[placeholder="Enter the password"]', password);
+    await page.fill('input[placeholder="Enter message password"]', password);
     await page.click('button:has-text("Decrypt Message")');
 
     await expect(page.locator('text=CTA test message')).toBeVisible({ timeout: 5000 });
@@ -231,7 +231,7 @@ test.describe('Viral Mechanics Features', () => {
 
     await page.goto(shareUrl);
     await page.click('button:has-text("Unlock Secret Message")');
-    await page.fill('input[placeholder="Enter the password"]', password);
+    await page.fill('input[placeholder="Enter message password"]', password);
     await page.click('button:has-text("Decrypt Message")');
 
     await expect(page.locator('text=Share test')).toBeVisible({ timeout: 5000 });
@@ -330,7 +330,7 @@ test.describe('Viral Mechanics Features', () => {
 
     await page.goto(shareUrl);
     await page.click('button:has-text("Unlock Secret Message")');
-    await page.fill('input[placeholder="Enter the password"]', password);
+    await page.fill('input[placeholder="Enter message password"]', password);
     await page.click('button:has-text("Decrypt Message")');
 
     await expect(page.locator('text=Burn effect test')).toBeVisible({ timeout: 5000 });
@@ -419,7 +419,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.click('button:has-text("Unlock Secret Message")');
     
     // Try wrong password
-    await page.fill('input[placeholder="Enter the password"]', 'WrongPassword123!');
+    await page.fill('input[placeholder="Enter message password"]', 'WrongPassword123!');
     await page.click('button:has-text("Decrypt Message")');
 
     // Should show friendly error message

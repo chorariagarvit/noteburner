@@ -2,53 +2,54 @@
  * Utility functions for message route operations
  */
 
-/**
- * Determine if an identifier is a token or custom slug
- * @param {string} identifier - The identifier to check
- * @returns {boolean} - True if token, false if custom slug
- */
-export function isTokenIdentifier(identifier) {
-  return identifier.length === 32 && /^[A-Za-z0-9_-]+$/.test(identifier);
-}
+// Explicit column list — intentionally excludes totp_secret to prevent accidental exposure
+const MESSAGE_COLUMNS = `
+  token, encrypted_data, iv, salt, expires_at, created_at, accessed,
+  custom_slug, creator_token, max_views, view_count, max_password_attempts,
+  require_2fa, require_geo_match, creator_country, auto_burn_suspicious,
+  media_files, group_id
+`;
 
 /**
  * Get message by identifier (token or slug)
+ * Always tries token lookup first, then falls back to slug — avoids misrouting
+ * 32-char slugs that would previously be treated as tokens.
  * @param {Object} db - Database instance
  * @param {string} identifier - Token or custom slug
  * @returns {Promise<Object|null>} - Message object or null
  */
 export async function getMessageByIdentifier(db, identifier) {
-  const isToken = isTokenIdentifier(identifier);
-  
-  if (isToken) {
-    return await db.prepare(
-      `SELECT * FROM messages WHERE token = ? AND accessed = 0`
-    ).bind(identifier).first();
-  } else {
-    return await db.prepare(
-      `SELECT * FROM messages WHERE custom_slug = ? AND accessed = 0`
-    ).bind(identifier).first();
-  }
+  // Try token lookup first
+  const byToken = await db.prepare(
+    `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE token = ? AND accessed = 0`
+  ).bind(identifier).first();
+
+  if (byToken) return byToken;
+
+  // Fall back to slug lookup
+  return await db.prepare(
+    `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE custom_slug = ? AND accessed = 0`
+  ).bind(identifier).first();
 }
 
 /**
- * Delete message by identifier
+ * Delete message by identifier (atomically marks as accessed)
  * @param {Object} db - Database instance
  * @param {string} identifier - Token or custom slug
  * @returns {Promise<Object|null>} - Deleted message info or null
  */
 export async function deleteMessageByIdentifier(db, identifier) {
-  const isToken = isTokenIdentifier(identifier);
-  
-  if (isToken) {
-    return await db.prepare(
-      `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING media_files, token`
-    ).bind(identifier).first();
-  } else {
-    return await db.prepare(
-      `UPDATE messages SET accessed = 1 WHERE custom_slug = ? AND accessed = 0 RETURNING media_files, token`
-    ).bind(identifier).first();
-  }
+  // Try token first
+  const byToken = await db.prepare(
+    `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING media_files, token, group_id`
+  ).bind(identifier).first();
+
+  if (byToken) return byToken;
+
+  // Fall back to slug
+  return await db.prepare(
+    `UPDATE messages SET accessed = 1 WHERE custom_slug = ? AND accessed = 0 RETURNING media_files, token, group_id`
+  ).bind(identifier).first();
 }
 
 /**
@@ -56,22 +57,13 @@ export async function deleteMessageByIdentifier(db, identifier) {
  * @param {Object} db - Database instance
  * @param {Object} mediaBucket - R2 bucket instance
  * @param {string} identifier - Token or custom slug
- * @param {Object} message - Message object
+ * @param {Object} message - Message object (must have token and media_files)
  */
 export async function deleteExpiredMessage(db, mediaBucket, identifier, message) {
-  const isToken = isTokenIdentifier(identifier);
-  
-  // Delete message from database
-  const deleteQuery = isToken 
-    ? `DELETE FROM messages WHERE token = ?`
-    : `DELETE FROM messages WHERE custom_slug = ?`;
-  await db.prepare(deleteQuery).bind(identifier).run();
+  await db.prepare(`DELETE FROM messages WHERE token = ?`).bind(message.token).run();
 
-  // Delete associated media files
   if (message.media_files) {
     const mediaFiles = JSON.parse(message.media_files);
-    for (const fileId of mediaFiles) {
-      await mediaBucket.delete(fileId);
-    }
+    await Promise.allSettled(mediaFiles.map(fileId => mediaBucket.delete(fileId)));
   }
 }

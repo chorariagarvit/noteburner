@@ -9,7 +9,7 @@
     "login": "Login",
     "signup": "Sign Up",
     "profile": "Profile",
-    "logout": "Logout",
+    "logout": "Sign out",
     "premium": "Premium"
   },
   "home": {
@@ -92,9 +92,9 @@
   },
   "create": {
     "title": "Create Secret Message",
-    "messagePlaceholder": "Type your secret message here...",
+    "messagePlaceholder": "Enter your secret message...",
     "passwordLabel": "Password",
-    "passwordPlaceholder": "Set a password (optional)",
+    "passwordPlaceholder": "Enter a strong password",
     "expiryLabel": "Expires in",
     "submitButton": "Encrypt & Create Link",
     "customUrlLabel": "Custom URL (optional)",
@@ -164,7 +164,11 @@
     "previewUnlock": "Unlock Secret Message",
     "afterBurnTitle": "Your secret has self-destructed! 🔥",
     "afterBurnSendOwn": "Want to send your own encrypted message?",
-    "afterBurnCta": "Create Your Secret Message"
+    "afterBurnCta": "Create Your Secret Message",
+    "decryptedTitle": "Message Decrypted",
+    "decryptedDesc": "This message has been permanently deleted",
+    "shareX": "Share on X",
+    "shareReddit": "Share on Reddit"
   },
   "auth": {
     "login": {
@@ -211,7 +215,10 @@
         "passwordMismatch": "Passwords do not match",
         "passwordWeak": "Password must be at least 8 characters with uppercase, lowercase and number",
         "termsRequired": "You must accept the terms"
-      }
+      },
+      "successTitle": "Account created successfully",
+      "successMessage": "Please check your email to verify your account",
+      "redirecting": "Redirecting to login..."
     },
     "forgotPassword": {
       "title": "Reset Password",

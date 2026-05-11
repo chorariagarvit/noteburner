@@ -7,10 +7,10 @@ export const securityHeaders = () => {
   return async (c, next) => {
     await next();
 
-    // Content Security Policy
+    // Content Security Policy — no unsafe-inline or unsafe-eval
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com", // Allow React DevTools in dev
+      "script-src 'self' https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: https: blob:",
       "font-src 'self' https://fonts.gstatic.com data:",
@@ -48,142 +48,117 @@ export const securityHeaders = () => {
 
 /**
  * Rate Limiting Middleware
- * Enhanced rate limiting with sliding window
+ * KV-backed rate limiting — works correctly across all Cloudflare Worker isolates
  */
 export const enhancedRateLimit = (options = {}) => {
   const {
-    windowMs = 60000, // 1 minute
+    windowMs = 60000,
     maxRequests = 100,
-    message = 'Too many requests',
-    skipSuccessfulRequests = false
+    message = 'Too many requests'
   } = options;
 
-  // In-memory store (for production, use Cloudflare KV or Durable Objects)
-  const requests = new Map();
+  const windowSeconds = Math.ceil(windowMs / 1000);
 
   return async (c, next) => {
-    const identifier = getClientIdentifier(c.req);
-    const now = Date.now();
+    const kv = c.env.CACHE;
 
-    // Clean up old entries
-    if (requests.size > 10000) {
-      // Clean entries older than windowMs
-      for (const [key, value] of requests.entries()) {
-        if (now - value.resetTime > windowMs) {
-          requests.delete(key);
-        }
-      }
+    if (!kv) {
+      console.warn('[RateLimit] KV namespace not available, skipping rate limit');
+      await next();
+      return;
     }
 
-    // Get or create request record
-    let record = requests.get(identifier);
-    if (!record || now - record.resetTime > windowMs) {
-      record = {
-        count: 0,
-        resetTime: now + windowMs
-      };
-    }
+    const identifier = await getClientIdentifier(c.req);
+    const key = `erl:${identifier}:${maxRequests}:${windowSeconds}`;
+    const current = await kv.get(key);
+    const count = current ? parseInt(current, 10) : 0;
 
-    // Increment request count
-    record.count++;
-    requests.set(identifier, record);
-
-    // Check if rate limit exceeded
-    if (record.count > maxRequests) {
+    if (count >= maxRequests) {
       c.header('X-RateLimit-Limit', maxRequests.toString());
       c.header('X-RateLimit-Remaining', '0');
-      c.header('X-RateLimit-Reset', new Date(record.resetTime).toISOString());
-      c.header('Retry-After', Math.ceil((record.resetTime - now) / 1000).toString());
-
-      return c.json({
-        error: message,
-        retryAfter: Math.ceil((record.resetTime - now) / 1000)
-      }, 429);
+      c.header('Retry-After', windowSeconds.toString());
+      return c.json({ error: message, retryAfter: windowSeconds }, 429);
     }
 
-    // Set rate limit headers
+    await kv.put(key, String(count + 1), { expirationTtl: windowSeconds });
+
     c.header('X-RateLimit-Limit', maxRequests.toString());
-    c.header('X-RateLimit-Remaining', (maxRequests - record.count).toString());
-    c.header('X-RateLimit-Reset', new Date(record.resetTime).toISOString());
+    c.header('X-RateLimit-Remaining', String(maxRequests - count - 1));
 
     await next();
-
-    // Reset count for successful requests if configured
-    if (skipSuccessfulRequests && c.res.status < 400) {
-      record.count--;
-      requests.set(identifier, record);
-    }
   };
 };
 
 /**
  * Get client identifier for rate limiting
+ * API keys are hashed before use so raw keys never appear in KV keys or logs
  */
-function getClientIdentifier(req) {
-  // Priority: API key > IP address
+async function getClientIdentifier(req) {
   const apiKey = req.header('X-API-Key');
   if (apiKey) {
-    return `api:${apiKey}`;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(apiKey);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return `api:${hashHex.slice(0, 16)}`;
   }
 
-  // Use Cloudflare's connecting IP
-  const ip = req.header('CF-Connecting-IP') || 
+  const ip = req.header('CF-Connecting-IP') ||
               req.header('X-Forwarded-For')?.split(',')[0] ||
               'unknown';
-  
+
   return `ip:${ip}`;
 }
 
 /**
  * DDoS Protection Middleware
- * Blocks suspicious traffic patterns
+ * KV-backed IP banning — persists across Worker isolates and cold starts
  */
 export const ddosProtection = () => {
-  const suspiciousIPs = new Map(); // IP -> { count, firstSeen }
-  const THRESHOLD = 1000; // requests
-  const TIME_WINDOW = 60000; // 1 minute
-  const BAN_DURATION = 3600000; // 1 hour
+  const THRESHOLD = 1000; // requests per minute before ban
+  const WINDOW_SECONDS = 60;
+  const BAN_SECONDS = 3600; // 1 hour ban
 
   return async (c, next) => {
-    const ip = c.req.header('CF-Connecting-IP') || 
+    const kv = c.env.CACHE;
+    const ip = c.req.header('CF-Connecting-IP') ||
                c.req.header('X-Forwarded-For')?.split(',')[0] ||
                'unknown';
 
-    const now = Date.now();
-    const record = suspiciousIPs.get(ip);
+    if (!kv) {
+      await next();
+      return;
+    }
 
-    // Check if IP is banned
-    if (record?.banned && now - record.bannedAt < BAN_DURATION) {
+    // Check if IP is currently banned
+    const banKey = `ddos:ban:${ip}`;
+    const banned = await kv.get(banKey);
+    if (banned) {
+      const ttl = parseInt(banned, 10);
       return c.json({
         error: 'Access temporarily blocked due to suspicious activity',
-        retryAfter: Math.ceil((BAN_DURATION - (now - record.bannedAt)) / 1000)
+        retryAfter: BAN_SECONDS
       }, 403);
     }
 
-    // Track request
-    if (!record || now - record.firstSeen > TIME_WINDOW) {
-      suspiciousIPs.set(ip, {
-        count: 1,
-        firstSeen: now,
-        banned: false
-      });
-    } else {
-      record.count++;
-      
-      // Ban if threshold exceeded
-      if (record.count > THRESHOLD) {
-        record.banned = true;
-        record.bannedAt = now;
-        console.warn(`IP ${ip} banned for DDoS-like behavior (${record.count} requests in ${TIME_WINDOW}ms)`);
-        
-        return c.json({
-          error: 'Access temporarily blocked due to suspicious activity',
-          retryAfter: BAN_DURATION / 1000
-        }, 403);
-      }
-      
-      suspiciousIPs.set(ip, record);
+    // Increment request counter for this IP
+    const countKey = `ddos:count:${ip}`;
+    const current = await kv.get(countKey);
+    const count = current ? parseInt(current, 10) : 0;
+
+    if (count >= THRESHOLD) {
+      // Ban the IP
+      await kv.put(banKey, '1', { expirationTtl: BAN_SECONDS });
+      await kv.delete(countKey);
+      console.warn(`[DDoS] IP ${ip} banned after ${count} requests in ${WINDOW_SECONDS}s`);
+      return c.json({
+        error: 'Access temporarily blocked due to suspicious activity',
+        retryAfter: BAN_SECONDS
+      }, 403);
     }
+
+    await kv.put(countKey, String(count + 1), { expirationTtl: WINDOW_SECONDS });
 
     await next();
   };

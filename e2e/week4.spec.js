@@ -229,18 +229,18 @@ test.describe('Week 4 - Gamification', () => {
   test('should navigate between gamification pages using header links', async ({ page }) => {
     await page.goto(BASE_URL);
     
-    // Click achievements link
-    await page.click('text=Achievements');
+    // Click achievements link (use href to work across all viewports)
+    await page.click('a[href="/achievements"]');
     await expect(page).toHaveURL(`${BASE_URL}/achievements`);
     await expect(page.locator('text=Your Achievements')).toBeVisible();
     
-    // Click leaderboard link
-    await page.click('text=/Leaderboard|Stats/');
+    // Click leaderboard link (use href to work across all viewports)
+    await page.click('a[href="/leaderboard"]');
     await expect(page).toHaveURL(`${BASE_URL}/leaderboard`);
     await expect(page.locator('text=Global Leaderboard')).toBeVisible();
     
-    // Click create message link
-    await page.click('text=Create Message');
+    // Click create message link (use href)
+    await page.click('a[href="/create"]');
     await expect(page).toHaveURL(/\/(create)?/);
   });
 

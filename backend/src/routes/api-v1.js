@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
+import { sha256hex } from '../utils/password.js';
 
 const router = new Hono();
 
@@ -13,12 +14,15 @@ async function requireApiKey(c, next) {
     return c.json({ error: 'API key required', code: 'API_KEY_MISSING' }, 401);
   }
 
+  // Hash the incoming key before DB lookup — raw keys are never stored
+  const hashedKey = await sha256hex(apiKey);
+
   // Verify API key and check if active
   const keyData = await c.env.DB.prepare(`
     SELECT id, user_id, rate_limit, active, requests_today, last_reset_at
-    FROM api_keys 
+    FROM api_keys
     WHERE key = ? AND active = 1
-  `).bind(apiKey).first();
+  `).bind(hashedKey).first();
 
   if (!keyData) {
     return c.json({ error: 'Invalid or inactive API key', code: 'API_KEY_INVALID' }, 401);
@@ -316,18 +320,19 @@ router.post('/api-keys', async (c) => {
   }
 
   const id = nanoid(16);
-  const key = `nb_${nanoid(32)}`;
+  const rawKey = `nb_${nanoid(32)}`;
+  const hashedKey = await sha256hex(rawKey);
 
   await c.env.DB.prepare(`
     INSERT INTO api_keys (id, user_id, key, name, rate_limit, active)
     VALUES (?, ?, ?, ?, ?, 1)
-  `).bind(id, userId, key, name, rate_limit).run();
+  `).bind(id, userId, hashedKey, name, rate_limit).run();
 
   return c.json({
     success: true,
     api_key: {
       id,
-      key, // Only shown once
+      key: rawKey, // Raw key shown once — not stored; user must save it now
       name,
       rate_limit,
       created_at: new Date().toISOString()

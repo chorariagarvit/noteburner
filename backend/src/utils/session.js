@@ -10,36 +10,13 @@ const SESSION_EXPIRY_SHORT = 7 * 24 * 60 * 60 * 1000; // 7 days
 const SESSION_EXPIRY_LONG = 30 * 24 * 60 * 60 * 1000; // 30 days (remember me)
 
 /**
- * Generate a secure session token
- * Format: session_{userId}_{randomToken}
- * @param {string} userId - User ID
- * @returns {string} - Session token
+ * Generate a secure opaque session token
+ * @returns {string} - Opaque random session token (48 chars)
  */
-export function generateSessionToken(userId) {
+export function generateSessionToken() {
   const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  const nanoid = customAlphabet(alphabet, 32);
-  const randomToken = nanoid();
-  return `session_${userId}_${randomToken}`;
-}
-
-/**
- * Extract user ID from session token
- * @param {string} sessionToken - Session token
- * @returns {string|null} - User ID or null
- */
-export function extractUserIdFromToken(sessionToken) {
-  if (!sessionToken || typeof sessionToken !== 'string') {
-    return null;
-  }
-
-  // Format: session_{userId}_{randomToken}
-  const parts = sessionToken.split('_');
-  if (parts.length >= 3 && parts[0] === 'session') {
-    // Join all parts except first (session) and last (random token)
-    return parts.slice(1, -1).join('_');
-  }
-
-  return null;
+  const nanoid = customAlphabet(alphabet, 48);
+  return nanoid();
 }
 
 /**
@@ -56,7 +33,7 @@ export async function createSession(db, userId, options = {}) {
     userAgent = null
   } = options;
 
-  const sessionToken = generateSessionToken(userId);
+  const sessionToken = generateSessionToken();
   const expiryMs = rememberMe ? SESSION_EXPIRY_LONG : SESSION_EXPIRY_SHORT;
   const expiresAt = new Date(Date.now() + expiryMs).toISOString();
 

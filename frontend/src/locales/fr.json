@@ -9,7 +9,7 @@
     "login": "Connexion",
     "signup": "S'inscrire",
     "profile": "Profil",
-    "logout": "Déconnexion",
+    "logout": "Se déconnecter",
     "premium": "Premium"
   },
   "home": {
@@ -92,9 +92,9 @@
   },
   "create": {
     "title": "Créer un Message Secret",
-    "messagePlaceholder": "Tapez votre message secret ici...",
+    "messagePlaceholder": "Tapez votre message secret...",
     "passwordLabel": "Mot de passe",
-    "passwordPlaceholder": "Définir un mot de passe (optionnel)",
+    "passwordPlaceholder": "Entrez un mot de passe fort",
     "expiryLabel": "Expire dans",
     "submitButton": "Créer un Message Sécurisé",
     "customUrlLabel": "URL Personnalisée (optionnel)",
@@ -164,7 +164,11 @@
     "previewUnlock": "Déverrouiller le Message Secret",
     "afterBurnTitle": "Votre secret s'est autodétruit ! 🔥",
     "afterBurnSendOwn": "Vous voulez envoyer votre propre message chiffré ?",
-    "afterBurnCta": "Créez Votre Message Secret"
+    "afterBurnCta": "Créez Votre Message Secret",
+    "decryptedTitle": "Message Déchiffré",
+    "decryptedDesc": "Ce message a été supprimé définitivement",
+    "shareX": "Partager sur X",
+    "shareReddit": "Partager sur Reddit"
   },
   "auth": {
     "login": {
@@ -211,7 +215,10 @@
         "passwordMismatch": "Les mots de passe ne correspondent pas",
         "passwordWeak": "Le mot de passe doit contenir au moins 8 caractères avec majuscule, minuscule et chiffre",
         "termsRequired": "Vous devez accepter les conditions"
-      }
+      },
+      "successTitle": "Compte créé avec succès",
+      "successMessage": "Veuillez vérifier votre e-mail pour valider votre compte",
+      "redirecting": "Redirection vers la connexion..."
     },
     "forgotPassword": {
       "title": "Réinitialiser le Mot de Passe",

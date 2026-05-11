@@ -263,15 +263,25 @@ router.post('/:id/members', requireAuth, async (c) => {
     }, 400);
   }
 
-  // For now, use email as user_id (in production, would invite user properly)
-  const newUserId = nanoid(16);
+  // Look up existing registered user by email — don't create phantom rows
+  const existingUser = await c.env.DB.prepare(`
+    SELECT id FROM users WHERE email = ?
+  `).bind(email.toLowerCase()).first();
+
+  if (!existingUser) {
+    return c.json({
+      error: 'User not found. They must register before being added to a team.',
+      code: 'USER_NOT_REGISTERED'
+    }, 404);
+  }
+
   const memberId = nanoid(16);
 
   try {
     await c.env.DB.prepare(`
       INSERT INTO team_members (id, team_id, user_id, email, role)
       VALUES (?, ?, ?, ?, ?)
-    `).bind(memberId, teamId, newUserId, email, role).run();
+    `).bind(memberId, teamId, existingUser.id, email.toLowerCase(), role).run();
 
     return c.json({
       success: true,

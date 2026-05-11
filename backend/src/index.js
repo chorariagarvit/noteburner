@@ -17,7 +17,6 @@ import healthRouter from './routes/health.js';
 import premiumRouter from './routes/premium.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
 import { securityHeaders, enhancedRateLimit, ddosProtection } from './middleware/security.js';
-import { requireAuth } from './middleware/auth.js';
 import { detectLocale } from './middleware/locale.js';
 
 const app = new Hono();
@@ -39,32 +38,26 @@ app.get('/', (c) => {
   return c.json({
     status: 'ok',
     service: 'NoteBurner API',
-    version: '1.12.0',
+    version: '1.14.0',
     features: ['authentication', 'enterprise', 'teams', 'api-v1', 'branding', 'compliance', 'caching', 'monitoring', 'i18n', 'premium']
   });
 });
 
 // Mount route modules
-app.route('/api/health', healthRouter); // Week 12: Health monitoring
+app.route('/api/health', healthRouter);
 app.route('/api/messages', messagesRouter);
 app.route('/api/media', mediaRouter);
 app.route('/api/stats', statsRouter);
 app.route('/api/cleanup', cleanupRouter);
 app.route('/api/integrations', integrationsRouter);
 app.route('/api/audit', auditRouter);
-
-// Week 11: Authentication
-app.route('/api/auth', authRouter); // User authentication
-
-// Week 14: Premium features
+app.route('/api/auth', authRouter);
 app.route('/api/premium', premiumRouter);
-
-// Week 10: Enterprise features
-app.route('/api/v1', apiV1Router); // Has its own API key auth
-app.route('/api/api-keys', apiKeysRouter); // Session auth in router
-app.route('/api/teams', teamsRouter); // Session auth in router
-app.route('/api/branding', brandingRouter); // Session auth in router
-app.route('/api/compliance', complianceRouter); // Session auth in router
+app.route('/api/v1', apiV1Router);
+app.route('/api/api-keys', apiKeysRouter);
+app.route('/api/teams', teamsRouter);
+app.route('/api/branding', brandingRouter);
+app.route('/api/compliance', complianceRouter);
 
 // Handle preflight OPTIONS requests
 app.options('/*', (c) => {

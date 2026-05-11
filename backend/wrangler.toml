@@ -50,10 +50,17 @@ RATE_LIMIT_WINDOW = "60"       # seconds
 [triggers]
 crons = ["0 * * * *"]
 
-# CORS settings
+# Environment-specific overrides
 [env.production]
 name = "noteburner-api"
-FRONTEND_URL = "https://noteburner.work"  # Update with your actual Pages URL
+
+[env.production.vars]
+FRONTEND_URL = "https://noteburner.work"
+ENVIRONMENT = "production"
+# Set secrets via: wrangler secret put TOTP_ENCRYPTION_KEY --env production
 
 [env.development]
 name = "noteburner-api-dev"
+
+[env.development.vars]
+ENVIRONMENT = "development"

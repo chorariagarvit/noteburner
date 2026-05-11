@@ -92,9 +92,9 @@
   },
   "create": {
     "title": "创建秘密消息",
-    "messagePlaceholder": "在此输入您的秘密消息...",
+    "messagePlaceholder": "输入您的秘密消息...",
     "passwordLabel": "密码",
-    "passwordPlaceholder": "设置密码（可选）",
+    "passwordPlaceholder": "输入强密码",
     "expiryLabel": "过期时间",
     "submitButton": "创建安全消息",
     "customUrlLabel": "自定义网址（可选）",
@@ -164,7 +164,11 @@
     "previewUnlock": "解锁秘密消息",
     "afterBurnTitle": "你的秘密已自毁！🔥",
     "afterBurnSendOwn": "想发送您自己的加密消息吗？",
-    "afterBurnCta": "创建你的秘密消息"
+    "afterBurnCta": "创建你的秘密消息",
+    "decryptedTitle": "消息已解密",
+    "decryptedDesc": "此消息已被永久删除",
+    "shareX": "分享到X",
+    "shareReddit": "分享到Reddit"
   },
   "auth": {
     "login": {
@@ -211,7 +215,10 @@
         "passwordMismatch": "密码不匹配",
         "passwordWeak": "密码必须至少包含 8 个字符，包括大写、小写和数字",
         "termsRequired": "您必须接受条款"
-      }
+      },
+      "successTitle": "账户创建成功",
+      "successMessage": "请查看您的电子邮件以验证您的账户",
+      "redirecting": "正在跳转到登录页面..."
     },
     "forgotPassword": {
       "title": "重置密码",
