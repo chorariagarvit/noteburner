@@ -1,6 +1,7 @@
 import { X, Command, Keyboard } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { useEscapeKey } from '../../hooks/useKeyboardShortcuts';
+import React from 'react';
 
 const SHORTCUTS = [
   {
