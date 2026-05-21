@@ -1,6 +1,6 @@
-const CACHE_NAME = 'noteburner-v1.6.0';
-const STATIC_CACHE = 'noteburner-static-v1.6.0';
-const DYNAMIC_CACHE = 'noteburner-dynamic-v1.6.0';
+const CACHE_NAME = 'noteburner-v1.14.0';
+const STATIC_CACHE = 'noteburner-static-v1.14.0';
+const DYNAMIC_CACHE = 'noteburner-dynamic-v1.14.0';
 
 // Assets to cache immediately
 const STATIC_ASSETS = [
