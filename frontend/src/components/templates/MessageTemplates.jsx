@@ -1,3 +1,4 @@
+import React from 'react';
 import { FileText, Gift, Heart, Briefcase, Key, Star } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { useI18n } from '../../contexts/I18nContext';
