@@ -80,7 +80,12 @@ export const enhancedRateLimit = (options = {}) => {
       return c.json({ error: message, retryAfter: windowSeconds }, 429);
     }
 
-    await kv.put(key, String(count + 1), { expirationTtl: windowSeconds });
+    // Only set TTL on first write to avoid sliding the window on every request
+    if (count === 0) {
+      await kv.put(key, '1', { expirationTtl: windowSeconds });
+    } else {
+      await kv.put(key, String(count + 1));
+    }
 
     c.header('X-RateLimit-Limit', maxRequests.toString());
     c.header('X-RateLimit-Remaining', String(maxRequests - count - 1));
