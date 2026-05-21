@@ -21,12 +21,12 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260410",
-    "wrangler": "^4.81.1"
+    "@cloudflare/workers-types": "^4.20260521",
+    "wrangler": "^4.93.0"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "hono": "^4.12.12",
-    "nanoid": "^5.1.7"
+    "hono": "^4.12.21",
+    "nanoid": "^5.1.11"
   }
 }
