@@ -16,14 +16,13 @@ import authRouter from './routes/auth.js';
 import healthRouter from './routes/health.js';
 import premiumRouter from './routes/premium.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
-import { securityHeaders, enhancedRateLimit, ddosProtection } from './middleware/security.js';
+import { securityHeaders, enhancedRateLimit } from './middleware/security.js';
 import { detectLocale } from './middleware/locale.js';
 
 const app = new Hono();
 
 // Security middleware (apply first)
 app.use('/*', securityHeaders());
-app.use('/*', ddosProtection());
 app.use('/*', detectLocale());
 
 // CORS middleware

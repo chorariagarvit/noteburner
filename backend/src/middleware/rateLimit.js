@@ -20,8 +20,11 @@ export function rateLimitMiddleware(limit = 10, windowSeconds = 60) {
       return c.json({ error: 'Rate limit exceeded. Please try again later.' }, 429);
     }
 
-    // Increment counter; set TTL only on first write to avoid window reset on every request
-    await kv.put(key, String(count + 1), { expirationTtl: windowSeconds });
+    if (count === 0) {
+      await kv.put(key, '1', { expirationTtl: windowSeconds });
+    } else {
+      await kv.put(key, String(count + 1));
+    }
 
     await next();
   };
