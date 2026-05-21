@@ -31,6 +31,10 @@
   ],
   "author": "",
   "license": "MIT",
+  "overrides": {
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
   "devDependencies": {
     "@playwright/test": "^1.58.2"
   }
