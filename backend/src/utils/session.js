@@ -4,6 +4,11 @@
  */
 
 import { customAlphabet } from 'nanoid';
+import { sha256hex } from './password.js';
+
+// Session tokens are stored as SHA-256 hashes: a DB/log leak cannot be replayed as a session.
+// The raw token only ever lives in the client. `sessionId` (hash prefix) identifies a session safely.
+const sessionIdOf = (hash) => hash.slice(0, 16);
 
 // Session expiration times (in milliseconds)
 const SESSION_EXPIRY_SHORT = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -40,7 +45,7 @@ export async function createSession(db, userId, options = {}) {
   await db.prepare(`
     INSERT INTO sessions (session_token, user_id, expires_at, ip_address, user_agent, remember_me)
     VALUES (?, ?, ?, ?, ?, ?)
-  `).bind(sessionToken, userId, expiresAt, ipAddress, userAgent, rememberMe ? 1 : 0).run();
+  `).bind(await sha256hex(sessionToken), userId, expiresAt, ipAddress, userAgent, rememberMe ? 1 : 0).run();
 
   return {
     sessionToken,
@@ -61,11 +66,12 @@ export async function validateSession(db, sessionToken) {
     return null;
   }
 
+  const hashed = await sha256hex(sessionToken);
   const session = await db.prepare(`
     SELECT session_token, user_id, expires_at, remember_me, created_at
     FROM sessions
     WHERE session_token = ?
-  `).bind(sessionToken).first();
+  `).bind(hashed).first();
 
   if (!session) {
     return null;
@@ -84,10 +90,11 @@ export async function validateSession(db, sessionToken) {
     UPDATE sessions
     SET last_accessed_at = CURRENT_TIMESTAMP
     WHERE session_token = ?
-  `).bind(sessionToken).run();
+  `).bind(hashed).run();
 
   return {
-    sessionToken: session.session_token,
+    sessionId: sessionIdOf(hashed),
+    sessionToken, // the raw token the caller presented
     userId: session.user_id,
     expiresAt: session.expires_at,
     rememberMe: session.remember_me === 1,
@@ -115,7 +122,7 @@ export async function refreshSession(db, sessionToken) {
     UPDATE sessions
     SET expires_at = ?, last_accessed_at = CURRENT_TIMESTAMP
     WHERE session_token = ?
-  `).bind(newExpiresAt, sessionToken).run();
+  `).bind(newExpiresAt, await sha256hex(sessionToken)).run();
 
   return {
     ...session,
@@ -132,7 +139,18 @@ export async function refreshSession(db, sessionToken) {
 export async function revokeSession(db, sessionToken) {
   await db.prepare(`
     DELETE FROM sessions WHERE session_token = ?
-  `).bind(sessionToken).run();
+  `).bind(await sha256hex(sessionToken)).run();
+}
+
+/**
+ * Revoke one of a user's sessions by its opaque id (hash prefix). Returns true if revoked.
+ */
+export async function revokeSessionById(db, userId, sessionId) {
+  if (!/^[0-9a-f]{16}$/.test(sessionId || '')) return false;
+  const result = await db.prepare(`
+    DELETE FROM sessions WHERE user_id = ? AND session_token LIKE ? || '%'
+  `).bind(userId, sessionId).run();
+  return (result.meta.changes || 0) > 0;
 }
 
 /**
@@ -163,7 +181,7 @@ export async function getUserSessions(db, userId) {
     ORDER BY last_accessed_at DESC
   `).bind(userId, now).all();
 
-  return sessions.results || [];
+  return (sessions.results || []).map((row) => ({ ...row, session_id: sessionIdOf(row.session_token), session_token: undefined }));
 }
 
 /**

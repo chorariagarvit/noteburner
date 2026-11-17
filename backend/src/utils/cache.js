@@ -45,10 +45,8 @@ export async function getCache(kv, key) {
   try {
     const cached = await kv.get(key, { type: 'json' });
     if (cached) {
-      console.log(`Cache HIT: ${key}`);
       return cached;
     }
-    console.log(`Cache MISS: ${key}`);
     return null;
   } catch (error) {
     console.error(`Cache read error for ${key}:`, error);
@@ -74,7 +72,6 @@ export async function setCache(kv, key, value, ttl = 300) {
     await kv.put(key, JSON.stringify(value), {
       expirationTtl: ttl,
     });
-    console.log(`Cache SET: ${key} (TTL: ${ttl}s)`);
   } catch (error) {
     console.error(`Cache write error for ${key}:`, error);
     // Don't throw - cache failures shouldn't break the app
@@ -94,7 +91,6 @@ export async function deleteCache(kv, key) {
 
   try {
     await kv.delete(key);
-    console.log(`Cache DELETE: ${key}`);
   } catch (error) {
     console.error(`Cache delete error for ${key}:`, error);
   }

@@ -22,9 +22,9 @@ router.get('/:messageId', async (c) => {
 
     // Verify creator token matches message
     const message = await c.env.DB.prepare(`
-      SELECT id, creator_token, created_at, expires_at, max_views, view_count, password_attempts
+      SELECT token AS id, creator_token, created_at, expires_at, max_views, view_count, password_attempts
       FROM messages
-      WHERE id = ? AND creator_token = ?
+      WHERE token = ? AND creator_token = ?
     `).bind(messageId, creatorToken).first();
 
     if (!message) {

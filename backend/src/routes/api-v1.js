@@ -195,7 +195,7 @@ router.post('/messages', async (c) => {
     VALUES (?, 'created', ?, 1, ?)
   `).bind(token, creatorCountry, JSON.stringify({ via: 'api', user_id: userId })).run();
 
-  const frontendUrl = c.env.FRONTEND_URL || 'https://noteburner.app';
+  const frontendUrl = c.env.FRONTEND_URL || 'https://noteburner.work';
   const messageUrl = customSlug 
     ? `${frontendUrl}/m/${customSlug}`
     : `${frontendUrl}/m/${token}`;
@@ -305,40 +305,8 @@ router.get('/api-keys', async (c) => {
   return c.json({ api_keys: keys.results || [] });
 });
 
-/**
- * POST /api/v1/api-keys
- * Create a new API key
- */
-router.post('/api-keys', async (c) => {
-  const userId = c.get('userId');
-  const body = await c.req.json();
-
-  const { name, rate_limit = 1000 } = body;
-
-  if (!name) {
-    return c.json({ error: 'Name is required', code: 'NAME_REQUIRED' }, 400);
-  }
-
-  const id = nanoid(16);
-  const rawKey = `nb_${nanoid(32)}`;
-  const hashedKey = await sha256hex(rawKey);
-
-  await c.env.DB.prepare(`
-    INSERT INTO api_keys (id, user_id, key, name, rate_limit, active)
-    VALUES (?, ?, ?, ?, ?, 1)
-  `).bind(id, userId, hashedKey, name, rate_limit).run();
-
-  return c.json({
-    success: true,
-    api_key: {
-      id,
-      key: rawKey, // Raw key shown once — not stored; user must save it now
-      name,
-      rate_limit,
-      created_at: new Date().toISOString()
-    }
-  }, 201);
-});
+// Key creation is intentionally NOT available with an API key: use POST /api/api-keys (session auth)
+// so a leaked key cannot mint more keys or raise its own rate limit.
 
 /**
  * DELETE /api/v1/api-keys/:id

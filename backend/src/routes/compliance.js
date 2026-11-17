@@ -300,13 +300,27 @@ router.post('/:teamId/gdpr/delete-all', requireAuth, async (c) => {
     }, 400);
   }
 
-  // Delete all team data (messages, audit logs, etc.)
-  // The CASCADE will handle related records
+  // Delete everything tied to the team. CASCADE only covers members/branding/settings, so
+  // messages, their audit logs and R2 media must be removed explicitly (in D1-safe chunks).
+  const teamMessages = await c.env.DB.prepare(
+    `SELECT token, media_files FROM messages WHERE team_id = ?`
+  ).bind(teamId).all();
+  const rows = teamMessages.results || [];
+  const tokens = rows.map(r => r.token);
+  const mediaIds = rows.flatMap(r => (r.media_files ? JSON.parse(r.media_files) : []));
+  await Promise.allSettled(mediaIds.map(id => c.env.MEDIA_BUCKET.delete(id)));
+  for (let i = 0; i < tokens.length; i += 90) {
+    const chunk = tokens.slice(i, i + 90);
+    const ph = chunk.map(() => '?').join(', ');
+    await c.env.DB.prepare(`DELETE FROM audit_logs WHERE message_id IN (${ph})`).bind(...chunk).run();
+    await c.env.DB.prepare(`DELETE FROM messages WHERE token IN (${ph})`).bind(...chunk).run();
+  }
   await c.env.DB.prepare(`DELETE FROM teams WHERE id = ?`).bind(teamId).run();
 
   return c.json({ 
     success: true, 
-    message: 'All team data deleted per GDPR request',
+    message: 'Team, its members, settings, messages, audit logs and attached files were deleted.',
+    deleted_messages: tokens.length,
     deleted_at: new Date().toISOString()
   });
 });
