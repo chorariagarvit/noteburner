@@ -17,7 +17,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const from = location.state?.from?.pathname || '/';
+  // Honour ?redirect= only for same-origin relative paths (prevents open redirects)
+  const redirectParam = new URLSearchParams(location.search).get('redirect');
+  const safeRedirect = redirectParam && /^\/(?![/\\])/.test(redirectParam) ? redirectParam : null;
+  const from = location.state?.from?.pathname || safeRedirect || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

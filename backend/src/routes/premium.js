@@ -7,6 +7,7 @@
 
 import { Hono } from 'hono';
 import { requireAuth } from '../middleware/requireAuth.js';
+import { verifyStripeSignature } from '../utils/stripeSignature.js';
 import { nanoid } from 'nanoid';
 
 const app = new Hono();
@@ -92,6 +93,7 @@ app.get('/status', requireAuth, async (c) => {
     },
     subscription: {
       id: subscription.id,
+      plan_id: subscription.plan_id,
       status: subscription.status,
       payment_method: subscription.payment_method,
       current_period_start: subscription.current_period_start,
@@ -104,34 +106,54 @@ app.get('/status', requireAuth, async (c) => {
 
 /**
  * POST /api/premium/subscribe
- * Body: { planId, paymentMethod, ... }
  *
- * For Stripe: payment is handled client-side via Stripe.js.
- * This endpoint records the subscription after Stripe confirms.
- * For crypto: generates a payment address, awaits confirmation webhook.
+ * Paid plans are granted ONLY by the verified payment webhook below. This endpoint must never
+ * create an active paid subscription from client-supplied data (that was a payment bypass).
+ * Until a checkout flow is wired up it reports that payments are not enabled.
  */
 app.post('/subscribe', requireAuth, async (c) => {
-  const userId = c.get('userId');
-  const body = await c.req.json().catch(() => ({}));
-  const { planId, paymentMethod, stripeCustomerId, stripeSubscriptionId } = body;
+  return c.json({
+    error: 'Online payments are not enabled yet. Your plan was not changed.',
+    code: 'PAYMENTS_NOT_ENABLED'
+  }, 501);
+});
 
-  if (!planId) {
-    return c.json({ error: 'planId is required' }, 400);
+/**
+ * POST /api/premium/webhook  (Stripe -> server, authenticated by Stripe-Signature HMAC)
+ * Handles checkout.session.completed with metadata { user_id, plan_id } set by our checkout
+ * session. Fails closed if STRIPE_WEBHOOK_SECRET is not configured.
+ */
+app.post('/webhook', async (c) => {
+  const rawBody = await c.req.text();
+  const valid = verifyStripeSignature({
+    secret: c.env.STRIPE_WEBHOOK_SECRET,
+    header: c.req.header('Stripe-Signature'),
+    rawBody
+  });
+  if (!valid) {
+    return c.json({ error: 'Invalid signature' }, 401);
   }
 
-  const plan = await c.env.DB.prepare(
-    'SELECT * FROM premium_plans WHERE id = ? AND is_active = 1'
-  ).bind(planId).first();
+  let event;
+  try { event = JSON.parse(rawBody); } catch { return c.json({ error: 'Invalid payload' }, 400); }
 
-  if (!plan) {
-    return c.json({ error: 'Plan not found' }, 404);
+  if (event.type !== 'checkout.session.completed') {
+    return c.json({ received: true });
   }
 
-  if (planId === 'free') {
-    return c.json({ error: 'Cannot subscribe to free plan' }, 400);
+  const session = event.data?.object || {};
+  const userId = session.metadata?.user_id;
+  const planId = session.metadata?.plan_id;
+  if (!userId || !['premium', 'lifetime'].includes(planId) || session.payment_status !== 'paid') {
+    return c.json({ received: true, ignored: true });
   }
 
-  // Cancel any existing active subscription
+  const plan = await c.env.DB.prepare('SELECT id FROM premium_plans WHERE id = ? AND is_active = 1').bind(planId).first();
+  const user = await c.env.DB.prepare('SELECT id FROM users WHERE id = ?').bind(userId).first();
+  if (!plan || !user) {
+    return c.json({ received: true, ignored: true });
+  }
+
   await c.env.DB.prepare(`
     UPDATE user_subscriptions
     SET status = 'cancelled', cancelled_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
@@ -143,34 +165,18 @@ app.post('/subscribe', requireAuth, async (c) => {
     ? new Date('2099-12-31').toISOString()
     : new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()).toISOString();
 
-  const subscriptionId = nanoid();
-
   await c.env.DB.prepare(`
     INSERT INTO user_subscriptions
       (id, user_id, plan_id, status, payment_method, stripe_customer_id,
        stripe_subscription_id, current_period_start, current_period_end)
-    VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, 'active', 'stripe', ?, ?, ?, ?)
   `).bind(
-    subscriptionId,
-    userId,
-    planId,
-    paymentMethod || 'manual',
-    stripeCustomerId || null,
-    stripeSubscriptionId || null,
-    now.toISOString(),
-    periodEnd
+    nanoid(), userId, planId,
+    session.customer || null, session.subscription || null,
+    now.toISOString(), periodEnd
   ).run();
 
-  return c.json({
-    success: true,
-    subscriptionId,
-    plan: {
-      id: plan.id,
-      name: plan.name,
-      features: JSON.parse(plan.features || '[]')
-    },
-    currentPeriodEnd: periodEnd
-  }, 201);
+  return c.json({ received: true });
 });
 
 // ─── Cancel ──────────────────────────────────────────────────────────────────

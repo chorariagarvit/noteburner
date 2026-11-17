@@ -95,12 +95,11 @@ export async function incrementGroupAccess(db, groupId) {
     return false;
   }
 
-  const newAccessCount = group.accessed_count + 1;
-
-  // Update access count
-  await db.prepare(
-    'UPDATE message_groups SET accessed_count = ? WHERE group_id = ?'
-  ).bind(newAccessCount, groupId).run();
+  // Atomic increment (read-modify-write lost updates under concurrent burns)
+  const updated = await db.prepare(
+    'UPDATE message_groups SET accessed_count = accessed_count + 1 WHERE group_id = ? RETURNING accessed_count'
+  ).bind(groupId).first();
+  const newAccessCount = updated?.accessed_count ?? group.accessed_count + 1;
 
   // Check if we should burn all messages
   const shouldBurn = 

@@ -10,11 +10,13 @@ import {
   verifyPassword, 
   validatePasswordStrength,
   generateResetToken,
-  generateVerificationToken
+  generateVerificationToken,
+  sha256hex
 } from '../utils/password.js';
 import {
   createSession,
   validateSession,
+  revokeSessionById,
   revokeSession,
   revokeAllUserSessions,
   getUserSessions,
@@ -27,7 +29,9 @@ import {
 } from '../utils/email.js';
 import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
-import { deleteCache, getSessionCacheKey } from '../utils/cache.js';
+
+// Valid bcrypt hash compared against for unknown emails so response time doesn't reveal account existence
+const DUMMY_BCRYPT_HASH = '$2b$10$/irzLbtFeEa2LzCJx3scjOC7BC1cKIn7ovEPEvpYcmuHBuIMTMsFK';
 
 const router = new Hono();
 
@@ -35,10 +39,14 @@ const router = new Hono();
  * POST /api/auth/signup
  * Register a new user
  */
-router.post('/signup', async (c) => {
+router.post('/signup', rateLimitMiddleware(5, 600), async (c) => {
   try {
     const body = await c.req.json();
-    const { email, password, displayName } = body;
+    const { email, password } = body;
+    // Cap length and strip control characters / angle brackets (also HTML-escaped in emails)
+    const displayName = typeof body.displayName === 'string'
+      ? body.displayName.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 80) || null
+      : null;
 
     // Validate input
     if (!email || !password) {
@@ -81,7 +89,7 @@ router.post('/signup', async (c) => {
     await c.env.DB.prepare(`
       INSERT INTO users (id, email, password_hash, display_name, verification_token, email_verified)
       VALUES (?, ?, ?, ?, ?, 0)
-    `).bind(userId, email.toLowerCase(), passwordHash, displayName || null, verificationToken).run();
+    `).bind(userId, email.toLowerCase(), passwordHash, displayName || null, await sha256hex(verificationToken)).run(); // only the hash is stored
 
     // Send verification email
     const emailSent = await sendVerificationEmail(
@@ -116,7 +124,7 @@ router.post('/signup', async (c) => {
  * POST /api/auth/login
  * Login and create session
  */
-router.post('/login', async (c) => {
+router.post('/login', rateLimitMiddleware(10, 300), async (c) => {
   try {
     const body = await c.req.json();
     const { email, password, rememberMe = false } = body;
@@ -142,18 +150,16 @@ router.post('/login', async (c) => {
         VALUES (?, ?, 0, 'Email not found')
       `).bind(email.toLowerCase(), ipAddress).run();
 
+      await verifyPassword(password, DUMMY_BCRYPT_HASH); // constant-ish timing vs. real accounts
       return c.json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }, 401);
     }
 
-    // Check if account is locked
+    // Check if account is locked (same generic response as a bad password: no account enumeration)
     if (user.locked_until) {
       const lockedUntil = new Date(user.locked_until);
       if (lockedUntil > new Date()) {
-        return c.json({ 
-          error: 'Account temporarily locked due to too many failed attempts', 
-          code: 'ACCOUNT_LOCKED',
-          lockedUntil: user.locked_until
-        }, 423);
+        await verifyPassword(password, DUMMY_BCRYPT_HASH);
+        return c.json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }, 401);
       } else {
         // Lock expired, reset failed attempts
         await c.env.DB.prepare(`
@@ -166,13 +172,14 @@ router.post('/login', async (c) => {
     const passwordValid = await verifyPassword(password, user.password_hash);
 
     if (!passwordValid) {
-      // Increment failed attempts
-      const failedAttempts = (user.failed_login_attempts || 0) + 1;
-      const lockUntil = failedAttempts >= 5 ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null;
-
+      // Atomic increment (parallel guesses can't all read the same counter); lock at 5 failures
       await c.env.DB.prepare(`
-        UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?
-      `).bind(failedAttempts, lockUntil, user.id).run();
+        UPDATE users
+        SET failed_login_attempts = failed_login_attempts + 1,
+            locked_until = CASE WHEN failed_login_attempts + 1 >= 5
+                                THEN ? ELSE locked_until END
+        WHERE id = ?
+      `).bind(new Date(Date.now() + 15 * 60 * 1000).toISOString(), user.id).run();
 
       // Log failed attempt
       await c.env.DB.prepare(`
@@ -229,7 +236,6 @@ router.post('/logout', requireAuth, async (c) => {
     const sessionToken = c.get('sessionToken');
     await revokeSession(c.env.DB, sessionToken);
     // Invalidate KV session cache so the token stops working immediately
-    await deleteCache(c.env.CACHE, getSessionCacheKey(sessionToken));
 
     return c.json({
       success: true,
@@ -320,10 +326,11 @@ router.post('/verify-email', rateLimitMiddleware(10, 300), async (c) => {
     }
 
     const user = await c.env.DB.prepare(`
-      SELECT id, email FROM users WHERE verification_token = ? AND email_verified = 0
-    `).bind(token).first();
+      SELECT id, email, created_at FROM users WHERE verification_token = ? AND email_verified = 0
+    `).bind(await sha256hex(String(token))).first();
 
-    if (!user) {
+    // The email promises 24 hours: enforce it (created_at is UTC from SQLite CURRENT_TIMESTAMP)
+    if (!user || Date.now() - new Date(`${user.created_at.replace(' ', 'T')}Z`).getTime() > 24 * 3600 * 1000) {
       return c.json({ error: 'Invalid or expired verification token', code: 'INVALID_TOKEN' }, 400);
     }
 
@@ -375,7 +382,7 @@ router.post('/forgot-password', rateLimitMiddleware(5, 300), async (c) => {
     await c.env.DB.prepare(`
       INSERT INTO password_resets (id, user_id, reset_token, expires_at)
       VALUES (?, ?, ?, ?)
-    `).bind(resetId, user.id, resetToken, expiresAt).run();
+    `).bind(resetId, user.id, await sha256hex(resetToken), expiresAt).run(); // hash only
 
     // Get user's display name for email
     const userDetails = await c.env.DB.prepare(`
@@ -434,7 +441,7 @@ router.post('/reset-password', rateLimitMiddleware(5, 300), async (c) => {
       UPDATE password_resets SET used = 1
       WHERE reset_token = ? AND used = 0
       RETURNING id, user_id, expires_at
-    `).bind(token).first();
+    `).bind(await sha256hex(String(token))).first();
 
     if (!reset) {
       return c.json({ error: 'Invalid or already-used reset token', code: 'INVALID_TOKEN' }, 400);
@@ -453,8 +460,9 @@ router.post('/reset-password', rateLimitMiddleware(5, 300), async (c) => {
       UPDATE users SET password_hash = ?, failed_login_attempts = 0, locked_until = NULL WHERE id = ?
     `).bind(passwordHash, reset.user_id).run();
 
-    // Revoke all existing sessions for security
+    // Revoke all existing sessions and invalidate any other outstanding reset links
     await revokeAllUserSessions(c.env.DB, reset.user_id);
+    await c.env.DB.prepare(`UPDATE password_resets SET used = 1 WHERE user_id = ?`).bind(reset.user_id).run();
 
     return c.json({
       success: true,
@@ -551,6 +559,9 @@ router.delete('/account', requireAuth, async (c) => {
       return c.json({ error: 'Incorrect password', code: 'INVALID_PASSWORD' }, 403);
     }
 
+    // api_keys has no FK to users, so remove them explicitly (keys must not outlive the account)
+    await c.env.DB.prepare(`DELETE FROM api_keys WHERE user_id = ?`).bind(userId).run();
+
     // Delete user (CASCADE will delete sessions, password_resets, etc.)
     await c.env.DB.prepare(`DELETE FROM users WHERE id = ?`).bind(userId).run();
 
@@ -575,7 +586,7 @@ router.get('/sessions', requireAuth, async (c) => {
 
     return c.json({
       sessions: sessions.map(s => ({
-        sessionToken: s.session_token,
+        id: s.session_id,
         createdAt: s.created_at,
         lastAccessedAt: s.last_accessed_at,
         ipAddress: s.ip_address,
@@ -609,24 +620,17 @@ router.delete('/sessions', requireAuth, async (c) => {
 });
 
 /**
- * DELETE /api/auth/sessions/:sessionToken
- * Logout specific session
+ * DELETE /api/auth/sessions/:sessionId
+ * Logout a specific session (by opaque id from GET /sessions)
  */
-router.delete('/sessions/:sessionToken', requireAuth, async (c) => {
+router.delete('/sessions/:sessionId', requireAuth, async (c) => {
   try {
     const userId = getUserId(c);
-    const sessionToken = c.req.param('sessionToken');
+    const revoked = await revokeSessionById(c.env.DB, userId, c.req.param('sessionId'));
 
-    // Verify session belongs to user
-    const session = await c.env.DB.prepare(`
-      SELECT user_id FROM sessions WHERE session_token = ?
-    `).bind(sessionToken).first();
-
-    if (!session || session.user_id !== userId) {
+    if (!revoked) {
       return c.json({ error: 'Session not found', code: 'SESSION_NOT_FOUND' }, 404);
     }
-
-    await revokeSession(c.env.DB, sessionToken);
 
     return c.json({
       success: true,
