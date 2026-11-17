@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Shield, Download, Trash2, Clock, MapPin, User } from 'lucide-react';
 import { getSessionToken, getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
+import { API_BASE } from '../../utils/apiBase';
 
 export default function ComplianceDashboard() {
   const { teamId } = useParams();
@@ -24,14 +25,14 @@ export default function ComplianceDashboard() {
       const sessionToken = getSessionToken();
 
       // Load compliance settings
-      const settingsRes = await fetch(`/api/compliance/${teamId}/settings`, {
+      const settingsRes = await fetch(`${API_BASE}/api/compliance/${teamId}/settings`, {
         headers: getAuthHeaders()
       });
       const settingsData = await settingsRes.json();
       setSettings(settingsData.settings);
 
       // Load compliance report
-      const reportRes = await fetch(`/api/compliance/${teamId}/report`, {
+      const reportRes = await fetch(`${API_BASE}/api/compliance/${teamId}/report`, {
         headers: getAuthHeaders()
       });
       const reportData = await reportRes.json();
@@ -49,7 +50,7 @@ export default function ComplianceDashboard() {
     setMessage(null);
 
     try {
-      const response = await fetch(`/api/compliance/${teamId}/settings`, {
+      const response = await fetch(`${API_BASE}/api/compliance/${teamId}/settings`, {
         method: 'PUT',
         headers: getAuthHeadersWithJSON(),
         body: JSON.stringify(settings)
@@ -69,11 +70,12 @@ export default function ComplianceDashboard() {
   const handleExport = async (type, format = 'json') => {
     try {
       const sessionToken = getSessionToken();
-      const url = `/api/compliance/${teamId}/export/${type}?format=${format}`;
+      const url = `${API_BASE}/api/compliance/${teamId}/export/${type}?format=${format}`;
       
       const response = await fetch(url, {
         headers: getAuthHeaders()
       });
+      if (!response.ok) throw new Error(`Export failed (HTTP ${response.status})`);
 
       if (format === 'csv') {
         const blob = await response.blob();
@@ -106,11 +108,11 @@ export default function ComplianceDashboard() {
 
   const handleDeleteAllData = async () => {
     try {
-      const response = await fetch(`/api/compliance/${teamId}/gdpr/delete-all`, {
+      const response = await fetch(`${API_BASE}/api/compliance/${teamId}/gdpr/delete-all`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Session-Token': sessionStorage.getItem('sessionToken')
+          ...getAuthHeaders()
         },
         body: JSON.stringify({ confirmation: 'DELETE_ALL_DATA' })
       });

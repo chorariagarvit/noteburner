@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Trophy, TrendingUp, Shield, Clock } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
+import { API_BASE } from '../utils/apiBase';
 
 export default function LeaderboardPage() {
   const [leaderboardData, setLeaderboardData] = useState(null);
@@ -14,7 +15,7 @@ export default function LeaderboardPage() {
   
   const fetchLeaderboard = async () => {
     try {
-      const response = await fetch('/api/stats');
+      const response = await fetch(`${API_BASE}/api/stats`);
       const data = await response.json();
       setLeaderboardData(data);
     } catch (error) {
