@@ -32,10 +32,10 @@
   "author": "",
   "license": "MIT",
   "overrides": {
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2"
+    "@playwright/test": "^1.65.1"
   }
 }
