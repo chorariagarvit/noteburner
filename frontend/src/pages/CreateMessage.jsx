@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Lock } from 'lucide-react';
-import { encryptMessage, encryptFile, generatePassword } from '../utils/crypto';
+import { encryptMessage, encryptFile, generatePassword, deriveAuthTag } from '../utils/crypto';
 import { createMessage, createGroupMessage, uploadMedia } from '../utils/api';
 import { updateStatsOnMessageCreate } from '../utils/achievements';
 import { incrementReferralProgress } from '../utils/referrals';
@@ -129,14 +129,18 @@ function CreateMessage() {
     }
   }, [location.state]);
 
-  // Check for 'text' query parameter (e.g. from extension)
+  // Prefill from the extension. It passes the text in the URL FRAGMENT (#text=...), which is never
+  // sent to servers or analytics; legacy ?text= is still accepted. Strip it from the address bar
+  // immediately so the secret doesn't linger in history/screenshots.
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const textParam = searchParams.get('text');
+    const fromHash = new URLSearchParams(globalThis.location.hash.replace(/^#/, '')).get('text');
+    const fromQuery = new URLSearchParams(location.search).get('text');
+    const textParam = fromHash || fromQuery;
     if (textParam) {
       setMessage(textParam);
+      globalThis.history.replaceState({}, document.title, globalThis.location.pathname);
     }
-  }, [location.search]);
+  }, [location.search, location.hash]);
 
   // Keyboard shortcuts
   useSubmitShortcut(() => {
@@ -181,6 +185,7 @@ function CreateMessage() {
 
       // Encrypt message
       const encrypted = await encryptMessage(message, password);
+      const authTag = await deriveAuthTag(password, encrypted.salt);
 
       // Create message on server
       const expirySeconds = selfDestructOptions.expiresInMinutes ? selfDestructOptions.expiresInMinutes * 60 : null;
@@ -214,7 +219,8 @@ function CreateMessage() {
             maxPasswordAttempts: selfDestructOptions.maxPasswordAttempts,
             requireGeoMatch: selfDestructOptions.requireGeoMatch ? 1 : 0,
             autoBurnOnSuspicious: selfDestructOptions.autoBurnOnSuspicious ? 1 : 0,
-            require2FA: selfDestructOptions.require2FA ? 1 : 0
+            require2FA: selfDestructOptions.require2FA ? 1 : 0,
+            authTag
           }
         );
       }
@@ -229,7 +235,8 @@ function CreateMessage() {
             file.type,
             encryptedFile.iv,
             encryptedFile.salt,
-            result.token
+            result.token,
+            result.creatorToken
           );
         }
       }

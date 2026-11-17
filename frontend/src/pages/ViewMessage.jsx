@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, X as XIcon, MessageSquare, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { decryptMessage, decryptFile } from '../utils/crypto';
-import { getMessage, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
+import { deriveAuthTag, decryptMessage, decryptFile } from '../utils/crypto';
+import { getMessage, getMessageMeta, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
 import { useCountdown, formatTimeLeft } from '../hooks/useCountdown';
 import { CountdownTimer } from '../components/CountdownTimer';
 import { setMessageOpenGraph } from '../utils/openGraph';
 import TOTPInput from '../components/TOTPInput';
 import { useI18n } from '../contexts/I18nContext';
+import { API_BASE } from '../utils/apiBase';
 
 function ViewMessage() {
   const { identifier } = useParams();
@@ -31,6 +32,8 @@ function ViewMessage() {
   const [expiresAt, setExpiresAt] = useState(null);
   const [totpRequired, setTotpRequired] = useState(false);
   const [totpVerified, setTotpVerified] = useState(false);
+  const [totpProof, setTotpProof] = useState(null);
+  const [meta, setMeta] = useState(null);
   const [totpError, setTotpError] = useState('');
   const timeLeft = useCountdown(expiresAt);
   
@@ -43,7 +46,8 @@ function ViewMessage() {
     // Fetch message metadata (including expiration and TOTP requirement) without decrypting
     async function fetchMetadata() {
       try {
-        const data = await getMessage(messageIdentifier);
+        const data = await getMessageMeta(messageIdentifier);
+        setMeta(data);
         if (data.expiresAt) {
           setExpiresAt(data.expiresAt);
         }
@@ -69,7 +73,7 @@ function ViewMessage() {
   const handleTOTPVerify = async (code) => {
     try {
       setTotpError('');
-      const response = await fetch(`/api/messages/${messageIdentifier}/verify-totp`, {
+      const response = await fetch(`${API_BASE}/api/messages/${messageIdentifier}/verify-totp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,12 +81,13 @@ function ViewMessage() {
         body: JSON.stringify({ code }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to verify TOTP code');
       }
 
+      setTotpProof(data.proof || null);
       setTotpVerified(true);
       setTotpError('');
     } catch (err) {
@@ -122,7 +127,12 @@ function ViewMessage() {
       }
 
       // Fetch encrypted message
-      const data = await getMessage(messageIdentifier);
+      // Prove knowledge of the password to the server (it enforces attempts + one-time view)
+      const metaData = meta || await getMessageMeta(messageIdentifier);
+      const authTag = metaData.authRequired ? await deriveAuthTag(password, metaData.salt) : null;
+      const protection = { totpProof, authTag };
+
+      const data = await getMessage(messageIdentifier, protection);
       
       // Store expiration time
       if (data.expiresAt) {
@@ -153,7 +163,7 @@ function ViewMessage() {
       
       // Decryption successful - now permanently delete the message and media
       try {
-        await deleteMessage(messageIdentifier);
+        await deleteMessage(messageIdentifier, protection);
       } catch (err) {
         console.error('Failed to delete message:', err);
         // Continue anyway - message was decrypted successfully
@@ -257,7 +267,7 @@ function ViewMessage() {
             </div>
 
             <div className="bg-white dark:bg-gray-700 border-2 border-primary-200 dark:border-primary-700 rounded-lg p-6 mb-6">
-              <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-100 font-sans">
+              <pre data-clarity-mask="true" className="whitespace-pre-wrap text-gray-800 dark:text-gray-100 font-sans">
                 {message}
               </pre>
             </div>
