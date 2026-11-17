@@ -73,9 +73,9 @@ generatePasswordBtn.addEventListener('click', () => {
   navigator.clipboard.writeText(password);
   
   // Show feedback
-  generatePasswordBtn.innerHTML = '<span>✅</span>';
+  generatePasswordBtn.textContent = '✅';
   setTimeout(() => {
-    generatePasswordBtn.innerHTML = '<span>🎲</span>';
+    generatePasswordBtn.textContent = '🎲';
   }, 1500);
 });
 
@@ -156,10 +156,10 @@ async function handleCreateMessage() {
 copyBtn.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(currentShareUrl);
-    copyBtn.innerHTML = '<span class="btn-icon">✅</span> Copied!';
+    copyBtn.textContent = '✅ Copied!';
     
     setTimeout(() => {
-      copyBtn.innerHTML = '<span class="btn-icon">📋</span> Copy Link';
+      copyBtn.textContent = '📋 Copy Link';
     }, 2000);
   } catch (error) {
     showError('Failed to copy link');

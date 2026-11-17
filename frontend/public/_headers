@@ -1,0 +1,14 @@
+# Security headers for the SPA (served by Cloudflare Pages)
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.clarity.ms https://scripts.clarity.ms; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.noteburner.work https://noteburner.work https://www.google-analytics.com https://*.google-analytics.com https://*.clarity.ms; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+
+# Never cache the service worker or capability pages at the edge
+/sw.js
+  Cache-Control: no-cache
+/m/*
+  Cache-Control: no-store

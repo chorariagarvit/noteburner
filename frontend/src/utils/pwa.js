@@ -122,25 +122,37 @@ export const sendNotification = (title, options = {}) => {
   return null;
 };
 
-// Check online/offline status
+// Check online/offline status.
+// Only notifies on real transitions: "online" fires only after a previously-reported
+// offline state (never on first load), and rapid flapping is debounced.
 export const setupOnlineStatusDetection = (onOnline, onOffline) => {
-  const updateOnlineStatus = () => {
-    if (navigator.onLine) {
-      if (onOnline) onOnline();
-    } else {
-      if (onOffline) onOffline();
-    }
+  let lastReported = navigator.onLine ? 'online' : 'offline';
+  let timer = null;
+
+  // Initial state: only surface "offline" (nothing to announce when already online)
+  if (lastReported === 'offline' && onOffline) onOffline();
+
+  const handleChange = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const current = navigator.onLine ? 'online' : 'offline';
+      if (current === lastReported) return;
+      lastReported = current;
+      if (current === 'online') {
+        if (onOnline) onOnline();
+      } else if (onOffline) {
+        onOffline();
+      }
+    }, 1500);
   };
-  
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
-  
-  // Initial check
-  updateOnlineStatus();
-  
+
+  window.addEventListener('online', handleChange);
+  window.addEventListener('offline', handleChange);
+
   return () => {
-    window.removeEventListener('online', updateOnlineStatus);
-    window.removeEventListener('offline', updateOnlineStatus);
+    clearTimeout(timer);
+    window.removeEventListener('online', handleChange);
+    window.removeEventListener('offline', handleChange);
   };
 };
 

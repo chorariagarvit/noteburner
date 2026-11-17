@@ -4,7 +4,6 @@ import { corsConfig } from './config/cors.js';
 import messagesRouter from './routes/messages.js';
 import mediaRouter from './routes/media.js';
 import statsRouter from './routes/stats.js';
-import cleanupRouter from './routes/cleanup.js';
 import integrationsRouter from './routes/integrations.js';
 import auditRouter from './routes/audit.js';
 import apiV1Router from './routes/api-v1.js';
@@ -18,6 +17,8 @@ import premiumRouter from './routes/premium.js';
 import { cleanupScheduled } from './scheduled/cleanup.js';
 import { securityHeaders, enhancedRateLimit } from './middleware/security.js';
 import { detectLocale } from './middleware/locale.js';
+import { apiGate } from './middleware/apiGate.js';
+import appTokenRouter from './routes/app-token.js';
 
 const app = new Hono();
 
@@ -27,6 +28,9 @@ app.use('/*', detectLocale());
 
 // CORS middleware
 app.use('/*', cors(corsConfig));
+
+// Authentication gate: every /api/* call needs a session, API key or signed app token
+app.use('/api/*', apiGate);
 
 // Rate limiting (different limits for different endpoints - relaxed for testing)
 app.use('/api/messages/*', enhancedRateLimit({ maxRequests: 200, windowMs: 60000 }));
@@ -43,11 +47,11 @@ app.get('/', (c) => {
 });
 
 // Mount route modules
+app.route('/api/app-token', appTokenRouter);
 app.route('/api/health', healthRouter);
 app.route('/api/messages', messagesRouter);
 app.route('/api/media', mediaRouter);
 app.route('/api/stats', statsRouter);
-app.route('/api/cleanup', cleanupRouter);
 app.route('/api/integrations', integrationsRouter);
 app.route('/api/audit', auditRouter);
 app.route('/api/auth', authRouter);
@@ -71,7 +75,7 @@ app.notFound((c) => {
 // Error handler
 app.onError((err, c) => {
   console.error('Error:', err);
-  return c.json({ error: err.message || 'Internal server error' }, 500);
+  return c.json({ error: 'Internal server error' }, 500); // details stay in server logs
 });
 
 // Export worker with both fetch and scheduled handlers

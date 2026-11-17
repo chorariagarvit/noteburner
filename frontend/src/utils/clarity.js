@@ -8,6 +8,13 @@ export function initClarity() {
     return;
   }
 
+  // Session replay would record decrypted messages and capability URLs: skip sensitive pages
+  const path = globalThis.location.pathname;
+  if (path.startsWith('/m/') || path.startsWith('/create') ||
+      path.startsWith('/reset-password') || path.startsWith('/verify-email')) {
+    return;
+  }
+
   // Check if already initialized
   if (globalThis.clarity) {
     return;

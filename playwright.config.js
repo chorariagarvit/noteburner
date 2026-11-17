@@ -1,4 +1,13 @@
+import crypto from 'node:crypto';
 import { defineConfig, devices } from '@playwright/test';
+
+// Mirrors backend/src/utils/appToken.js; secret matches the dev script's APP_TOKEN_SECRET
+function makeTestAppToken() {
+  const secret = process.env.APP_TOKEN_SECRET || 'dev-app-token-secret';
+  const payload = Buffer.from(JSON.stringify({ exp: Date.now() + 24 * 3600 * 1000, n: 'e2e' })).toString('base64url');
+  return `${payload}.${crypto.createHmac('sha256', secret).update(payload).digest('hex')}`;
+}
+
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -58,6 +67,8 @@ export default defineConfig({
   // Use localhost API for tests
   use: {
     baseURL: 'http://localhost:5173',
+    // Direct API calls in specs need a signed app token (same dev secret as backend `npm run dev`)
+    extraHTTPHeaders: { 'X-App-Token': makeTestAppToken() },
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

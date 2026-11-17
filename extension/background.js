@@ -18,7 +18,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       const encodedText = encodeURIComponent(selectedText);
       // Open NoteBurner with pre-filled message
       // Use correct domain noteburner.work
-      const url = `https://noteburner.work/create?text=${encodedText}`;
+      const url = `https://noteburner.work/create#text=${encodedText}`;
       chrome.tabs.create({ url });
     }
   }

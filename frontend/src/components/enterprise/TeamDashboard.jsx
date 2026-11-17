@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getSessionToken, getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
+import { API_BASE } from '../../utils/apiBase';
 
 export default function TeamDashboard() {
   const { teamId } = useParams();
@@ -28,28 +29,28 @@ export default function TeamDashboard() {
       const sessionToken = getSessionToken();
       
       // Load team details
-      const teamRes = await fetch(`/api/teams/${teamId}`, {
+      const teamRes = await fetch(`${API_BASE}/api/teams/${teamId}`, {
         headers: getAuthHeaders()
       });
       const teamData = await teamRes.json();
       setTeam(teamData.team);
 
       // Load members
-      const membersRes = await fetch(`/api/teams/${teamId}/members`, {
+      const membersRes = await fetch(`${API_BASE}/api/teams/${teamId}/members`, {
         headers: getAuthHeaders()
       });
       const membersData = await membersRes.json();
       setMembers(membersData.members || []);
 
       // Load messages
-      const messagesRes = await fetch(`/api/teams/${teamId}/messages?limit=20`, {
+      const messagesRes = await fetch(`${API_BASE}/api/teams/${teamId}/messages?limit=20`, {
         headers: getAuthHeaders()
       });
       const messagesData = await messagesRes.json();
       setMessages(messagesData.messages || []);
 
       // Load stats
-      const statsRes = await fetch(`/api/teams/${teamId}/stats`, {
+      const statsRes = await fetch(`${API_BASE}/api/teams/${teamId}/stats`, {
         headers: getAuthHeaders()
       });
       const statsData = await statsRes.json();
@@ -66,7 +67,7 @@ export default function TeamDashboard() {
     e.preventDefault();
     
     try {
-      const response = await fetch(`/api/teams/${teamId}/members`, {
+      const response = await fetch(`${API_BASE}/api/teams/${teamId}/members`, {
         method: 'POST',
         headers: getAuthHeadersWithJSON(),
         body: JSON.stringify({
@@ -90,9 +91,9 @@ export default function TeamDashboard() {
     if (!confirm('Remove this member from the team?')) return;
 
     try {
-      await fetch(`/api/teams/${teamId}/members/${memberId}`, {
+      await fetch(`${API_BASE}/api/teams/${teamId}/members/${memberId}`, {
         method: 'DELETE',
-        headers: { 'X-Session-Token': sessionStorage.getItem('sessionToken') }
+        headers: getAuthHeaders()
       });
       loadTeamData();
     } catch (err) {
@@ -102,11 +103,11 @@ export default function TeamDashboard() {
 
   const handleUpdateRole = async (memberId, newRole) => {
     try {
-      await fetch(`/api/teams/${teamId}/members/${memberId}`, {
+      await fetch(`${API_BASE}/api/teams/${teamId}/members/${memberId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Session-Token': sessionStorage.getItem('sessionToken')
+          ...getAuthHeaders()
         },
         body: JSON.stringify({ role: newRole })
       });

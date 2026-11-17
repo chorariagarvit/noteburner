@@ -3,13 +3,13 @@ const STATIC_CACHE = 'noteburner-static-v1.14.0';
 const DYNAMIC_CACHE = 'noteburner-dynamic-v1.14.0';
 
 // Assets to cache immediately
+// Only files that actually exist in public/ (a missing precache entry would pin the SPA-fallback HTML)
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/offline.html',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/flame.svg'
 ];
 
 // Install event - cache static assets
@@ -64,12 +64,14 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Network first strategy for HTML
-  if (request.headers.get('accept').includes('text/html')) {
+  if ((request.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone and cache the response (only for http/https)
-          if (request.url.startsWith('http://') || request.url.startsWith('https://')) {
+          // Never persist capability URLs (/m/<token>), reset/verify links, or error pages on the device
+          const path = new URL(request.url).pathname;
+          const sensitive = path.startsWith('/m/') || path.startsWith('/reset-password') || path.startsWith('/verify-email');
+          if (!sensitive && response.ok && (request.url.startsWith('http://') || request.url.startsWith('https://'))) {
             const responseClone = response.clone();
             caches.open(DYNAMIC_CACHE)
               .then((cache) => cache.put(request, responseClone));
@@ -103,6 +105,11 @@ self.addEventListener('fetch', (event) => {
           .then((response) => {
             // Don't cache non-200 responses
             if (!response || response.status !== 200 || response.type === 'error') {
+              return response;
+            }
+            // Never cache an HTML SPA-fallback as a static asset (e.g. missing image/script)
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('text/html') && /\.[a-z0-9]+$/i.test(new URL(request.url).pathname)) {
               return response;
             }
             // Only cache http/https URLs

@@ -20,7 +20,7 @@ function createFloatingButton() {
 
   floatingButton = document.createElement('div');
   floatingButton.id = 'noteburner-fab';
-  floatingButton.innerHTML = '🔥';
+  floatingButton.textContent = '🔥';
   floatingButton.style.cssText = `
     position: fixed;
     bottom: 20px;
@@ -54,7 +54,7 @@ function createFloatingButton() {
     const selectedText = window.getSelection().toString();
     if (selectedText) {
       const encodedText = encodeURIComponent(selectedText);
-      window.open(`https://noteburner.work/create?text=${encodedText}`, '_blank');
+      window.open(`https://noteburner.work/create#text=${encodedText}`, '_blank');
     } else {
       window.open('https://noteburner.work/create', '_blank');
     }

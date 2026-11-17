@@ -1,4 +1,24 @@
-const API_URL = import.meta.env.VITE_API_URL || '';
+import { API_BASE } from './apiBase';
+const API_URL = API_BASE;
+
+// Parse a JSON error body safely: if the server returned HTML (e.g. SPA
+// fallback or a gateway error page) avoid "Unexpected token '<'" crashes.
+async function readError(response, fallback) {
+  try {
+    const body = await response.json();
+    return body.error || fallback;
+  } catch {
+    return `${fallback} (HTTP ${response.status})`;
+  }
+}
+
+async function readJson(response) {
+  const type = response.headers.get('content-type') || '';
+  if (!type.includes('application/json')) {
+    throw new Error(`Unexpected server response (HTTP ${response.status}). Please try again.`);
+  }
+  return response.json();
+}
 
 export async function createMessage(encryptedData, iv, salt, expiresIn = null, customSlug = null, securityOptions = {}) {
   const response = await fetch(`${API_URL}/api/messages`, {
@@ -17,35 +37,54 @@ export async function createMessage(encryptedData, iv, salt, expiresIn = null, c
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to create message');
+    throw new Error(await readError(response, 'Failed to create message'));
   }
 
-  return response.json();
+  return readJson(response);
 }
 
-export async function getMessage(token) {
-  const response = await fetch(`${API_URL}/api/messages/${token}`);
+// Public metadata (salt, expiry, protections). Never returns ciphertext.
+export async function getMessageMeta(token) {
+  const response = await fetch(`${API_URL}/api/messages/${token}/meta`);
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to retrieve message');
+    throw new Error(await readError(response, 'Failed to retrieve message'));
   }
 
-  return response.json();
+  return readJson(response);
 }
 
-export async function deleteMessage(token) {
+function protectionHeaders({ totpProof, authTag } = {}) {
+  const headers = {};
+  if (totpProof) headers['X-TOTP-Proof'] = totpProof;
+  if (authTag) headers['X-Auth-Tag'] = authTag;
+  return headers;
+}
+
+// Releases ciphertext only for a correct password proof (authTag) and, if enabled, TOTP proof.
+export async function getMessage(token, protection = {}) {
   const response = await fetch(`${API_URL}/api/messages/${token}`, {
-    method: 'DELETE',
+    headers: protectionHeaders(protection),
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to delete message');
+    throw new Error(await readError(response, 'Failed to retrieve message'));
   }
 
-  return response.json();
+  return readJson(response);
+}
+
+export async function deleteMessage(token, protection = {}) {
+  const response = await fetch(`${API_URL}/api/messages/${token}`, {
+    method: 'DELETE',
+    headers: protectionHeaders(protection),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Failed to delete message'));
+  }
+
+  return readJson(response);
 }
 
 export async function createGroupMessage(encryptedData, iv, salt, expiresIn = null, recipientCount = 1, maxViews = null, burnOnFirstView = false) {
@@ -66,22 +105,20 @@ export async function createGroupMessage(encryptedData, iv, salt, expiresIn = nu
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to create group message');
+    throw new Error(await readError(response, 'Failed to create group message'));
   }
 
-  return response.json();
+  return readJson(response);
 }
 
 export async function checkSlugAvailability(slug) {
   const response = await fetch(`${API_URL}/api/messages/check-slug/${encodeURIComponent(slug)}`);
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to check slug availability');
+    throw new Error(await readError(response, 'Failed to check slug availability'));
   }
 
-  return response.json();
+  return readJson(response);
 }
 
 export async function confirmMediaDownload(fileId) {
@@ -90,18 +127,18 @@ export async function confirmMediaDownload(fileId) {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to confirm download');
+    throw new Error(await readError(response, 'Failed to confirm download'));
   }
 
-  return response.json();
+  return readJson(response);
 }
 
-export async function uploadMedia(fileData, fileName, fileType, iv, salt, token) {
+export async function uploadMedia(fileData, fileName, fileType, iv, salt, token, creatorToken) {
   const response = await fetch(`${API_URL}/api/media`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(creatorToken ? { 'X-Creator-Token': creatorToken } : {}),
     },
     body: JSON.stringify({
       fileData,
@@ -114,19 +151,17 @@ export async function uploadMedia(fileData, fileName, fileType, iv, salt, token)
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to upload media');
+    throw new Error(await readError(response, 'Failed to upload media'));
   }
 
-  return response.json();
+  return readJson(response);
 }
 
 export async function getMedia(fileId) {
   const response = await fetch(`${API_URL}/api/media/${fileId}`);
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to retrieve media');
+    throw new Error(await readError(response, 'Failed to retrieve media'));
   }
 
   const contentType = response.headers.get('Content-Type');
@@ -150,15 +185,14 @@ export async function getMedia(fileId) {
   }
 
   // Small files return JSON with base64 data
-  return response.json();
+  return readJson(response);
 }
 
 export async function getMediaStream(fileId) {
   const response = await fetch(`${API_URL}/api/media/${fileId}`);
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to retrieve media');
+    throw new Error(await readError(response, 'Failed to retrieve media'));
   }
 
   return response;

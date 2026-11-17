@@ -124,11 +124,11 @@ export function generateRandomSlug(length = 8) {
   let slug = '';
   
   // First character must be a letter
-  slug += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+  slug += 'abcdefghijklmnopqrstuvwxyz'[secureRandomInt(26)];
   
   // Remaining characters
   for (let i = 1; i < length; i++) {
-    slug += chars[Math.floor(Math.random() * chars.length)];
+    slug += chars[secureRandomInt(chars.length)];
   }
   
   return slug;
@@ -148,4 +148,11 @@ export async function isSlugAvailable(db, slug) {
   ).bind(slug).first();
   
   return !result; // Available if no result found
+}
+
+function secureRandomInt(max) {
+  const limit = Math.floor(0x100000000 / max) * max;
+  const buf = new Uint32Array(1);
+  do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+  return buf[0] % max;
 }

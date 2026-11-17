@@ -1,3 +1,8 @@
+// HTML-escape every user-controlled value interpolated into email markup
+const esc = (v) => String(v ?? '')
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 /**
  * Email Templates for NoteBurner
  * HTML email templates with inline CSS for maximum compatibility
@@ -96,20 +101,20 @@ function verificationTemplate({ displayName, verificationUrl, expiresIn }) {
     <div class="content">
       <h2 style="color: #1f2937; margin-top: 0;">Verify Your Email Address</h2>
       
-      <p>Hi ${displayName},</p>
+      <p>Hi ${esc(displayName)},</p>
       
       <p>Thanks for signing up for NoteBurner! To complete your registration and start sending secure, self-destructing messages, please verify your email address.</p>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${verificationUrl}" class="button">Verify Email Address</a>
+        <a href="${esc(verificationUrl)}" class="button">Verify Email Address</a>
       </div>
       
       <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
-      <p class="code" style="word-break: break-all;">${verificationUrl}</p>
+      <p class="code" style="word-break: break-all;">${esc(verificationUrl)}</p>
       
       <div class="alert">
         <p style="margin: 0; font-size: 14px;">
-          ⏰ This verification link expires in <strong>${expiresIn}</strong>
+          ⏰ This verification link expires in <strong>${esc(expiresIn)}</strong>
         </p>
       </div>
       
@@ -156,20 +161,20 @@ function passwordResetTemplate({ displayName, resetUrl, expiresIn }) {
     <div class="content">
       <h2 style="color: #1f2937; margin-top: 0;">Reset Your Password</h2>
       
-      <p>Hi ${displayName},</p>
+      <p>Hi ${esc(displayName)},</p>
       
       <p>We received a request to reset your NoteBurner account password. Click the button below to create a new password.</p>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${resetUrl}" class="button">Reset Password</a>
+        <a href="${esc(resetUrl)}" class="button">Reset Password</a>
       </div>
       
       <p style="color: #6b7280; font-size: 14px;">Or copy and paste this link into your browser:</p>
-      <p class="code" style="word-break: break-all;">${resetUrl}</p>
+      <p class="code" style="word-break: break-all;">${esc(resetUrl)}</p>
       
       <div class="alert">
         <p style="margin: 0; font-size: 14px;">
-          ⏰ This reset link expires in <strong>${expiresIn}</strong>
+          ⏰ This reset link expires in <strong>${esc(expiresIn)}</strong>
         </p>
       </div>
       
@@ -217,7 +222,7 @@ function welcomeTemplate({ displayName, baseUrl }) {
     <div class="content">
       <h2 style="color: #1f2937; margin-top: 0;">You're All Set!</h2>
       
-      <p>Hi ${displayName},</p>
+      <p>Hi ${esc(displayName)},</p>
       
       <p>Your email has been verified successfully. Welcome to NoteBurner - the secure way to share sensitive information.</p>
       
@@ -231,7 +236,7 @@ function welcomeTemplate({ displayName, baseUrl }) {
       </ul>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${baseUrl}/create" class="button">Create Your First Message</a>
+        <a href="${esc(baseUrl)}/create" class="button">Create Your First Message</a>
       </div>
       
       <h3 style="color: #1f2937;">✨ Premium Features</h3>
@@ -256,9 +261,9 @@ function welcomeTemplate({ displayName, baseUrl }) {
         <strong>NoteBurner</strong> - Secure Self-Destructing Messages
       </p>
       <p style="margin: 0;">
-        <a href="${baseUrl}" style="color: #f59e0b; text-decoration: none;">noteburner.work</a> | 
-        <a href="${baseUrl}/docs/api" style="color: #f59e0b; text-decoration: none;">API Docs</a> | 
-        <a href="${baseUrl}/support" style="color: #f59e0b; text-decoration: none;">Support</a>
+        <a href="${esc(baseUrl)}" style="color: #f59e0b; text-decoration: none;">noteburner.work</a> | 
+        <a href="${esc(baseUrl)}/docs/api" style="color: #f59e0b; text-decoration: none;">API Docs</a> | 
+        <a href="${esc(baseUrl)}/support" style="color: #f59e0b; text-decoration: none;">Support</a>
       </p>
     </div>
   </div>
@@ -290,11 +295,11 @@ function teamInvitationTemplate({ teamName, inviterName, role, loginUrl }) {
     <div class="content">
       <h2 style="color: #1f2937; margin-top: 0;">You've Been Invited!</h2>
       
-      <p>${inviterName} has invited you to join <strong>${teamName}</strong> on NoteBurner.</p>
+      <p>${esc(inviterName)} has invited you to join <strong>${esc(teamName)}</strong> on NoteBurner.</p>
       
       <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; margin: 20px 0; border-radius: 4px;">
         <p style="margin: 0; font-size: 14px; color: #065f46;">
-          <strong>Your Role:</strong> ${role.charAt(0).toUpperCase() + role.slice(1)}
+          <strong>Your Role:</strong> ${esc(role.charAt(0).toUpperCase() + role.slice(1))}
         </p>
       </div>
       
@@ -306,7 +311,7 @@ function teamInvitationTemplate({ teamName, inviterName, role, loginUrl }) {
       </ul>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="${loginUrl}" class="button">Accept Invitation</a>
+        <a href="${esc(loginUrl)}" class="button">Accept Invitation</a>
       </div>
       
       <p style="color: #6b7280; font-size: 14px;">

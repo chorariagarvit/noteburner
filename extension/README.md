@@ -117,6 +117,12 @@ MIT License - See main repository for details
 
 ## Changelog
 
+### v1.14.0 (2026-11-17)
+- Authenticates with the NoteBurner API: fetches a short-lived signed app token (`POST /api/app-token`) and sends it as `X-App-Token` on every request. Required since the API now rejects unauthenticated calls.
+- Added API hosts to `host_permissions` (Chrome and Firefox manifests)
+- Replaced `innerHTML` with `textContent` in the popup and content script
+- Version aligned with the web app (was 1.0.0)
+
 ### v1.0.0 (2026-01-14)
 - Initial release
 - Context menu integration

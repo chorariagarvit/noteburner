@@ -69,7 +69,7 @@ function CreateMessageForm(props) {
                             {t('create.useTemplate')}
                         </button>
                     </div>
-                    <textarea
+                    <textarea data-clarity-mask="true"
                         id="message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}

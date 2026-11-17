@@ -202,7 +202,7 @@ export async function healthCheck(env) {
     } catch (error) {
       checks.checks.database = {
         status: 'down',
-        error: error.message
+        error: 'unavailable' /* details only in logs */
       };
       checks.status = 'degraded';
     }
@@ -219,7 +219,7 @@ export async function healthCheck(env) {
       } catch (error) {
         checks.checks.cache = {
           status: 'down',
-          error: error.message
+          error: 'unavailable' /* details only in logs */
         };
       }
     }
@@ -237,7 +237,7 @@ export async function healthCheck(env) {
     return {
       timestamp: new Date().toISOString(),
       status: 'error',
-      error: error.message
+      error: 'unavailable' /* details only in logs */
     };
   }
 }

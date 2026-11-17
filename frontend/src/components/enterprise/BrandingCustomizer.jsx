@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Palette, Upload, Eye, Save } from 'lucide-react';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
+import { API_BASE } from '../../utils/apiBase';
 
 export default function BrandingCustomizer() {
   const { teamId } = useParams();
@@ -25,8 +26,8 @@ export default function BrandingCustomizer() {
 
   const loadBranding = async () => {
     try {
-      const response = await fetch(`/api/branding/${teamId}`, {
-        headers: { 'X-Session-Token': sessionStorage.getItem('sessionToken') }
+      const response = await fetch(`${API_BASE}/api/branding/${teamId}`, {
+        headers: getAuthHeaders()
       });
       const data = await response.json();
       setBranding(data.branding);
@@ -42,7 +43,7 @@ export default function BrandingCustomizer() {
     setMessage(null);
 
     try {
-      const response = await fetch(`/api/branding/${teamId}`, {
+      const response = await fetch(`${API_BASE}/api/branding/${teamId}`, {
         method: 'PUT',
         headers: getAuthHeadersWithJSON(),
         body: JSON.stringify(branding)
@@ -64,9 +65,9 @@ export default function BrandingCustomizer() {
 
   const handleRemoveLogo = async () => {
     try {
-      await fetch(`/api/branding/${teamId}/logo`, {
+      await fetch(`${API_BASE}/api/branding/${teamId}/logo`, {
         method: 'DELETE',
-        headers: { 'X-Session-Token': sessionStorage.getItem('sessionToken') }
+        headers: getAuthHeaders()
       });
       setBranding({ ...branding, logo_url: null });
       setMessage({ type: 'success', text: 'Logo removed' });

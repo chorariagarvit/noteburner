@@ -3,10 +3,31 @@ import { nanoid } from 'nanoid';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { incrementStat } from '../utils/stats.js';
 
+import crypto from 'node:crypto';
+
 const app = new Hono();
 
+// Uploads are only allowed for the message's creator: the share link alone (the token) is not
+// enough, otherwise a recipient/scanner could attach files or fill storage.
+const MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024;   // hard cap (plan limits are UI-level)
+const MAX_PARTS = 200;                            // 200 x 50MB chunks > 2GB
+
+async function authorizeUpload(c, token) {
+  const creatorToken = c.req.header('X-Creator-Token');
+  if (!token || !creatorToken) return null;
+  const message = await c.env.DB.prepare(
+    `SELECT media_files, creator_token FROM messages
+     WHERE token = ? AND accessed = 0 AND (expires_at IS NULL OR expires_at > ?)`
+  ).bind(token, Date.now()).first();
+  if (!message || !message.creator_token) return null;
+  const a = Buffer.from(String(message.creator_token));
+  const b = Buffer.from(String(creatorToken));
+  return a.length === b.length && crypto.timingSafeEqual(a, b) ? message : null;
+}
+
+
 // Initialize multipart upload for large files (>100MB)
-app.post('/init', rateLimitMiddleware(5, 60000), async (c) => {
+app.post('/init', rateLimitMiddleware(5, 60), async (c) => {
   try {
     const body = await c.req.json();
     const { fileName, fileType, fileSize, iv, salt, token } = body;
@@ -16,17 +37,16 @@ app.post('/init', rateLimitMiddleware(5, 60000), async (c) => {
     }
 
     // Check file size limit (2GB)
-    if (fileSize > 2 * 1024 * 1024 * 1024) {
+    if (fileSize > MAX_FILE_BYTES) {
       return c.json({ error: 'File size exceeds 2GB limit' }, 400);
     }
 
-    // Verify token exists
-    const message = await c.env.DB.prepare(
-      `SELECT media_files FROM messages WHERE token = ?`
-    ).bind(token).first();
-
+    if (!Number.isFinite(Number(fileSize)) || Number(fileSize) <= 0) {
+      return c.json({ error: 'Invalid file size' }, 400);
+    }
+    const message = await authorizeUpload(c, token);
     if (!message) {
-      return c.json({ error: 'Invalid message token' }, 404);
+      return c.json({ error: 'Not authorized to upload to this message' }, 403);
     }
 
     // Generate unique file ID
@@ -60,13 +80,19 @@ app.post('/init', rateLimitMiddleware(5, 60000), async (c) => {
 });
 
 // Upload a single chunk
-app.post('/chunk', rateLimitMiddleware(50, 60000), async (c) => {
+app.post('/chunk', rateLimitMiddleware(50, 60), async (c) => {
   try {
     const body = await c.req.json();
-    const { fileId, uploadId, chunkIndex, chunkData } = body;
+    const { fileId, uploadId, chunkIndex, chunkData, token } = body;
 
-    if (!fileId || !uploadId || chunkIndex === undefined || !chunkData) {
+    if (!fileId || !uploadId || chunkIndex === undefined || !chunkData || !token) {
       return c.json({ error: 'Missing required fields' }, 400);
+    }
+    if (!Number.isInteger(chunkIndex) || chunkIndex < 0 || chunkIndex >= MAX_PARTS) {
+      return c.json({ error: 'Invalid chunk index' }, 400);
+    }
+    if (!(await authorizeUpload(c, token))) {
+      return c.json({ error: 'Not authorized to upload to this message' }, 403);
     }
 
     // Convert base64 to binary
@@ -97,18 +123,25 @@ app.post('/complete', async (c) => {
     const body = await c.req.json();
     const { fileId, uploadId, parts, fileName, token, fileSize } = body;
 
-    if (!fileId || !uploadId || !parts || !token) {
-      return c.json({ error: 'Missing required fields' }, 400);
+    if (!fileId || !uploadId || !Array.isArray(parts) || parts.length === 0 || parts.length > MAX_PARTS || !token) {
+      return c.json({ error: 'Missing or invalid fields' }, 400);
+    }
+
+    // Authorize BEFORE completing anything in R2 (previously a bad token orphaned the object)
+    const message = await authorizeUpload(c, token);
+    if (!message) {
+      return c.json({ error: 'Not authorized to upload to this message' }, 403);
     }
 
     // Complete the multipart upload
     const multipartUpload = c.env.MEDIA_BUCKET.resumeMultipartUpload(fileId, uploadId);
-    await multipartUpload.complete(parts);
+    const object = await multipartUpload.complete(parts);
 
-    // Update message with file reference
-    const message = await c.env.DB.prepare(
-      `SELECT media_files FROM messages WHERE token = ?`
-    ).bind(token).first();
+    // The object must have been initiated for THIS message
+    if (object?.customMetadata?.messageToken && object.customMetadata.messageToken !== token) {
+      await c.env.MEDIA_BUCKET.delete(fileId);
+      return c.json({ error: 'Upload does not belong to this message' }, 403);
+    }
 
     const existingFiles = message.media_files ? JSON.parse(message.media_files) : [];
     existingFiles.push(fileId);
@@ -119,7 +152,7 @@ app.post('/complete', async (c) => {
 
     // Increment stats
     await incrementStat(c.env.DB, 'files_encrypted');
-    await incrementStat(c.env.DB, 'total_file_size', fileSize || 0);
+    await incrementStat(c.env.DB, 'total_file_size', object?.size || 0); // measured, not client-claimed
 
     return c.json({
       success: true,
@@ -133,7 +166,7 @@ app.post('/complete', async (c) => {
 });
 
 // Upload encrypted media file (legacy endpoint for files <100MB)
-app.post('/', rateLimitMiddleware(5, 60000), async (c) => {
+app.post('/', rateLimitMiddleware(5, 60), async (c) => {
   try {
     const body = await c.req.json();
     const { fileData, fileName, fileType, iv, salt, token } = body;
@@ -142,13 +175,9 @@ app.post('/', rateLimitMiddleware(5, 60000), async (c) => {
       return c.json({ error: 'Missing required fields' }, 400);
     }
 
-    // Verify token exists
-    const message = await c.env.DB.prepare(
-      `SELECT media_files FROM messages WHERE token = ?`
-    ).bind(token).first();
-
+    const message = await authorizeUpload(c, token);
     if (!message) {
-      return c.json({ error: 'Invalid message token' }, 404);
+      return c.json({ error: 'Not authorized to upload to this message' }, 403);
     }
 
     // Generate unique file ID

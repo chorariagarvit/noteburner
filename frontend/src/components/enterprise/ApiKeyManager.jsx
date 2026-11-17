@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Key, Trash2, AlertCircle, CheckCircle, Copy, ExternalLink } from 'lucide-react';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
+import { API_BASE } from '../../utils/apiBase';
 
 export default function ApiKeyManager() {
   const { t } = useI18n();
@@ -21,7 +22,7 @@ export default function ApiKeyManager() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/api-keys', {
+      const response = await fetch(`${API_BASE}/api/api-keys`, {
         headers: getAuthHeaders()
       });
 
@@ -49,7 +50,7 @@ export default function ApiKeyManager() {
     
     try {
       setError(null);
-      const response = await fetch('/api/api-keys', {
+      const response = await fetch(`${API_BASE}/api/api-keys`, {
         method: 'POST',
         headers: getAuthHeadersWithJSON(),
         body: JSON.stringify({
@@ -84,7 +85,7 @@ export default function ApiKeyManager() {
 
     try {
       setError(null);
-      const response = await fetch(`/api/api-keys/${keyId}`, {
+      const response = await fetch(`${API_BASE}/api/api-keys/${keyId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });

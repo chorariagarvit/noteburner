@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
 import { requireAuth, getUserId } from '../middleware/requireAuth.js';
+import { sha256hex } from '../utils/password.js';
 
 const router = new Hono();
 
@@ -51,11 +52,11 @@ router.post('/', requireAuth, async (c) => {
   await c.env.DB.prepare(`
     INSERT INTO api_keys (id, user_id, key, name, rate_limit, active, requests_today, requests_month)
     VALUES (?, ?, ?, ?, ?, 1, 0, 0)
-  `).bind(id, userId, key, name, rate_limit).run();
+  `).bind(id, userId, await sha256hex(key), name, rate_limit).run(); // only the hash is stored
 
   return c.json({
     success: true,
-    key, // Only shown once at creation
+    key, // Raw key shown once; only its SHA-256 is stored
     api_key: {
       id,
       name,
