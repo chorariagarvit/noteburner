@@ -1,10 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Copy, CheckCircle, QrCode } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
+import { generateQRCode } from '../utils/qrcode';
 
 export default function TOTPSetup({ totpData }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+
+  // Backend returns the otpauth:// URI only; render the QR code client-side
+  useEffect(() => {
+    let cancelled = false;
+    if (!totpData?.uri) return undefined;
+    generateQRCode(totpData.uri, { width: 256 })
+      .then((url) => { if (!cancelled) setQrCodeUrl(url); })
+      .catch(() => { if (!cancelled) setQrCodeUrl(''); });
+    return () => { cancelled = true; };
+  }, [totpData?.uri]);
 
   const handleCopy = async () => {
     try {
@@ -37,11 +49,13 @@ export default function TOTPSetup({ totpData }) {
           </div>
           
           <div className="bg-white p-4 rounded-lg border-2 border-gray-200 mb-3">
-            <img 
-              src={totpData.qrCodeUrl} 
-              alt="TOTP QR Code"
-              className="w-64 h-64"
-            />
+            {qrCodeUrl && (
+              <img
+                src={qrCodeUrl}
+                alt="TOTP QR Code"
+                className="w-64 h-64"
+              />
+            )}
           </div>
           
           <p className="text-xs text-gray-600 text-center">
