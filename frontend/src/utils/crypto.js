@@ -30,6 +30,33 @@ export async function deriveKey(password, salt) {
 }
 
 /**
+ * Derive a password-proof "auth tag" (independent of the encryption key).
+ * Domain-separated PBKDF2 so the tag reveals nothing about the AES key. The server only
+ * stores SHA-256(tag), and requires it to release ciphertext or accept a burn.
+ * @param {string} password
+ * @param {string} saltBase64 - the message salt (base64)
+ * @returns {Promise<string>} base64 tag
+ */
+export async function deriveAuthTag(password, saltBase64) {
+  const encoder = new TextEncoder();
+  const salt = new Uint8Array(base64ToArrayBuffer(saltBase64));
+  const label = encoder.encode('nb-auth-v1');
+  const authSalt = new Uint8Array(salt.length + label.length);
+  authSalt.set(salt, 0);
+  authSalt.set(label, salt.length);
+
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), { name: 'PBKDF2' }, false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: authSalt, iterations: 300000, hash: 'SHA-256' },
+    keyMaterial,
+    256
+  );
+  return arrayBufferToBase64(bits);
+}
+
+/**
  * Encrypt message with password
  */
 export async function encryptMessage(message, password) {

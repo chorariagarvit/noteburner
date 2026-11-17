@@ -18,17 +18,19 @@ const MESSAGE_COLUMNS = `
  * @param {string} identifier - Token or custom slug
  * @returns {Promise<Object|null>} - Message object or null
  */
-export async function getMessageByIdentifier(db, identifier) {
+export async function getMessageByIdentifier(db, identifier, { includeSecrets = false } = {}) {
+  // Secrets (TOTP secret, auth hash) are opt-in: only verification paths may read them
+  const columns = includeSecrets ? `${MESSAGE_COLUMNS}, totp_secret, auth_hash, totp_attempts` : MESSAGE_COLUMNS;
   // Try token lookup first
   const byToken = await db.prepare(
-    `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE token = ? AND accessed = 0`
+    `SELECT ${columns} FROM messages WHERE token = ? AND accessed = 0`
   ).bind(identifier).first();
 
   if (byToken) return byToken;
 
   // Fall back to slug lookup
   return await db.prepare(
-    `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE custom_slug = ? AND accessed = 0`
+    `SELECT ${columns} FROM messages WHERE custom_slug = ? AND accessed = 0`
   ).bind(identifier).first();
 }
 

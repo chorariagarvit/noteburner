@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Flame, Lock, Zap, Shield, Clock, Eye, EyeOff, Upload, X, TrendingUp, Link2, CheckCircle, XCircle, Loader, Settings } from 'lucide-react';
-import { encryptMessage, encryptFile, generatePassword } from '../../utils/crypto';
+import { encryptMessage, encryptFile, generatePassword, deriveAuthTag } from '../../utils/crypto';
 import { createMessage, uploadMedia } from '../../utils/api';
 import { uploadLargeFile, shouldUseChunkedUpload } from '../../utils/chunkedUpload';
 import { updateStatsOnMessageCreate } from '../../utils/achievements';
@@ -70,6 +70,7 @@ function HeroSection({ stats, statsLoading }) {
                         encryptedFile.iv,
                         encryptedFile.salt,
                         result.token,
+                        result.creatorToken,
                         (progress) => {
                             setUploadProgress(prev => ({ ...prev, [i]: progress }));
                         }
@@ -82,7 +83,8 @@ function HeroSection({ stats, statsLoading }) {
                         file.type,
                         encryptedFile.iv,
                         encryptedFile.salt,
-                        result.token
+                        result.token,
+                        result.creatorToken
                     );
                     // Set progress to 100 for small files
                     setUploadProgress(prev => ({ ...prev, [i]: 100 }));
@@ -104,12 +106,14 @@ function HeroSection({ stats, statsLoading }) {
 
             const encrypted = await encryptMessage(message, password);
             const expirySeconds = expiresIn ? Number.parseInt(expiresIn) * 60 : null; // Convert minutes to seconds
+            const authTag = await deriveAuthTag(password, encrypted.salt);
             const result = await createMessage(
                 encrypted.encryptedData,
                 encrypted.iv,
                 encrypted.salt,
                 expirySeconds,
-                customSlug || null
+                customSlug || null,
+                { authTag }
             );
 
             if (files.length > 0) {
@@ -214,7 +218,7 @@ function HeroSection({ stats, statsLoading }) {
                                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Message *
                                 </label>
-                                <textarea
+                                <textarea data-clarity-mask="true"
                                     id="message"
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}

@@ -5,12 +5,61 @@ import { incrementStat } from '../utils/stats.js';
 import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValidation.js';
 import { getMessageByIdentifier, deleteMessageByIdentifier, deleteExpiredMessage } from '../utils/messageHelpers.js';
 import { createGroupMessage, incrementGroupAccess } from '../utils/groupMessages.js';
-import { generateTOTPSecret, generateTOTPUri, verifyTOTP } from '../utils/totp.js';
+import { sha256hex } from '../utils/password.js';
+import crypto from 'node:crypto';
+import { generateTOTPSecret, generateTOTPUri, verifyTOTP, createTotpProof, verifyTotpProof } from '../utils/totp.js';
 
 const app = new Hono();
 
+// ---- helpers -------------------------------------------------------------
+
+const clampInt = (value, min, max, fallback) => {
+  const n = typeof value === 'number' ? value : Number.parseInt(value, 10);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.trunc(n))) : fallback;
+};
+const flag = (v) => (v === true || v === 1 || v === '1' ? 1 : 0);
+const MAX_EXPIRY_SECONDS = 30 * 24 * 3600; // 30 days
+
+function safeEqualStr(a, b) {
+  const x = Buffer.from(String(a));
+  const y = Buffer.from(String(b));
+  return x.length === y.length && crypto.timingSafeEqual(x, y);
+}
+
+/**
+ * Enforce the password-derived auth tag server-side.
+ * Wrong tags count against max_password_attempts (atomic D1 increment); the message is
+ * destroyed once the limit is reached. Returns a Response to send, or null if OK.
+ * Messages without auth_hash (legacy / group) are not checked.
+ */
+async function enforceAuthTag(c, message) {
+  if (!message.auth_hash) return null;
+  const tag = c.req.header('X-Auth-Tag');
+  // No tag at all is "not authenticated" (401), not a password guess: it must not burn the message
+  if (!tag) {
+    return c.json({ error: 'Password proof required', code: 'AUTH_TAG_REQUIRED' }, 401);
+  }
+  if (safeEqualStr(await sha256hex(tag), message.auth_hash)) return null;
+
+  const row = await c.env.DB.prepare(
+    `UPDATE messages SET password_attempts = password_attempts + 1
+     WHERE token = ? AND accessed = 0
+     RETURNING password_attempts, max_password_attempts`
+  ).bind(message.token).first();
+  const max = row?.max_password_attempts || 3;
+  if (row && row.password_attempts >= max) {
+    await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, message.token, message);
+    await incrementStat(c.env.DB, 'messages_burned');
+    return c.json({ error: 'Too many incorrect attempts. The message has been destroyed.', code: 'BURNED_ATTEMPTS' }, 410);
+  }
+  return c.json({
+    error: `Incorrect password. ${Math.max(0, max - (row?.password_attempts || 0))} attempt(s) remaining.`,
+    code: 'BAD_AUTH_TAG'
+  }, 401);
+}
+
 // Check if custom slug is available
-app.get('/check-slug/:slug', async (c) => {
+app.get('/check-slug/:slug', rateLimitMiddleware(30, 60), async (c) => {
   try {
     const slug = c.req.param('slug');
     
@@ -40,7 +89,7 @@ app.get('/check-slug/:slug', async (c) => {
 });
 
 // Create encrypted message
-app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
+app.post('/', rateLimitMiddleware(10, 60), async (c) => {
   try {
     const body = await c.req.json();
     const { 
@@ -49,15 +98,23 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
       salt, 
       expiresIn, 
       customSlug,
-      maxViews = 1,
-      maxPasswordAttempts = 3,
-      requireGeoMatch = 0,
-      autoBurnOnSuspicious = 0,
-      require2FA = 0
+      authTag
     } = body;
+    const maxViews = clampInt(body.maxViews, 1, 10, 1);
+    const maxPasswordAttempts = clampInt(body.maxPasswordAttempts, 1, 10, 3);
+    const requireGeoMatch = flag(body.requireGeoMatch);
+    const autoBurnOnSuspicious = flag(body.autoBurnOnSuspicious);
+    const require2FA = flag(body.require2FA);
 
-    if (!encryptedData || !iv || !salt) {
+    if (typeof encryptedData !== 'string' || typeof iv !== 'string' || typeof salt !== 'string' || !encryptedData || !iv || !salt) {
       return c.json({ error: 'Missing required fields' }, 400);
+    }
+    if (authTag !== undefined && (typeof authTag !== 'string' || authTag.length < 32 || authTag.length > 128)) {
+      return c.json({ error: 'Invalid auth tag' }, 400);
+    }
+    if (expiresIn !== undefined && expiresIn !== null &&
+        (!Number.isFinite(Number(expiresIn)) || Number(expiresIn) <= 0 || Number(expiresIn) > MAX_EXPIRY_SECONDS)) {
+      return c.json({ error: 'expiresIn must be between 1 second and 30 days' }, 400);
     }
 
     // Validate field sizes
@@ -69,7 +126,7 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
       return c.json({ error: 'Invalid salt length' }, 400);
     }
     // encryptedData max 2MB base64
-    if (encryptedData.length > 2 * 1024 * 1024 * 1.4) {
+    if (encryptedData.length > 1.4 * 1024 * 1024) { // keep under D1's 2 MB row limit
       return c.json({ error: 'Message too large' }, 413);
     }
 
@@ -78,7 +135,8 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
     const creatorToken = nanoid(32);
     const createdAt = Date.now();
     // expiresIn is in seconds, convert to milliseconds
-    const expiresAt = expiresIn ? createdAt + (expiresIn * 1000) : null;
+    const expiresAt = expiresIn ? createdAt + (Number(expiresIn) * 1000) : null;
+    const authHash = authTag ? await sha256hex(authTag) : null;
 
     // Get creator's country from CF headers (for geo-matching)
     const creatorCountry = c.req.header('cf-ipcountry') || null;
@@ -119,12 +177,12 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
       `INSERT INTO messages (
         token, encrypted_data, iv, salt, created_at, expires_at, accessed, custom_slug,
         creator_token, max_views, view_count, max_password_attempts, password_attempts,
-        require_geo_match, creator_country, auto_burn_suspicious, require_2fa, totp_secret
-      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?)`
+        require_geo_match, creator_country, auto_burn_suspicious, require_2fa, totp_secret, auth_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?, ?)`
     ).bind(
       token, encryptedData, iv, salt, createdAt, expiresAt, finalSlug,
       creatorToken, maxViews, maxPasswordAttempts, requireGeoMatch, 
-      creatorCountry, autoBurnOnSuspicious, require2FA, totpSecret
+      creatorCountry, autoBurnOnSuspicious, require2FA, totpSecret, authHash
     ).run();
 
     // Log creation event
@@ -170,7 +228,7 @@ app.post('/', rateLimitMiddleware(10, 60000), async (c) => {
 });
 
 // Create group message (1-to-many)
-app.post('/group', rateLimitMiddleware(5, 60000), async (c) => {
+app.post('/group', rateLimitMiddleware(5, 60), async (c) => {
   try {
     const body = await c.req.json();
     const { 
@@ -222,7 +280,33 @@ app.post('/group', rateLimitMiddleware(5, 60000), async (c) => {
     }, 201);
   } catch (error) {
     console.error('Error creating group message:', error);
-    return c.json({ error: error.message || 'Failed to create group message' }, 500);
+    return c.json({ error: 'Failed to create group message' }, 500);
+  }
+});
+
+// Public metadata needed to start decryption (no ciphertext): salt for key derivation,
+// expiry, and which protections apply. Never reveals secrets or the auth hash.
+app.get('/:identifier/meta', async (c) => {
+  try {
+    const identifier = c.req.param('identifier');
+    const result = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
+    if (!result) {
+      return c.json({ error: 'Message not found or already accessed' }, 404);
+    }
+    if (result.expires_at && Date.now() > result.expires_at) {
+      await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
+      return c.json({ error: 'Message has expired' }, 410);
+    }
+    return c.json({
+      salt: result.salt,
+      expiresAt: result.expires_at,
+      createdAt: result.created_at,
+      totpRequired: result.require_2fa === 1,
+      authRequired: !!result.auth_hash
+    });
+  } catch (error) {
+    console.error('Error retrieving message metadata:', error);
+    return c.json({ error: 'Failed to retrieve message' }, 500);
   }
 });
 
@@ -236,7 +320,7 @@ app.get('/:identifier', async (c) => {
     }
 
     // Retrieve message without marking as accessed yet
-    const result = await getMessageByIdentifier(c.env.DB, identifier);
+    const result = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
 
     if (!result) {
       // Message either doesn't exist or was already accessed
@@ -248,6 +332,34 @@ app.get('/:identifier', async (c) => {
       // Delete expired message and media files
       await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
       return c.json({ error: 'Message has expired' }, 410);
+    }
+
+    // 2FA-protected: only reveal ciphertext to callers holding a valid TOTP proof
+    if (result.require_2fa === 1) {
+      const proof = c.req.header('X-TOTP-Proof');
+      if (!verifyTotpProof(proof, result.totp_secret, identifier)) {
+        return c.json({
+          totpRequired: true,
+          expiresAt: result.expires_at,
+          createdAt: result.created_at
+        });
+      }
+    }
+
+    // Password proof (server-enforced): wrong tags count toward max_password_attempts
+    const authFailure = await enforceAuthTag(c, result);
+    if (authFailure) return authFailure;
+
+    // Atomically claim a view. Once max_views is used up the ciphertext is never released
+    // again, so link scanners/unfurlers cannot silently re-fetch it.
+    const claimed = await c.env.DB.prepare(
+      `UPDATE messages SET view_count = view_count + 1
+       WHERE token = ? AND accessed = 0 AND view_count < COALESCE(NULLIF(max_views, 0), 1)
+       RETURNING token`
+    ).bind(result.token).first();
+    if (!claimed) {
+      await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
+      return c.json({ error: 'This message has already been viewed and is destroyed.', code: 'ALREADY_VIEWED' }, 410);
     }
 
     // Return message data for decryption attempt
@@ -284,7 +396,7 @@ app.post('/:identifier/verify-totp', async (c) => {
     }
 
     // Retrieve message
-    const result = await getMessageByIdentifier(c.env.DB, identifier);
+    const result = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
 
     if (!result) {
       return c.json({ error: 'Message not found' }, 404);
@@ -295,9 +407,20 @@ app.post('/:identifier/verify-totp', async (c) => {
       return c.json({ error: 'This message does not require 2FA' }, 400);
     }
 
-    // Brute-force protection: max 5 attempts per 5 minutes per identifier
+    // Atomic per-message cap across ALL IPs: burn the message after 10 total guesses
+    const counted = await c.env.DB.prepare(
+      `UPDATE messages SET totp_attempts = totp_attempts + 1
+       WHERE token = ? AND accessed = 0 RETURNING totp_attempts`
+    ).bind(result.token).first();
+    if (counted && counted.totp_attempts > 10) {
+      await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
+      return c.json({ error: 'Too many 2FA attempts. The message has been destroyed.', code: 'BURNED_2FA' }, 410);
+    }
+
+    // Per-IP brute-force protection: max 5 attempts per 5 minutes
     const kv = c.env.CACHE;
-    const attemptsKey = `totp_attempts:${identifier}`;
+    const clientIp = c.req.header('CF-Connecting-IP') || 'unknown';
+    const attemptsKey = `totp_attempts:${identifier}:${clientIp}`;
     if (kv) {
       const attempts = await kv.get(attemptsKey);
       const count = attempts ? parseInt(attempts, 10) : 0;
@@ -326,7 +449,8 @@ app.post('/:identifier/verify-totp', async (c) => {
 
     return c.json({
       success: true,
-      message: 'TOTP verified successfully'
+      message: 'TOTP verified successfully',
+      proof: createTotpProof(result.totp_secret, identifier)
     });
   } catch (error) {
     console.error('Error verifying TOTP:', error);
@@ -336,7 +460,7 @@ app.post('/:identifier/verify-totp', async (c) => {
 
 // Delete message after successful decryption (called by frontend)
 // Optionally accepts X-Creator-Token for creator-initiated early burns.
-// Normal self-destruct (recipient burns after decryption) requires no token.
+// Recipient burns after decryption must present the password-derived X-Auth-Tag (and TOTP proof if 2FA).
 app.delete('/:identifier', async (c) => {
   try {
     const identifier = c.req.param('identifier');
@@ -349,6 +473,7 @@ app.delete('/:identifier', async (c) => {
     // This supports creator-initiated early burns. If not provided, allow
     // the normal self-destruct flow (recipient burns after decryption).
     const creatorToken = c.req.header('X-Creator-Token');
+    let isCreator = false;
     if (creatorToken) {
       const message = await c.env.DB.prepare(
         `SELECT creator_token FROM messages WHERE token = ? OR custom_slug = ?`
@@ -360,6 +485,22 @@ app.delete('/:identifier', async (c) => {
 
       if (message.creator_token !== creatorToken) {
         return c.json({ error: 'Invalid creator token', code: 'INVALID_CREATOR_TOKEN' }, 403);
+      }
+      isCreator = true;
+    }
+
+    // 2FA-protected messages can only be burned by the creator or with a valid TOTP proof
+    if (!isCreator) {
+      const protectedMsg = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
+      if (protectedMsg?.require_2fa === 1 &&
+          !verifyTotpProof(c.req.header('X-TOTP-Proof'), protectedMsg.totp_secret, identifier)) {
+        return c.json({ error: 'TOTP verification required', code: 'TOTP_REQUIRED' }, 403);
+      }
+      // Burning without being the creator requires proof of the password (auth tag),
+      // so holders of only the link cannot destroy the message.
+      if (protectedMsg) {
+        const authFailure = await enforceAuthTag(c, protectedMsg);
+        if (authFailure) return authFailure;
       }
     }
 
