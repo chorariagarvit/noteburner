@@ -11,20 +11,24 @@ export const ALLOWED_ORIGINS = [
 ];
 
 export const corsConfig = {
-  origin: (origin) => {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return true;
-    
+  origin: (origin, c) => {
+    // No Origin header (curl, server-to-server): no CORS headers needed
+    if (!origin) return null;
+
     // Allow Chrome/Firefox extension origins (chrome-extension:// or moz-extension://)
-    if (origin && (origin.startsWith('chrome-extension://') || origin.startsWith('moz-extension://'))) {
+    if (origin.startsWith('chrome-extension://') || origin.startsWith('moz-extension://')) {
       return origin;
     }
-    
-    // Check if origin is in allowed list
-    return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+    // localhost origins are only for non-production environments
+    const isLocal = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+    if (isLocal && c?.env?.ENVIRONMENT === 'production') return null;
+
+    // Reject anything not explicitly allowed (no fallback origin)
+    return ALLOWED_ORIGINS.includes(origin) ? origin : null;
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'X-Session-Token', 'X-API-Key', 'X-Creator-Token'],
+  allowHeaders: ['Content-Type', 'X-Session-Token', 'X-API-Key', 'X-Creator-Token', 'X-TOTP-Proof', 'X-App-Token', 'X-Auth-Tag', 'Authorization'],
   exposeHeaders: ['X-File-IV', 'X-File-Salt', 'X-File-Name', 'Content-Disposition'],
   credentials: false,
 };
