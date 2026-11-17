@@ -65,10 +65,37 @@ async function deriveKey(password, salt) {
  */
 function generatePassword(length = 16) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-  const randomValues = crypto.getRandomValues(new Uint8Array(length));
-  return Array.from(randomValues)
-    .map(x => chars[x % chars.length])
-    .join('');
+  const limit = 256 - (256 % chars.length); // reject values that would bias the modulo
+  let out = '';
+  while (out.length < length) {
+    const buf = crypto.getRandomValues(new Uint8Array(length * 2));
+    for (const x of buf) {
+      if (x < limit && out.length < length) out += chars[x % chars.length];
+    }
+  }
+  return out;
+}
+
+/**
+ * Password-proof auth tag (must match the web app's deriveAuthTag). The server stores only
+ * SHA-256(tag) and requires it before releasing ciphertext or accepting a burn.
+ */
+async function deriveAuthTag(password, saltBase64) {
+  const encoder = new TextEncoder();
+  const salt = new Uint8Array(base64ToArrayBuffer(saltBase64));
+  const label = encoder.encode('nb-auth-v1');
+  const authSalt = new Uint8Array(salt.length + label.length);
+  authSalt.set(salt, 0);
+  authSalt.set(label, salt.length);
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', encoder.encode(password), { name: 'PBKDF2' }, false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: authSalt, iterations: 300000, hash: 'SHA-256' },
+    keyMaterial,
+    256
+  );
+  return arrayBufferToBase64(bits);
 }
 
 /**
@@ -120,7 +147,7 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     console.log('[NoteBurner Extension] Encrypted data length:', encrypted.encryptedData.length);
     
     // Use Worker URL directly - bypass Pages routing
-    const apiUrl = 'https://noteburner-api.gravity-solutions-cf-account.workers.dev';
+    const apiUrl = 'https://api.noteburner.work';
     const endpoint = `${apiUrl}/api/messages`;
     
     console.log('[NoteBurner Extension] API endpoint:', endpoint);
@@ -133,30 +160,30 @@ async function createSecureMessage(message, password, expiresIn = '24') {
       encryptedData: encrypted.encryptedData,
       iv: encrypted.iv,
       salt: encrypted.salt,
-      expiresIn: expirySeconds
+      expiresIn: expirySeconds,
+      authTag: await deriveAuthTag(password, encrypted.salt)
     };
-    
-    console.log('[NoteBurner Extension] Request body:', {
-      encryptedDataLength: requestBody.encryptedData.length,
-      ivLength: requestBody.iv.length,
-      saltLength: requestBody.salt.length,
-      expiresIn: requestBody.expiresIn,
-      expiresInHours: expiresIn
-    });
     
     // Create message via API
     console.log('[NoteBurner Extension] Sending request...');
+    // The API requires a signed app token on every call: fetch a short-lived one first
+    const tokenRes = await fetch(`${apiUrl}/api/app-token`, { method: 'POST' });
+    if (!tokenRes.ok) {
+      throw new Error(`Could not start API session (HTTP ${tokenRes.status})`);
+    }
+    const { token: appToken } = await tokenRes.json();
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-App-Token': appToken
       },
       body: JSON.stringify(requestBody)
     });
     
     console.log('[NoteBurner Extension] Response received');
     console.log('[NoteBurner Extension] Status:', response.status, response.statusText);
-    console.log('[NoteBurner Extension] Headers:', Object.fromEntries(response.headers.entries()));
     console.log('[NoteBurner Extension] OK:', response.ok);
     
     if (!response.ok) {
@@ -167,7 +194,6 @@ async function createSecureMessage(message, password, expiresIn = '24') {
         console.log('[NoteBurner Extension] Error response content-type:', contentType);
         
         const errorBody = await response.text();
-        console.log('[NoteBurner Extension] Error response body:', errorBody);
         
         if (contentType && contentType.includes('application/json') && errorBody) {
           errorDetails = JSON.parse(errorBody);
@@ -184,10 +210,8 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     }
     
     const responseText = await response.text();
-    console.log('[NoteBurner Extension] Success response body:', responseText);
     
     const data = JSON.parse(responseText);
-    console.log('[NoteBurner Extension] Parsed data:', data);
     
     // API returns either 'url' directly or we construct from token/slug
     // Response format: { success: true, token, slug?, url }
@@ -195,8 +219,6 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     const messageId = data.slug || data.token;
     
     console.log('[NoteBurner Extension] Message created successfully');
-    console.log('[NoteBurner Extension] Message ID:', messageId);
-    console.log('[NoteBurner Extension] Share URL:', shareUrl);
     
     return {
       url: shareUrl,
