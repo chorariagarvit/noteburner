@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.14.0] - 2026-03-13
+
+### Added - Premium Features (Week 14)
+- Premium plan ($5/month) and Lifetime plan ($49 one-time): 1GB uploads, unlimited custom URLs, 10,000 API calls/day
+- Stripe-ready subscription backend (`/api/premium/plans|status|subscribe|cancel|usage`), migration `0012_premium_features.sql`
+- `PricingPage` (3-tier comparison, FAQ) and `PremiumPage` (usage dashboard, cancel flow)
+- `PremiumBadge` component and `premium.js` utilities
+- 29 E2E tests (`e2e/week14.spec.js`)
+
+See [docs/WEEK14_SUMMARY.md](docs/WEEK14_SUMMARY.md).
+
+---
+
+## [1.13.0] - 2026-03-12
+
+### Added - Internationalization (Week 13)
+- 6 languages (EN/ES/FR/DE/ZH/HI) with browser auto-detect and `LanguageSwitcher`
+- Locale-aware dates and numbers via `Intl`; RTL support ready
+- Backend `detectLocale()` middleware (`Content-Language` header) and GDPR/CCPA compliance flags
+
+See [docs/WEEK13_SUMMARY.md](docs/WEEK13_SUMMARY.md).
+
+---
+
+## [1.12.0] - 2026-03-04
+
+### Added - Scaling & Performance (Week 12)
+- Cloudflare KV cache-aside layer
+- 7 composite DB indexes (about 500ms down to 20-50ms)
+- Health endpoints `/ping`, `/health`, `/health/deep`
+- `Server-Timing` / `X-Response-Time` headers and a `PerformanceMonitor` class
+
+### Notes
+- There is no v1.11. The API version string was set to `1.11.0` in code during this work, but the release is v1.12.0.
+
+See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
+
+---
+
 ## [1.10.1] - 2026-02-24
 
 ### Added - Enhanced Test Coverage
@@ -358,6 +397,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Week 6, no version] - 2026-01-20
+
+### Added - UI/UX Polish
+- **Onboarding Flow**:
+  - 3-step tutorial for first-time users
+  - Animated transitions with progress bar
+  - Skip button and keyboard navigation
+  - Full ARIA support for accessibility
+
+- **Message Templates**:
+  - 6 pre-written templates (Work, Personal, Events)
+  - Quick-insert functionality
+  - Category filtering
+
+- **Keyboard Shortcuts**:
+  - 12 shortcuts for power users
+  - Help modal (Shift+?)
+  - Custom hooks for shortcut handling
+
+- **Loading States**:
+  - 8 skeleton components for loading states
+  - Rotating personality messages during encryption
+  - Smooth animations and transitions
+
+### Technical
+- Components: OnboardingModal, MessageTemplates, KeyboardShortcutsModal, Skeletons
+- 878 lines added (5 new components, 4 modified)
+- Full accessibility with ARIA labels and keyboard navigation
+
+---
+
 ## [1.5.0] - 2026-01-14
 
 ### Added - Network Effects
@@ -395,38 +465,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.0] - 2026-01-20
-
-### Added - UI/UX Polish
-- **Onboarding Flow**:
-  - 3-step tutorial for first-time users
-  - Animated transitions with progress bar
-  - Skip button and keyboard navigation
-  - Full ARIA support for accessibility
-
-- **Message Templates**:
-  - 6 pre-written templates (Work, Personal, Events)
-  - Quick-insert functionality
-  - Category filtering
-
-- **Keyboard Shortcuts**:
-  - 12 shortcuts for power users
-  - Help modal (Shift+?)
-  - Custom hooks for shortcut handling
-
-- **Loading States**:
-  - 8 skeleton components for loading states
-  - Rotating personality messages during encryption
-  - Smooth animations and transitions
-
-### Technical
-- Components: OnboardingModal, MessageTemplates, KeyboardShortcutsModal, Skeletons
-- 878 lines added (5 new components, 4 modified)
-- Full accessibility with ARIA labels and keyboard navigation
-
----
-
-## [1.3.0] - 2025-12-29
+## [1.4.0] - 2026-01-08
 
 ### Added - Gamification
 - **Achievement System**:
@@ -456,7 +495,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.0] - 2025-12-22
+## [1.3.0] - 2025-12-28
+
+### Added - Custom URLs & Branding
+- Custom short URLs (3-20 chars, real-time validation, profanity filter, reserved slugs)
+- QR code generation (512x512 PNG, one-click download)
+- Countdown timer with urgency states
+- Open Graph tags for share previews
+
+See [docs/WEEK3_SUMMARY.md](docs/WEEK3_SUMMARY.md).
+
+---
+
+## [1.2.0] - 2025-12-23
 
 ### Added - Viral Mechanics
 - **Post-Burn CTA**:
@@ -481,7 +532,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.1.0] - 2025-12-15
+## [1.1.0] - 2025-12-17
 
 ### Added - Analytics & Social Proof
 - **Message Counter**:
@@ -506,7 +557,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2025-12-01
+## [1.0.0] - 2025-12-07
 
 ### Added - Initial Release
 - **Core Security**:
@@ -543,17 +594,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-| Version | Release Date | Focus | Lines Added | New Tests |
-|---------|-------------|-------|-------------|-----------|
-| 1.8.0   | 2026-02-09  | Security Enhancements | 1,350+ | 40+ |
-| 1.7.0   | 2026-02-09  | Platform Integrations | 1,200+ | 30+ |
-| 1.6.0   | 2026-01-23  | Mobile & PWA | 1,659 | 26 |
-| 1.5.0   | 2026-01-14  | Network Effects | 2,696 | 28 |
-| 1.4.0   | 2026-01-20  | UI/UX Polish | 878 | 0 |
-| 1.3.0   | 2025-12-29  | Gamification | 1,200+ | 19 |
-| 1.2.0   | 2025-12-22  | Viral Mechanics | 800+ | 10 |
-| 1.1.0   | 2025-12-15  | Analytics | 500+ | 8 |
-| 1.0.0   | 2025-12-01  | Initial Release | - | 30 |
+| Version | Release Date | Focus |
+|---------|-------------|-------|
+| 1.14.0  | 2026-03-13  | Premium Features |
+| 1.13.0  | 2026-03-12  | Internationalization |
+| 1.12.0  | 2026-03-04  | Scaling & Performance |
+| 1.10.1  | 2026-02-24  | Expanded E2E coverage |
+| 1.10.0  | 2026-02-24  | User Authentication |
+| 1.9.0   | 2026-02-20  | Enterprise Features |
+| 1.8.0   | 2026-02-09  | Security Enhancements |
+| 1.7.0   | 2026-02-09  | Platform Integrations |
+| 1.6.0   | 2026-01-23  | Mobile & PWA |
+| 1.5.0   | 2026-01-14  | Network Effects |
+| 1.4.0   | 2026-01-08  | Gamification |
+| 1.3.0   | 2025-12-28  | Custom URLs & Branding |
+| 1.2.0   | 2025-12-23  | Viral Mechanics |
+| 1.1.0   | 2025-12-17  | Analytics & Social Proof |
+| 1.0.0   | 2025-12-07  | Initial Release |
+
+Week 6 (UI/UX Polish, 2026-01-20) shipped without a version bump. See [ROADMAP.md](ROADMAP.md) for the week-to-version map.
 
 **Total E2E Tests**: 176+ (expected 99%+ pass rate)  
 **Total Lines**: ~13,000+ across all releases  
@@ -561,6 +620,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[1.14.0]: https://github.com/noteburner/noteburner/releases/tag/v1.14.0
+[1.13.0]: https://github.com/noteburner/noteburner/releases/tag/v1.13.0
+[1.12.0]: https://github.com/noteburner/noteburner/releases/tag/v1.12.0
+[1.10.1]: https://github.com/noteburner/noteburner/releases/tag/v1.10.1
+[1.10.0]: https://github.com/noteburner/noteburner/releases/tag/v1.10.0
+[1.9.0]: https://github.com/noteburner/noteburner/releases/tag/v1.9.0
 [1.8.0]: https://github.com/noteburner/noteburner/releases/tag/v1.8.0
 [1.7.0]: https://github.com/noteburner/noteburner/releases/tag/v1.7.0
 [1.6.0]: https://github.com/noteburner/noteburner/releases/tag/v1.6.0
