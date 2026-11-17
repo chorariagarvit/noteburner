@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 import { useI18n } from '../contexts/I18nContext';
+import { API_BASE } from '../utils/apiBase';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function ResetPasswordPage() {
     }
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

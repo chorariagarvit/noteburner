@@ -1,3 +1,5 @@
+import { readCounter, bumpCounter } from '../utils/kvCounter.js';
+
 // Rate limiting middleware — backed by Cloudflare KV for cross-isolate persistence
 
 export function rateLimitMiddleware(limit = 10, windowSeconds = 60) {
@@ -13,18 +15,14 @@ export function rateLimitMiddleware(limit = 10, windowSeconds = 60) {
     }
 
     const key = `rl:ip:${ip}:${limit}:${windowSeconds}`;
-    const current = await kv.get(key);
-    const count = current ? parseInt(current, 10) : 0;
+    const counter = await readCounter(kv, key);
+    const count = counter.count;
 
     if (count >= limit) {
       return c.json({ error: 'Rate limit exceeded. Please try again later.' }, 429);
     }
 
-    if (count === 0) {
-      await kv.put(key, '1', { expirationTtl: windowSeconds });
-    } else {
-      await kv.put(key, String(count + 1));
-    }
+    await bumpCounter(kv, key, counter, windowSeconds);
 
     await next();
   };

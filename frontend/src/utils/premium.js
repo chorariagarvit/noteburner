@@ -1,8 +1,9 @@
+import { API_BASE } from './apiBase';
 /**
  * Frontend utility for checking and caching premium status.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_URL = API_BASE;
 const CACHE_KEY = 'noteburner_premium_status';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 

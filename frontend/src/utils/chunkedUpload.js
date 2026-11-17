@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://noteburner-api.gravitysolutions.in';
+import { API_BASE } from './apiBase';
+const API_URL = API_BASE;
 
 const CHUNK_SIZE = 50 * 1024 * 1024; // 50MB chunks
 const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB max
@@ -39,10 +40,10 @@ async function fetchWithTimeout(url, options, timeout = UPLOAD_TIMEOUT) {
 /**
  * Initialize multipart upload
  */
-async function initializeUpload(file, encryptedData, iv, salt, token) {
+async function initializeUpload(file, encryptedData, iv, salt, token, creatorToken) {
   const initResponse = await fetchWithTimeout(`${API_URL}/api/media/init`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Creator-Token': creatorToken },
     body: JSON.stringify({
       fileName: file.name,
       fileType: file.type,
@@ -64,7 +65,7 @@ async function initializeUpload(file, encryptedData, iv, salt, token) {
 /**
  * Upload a single chunk with retry logic
  */
-async function uploadChunk(fileId, uploadId, chunkIndex, chunkData, totalChunks, onProgress, currentProgress) {
+async function uploadChunk(fileId, uploadId, chunkIndex, chunkData, totalChunks, onProgress, currentProgress, token, creatorToken) {
   let lastError = null;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -84,8 +85,9 @@ async function uploadChunk(fileId, uploadId, chunkIndex, chunkData, totalChunks,
 
       const chunkResponse = await fetchWithTimeout(`${API_URL}/api/media/chunk`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Creator-Token': creatorToken },
         body: JSON.stringify({
+          token,
           fileId,
           uploadId,
           chunkIndex,
@@ -123,10 +125,10 @@ async function uploadChunk(fileId, uploadId, chunkIndex, chunkData, totalChunks,
 /**
  * Complete multipart upload
  */
-async function completeUpload(fileId, uploadId, parts, fileName, token, fileSize) {
+async function completeUpload(fileId, uploadId, parts, fileName, token, fileSize, creatorToken) {
   const completeResponse = await fetchWithTimeout(`${API_URL}/api/media/complete`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Creator-Token': creatorToken },
     body: JSON.stringify({
       fileId,
       uploadId,
@@ -152,16 +154,17 @@ async function completeUpload(fileId, uploadId, parts, fileName, token, fileSize
  * @param {string} iv - Initialization vector
  * @param {string} salt - Salt for encryption
  * @param {string} token - Message token
+ * @param {string} creatorToken - Creator token (required to upload)
  * @param {Function} onProgress - Progress callback (percentage)
  * @returns {Promise<{success: boolean, fileId: string}>}
  */
-export async function uploadLargeFile(file, encryptedData, iv, salt, token, onProgress) {
+export async function uploadLargeFile(file, encryptedData, iv, salt, token, creatorToken, onProgress) {
   if (file.size > MAX_FILE_SIZE) {
     throw new Error(`File size exceeds maximum of ${MAX_FILE_SIZE / (1024 * 1024 * 1024)}GB`);
   }
 
   // Step 1: Initialize multipart upload
-  const { fileId, uploadId, chunkSize } = await initializeUpload(file, encryptedData, iv, salt, token);
+  const { fileId, uploadId, chunkSize } = await initializeUpload(file, encryptedData, iv, salt, token, creatorToken);
 
   // Step 2: Upload chunks with retry logic
   const totalChunks = Math.ceil(encryptedData.length / chunkSize);
@@ -173,12 +176,12 @@ export async function uploadLargeFile(file, encryptedData, iv, salt, token, onPr
     const end = Math.min(start + chunkSize, encryptedData.length);
     const chunkData = encryptedData.slice(start, end);
     
-    const part = await uploadChunk(fileId, uploadId, i, chunkData, totalChunks, onProgress, currentProgress);
+    const part = await uploadChunk(fileId, uploadId, i, chunkData, totalChunks, onProgress, currentProgress, token, creatorToken);
     parts.push(part);
   }
 
   // Step 3: Complete upload
-  const result = await completeUpload(fileId, uploadId, parts, file.name, token, encryptedData.length);
+  const result = await completeUpload(fileId, uploadId, parts, file.name, token, encryptedData.length, creatorToken);
 
   // Set progress to 100%
   if (onProgress) {

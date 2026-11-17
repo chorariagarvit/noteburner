@@ -52,3 +52,7 @@ temp/
 wrangler.toml.backup
 noteburner-extension.crx
 noteburner-extension.zip
+
+# Extension signing keys / packages (never commit)
+*.pem
+*.crx

@@ -270,3 +270,19 @@ Verify R2 bucket is created and bound correctly in `wrangler.toml`.
 ## Support
 
 For issues or questions, please check the documentation or create an issue.
+
+
+## API authentication (required secrets)
+
+Every `/api/*` request must carry a user session, an API key, or a signed app token
+(`X-App-Token`, obtained from `POST /api/app-token`). Only login/signup/password-reset,
+`/api/app-token` and `/api/health` + `/api/health/ping` are open.
+
+```bash
+cd backend
+openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET --env production
+wrangler secret put SLACK_SIGNING_SECRET --env production   # only if using Slack
+```
+
+The API **fails closed**: without `APP_TOKEN_SECRET` anonymous calls get HTTP 503.
+Local dev (`npm run dev`) uses `dev-app-token-secret`; Playwright signs test tokens with the same value.

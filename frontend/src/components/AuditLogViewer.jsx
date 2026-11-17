@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../contexts/I18nContext';
+import { API_BASE } from '../utils/apiBase';
 
 /**
  * Audit Log Viewer
@@ -20,7 +21,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/audit/${messageId}`, {
+      const response = await fetch(`${API_BASE}/api/audit/${messageId}`, {
         headers: {
           'X-Creator-Token': creatorToken
         }

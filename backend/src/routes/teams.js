@@ -30,14 +30,16 @@ router.post('/', requireAuth, async (c) => {
 
   const body = await c.req.json();
 
-  const { name, plan = 'free' } = body;
+  const { name } = body;
+  // Plan is NEVER client-chosen: paid plans are granted only through verified billing
+  const plan = 'free';
 
   if (!name || name.trim().length < 3) {
     return c.json({ error: 'Team name must be at least 3 characters', code: 'INVALID_NAME' }, 400);
   }
 
   const teamId = nanoid(16);
-  const maxMembers = plan === 'enterprise' ? 100 : plan === 'team' ? 20 : 5;
+  const maxMembers = 5;
 
   // Get user's email from users table
   const user = await c.env.DB.prepare(`
@@ -242,6 +244,10 @@ router.post('/:id/members', requireAuth, async (c) => {
 
   const { email, role = 'member' } = body;
 
+  if (!['viewer', 'member', 'admin'].includes(role)) {
+    return c.json({ error: 'Invalid role', code: 'INVALID_ROLE' }, 400);
+  }
+
   if (!email || !email.includes('@')) {
     return c.json({ error: 'Valid email required', code: 'INVALID_EMAIL' }, 400);
   }
@@ -269,10 +275,11 @@ router.post('/:id/members', requireAuth, async (c) => {
   `).bind(email.toLowerCase()).first();
 
   if (!existingUser) {
+    // Same shape as success so team admins can't probe which emails have accounts
     return c.json({
-      error: 'User not found. They must register before being added to a team.',
-      code: 'USER_NOT_REGISTERED'
-    }, 404);
+      success: true,
+      message: 'If an account exists for that email, it has been added to the team.'
+    }, 201);
   }
 
   const memberId = nanoid(16);
@@ -323,6 +330,22 @@ router.put('/:teamId/members/:memberId', requireAuth, async (c) => {
     return c.json({ error: 'Invalid role', code: 'INVALID_ROLE' }, 400);
   }
 
+  // The owner's membership can't be changed, and only the owner can change another admin's role
+  const target = await c.env.DB.prepare(`
+    SELECT tm.user_id, tm.role, t.owner_id
+    FROM team_members tm JOIN teams t ON tm.team_id = t.id
+    WHERE tm.id = ? AND tm.team_id = ?
+  `).bind(memberId, teamId).first();
+  if (!target) {
+    return c.json({ error: 'Member not found', code: 'NOT_FOUND' }, 404);
+  }
+  if (target.user_id === target.owner_id) {
+    return c.json({ error: 'The team owner\'s role cannot be changed', code: 'CANNOT_MODIFY_OWNER' }, 403);
+  }
+  if ((target.role === 'admin' || role === 'admin') && userId !== target.owner_id) {
+    return c.json({ error: 'Only the team owner can grant or revoke admin', code: 'OWNER_REQUIRED' }, 403);
+  }
+
   await c.env.DB.prepare(`
     UPDATE team_members SET role = ? WHERE id = ? AND team_id = ?
   `).bind(role, memberId, teamId).run();
@@ -355,6 +378,14 @@ router.delete('/:teamId/members/:memberId', requireAuth, async (c) => {
 
   if (member && member.user_id === member.owner_id) {
     return c.json({ error: 'Cannot remove team owner', code: 'CANNOT_REMOVE_OWNER' }, 400);
+  }
+
+  if (member) {
+    const targetRole = await c.env.DB.prepare('SELECT role FROM team_members WHERE id = ? AND team_id = ?')
+      .bind(memberId, teamId).first();
+    if (targetRole?.role === 'admin' && userId !== member.owner_id) {
+      return c.json({ error: 'Only the team owner can remove an admin', code: 'OWNER_REQUIRED' }, 403);
+    }
   }
 
   await c.env.DB.prepare(`

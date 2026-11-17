@@ -2,6 +2,16 @@
 // Processes at most 500 items per run to stay within Worker CPU/time limits
 const BATCH_LIMIT = 500;
 const R2_CONCURRENCY = 25;
+// D1 allows at most 100 bound parameters per statement: delete in chunks well under that
+const D1_CHUNK = 90;
+
+async function deleteIn(db, table, column, values) {
+  for (let i = 0; i < values.length; i += D1_CHUNK) {
+    const chunk = values.slice(i, i + D1_CHUNK);
+    await db.prepare(`DELETE FROM ${table} WHERE ${column} IN (${chunk.map(() => '?').join(', ')})`)
+      .bind(...chunk).run();
+  }
+}
 
 export async function cleanupScheduled(env) {
   console.log('Running scheduled cleanup job...');
@@ -44,11 +54,7 @@ export async function cleanupScheduled(env) {
       }
 
       // Batch-delete messages from D1
-      const tokens = messages.map(m => m.token);
-      const placeholders = tokens.map(() => '?').join(', ');
-      await env.DB.prepare(
-        `DELETE FROM messages WHERE token IN (${placeholders})`
-      ).bind(...tokens).run();
+      await deleteIn(env.DB, 'messages', 'token', messages.map(m => m.token));
     }
 
     // 2. Find media files marked for deletion (bounded to BATCH_LIMIT per run)
@@ -67,10 +73,25 @@ export async function cleanupScheduled(env) {
       }
 
       // Batch-delete cleanup records from D1
-      const placeholders = fileIds.map(() => '?').join(', ');
-      await env.DB.prepare(
-        `DELETE FROM media_cleanup WHERE file_id IN (${placeholders})`
-      ).bind(...fileIds).run();
+      await deleteIn(env.DB, 'media_cleanup', 'file_id', fileIds);
+    }
+
+    // 3. Housekeeping for tables that otherwise grow forever (each isolated so one failure
+    //    doesn't stop the others)
+    const nowIso = new Date().toISOString();
+    const monthAgo = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+    const housekeeping = [
+      ['expired sessions', `DELETE FROM sessions WHERE expires_at < ?`, [nowIso]],
+      ['used/expired password resets', `DELETE FROM password_resets WHERE used = 1 OR expires_at < ?`, [nowIso]],
+      ['old login attempts', `DELETE FROM login_attempts WHERE attempted_at < ?`, [monthAgo]],
+      ['accessed messages', `DELETE FROM messages WHERE accessed = 1 AND created_at < ?`, [Date.now() - 7 * 24 * 3600 * 1000]],
+    ];
+    for (const [label, sql, params] of housekeeping) {
+      try {
+        await env.DB.prepare(sql).bind(...params).run();
+      } catch (err) {
+        console.error(`Cleanup step failed (${label}):`, err.message);
+      }
     }
 
     console.log('Cleanup completed:', {

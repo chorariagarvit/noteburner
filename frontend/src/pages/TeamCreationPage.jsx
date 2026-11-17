@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthHeadersWithJSON } from '../utils/session';
 import { useI18n } from '../contexts/I18nContext';
+import { API_BASE } from '../utils/apiBase';
 
 export default function TeamCreationPage() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function TeamCreationPage() {
     setMessage(null);
 
     try {
-      const response = await fetch('/api/teams', {
+      const response = await fetch(`${API_BASE}/api/teams`, {
         method: 'POST',
         headers: getAuthHeadersWithJSON(),
         body: JSON.stringify({

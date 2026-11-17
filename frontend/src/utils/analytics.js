@@ -26,6 +26,14 @@ export function initGTM() {
   document.head.appendChild(script);
 }
 
+// Capability URLs (/m/<token>), reset/verify links and prefilled text must never reach analytics.
+export function sanitizedPath(pathname = globalThis.location.pathname) {
+  if (pathname.startsWith('/m/')) return '/m/:id';
+  if (pathname.startsWith('/reset-password')) return '/reset-password';
+  if (pathname.startsWith('/verify-email')) return '/verify-email';
+  return pathname;
+}
+
 // Google Analytics 4 Integration
 
 export function initGA4() {
@@ -48,6 +56,8 @@ export function initGA4() {
   globalThis.gtag('js', new Date());
   globalThis.gtag('config', measurementId, {
     send_page_view: true,
+    page_location: `${globalThis.location.origin}${sanitizedPath()}`, // no query/hash/token
+    page_path: sanitizedPath(),
     cookie_flags: 'SameSite=None;Secure'
   });
 

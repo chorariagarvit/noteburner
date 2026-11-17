@@ -5,6 +5,12 @@
 
 import crypto from 'crypto';
 
+function safeEqual(a, b) {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  return bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
+}
+
 // Base32 encoding lookup table
 const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
@@ -14,9 +20,12 @@ const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
  * @returns {string} Base32-encoded secret
  */
 export function generateTOTPSecret(length = 32) {
+  // Rejection-free: 256 % 32 === 0, so masking a random byte gives uniform base32 chars
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
   let secret = '';
-  for (let i = 0; i < length; i++) {
-    secret += BASE32_CHARS[Math.floor(Math.random() * BASE32_CHARS.length)];
+  for (const byte of bytes) {
+    secret += BASE32_CHARS[byte & 31];
   }
   return secret;
 }
@@ -90,18 +99,42 @@ export function generateTOTP(secret, time = Date.now(), window = 30) {
 export function verifyTOTP(code, secret, window = 1) {
   const now = Date.now();
   const timeWindow = 30000; // 30 seconds in milliseconds
-  
-  // Check current window and adjacent windows to account for clock drift
+  let valid = false;
+
+  // Check every window (no early exit) with constant-time comparison
   for (let i = -window; i <= window; i++) {
-    const testTime = now + (i * timeWindow);
-    const testCode = generateTOTP(secret, testTime);
-    
-    if (testCode === code) {
-      return true;
+    const testCode = generateTOTP(secret, now + (i * timeWindow));
+    if (safeEqual(testCode, code)) {
+      valid = true;
     }
   }
-  
-  return false;
+
+  return valid;
+}
+
+const PROOF_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * Create a short-lived proof that a TOTP code was verified for a message.
+ * HMAC keyed with the message's TOTP secret (server-side only), so it cannot be forged.
+ * @returns {string} "<expiry>.<hex hmac>"
+ */
+export function createTotpProof(secret, identifier, ttlMs = PROOF_TTL_MS) {
+  const expiry = Date.now() + ttlMs;
+  const mac = crypto.createHmac('sha256', secret).update(`${identifier}:${expiry}`).digest('hex');
+  return `${expiry}.${mac}`;
+}
+
+/**
+ * Verify a proof produced by createTotpProof.
+ */
+export function verifyTotpProof(proof, secret, identifier) {
+  if (!proof || typeof proof !== 'string' || !secret) return false;
+  const [expiryStr, mac] = proof.split('.');
+  const expiry = Number(expiryStr);
+  if (!Number.isFinite(expiry) || !mac || Date.now() > expiry) return false;
+  const expected = crypto.createHmac('sha256', secret).update(`${identifier}:${expiry}`).digest('hex');
+  return safeEqual(mac, expected);
 }
 
 /**
@@ -121,17 +154,4 @@ export function generateTOTPUri(secret, label, issuer = 'NoteBurner') {
   });
   
   return `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(label)}?${params}`;
-}
-
-/**
- * Generate QR code data URL for TOTP URI
- * @param {string} totpUri - TOTP provisioning URI
- * @returns {string} Data URL for QR code SVG
- */
-export function generateQRCodeSVG(totpUri) {
-  // Simple QR code SVG generator (limited to small data)
-  // For production, consider using a proper QR library
-  // This returns a base64-encoded data URI that can be embedded
-  const encodedUri = encodeURIComponent(totpUri);
-  return `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodedUri}`;
 }

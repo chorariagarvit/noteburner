@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Star, Crown, Shield, Check, AlertCircle, Loader2, CreditCard, Bitcoin, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
+import { API_BASE } from '../utils/apiBase';
+import { getSessionToken } from '../utils/session';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_URL = API_BASE;
 
 const PLAN_META = {
   free:     { icon: Shield, color: 'gray',   label: 'Free Plan' },
@@ -13,7 +15,8 @@ const PLAN_META = {
 };
 
 export default function PremiumPage() {
-  const { isAuthenticated, user, token } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const token = getSessionToken();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

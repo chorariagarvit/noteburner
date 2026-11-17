@@ -1,3 +1,4 @@
+import { readCounter, bumpCounter } from '../utils/kvCounter.js';
 /**
  * Security Headers Middleware
  * Implements Content Security Policy and other security headers
@@ -14,7 +15,7 @@ export const securityHeaders = () => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: https: blob:",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://api.noteburner.app wss://api.noteburner.app",
+      "connect-src 'self' https://api.noteburner.work wss://api.noteburner.work",
       "media-src 'self' blob:",
       "object-src 'none'",
       "base-uri 'self'",
@@ -70,8 +71,8 @@ export const enhancedRateLimit = (options = {}) => {
 
     const identifier = await getClientIdentifier(c.req);
     const key = `erl:${identifier}:${maxRequests}:${windowSeconds}`;
-    const current = await kv.get(key);
-    const count = current ? parseInt(current, 10) : 0;
+    const counter = await readCounter(kv, key);
+    const count = counter.count;
 
     if (count >= maxRequests) {
       c.header('X-RateLimit-Limit', maxRequests.toString());
@@ -80,12 +81,8 @@ export const enhancedRateLimit = (options = {}) => {
       return c.json({ error: message, retryAfter: windowSeconds }, 429);
     }
 
-    // Only set TTL on first write to avoid sliding the window on every request
-    if (count === 0) {
-      await kv.put(key, '1', { expirationTtl: windowSeconds });
-    } else {
-      await kv.put(key, String(count + 1));
-    }
+    // Fixed window: keeps the original expiry on every write
+    await bumpCounter(kv, key, counter, windowSeconds);
 
     c.header('X-RateLimit-Limit', maxRequests.toString());
     c.header('X-RateLimit-Remaining', String(maxRequests - count - 1));
@@ -169,36 +166,3 @@ export const ddosProtection = () => {
   };
 };
 
-/**
- * API Key Validation Middleware
- */
-export const requireApiKey = () => {
-  return async (c, next) => {
-    const apiKey = c.req.header('X-API-Key');
-
-    if (!apiKey) {
-      return c.json({ error: 'API key required' }, 401);
-    }
-
-    // Validate API key from database
-    const validKey = await c.env.DB.prepare(`
-      SELECT id, user_id, rate_limit, last_used_at
-      FROM api_keys
-      WHERE key = ? AND active = 1
-    `).bind(apiKey).first();
-
-    if (!validKey) {
-      return c.json({ error: 'Invalid API key' }, 401);
-    }
-
-    // Update last used timestamp
-    await c.env.DB.prepare(`
-      UPDATE api_keys SET last_used_at = datetime('now') WHERE id = ?
-    `).bind(validKey.id).run();
-
-    // Store key info in context for later use
-    c.set('apiKey', validKey);
-
-    await next();
-  };
-};

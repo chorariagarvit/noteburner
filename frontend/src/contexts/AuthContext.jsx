@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { API_BASE } from '../utils/apiBase';
 
 const AuthContext = createContext(null);
 
@@ -13,7 +14,7 @@ export function AuthProvider({ children }) {
       
       if (sessionToken) {
         try {
-          const response = await fetch('/api/auth/me', {
+          const response = await fetch(`${API_BASE}/api/auth/me`, {
             headers: {
               'X-Session-Token': sessionToken
             }
@@ -40,7 +41,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password, rememberMe = false) => {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, rememberMe })
@@ -63,7 +64,7 @@ export function AuthProvider({ children }) {
 
   const signup = async ({ email, password, displayName }) => {
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch(`${API_BASE}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, displayName })
@@ -87,7 +88,7 @@ export function AuthProvider({ children }) {
     
     if (sessionToken) {
       try {
-        await fetch('/api/auth/logout', {
+        await fetch(`${API_BASE}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'X-Session-Token': sessionToken
@@ -109,7 +110,7 @@ export function AuthProvider({ children }) {
       return false;}
 
     try {
-      const response = await fetch('/api/auth/refresh', {
+      const response = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: 'POST',
         headers: {
           'X-Session-Token': sessionToken

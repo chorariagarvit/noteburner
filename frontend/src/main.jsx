@@ -4,7 +4,11 @@ import App from './App';
 import './index.css';
 import { initClarity } from './utils/clarity';
 import { initGTM, initGA4 } from './utils/analytics';
+import { installApiAuth } from './utils/apiBase';
 import { registerServiceWorker, checkInstallability, setupOnlineStatusDetection } from './utils/pwa';
+
+// Attach signed app token to all API calls (must run before any fetch)
+installApiAuth();
 
 // Initialize analytics (only if IDs are configured)
 initGTM();        // Google Tag Manager

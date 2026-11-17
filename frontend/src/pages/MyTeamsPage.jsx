@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Users, Plus, Crown, Shield, Eye, UserCheck } from 'lucide-react';
 import { getAuthHeaders } from '../utils/session';
 import { useI18n } from '../contexts/I18nContext';
+import { API_BASE } from '../utils/apiBase';
 
 export default function MyTeamsPage() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function MyTeamsPage() {
   const loadTeams = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/teams', {
+      const response = await fetch(`${API_BASE}/api/teams`, {
         headers: getAuthHeaders()
       });
 
