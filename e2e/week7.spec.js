@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 test.beforeEach(async ({ page }) => {
   // Disable onboarding modal for E2E tests
@@ -64,16 +64,11 @@ test.describe('Week 7 - Mobile Optimization & PWA Features', () => {
     test('should cache static assets', async ({ page }) => {
       await page.goto('/');
 
-      // Wait for service worker to activate
-      await page.waitForTimeout(1000);
-
-      // Check if cache storage has entries
-      const cacheKeys = await page.evaluate(async () => {
-        const keys = await caches.keys();
-        return keys;
-      });
-
-      expect(cacheKeys.length).toBeGreaterThan(0);
+      // Poll until the service worker has installed and created its caches (slower on WebKit/mobile)
+      await expect.poll(
+        () => page.evaluate(async () => (await caches.keys()).length),
+        { timeout: 15000 }
+      ).toBeGreaterThan(0);
     });
 
     test('should support background sync capability', async ({ page, browserName }) => {

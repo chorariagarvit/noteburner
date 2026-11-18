@@ -1,38 +1,47 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 /**
  * Week 8 E2E Tests - Platform Integrations
  * Tests for Slack, Zapier, Discord integrations and API
  */
 
+// API keys can only be created by a signed-in user (POST /api/api-keys); the old unauthenticated
+// /api/integrations/keys/create endpoint was a hole and has been removed.
+async function createApiKey(request) {
+  const email = `w8-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;
+  const password = 'Str0ng!Passw0rd#1';
+  const signup = await request.post('/api/auth/signup', { data: { email, password } });
+  expect(signup.status()).toBe(201);
+  const login = await request.post('/api/auth/login', { data: { email, password } });
+  expect(login.status()).toBe(200);
+  const { sessionToken } = await login.json();
+  const created = await request.post('/api/api-keys', {
+    headers: { 'X-Session-Token': sessionToken },
+    data: { name: 'e2e', rate_limit: 1000 },
+  });
+  expect(created.status()).toBe(201);
+  return (await created.json()).key;
+}
+
 test.describe('Week 8 - Platform Integrations', () => {
   
   // API Key Management Tests
   test.describe('API Key Management', () => {
-    test('should create API key', async ({ request }) => {
+    test('unauthenticated key minting endpoint is gone', async ({ request }) => {
       const response = await request.post('/api/integrations/keys/create', {
-        data: {
-          user_id: 'test_user_123',
-          name: 'Test Integration'
-        }
+        data: { user_id: 'test_user_123', name: 'Test Integration' }
       });
-
-      expect(response.status()).toBe(200);
-      const data = await response.json();
-      expect(data.success).toBe(true);
-      expect(data.api_key).toMatch(/^nb_/);
-      expect(data.name).toBe('Test Integration');
-      expect(data.warning).toContain('Save this key securely');
+      expect(response.status()).toBe(404);
     });
 
-    test('should require user_id and name', async ({ request }) => {
-      const response = await request.post('/api/integrations/keys/create', {
-        data: {}
-      });
+    test('should create API key via the authenticated flow', async ({ request }) => {
+      const key = await createApiKey(request);
+      expect(key).toMatch(/^nb_/);
+    });
 
-      expect(response.status()).toBe(400);
-      const data = await response.json();
-      expect(data.error).toContain('required');
+    test('creating a key requires a signed-in user', async ({ request }) => {
+      const response = await request.post('/api/api-keys', { data: { name: 'x' } });
+      expect(response.status()).toBe(401);
     });
   });
 
@@ -41,15 +50,7 @@ test.describe('Week 8 - Platform Integrations', () => {
     let apiKey;
 
     test.beforeAll(async ({ request }) => {
-      // Create API key for testing
-      const response = await request.post('/api/integrations/keys/create', {
-        data: {
-          user_id: 'zapier_test_user',
-          name: 'Zapier Test'
-        }
-      });
-      const data = await response.json();
-      apiKey = data.api_key;
+      apiKey = await createApiKey(request);
     });
 
     test('should authenticate with valid API key', async ({ request }) => {
@@ -125,18 +126,16 @@ test.describe('Week 8 - Platform Integrations', () => {
       expect(diffHours).toBeLessThanOrEqual(168);
     });
 
-    test('should reject message over 10,000 characters', async ({ request }) => {
-      const longMessage = 'a'.repeat(10001);
+    test('server-side message creation is disabled (zero-knowledge)', async ({ request }) => {
+      // The Zapier creator stored plaintext server-side and is disabled until it is redesigned
+      // around client-side encryption.
       const response = await request.post('/api/integrations/zapier/create', {
-        data: {
-          api_key: apiKey,
-          message: longMessage
-        }
+        data: { api_key: apiKey, message: 'a'.repeat(10001) }
       });
 
-      expect(response.status()).toBe(400);
+      expect(response.status()).toBe(501);
       const data = await response.json();
-      expect(data.error).toContain('max 10,000');
+      expect(data.code).toBe('INTEGRATION_DISABLED');
     });
   });
 
@@ -145,14 +144,7 @@ test.describe('Week 8 - Platform Integrations', () => {
     let apiKey;
 
     test.beforeAll(async ({ request }) => {
-      const response = await request.post('/api/integrations/keys/create', {
-        data: {
-          user_id: 'webhook_test_user',
-          name: 'Webhook Test'
-        }
-      });
-      const data = await response.json();
-      apiKey = data.api_key;
+      apiKey = await createApiKey(request);
     });
 
     test('should subscribe to webhooks', async ({ request }) => {
@@ -224,15 +216,12 @@ test.describe('Week 8 - Platform Integrations', () => {
       expect(data.embed.footer.text).toContain('Self-destructs');
     });
 
-    test('should reject invalid Discord bot token', async ({ request }) => {
+    test('Discord message creation is disabled', async ({ request }) => {
       const response = await request.post('/api/integrations/discord/create', {
-        data: {
-          bot_token: 'invalid_token',
-          message: 'Test message'
-        }
+        data: { bot_token: 'invalid_token', message: 'Test message' }
       });
 
-      expect(response.status()).toBe(401);
+      expect(response.status()).toBe(501);
     });
   });
 

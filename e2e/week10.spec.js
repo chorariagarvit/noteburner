@@ -1,4 +1,25 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
+import { execSync } from 'node:child_process';
+import path from 'node:path';
+
+// Plans are NOT client-selectable any more (teams always start on 'free'; paid plans come only from
+// verified billing). Tests that exercise paid features flip the plan directly in the local test DB.
+function upgradeTeam(teamId, plan = 'enterprise') {
+  execSync(
+    `npx wrangler d1 execute noteburner-db --local --command "UPDATE teams SET plan='${plan}', max_members=100 WHERE id='${teamId}'"`,
+    { cwd: path.resolve(process.cwd(), 'backend'), stdio: 'ignore' }
+  );
+}
+
+// Adding a member requires a REGISTERED user (unknown emails are not revealed or added).
+async function registerUser(request) {
+  const email = `e2e-member-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;
+  const res = await request.post('http://localhost:8787/api/auth/signup', {
+    data: { email, password: 'Str0ng!Passw0rd#1' }
+  });
+  expect(res.status()).toBe(201);
+  return email;
+}
 
 test.describe('Week 10: Enterprise Features', () => {
   
@@ -152,7 +173,7 @@ test.describe('Week 10: Enterprise Features', () => {
       
       // Check for team name in a more specific h1 (not the header)
       await expect(page.locator('h1.text-3xl')).toContainText('UI Test Team');
-      await expect(page.locator('text=Team Plan')).toBeVisible();
+      await expect(page.locator('text=/free Plan/i')).toBeVisible(); // plan is always 'free' until billing upgrades it
     });
 
     test('should invite team member', async ({ page }) => {
@@ -172,10 +193,11 @@ test.describe('Week 10: Enterprise Features', () => {
       // Switch to Members tab
       await page.click('button:has-text("Members")');
       
+      const inviteEmail = await registerUser(page.request);
       await page.click('button:has-text("Invite Member")');
-      await page.fill('input[type="email"]', 'newmember@test.com');
+      await page.fill('input[type="email"]', inviteEmail);
       await page.click('button:has-text("Send Invite")');
-      await expect(page.locator('text=newmember@test.com')).toBeVisible();
+      await expect(page.locator(`text=${inviteEmail}`)).toBeVisible();
     });
 
     test('should update member role', async ({ page }) => {
@@ -190,10 +212,11 @@ test.describe('Week 10: Enterprise Features', () => {
       const teamData = await teamRes.json();
       const teamId = teamData.team.id;
 
-      // Add a member
+      // Add a (registered) member
+      const memberEmail = await registerUser(page.request);
       await page.request.post(`http://localhost:8787/api/teams/${teamId}/members`, {
         headers: { 'X-Session-Token': sessionToken },
-        data: { email: 'member@test.com', role: 'member' }
+        data: { email: memberEmail, role: 'member' }
       });
 
       await page.goto(`http://localhost:5173/teams/${teamId}`);
@@ -202,7 +225,7 @@ test.describe('Week 10: Enterprise Features', () => {
       await page.click('button:has-text("Members")');
       
       // Update role via UI
-      const memberRow = page.locator('tr:has-text("member@test.com")');
+      const memberRow = page.locator(`tr:has-text("${memberEmail}")`);
       await memberRow.locator('select').selectOption('admin');
       await expect(memberRow.locator('select')).toHaveValue('admin');
     });
@@ -219,9 +242,10 @@ test.describe('Week 10: Enterprise Features', () => {
       const teamData = await teamRes.json();
       const teamId = teamData.team.id;
 
+      const removeEmail = await registerUser(page.request);
       await page.request.post(`http://localhost:8787/api/teams/${teamId}/members`, {
         headers: { 'X-Session-Token': sessionToken },
-        data: { email: 'removeme@test.com', role: 'member' }
+        data: { email: removeEmail, role: 'member' }
       });
 
       await page.goto(`http://localhost:5173/teams/${teamId}`);
@@ -230,9 +254,9 @@ test.describe('Week 10: Enterprise Features', () => {
       await page.click('button:has-text("Members")');
       
       page.on('dialog',dialog => dialog.accept());
-      const memberRow = page.locator('tr:has-text("removeme@test.com")');
+      const memberRow = page.locator(`tr:has-text("${removeEmail}")`);
       await memberRow.locator('button:has-text("Remove")').click();
-      await expect(page.locator('text=removeme@test.com')).not.toBeVisible();
+      await expect(page.locator(`text=${removeEmail}`)).not.toBeVisible();
     });
 
     test('should display team stats', async ({ page }) => {
@@ -283,6 +307,7 @@ test.describe('Week 10: Enterprise Features', () => {
       });
       const teamData = await teamRes.json();
       const teamId = teamData.team.id;
+      upgradeTeam(teamId); // branding is a paid feature
 
       await page.goto(`http://localhost:5173/teams/${teamId}/branding`);
       
@@ -321,6 +346,7 @@ test.describe('Week 10: Enterprise Features', () => {
       });
       const teamData = await teamRes.json();
       const teamId = teamData.team.id;
+      upgradeTeam(teamId); // branding is a paid feature
 
       await page.goto(`http://localhost:5173/teams/${teamId}/branding`);
       
@@ -649,6 +675,7 @@ test.describe('Week 10: Enterprise Features', () => {
       });
       const teamData = await teamRes.json();
       const teamId = teamData.team.id;
+      upgradeTeam(teamId); // branding is a paid feature
 
       await page.goto(`http://localhost:5173/teams/${teamId}/branding`);
       

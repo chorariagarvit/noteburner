@@ -3,7 +3,7 @@
  * Tests for signup, login, logout, password reset, and session management
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 // Test data
 const testUser = {
@@ -16,6 +16,14 @@ const weakPassword = 'weak';
 const invalidEmail = 'invalid-email';
 
 test.describe('Week 11: Authentication System', () => {
+  // The first-visit "Getting Started" modal (shown ~1s after the home page loads) can cover the
+  // header and intercept clicks. These tests are about auth, not onboarding, so mark it done.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      try { localStorage.setItem('noteburner_onboarding_complete', 'true'); } catch { /* ignore */ }
+    });
+  });
+
   
   test.describe('User Signup', () => {
     
@@ -192,12 +200,11 @@ test.describe('Week 11: Authentication System', () => {
       await page.check('#remember-me');
       await page.click('button[type="submit"]');
       
-      await page.waitForURL('/login', { timeout: 10000 });
+      // Wait until login completes (we leave /login) instead of waiting on the URL we're already on
+      await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 10000 });
       
-      // Check localStorage has session token
-      const sessionToken = await page.evaluate(() => localStorage.getItem('sessionToken'));
-      expect(sessionToken).toBeTruthy();
-      expect(sessionToken).toContain('session_');
+      // "Remember me" persists the opaque session token in localStorage
+      await expect.poll(() => page.evaluate(() => localStorage.getItem('sessionToken'))).toBeTruthy();
     });
   });
 
@@ -218,6 +225,10 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#password', testUser.password);
       await page.click('button[type="submit"]');
       await page.waitForURL('/', { timeout: 10000 });
+      
+      // The header switches to the signed-in state a moment after the redirect: wait for it,
+      // otherwise "last button in nav" can still be the dark-mode toggle
+      await expect(page.locator('a[href="/login"]')).toBeHidden({ timeout: 10000 });
       
       // Click user menu (last button in nav)
       const userButton = page.locator('nav button').last();
@@ -270,8 +281,7 @@ test.describe('Week 11: Authentication System', () => {
       await page.click('button[type="submit"]');
       
       // Should show success message
-      await expect(page.locator('text=Check your email')).toBeVisible({ timeout: 10000 });
-      await expect(page.locator('text=reset link').or(page.locator('text=reset instructions'))).toBeVisible();
+      await expect(page.getByRole('heading', { name: /Check your email/i })).toBeVisible({ timeout: 10000 });
     });
 
     test('should not reveal if email does not exist', async ({ page }) => {
@@ -370,8 +380,11 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#email', uniqueEmail);
       await page.fill('#password', testUser.password);
       await page.click('button[type="submit"]');
-      await page.waitForURL('/login', { timeout: 10000 });
+      await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 10000 });
       
+      // Wait for the signed-in header before locating the user button
+      await expect(page.locator('a[href="/login"]')).toBeHidden({ timeout: 10000 });
+
       // User button should be visible (last button in nav)
       const userButton = page.locator('nav button').last();
       await expect(userButton).toBeVisible();

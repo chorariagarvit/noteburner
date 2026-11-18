@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 /**
  * Week 9 E2E Tests - Security Enhancements
@@ -328,7 +328,8 @@ test.describe('Week 9 - Security Enhancements', () => {
       await page.goto('/success-page'); // Adjust URL
       
       // Check for flag emoji or country code
-      const countryIndicator = page.locator('text=/🇺🇸|🇬🇧|US|GB/');
+      // Only consider visible matches (on mobile the first text match can be a hidden menu item)
+      const countryIndicator = page.locator('text=/🇺🇸|🇬🇧|US|GB/').filter({ visible: true });
       if (await countryIndicator.count() > 0) {
         await expect(countryIndicator.first()).toBeVisible();
       }

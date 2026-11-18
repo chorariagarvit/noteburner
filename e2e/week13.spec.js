@@ -4,7 +4,7 @@
  * date/number formatting, and regional compliance endpoints.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8787';
 const APP_URL = process.env.APP_URL || 'http://localhost:5173';
