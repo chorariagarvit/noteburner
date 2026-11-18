@@ -12,8 +12,7 @@
     "contextMenus",
     "activeTab",
     "scripting",
-    "storage",
-    "notifications"
+    "storage"
   ],
   "host_permissions": [
     "https://api.noteburner.work/*",

@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "NoteBurner",
+  "version": "1.14.0",
+  "description": "Send self-destructing encrypted messages directly from any webpage",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "scripting",
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://api.noteburner.work/*",
+    "https://noteburner.work/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "NoteBurner - Quick Encrypt"
+  }
+}

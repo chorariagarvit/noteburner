@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -81,4 +82,11 @@ test('the popup reads the selection through activeTab + scripting, only when ope
   const popup = read('popup.js');
   assert.match(popup, /chrome\.scripting\.executeScript/);
   assert.ok(!/tabs\.sendMessage/.test(popup + read('background.js')));
+});
+
+test('every shipped script parses', () => {
+  for (const f of sources) {
+    const r = spawnSync(process.execPath, ['--check', path.join(EXT, f)], { encoding: 'utf8' });
+    assert.equal(r.status, 0, `${f} has a syntax error:\n${r.stderr}`);
+  }
 });
