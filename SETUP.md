@@ -281,8 +281,11 @@ Every `/api/*` request must carry a user session, an API key, or a signed app to
 ```bash
 cd backend
 openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET --env production
+openssl rand -hex 32 | wrangler secret put TOTP_ENCRYPTION_KEY --env production   # encrypts 2FA secrets at rest
 wrangler secret put SLACK_SIGNING_SECRET --env production   # only if using Slack
 ```
+
+Set `TOTP_ENCRYPTION_KEY` **before** deploying and never change it afterwards (messages sealed with the old key would stop verifying). Without it, creating a message with 2FA fails instead of storing the secret in plain text. Apply migrations through `0014` before the new Worker goes live.
 
 The API **fails closed**: without `APP_TOKEN_SECRET` anonymous calls get HTTP 503.
 Local dev (`npm run dev`) uses `dev-app-token-secret`; Playwright signs test tokens with the same value.
