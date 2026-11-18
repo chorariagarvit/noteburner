@@ -122,6 +122,10 @@ MIT License - See main repository for details
 - Added API hosts to `host_permissions` (Chrome and Firefox manifests)
 - Replaced `innerHTML` with `textContent` in the popup and content script
 - Version aligned with the web app (was 1.0.0)
+- Friendlier errors: rate limiting ("wait N seconds"), oversized messages, outages, gateway error pages and network failures no longer show raw `429: Too Many Requests` text
+- 30-second timeout on every API call so the popup can't hang; "No expiration" now sends no expiry instead of `NaN`
+- When the server requires a Turnstile human check, the popup opens noteburner.work/create with the text prefilled (the widget can't run in an extension)
+- New tests (`npm run test:extension`): crypto parity with the web app (auth tag, cross-decryption), the request contract against a mock API, manifest/source consistency
 
 ### v1.0.0 (2026-01-14)
 - Initial release
