@@ -30,6 +30,28 @@ export const test = base.extend({
     await use(context);
   },
 
+  // On a freshly loaded page, WebKit under heavy CPU load sometimes delivers the first input event
+  // in a way React never turns into onChange: the field is filled, then React writes the old (empty)
+  // state back ~10ms later and the form submits without it. Real typing is seconds after load and
+  // not affected in practice, but a scripted fill can land in that window. Verify the value stuck
+  // and retry, so a test fails only on real defects.
+  page: async ({ page }, use) => {
+    const fill = page.fill.bind(page);
+    page.fill = async (selector, value, options) => {
+      // Fields may legitimately transform what is typed (e.g. the custom URL strips invalid
+      // characters), so only a value that went back to what it was before the fill counts as lost.
+      const before = await page.inputValue(selector, { timeout: 2000 }).catch(() => null);
+      for (let attempt = 0; attempt < 6; attempt++) {
+        await fill(selector, value, options);
+        await page.waitForTimeout(80);
+        const now = await page.inputValue(selector, { timeout: 2000 }).catch(() => null);
+        if (now === null || before === null || now !== before || value === before) return;
+      }
+      throw new Error(`fill(${selector}) did not stick after 6 attempts`);
+    };
+    await use(page);
+  },
+
   request: async ({ playwright, baseURL }, use, testInfo) => {
     const ctx = await playwright.request.newContext({
       baseURL,
