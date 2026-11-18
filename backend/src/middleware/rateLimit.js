@@ -19,10 +19,17 @@ export function rateLimitMiddleware(limit = 10, windowSeconds = 60) {
     const count = counter.count;
 
     if (count >= limit) {
+      c.header('X-RateLimit-Limit', String(limit));
+      c.header('X-RateLimit-Remaining', '0');
+      c.header('X-RateLimit-Reset', String(counter.resetAt));
+      c.header('Retry-After', String(Math.max(1, counter.resetAt - Math.floor(Date.now() / 1000))));
       return c.json({ error: 'Rate limit exceeded. Please try again later.' }, 429);
     }
 
-    await bumpCounter(kv, key, counter, windowSeconds);
+    const updated = await bumpCounter(kv, key, counter, windowSeconds);
+    c.header('X-RateLimit-Limit', String(limit));
+    c.header('X-RateLimit-Remaining', String(Math.max(0, limit - updated.count)));
+    c.header('X-RateLimit-Reset', String(updated.resetAt));
 
     await next();
   };
