@@ -124,8 +124,10 @@ test.describe('Week 11: Authentication System', () => {
       await page.fill('#confirmPassword', testUser.password);
       await page.click('button[type="submit"]');
       
-      // Should show error
-      await expect(page.locator('text=Email already registered').or(page.locator('text=already exists'))).toBeVisible({ timeout: 3000 });
+      // Signup must not reveal that the address is taken: it looks exactly like a first signup
+      // (the real owner is told by email instead)
+      await expect(page.locator('text=Account created successfully')).toBeVisible({ timeout: 8000 });
+      await expect(page.locator('text=Email already registered').or(page.locator('text=already exists'))).toHaveCount(0);
     });
   });
 

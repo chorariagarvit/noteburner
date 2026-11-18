@@ -35,3 +35,13 @@ test('benign values are preserved', () => {
   assert.ok(out.includes('Ada Lovelace'));
   assert.ok(out.includes('token=abc123'));
 });
+
+test('account-exists email escapes the name and points to login and password reset only', () => {
+  const out = html(emailTemplates.accountExists({ displayName: evil, loginUrl: 'https://noteburner.work/login', resetUrl: 'https://noteburner.work/forgot-password' }));
+  assert.ok(!out.includes('<img src=x'));
+  assert.ok(!out.includes('<a href="https://evil.example">'));
+  assert.ok(out.includes('https://noteburner.work/login'));
+  assert.ok(out.includes('https://noteburner.work/forgot-password'));
+  assert.ok(/If this wasn't you/.test(out), 'tells a non-owner it is safe to ignore');
+  assert.ok(!/token=/.test(out), 'never contains a credential');
+});

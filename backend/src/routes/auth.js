@@ -23,7 +23,8 @@ import {
   refreshSession
 } from '../utils/session.js';
 import { 
-  sendVerificationEmail, 
+  sendVerificationEmail,
+  sendAccountExistsEmail, 
   sendPasswordResetEmail, 
   sendWelcomeEmail 
 } from '../utils/email.js';
@@ -69,58 +70,45 @@ router.post('/signup', rateLimitMiddleware(5, 600), async (c) => {
       }, 400);
     }
 
-    // Check if user already exists
-    const existingUser = await c.env.DB.prepare(`
-      SELECT id FROM users WHERE email = ?
-    `).bind(email.toLowerCase()).first();
-
-    if (existingUser) {
-      return c.json({ error: 'Email already registered', code: 'EMAIL_EXISTS' }, 409);
-    }
-
-    // Hash password
+    // Signup must not reveal whether an email is registered: every valid request gets the SAME
+    // answer. New address -> account + verification email. Existing address -> nothing changes and the
+    // owner is told by email. The password is hashed on both paths so response time doesn't leak it either.
+    const normalizedEmail = email.toLowerCase();
     const passwordHash = await hashPassword(password);
 
-    // Generate user ID and verification token
-    const userId = nanoid(16);
-    const verificationToken = generateVerificationToken();
+    const existingUser = await c.env.DB.prepare(`
+      SELECT id, display_name FROM users WHERE email = ?
+    `).bind(normalizedEmail).first();
 
-    // Create user (only the verification token's hash is stored)
-    try {
-      await c.env.DB.prepare(`
-        INSERT INTO users (id, email, password_hash, display_name, verification_token, email_verified)
-        VALUES (?, ?, ?, ?, ?, 0)
-      `).bind(userId, email.toLowerCase(), passwordHash, displayName || null, await sha256hex(verificationToken)).run();
-    } catch (err) {
-      // Two simultaneous signups with the same email both pass the check above; the UNIQUE index decides
-      if (/UNIQUE/i.test(String(err?.message))) {
-        return c.json({ error: 'Email already registered', code: 'EMAIL_EXISTS' }, 409);
+    let created = false;
+    let verificationToken = null;
+    if (!existingUser) {
+      verificationToken = generateVerificationToken();
+      try {
+        await c.env.DB.prepare(`
+          INSERT INTO users (id, email, password_hash, display_name, verification_token, email_verified)
+          VALUES (?, ?, ?, ?, ?, 0)
+        `).bind(nanoid(16), normalizedEmail, passwordHash, displayName || null, await sha256hex(verificationToken)).run();
+        created = true;
+      } catch (err) {
+        // Two simultaneous signups with the same email both pass the check above; the UNIQUE index
+        // decides, and the loser is simply treated as "already registered"
+        if (!/UNIQUE/i.test(String(err?.message))) throw err;
       }
-      throw err;
     }
 
-    // Send verification email
-    const emailSent = await sendVerificationEmail(
-      c.env, 
-      email.toLowerCase(), 
-      displayName || email.split('@')[0], 
-      verificationToken
-    );
+    const emailSent = created
+      ? await sendVerificationEmail(c.env, normalizedEmail, displayName || email.split('@')[0], verificationToken)
+      : await sendAccountExistsEmail(c.env, normalizedEmail, existingUser?.display_name || displayName || email.split('@')[0]);
 
     // Fallback: log generic message if email fails (dev mode)
     if (!emailSent) {
-      console.log(`[DEV] Verification email not sent for ${email} - check email service config`);
+      console.log(`[DEV] Signup email not sent for ${email} - check email service config`);
     }
 
     return c.json({
       success: true,
-      message: 'Account created successfully. Please check your email to verify your account.',
-      user: {
-        id: userId,
-        email: email.toLowerCase(),
-        displayName: displayName || null,
-        emailVerified: false
-      }
+      message: 'Almost there. Check your email to continue.'
     }, 201);
   } catch (error) {
     console.error('Signup error:', error);

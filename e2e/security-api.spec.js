@@ -426,8 +426,9 @@ test.describe('Accounts and sessions', () => {
     }
     const weak = await request.post(`${API}/auth/signup`, { data: { email: `weak-${uniq()}@example.com`, password: 'short' } });
     expect(weak.status()).toBe(400);
+    // a duplicate signup is indistinguishable from a first one (no "already registered" oracle)
     const dupe = await request.post(`${API}/auth/signup`, { data: { email, password: PASSWORD } });
-    expect(dupe.status()).toBe(409);
+    expect(dupe.status()).toBe(201);
   });
 });
 

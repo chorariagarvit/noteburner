@@ -106,6 +106,24 @@ export async function sendPasswordResetEmail(env, email, displayName, resetToken
 }
 
 /**
+ * Tell the owner of an existing account that someone tried to register their address.
+ * (Signup answers the same way for new and existing emails; this is how the real owner finds out.)
+ */
+export async function sendAccountExistsEmail(env, email, displayName, baseUrl = 'https://noteburner.work') {
+  const html = emailTemplates.accountExists({
+    displayName: displayName || 'there',
+    loginUrl: `${baseUrl}/login`,
+    resetUrl: `${baseUrl}/forgot-password`
+  });
+
+  return sendEmail(env, {
+    to: email,
+    subject: 'You already have a NoteBurner account',
+    html
+  });
+}
+
+/**
  * Send welcome email after successful verification
  * @param {Object} env - Environment bindings
  * @param {string} email - User email
