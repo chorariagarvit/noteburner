@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import confetti from 'canvas-confetti';
+import { fireConfetti } from '../utils/confetti';
 
 export default function AchievementUnlocked({ achievement, onClose }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -10,7 +10,7 @@ export default function AchievementUnlocked({ achievement, onClose }) {
     setTimeout(() => setIsVisible(true), 100);
     
     // Fire confetti
-    confetti({
+    fireConfetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
