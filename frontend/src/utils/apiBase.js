@@ -1,5 +1,7 @@
 // Single source of truth for the API origin.
 // Empty string = same-origin (production routes /api/* to the Worker; dev uses the Vite proxy).
+import { solveChallenge } from './turnstile';
+
 export const API_BASE = import.meta.env.VITE_API_URL || '';
 
 // ---------------------------------------------------------------------------
@@ -16,15 +18,30 @@ try {
 } catch { /* storage unavailable: fall back to memory only */ }
 let inflight = null;
 
+async function requestToken(rawFetch, turnstileToken) {
+  const res = await rawFetch(`${API_BASE}/api/app-token`, {
+    method: 'POST',
+    ...(turnstileToken ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ turnstileToken }) } : {}),
+  });
+  if (res.ok) return res.json();
+
+  // The server may ask for a human check first (Turnstile): solve it once and retry
+  if (res.status === 403 && !turnstileToken) {
+    const body = await res.json().catch(() => ({}));
+    if (body.code === 'CHALLENGE_REQUIRED' && body.siteKey) {
+      return requestToken(rawFetch, await solveChallenge(body.siteKey));
+    }
+  }
+  throw new Error(`app-token HTTP ${res.status}`);
+}
+
 async function getAppToken(rawFetch, force = false) {
   if (!force && tokenCache.token && Date.now() < tokenCache.expiresAt - 60_000) {
     return tokenCache.token;
   }
   if (!inflight) {
-    inflight = rawFetch(`${API_BASE}/api/app-token`, { method: 'POST' })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`app-token HTTP ${res.status}`);
-        const { token, expiresAt } = await res.json();
+    inflight = requestToken(rawFetch)
+      .then(({ token, expiresAt }) => {
         tokenCache = { token, expiresAt };
         try { globalThis.sessionStorage?.setItem(STORAGE_KEY, JSON.stringify(tokenCache)); } catch { /* ignore */ }
         return token;
@@ -55,7 +72,13 @@ export function installApiAuth() {
       // Callers that already authenticate (session / API key) don't need an anonymous app token
       const alreadyAuthenticated = headers.has('X-Session-Token') || headers.has('Authorization') || headers.has('X-API-Key');
       if (!alreadyAuthenticated) {
-        headers.set('X-App-Token', await getAppToken(rawFetch, force));
+        try {
+          headers.set('X-App-Token', await getAppToken(rawFetch, force));
+        } catch {
+          // Could not get a token (offline, request cancelled by a navigation, server down). Don't turn
+          // that into an uncaught rejection: send the request anyway so callers see a normal response
+          // (401 if the server is up) or the usual network error, exactly as before the gate existed.
+        }
       }
       return rawFetch(input, { ...init, headers });
     };

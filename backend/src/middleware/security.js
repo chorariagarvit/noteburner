@@ -1,4 +1,4 @@
-import { readCounter, bumpCounter } from '../utils/kvCounter.js';
+import { consume, setRateLimitHeaders } from '../utils/rateLimitStore.js';
 /**
  * Security Headers Middleware
  * Implements Content Security Policy and other security headers
@@ -61,47 +61,27 @@ export const enhancedRateLimit = (options = {}) => {
   const windowSeconds = Math.ceil(windowMs / 1000);
 
   return async (c, next) => {
-    const kv = c.env.CACHE;
-
-    if (!kv) {
-      console.warn('[RateLimit] KV namespace not available, skipping rate limit');
-      await next();
-      return;
-    }
-
     const identifier = await getClientIdentifier(c.req);
     const key = `erl:${identifier}:${maxRequests}:${windowSeconds}`;
-    let counter;
+
+    let result;
     try {
-      counter = await readCounter(kv, key);
+      result = await consume(c.env, key, maxRequests, windowSeconds);
     } catch (err) {
-      console.warn('[RateLimit] KV read failed, skipping rate limit:', err.message);
+      console.warn('[RateLimit] store failed, request allowed:', err.message);
       await next();
       return;
     }
-    const count = counter.count;
-
-    if (count >= maxRequests) {
-      c.header('X-RateLimit-Limit', maxRequests.toString());
-      c.header('X-RateLimit-Remaining', '0');
-      c.header('X-RateLimit-Reset', String(counter.resetAt));
-      c.header('Retry-After', windowSeconds.toString());
-      return c.json({ error: message, retryAfter: windowSeconds }, 429);
+    if (!result) {
+      console.warn('[RateLimit] no rate limit store configured, skipping');
+      await next();
+      return;
     }
 
-    // Fixed window: keeps the original expiry on every write
-    let updated;
-    try {
-      updated = await bumpCounter(kv, key, counter, windowSeconds);
-    } catch (err) {
-      console.warn('[RateLimit] KV write failed, request allowed:', err.message);
-      updated = { count: counter.count + 1, resetAt: counter.resetAt || Math.floor(Date.now() / 1000) + windowSeconds };
+    setRateLimitHeaders(c, result, maxRequests);
+    if (!result.allowed) {
+      return c.json({ error: message, retryAfter: Math.max(1, result.resetAt - Math.floor(Date.now() / 1000)) }, 429);
     }
-
-    c.header('X-RateLimit-Limit', maxRequests.toString());
-    c.header('X-RateLimit-Remaining', String(maxRequests - count - 1));
-    c.header('X-RateLimit-Reset', String(updated.resetAt));
-
     await next();
   };
 };

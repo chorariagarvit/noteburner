@@ -31,6 +31,15 @@ binding = "CACHE"
 id = "b9797c1d6b9547eb8e42b2a9ac0c3ad8"
 preview_id = "6042dca04d5f4fb09e37ca89ec9e37ed"
 
+# Durable Object for exact (atomic) rate limiting. SQLite-backed classes work on the Workers Free plan.
+[[ durable_objects.bindings ]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[ migrations ]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiter"]
+
 # Email Worker binding (Cloudflare Email Routing)
 # Run: wrangler types --env-interface CloudflareBindings
 [[ send_email ]]
@@ -61,9 +70,29 @@ ENVIRONMENT = "production"
 # REQUIRED secrets (API refuses anonymous traffic without APP_TOKEN_SECRET):
 #   wrangler secret put APP_TOKEN_SECRET --env production   # e.g. `openssl rand -hex 32`
 #   wrangler secret put SLACK_SIGNING_SECRET --env production  # only if using the Slack integration
+# OPTIONAL human check (Cloudflare Turnstile) on the anonymous token endpoint. Off unless the secret is set:
+#   wrangler secret put TURNSTILE_SECRET_KEY --env production   # from the Turnstile widget in the dashboard
+#   and add the widget's PUBLIC site key as a var:  TURNSTILE_SITE_KEY = "0x4AAAAAA..."  (under [env.production.vars])
+# The Durable Object RATE_LIMITER above needs no secret; its migration is applied by `wrangler deploy`.
 
 [env.development]
 name = "noteburner-api-dev"
 
 [env.development.vars]
 ENVIRONMENT = "development"
+
+[[ env.production.durable_objects.bindings ]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[ env.production.migrations ]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiter"]
+
+[[ env.development.durable_objects.bindings ]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[ env.development.migrations ]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiter"]
