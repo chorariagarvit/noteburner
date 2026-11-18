@@ -1,4 +1,4 @@
-name: E2E Tests
+name: Tests
 
 on:
   push:
@@ -7,47 +7,106 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    timeout-minutes: 60
+  # Fast checks: unit tests, production build and dependency audit
+  unit:
+    name: Unit tests, build and audit
+    timeout-minutes: 15
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '24'
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-    
+
+    - name: Backend unit tests
+      run: npm test --workspace=backend
+
+    - name: Frontend unit tests
+      run: npm test --workspace=frontend
+
+    - name: Frontend production build
+      run: npm run build --workspace=frontend
+
+    # The Worker is what runs in production: any high+ advisory there blocks the build.
+    - name: Dependency audit - backend runtime (blocking)
+      run: npm audit --omit=dev --audit-level=high --workspace=backend
+
+    # Build tooling (e.g. Vite's glob helpers) is reported but cannot block while no patched
+    # release exists upstream. Review the output; remove continue-on-error once it can be fixed.
+    - name: Dependency audit - all production dependencies (informational)
+      continue-on-error: true
+      run: npm audit --omit=dev --audit-level=high
+
+  # Full browser matrix: one job per Playwright project, in parallel.
+  # `browser` is the engine to install for that project (the mobile projects reuse chromium/webkit).
+  e2e:
+    name: E2E (${{ matrix.project }})
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: chromium
+            browser: chromium
+          - project: firefox
+            browser: firefox
+          - project: webkit
+            browser: webkit
+          - project: Mobile Chrome
+            browser: chromium
+          - project: Mobile Safari
+            browser: webkit
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browser (${{ matrix.browser }})
+      run: npx playwright install --with-deps ${{ matrix.browser }}
+
     - name: Apply D1 Migrations
       run: cd backend && npx wrangler d1 migrations apply noteburner-db --local
       env:
         CI: true
-    
-    - name: Run Playwright tests
-      run: npx playwright test
+
+    - name: Run Playwright tests (${{ matrix.project }})
+      run: npx playwright test --project="${{ matrix.project }}"
       env:
         CI: true
-    
+
+    - name: Artifact name
+      id: artifact
+      if: always()
+      run: echo "name=$(echo '${{ matrix.project }}' | tr ' ' '-' | tr 'A-Z' 'a-z')" >> "$GITHUB_OUTPUT"
+
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report
+        name: playwright-report-${{ steps.artifact.outputs.name }}
         path: playwright-report/
         retention-days: 30
-    
+
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-results
+        name: test-results-${{ steps.artifact.outputs.name }}
         path: test-results/
         retention-days: 30
