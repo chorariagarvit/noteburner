@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { incrementStat } from '../utils/stats.js';
 
-import crypto from 'node:crypto';
+import { matchesCreatorToken, upgradeCreatorToken } from '../utils/creatorToken.js';
 
 const app = new Hono();
 
@@ -20,9 +20,10 @@ async function authorizeUpload(c, token) {
      WHERE token = ? AND accessed = 0 AND (expires_at IS NULL OR expires_at > ?)`
   ).bind(token, Date.now()).first();
   if (!message || !message.creator_token) return null;
-  const a = Buffer.from(String(message.creator_token));
-  const b = Buffer.from(String(creatorToken));
-  return a.length === b.length && crypto.timingSafeEqual(a, b) ? message : null;
+  const verdict = await matchesCreatorToken(message.creator_token, creatorToken);
+  if (!verdict.ok) return null;
+  if (verdict.legacy) await upgradeCreatorToken(c.env.DB, token, creatorToken);
+  return message;
 }
 
 

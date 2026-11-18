@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { matchesCreatorToken, upgradeCreatorToken } from '../utils/creatorToken.js';
 
 const router = new Hono();
 
@@ -24,10 +25,13 @@ router.get('/:messageId', async (c) => {
     const message = await c.env.DB.prepare(`
       SELECT token AS id, creator_token, created_at, expires_at, max_views, view_count, password_attempts
       FROM messages
-      WHERE token = ? AND creator_token = ?
-    `).bind(messageId, creatorToken).first();
+      WHERE token = ?
+    `).bind(messageId).first();
 
-    if (!message) {
+    const verdict = await matchesCreatorToken(message?.creator_token, creatorToken);
+    if (message && verdict.ok && verdict.legacy) await upgradeCreatorToken(c.env.DB, messageId, creatorToken);
+
+    if (!message || !verdict.ok) {
       return c.json({ error: 'Message not found or unauthorized' }, 404);
     }
 
