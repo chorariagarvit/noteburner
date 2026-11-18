@@ -66,7 +66,7 @@ name = "noteburner-api"
 [env.production.vars]
 FRONTEND_URL = "https://noteburner.work"
 ENVIRONMENT = "production"
-# Set secrets via: wrangler secret put TOTP_ENCRYPTION_KEY --env production
+# Set secrets via: wrangler secret put TOTP_ENCRYPTION_KEY --env production   # `openssl rand -hex 32`; encrypts 2FA secrets at rest (they stay plaintext without it)
 # REQUIRED secrets (API refuses anonymous traffic without APP_TOKEN_SECRET):
 #   wrangler secret put APP_TOKEN_SECRET --env production   # e.g. `openssl rand -hex 32`
 #   wrangler secret put SLACK_SIGNING_SECRET --env production  # only if using the Slack integration

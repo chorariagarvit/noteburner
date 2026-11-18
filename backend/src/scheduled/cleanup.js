@@ -1,5 +1,8 @@
 // Scheduled cleanup handler for cron jobs
 // Processes at most 500 items per run to stay within Worker CPU/time limits
+import { migrateLegacyCreatorTokens } from '../utils/creatorToken.js';
+import { migrateLegacyTotpSecrets } from '../utils/secretBox.js';
+
 const BATCH_LIMIT = 500;
 const R2_CONCURRENCY = 25;
 // D1 allows at most 100 bound parameters per statement: delete in chunks well under that
@@ -87,6 +90,19 @@ export async function cleanupScheduled(env) {
       ['old login attempts', `DELETE FROM login_attempts WHERE attempted_at < ?`, [monthAgo]],
       ['accessed messages', `DELETE FROM messages WHERE accessed = 1 AND created_at < ?`, [Date.now() - 7 * 24 * 3600 * 1000]],
     ];
+    // Secrets stored before hashing/encryption existed are converted a batch at a time
+    for (const [label, run] of [
+      ['legacy creator tokens', () => migrateLegacyCreatorTokens(env.DB)],
+      ['legacy TOTP secrets', () => migrateLegacyTotpSecrets(env)],
+    ]) {
+      try {
+        const n = await run();
+        if (n) console.log(`Secured ${n} ${label}`);
+      } catch (err) {
+        console.error(`Cleanup step failed (${label}):`, err.message);
+      }
+    }
+
     for (const [label, sql, params] of housekeeping) {
       try {
         await env.DB.prepare(sql).bind(...params).run();
