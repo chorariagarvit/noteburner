@@ -71,7 +71,14 @@ export const enhancedRateLimit = (options = {}) => {
 
     const identifier = await getClientIdentifier(c.req);
     const key = `erl:${identifier}:${maxRequests}:${windowSeconds}`;
-    const counter = await readCounter(kv, key);
+    let counter;
+    try {
+      counter = await readCounter(kv, key);
+    } catch (err) {
+      console.warn('[RateLimit] KV read failed, skipping rate limit:', err.message);
+      await next();
+      return;
+    }
     const count = counter.count;
 
     if (count >= maxRequests) {
@@ -83,7 +90,13 @@ export const enhancedRateLimit = (options = {}) => {
     }
 
     // Fixed window: keeps the original expiry on every write
-    const updated = await bumpCounter(kv, key, counter, windowSeconds);
+    let updated;
+    try {
+      updated = await bumpCounter(kv, key, counter, windowSeconds);
+    } catch (err) {
+      console.warn('[RateLimit] KV write failed, request allowed:', err.message);
+      updated = { count: counter.count + 1, resetAt: counter.resetAt || Math.floor(Date.now() / 1000) + windowSeconds };
+    }
 
     c.header('X-RateLimit-Limit', maxRequests.toString());
     c.header('X-RateLimit-Remaining', String(maxRequests - count - 1));
