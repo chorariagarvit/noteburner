@@ -9,10 +9,10 @@ NoteBurner is a secure, one-time message encryption and decryption application. 
 
 - **Frontend**: React 19 + Vite 8 + Tailwind, deployed to Cloudflare Pages
 - **Backend**: Cloudflare Workers (serverless) with Hono
-- **Database**: Cloudflare D1 (SQLite) — migrations in `backend/migrations/` (0001–0013)
+- **Database**: Cloudflare D1 (SQLite) — migrations in `backend/migrations/` (0001–0014)
 - **Storage**: Cloudflare R2 (encrypted file attachments)
 - **Cache / counters**: Cloudflare KV
-- **Tests**: Playwright e2e (21 spec files, 465 tests per browser × 5 browser projects; the 91 API-only tests run on Chromium and are skipped elsewhere), backend unit tests (`backend/test`, 64), CSP checks (`e2e-csp`, 23), frontend unit tests (`frontend/test`, 5), browser-extension tests (`extension/test`, 22)
+- **Tests**: Playwright e2e (22 spec files, 479 tests on Chromium (8 skipped) × 5 browser projects; the 91 API-only tests run on Chromium and are skipped elsewhere), backend unit tests (`backend/test`, 72), CSP checks (`e2e-csp`, 24), frontend unit tests (`frontend/test`, 17), browser-extension tests (`extension/test`, 24)
 
 ## Development Commands
 
@@ -66,7 +66,7 @@ noteburner/
 │   │   ├── utils/                # totp, appToken, session, kvCounter, signatures, messageHelpers, ...
 │   │   ├── config/cors.js
 │   │   └── scheduled/cleanup.js  # Hourly cleanup + housekeeping
-│   ├── migrations/               # D1 SQL migrations (0001–0013)
+│   ├── migrations/               # D1 SQL migrations (0001–0014)
 │   └── test/                     # Node unit tests
 ├── frontend/
 │   ├── public/                   # sw.js, manifest, _headers (CSP etc. for Pages)
