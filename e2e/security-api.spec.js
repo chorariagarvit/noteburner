@@ -632,6 +632,21 @@ test.describe('File uploads are creator-only', () => {
     expect((await upload(request, m.token, { 'X-Creator-Token': m.creatorToken })).status()).toBe(403); // burned message
   });
 
+  test('a file id alone cannot delete a file; only files of a burned message can be confirmed', async ({ request }) => {
+    const m = await createMessage(request);
+    const { fileId } = await (await upload(request, m.token, { 'X-Creator-Token': m.creatorToken })).json();
+
+    // message still live: anyone holding the id (e.g. a link scanner) cannot destroy the attachment
+    expect((await request.delete(`${API}/media/${fileId}`)).status()).toBe(404);
+    expect((await request.get(`${API}/media/${fileId}`)).status()).toBe(200);
+    expect((await request.delete(`${API}/media/${'z'.repeat(32)}`)).status()).toBe(404); // unknown id
+
+    // the reader burns the message, then confirms the download
+    expect((await burn(request, m.token, { 'X-Creator-Token': m.creatorToken })).status()).toBe(200);
+    expect((await request.delete(`${API}/media/${fileId}`)).status()).toBe(200);
+    expect((await request.get(`${API}/media/${fileId}`)).status()).toBe(404);
+  });
+
   test('multipart endpoints enforce the same rule and sane limits', async ({ request }) => {
     const m = await createMessage(request);
     const asCreator = { 'X-Creator-Token': m.creatorToken };

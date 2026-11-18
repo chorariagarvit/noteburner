@@ -302,6 +302,16 @@ app.delete('/:fileId', async (c) => {
       return c.json({ error: 'Invalid file ID' }, 400);
     }
 
+    // Only files of an already-burned message may be deleted this way (the reader burns the
+    // message first, then confirms each download). A file that still belongs to a live message
+    // is destroyed by burning that message; knowing the file id is not enough to delete it.
+    const burned = await c.env.DB.prepare(
+      `SELECT file_id FROM media_cleanup WHERE file_id = ?`
+    ).bind(fileId).first();
+    if (!burned) {
+      return c.json({ error: 'File not found or still attached to an active message', code: 'NOT_DELETABLE' }, 404);
+    }
+
     // Delete from R2 after successful download
     await c.env.MEDIA_BUCKET.delete(fileId);
 

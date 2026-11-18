@@ -54,6 +54,18 @@ Weeks 1–14 are done and deployed to Cloudflare (Workers + Pages). Everything s
 - [ ] Connect Stripe for real payments (Week 14 backend is Stripe-ready but not live)
 - [ ] Load testing (planned in Week 12, not done)
 
+### Features not built yet (switched off or stubbed)
+- [ ] Payments: there is no checkout flow, only the signature-verified Stripe webhook; plans change only through it
+- [ ] Slack message creator (`/slack/command`, `/slack/actions`): returns 501. The old version put plaintext and the password in the link, so it needs a redesign around client-side encryption
+- [ ] Zapier message creator (`/zapier/create`): returns 501, same redesign needed
+- [ ] Discord message creator (`/discord/create`): returns 501, same redesign needed
+
+### Known dependency advisory
+- [ ] Vite's `picomatch` advisory (range <=4.0.7; 4.0.7 is the latest published release) has no patched version yet. CI reports it as informational (`continue-on-error` on the full audit step in `.github/workflows/e2e-tests.yml`). Re-check on each Vite upgrade, then make the audit blocking again.
+
+### Verify after deploy
+- [ ] Live-site CSP: `npm run test:csp` checks the policy against a local production build. Confirm the deployed site serves the same `_headers` (Cloudflare Pages) and has no violations.
+
 ### Technical debt
 - [ ] Comprehensive error boundaries
 - [ ] Request retry logic
