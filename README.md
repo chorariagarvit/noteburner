@@ -16,9 +16,7 @@ A secure one-time message encryption and decryption application. Messages can on
 - 🚫 **No backups** - Permanent deletion guarantee
 
 ### Platform Integrations (NEW in v1.7)
-- 💬 **Slack Integration** - `/noteburner` command for instant secure messages
-- ⚡ **Zapier Automation** - Create messages from 5,000+ apps
-- 🤖 **Discord Bot** - Share secrets in Discord servers
+- 💬 **Slack / ⚡ Zapier / 🤖 Discord** - *Planned.* The message creators are switched off (HTTP 501) until they are rebuilt around client-side encryption; see [ROADMAP.md](./ROADMAP.md)
 - 🔌 **Webhooks** - Real-time event notifications (created, viewed, burned)
 - 🔑 **API Access** - Programmatic message creation with API keys
 - 📚 **API Documentation** - Comprehensive guides and examples
@@ -55,10 +53,13 @@ A secure one-time message encryption and decryption application. Messages can on
 
 ### Security Enhancements (v1.8)
 - 💪 **Password Strength Meter** - Real-time feedback, entropy calculation
-- ⚙️ **Self-Destruct Options** - Max views, time limits, password attempts, geo restrictions
+- ⚙️ **Self-Destruct Options** - Max views, time limits and password attempts, all enforced by the server
+- 🌍 **Country restriction & auto-burn** - Enforced using the country Cloudflare reports: only the sender's country may open the message, and it self-destructs on access from a blocked country, failed guesses from two or more countries within 10 minutes, or Tor
 - 📊 **Audit Logs** - Privacy-friendly access tracking (country-level only)
 - 🛡️ **Enhanced Security Headers** - CSP, HSTS, X-Frame-Options (A+ rating)
-- 🚦 **Advanced Rate Limiting** - DDoS protection, per-endpoint limits
+- 🚦 **Exact Rate Limiting** - Durable Object counters (parallel bursts cannot slip past the limit); optional Cloudflare Turnstile on the anonymous app-token endpoint
+- 🔒 **Secrets at rest** - Creator tokens are stored hashed and 2FA secrets encrypted
+- 🔏 **Authenticated API** - Every `/api/*` call needs a session, an API key or a signed app token
 - 🔐 **2FA Support** - Optional TOTP for high-security messages
 
 ### Mobile & PWA (v1.6)
@@ -110,13 +111,18 @@ A secure one-time message encryption and decryption application. Messages can on
 4. Unique token-based access control
 5. Rate limiting to prevent brute force attacks
 6. Automatic deletion after first access or expiration
+7. One-time access is enforced by the server: a password-derived proof (the auth tag) is checked, attempts and views are counted atomically, and burning needs the proof or the creator token
+8. Only country codes are logged, never IP addresses; audit logs are deleted after 30 days
+9. Creator tokens are hashed and 2FA secrets encrypted in the database; a file ID alone cannot delete an attachment
 
 ## Project Structure
 
 ```
 noteburner/
-├── backend/          # Cloudflare Workers API
-├── frontend/         # React frontend application
+├── backend/          # Cloudflare Workers API (D1 migrations in backend/migrations)
+├── frontend/         # React frontend application (PWA)
+├── extension/        # Chrome / Firefox extension (context menu + popup, no content script)
+├── e2e/ e2e-csp/     # Playwright suites (app, and CSP check on the production build)
 ├── docs/            # Documentation
 └── package.json     # Root package configuration
 ```
@@ -136,9 +142,9 @@ noteburner/
 # Install dependencies
 npm run setup
 
-# Run database migrations (local development)
+# Apply all database migrations (local development)
 cd backend
-wrangler d1 execute noteburner-db --local --file=migrations/0006_add_group_messages.sql
+npx wrangler d1 migrations apply noteburner-db --local
 
 # Start development servers
 npm run dev:backend   # Backend on http://localhost:8787
@@ -176,6 +182,9 @@ binding = "MEDIA_BUCKET"
 bucket_name = "noteburner-media"
 ```
 
+Secrets (set with `wrangler secret put`, see [SETUP.md](./SETUP.md)):
+`APP_TOKEN_SECRET` (required: the API refuses anonymous calls without it) and `TOTP_ENCRYPTION_KEY` (required for 2FA messages; set once, never change). Optional: `TURNSTILE_SECRET_KEY` / `TURNSTILE_SITE_KEY`, `STRIPE_WEBHOOK_SECRET`, `SLACK_SIGNING_SECRET`. The `RateLimiter` Durable Object is declared in `wrangler.toml`.
+
 ### Frontend
 
 Create `frontend/.env`:
@@ -186,10 +195,16 @@ VITE_API_URL=https://noteburner-api.your-subdomain.workers.dev
 
 ## API Endpoints
 
+All calls need a session (`X-Session-Token`), an API key (`X-API-Key`) or a signed app token (`X-App-Token`, from `POST /api/app-token`).
+
 - `POST /api/messages` - Create encrypted message
-- `GET /api/messages/:token` - Retrieve and delete message (one-time)
-- `POST /api/media` - Upload encrypted media file
+- `GET /api/messages/:token` - Open a message (counts one view; needs `X-Auth-Tag` when password-protected)
+- `DELETE /api/messages/:token` - Burn a message (creator token or auth tag)
+- `POST /api/media` - Upload encrypted media file (creator only)
 - `GET /api/media/:fileId` - Retrieve encrypted media file
+- `DELETE /api/media/:fileId` - Confirm a download (only for files of an already-burned message)
+- `/api/v1/*` - Public API for API-key holders (messages, stats, teams)
+- `/api/teams`, `/api/compliance` - Team workspaces, stats, exports, GDPR tools
 
 ## Development
 
@@ -212,29 +227,27 @@ npm run dev
 NoteBurner includes comprehensive end-to-end tests using Playwright.
 
 ```bash
-# Run all E2E tests
+# Unit tests: backend, frontend, extension
+npm test --workspace=backend && npm test --workspace=frontend && npm run test:extension
+
+# CSP check against the production build
+npm run test:csp
+
+# All E2E tests (5 browser projects) or one project
 npm run test:e2e
+npx playwright test --project=chromium
 
-# Run tests with UI mode (interactive)
+# Interactive UI mode / report
 npm run test:e2e:ui
-
-# View test report
 npm run test:report
 ```
 
-**Test Coverage (341 E2E tests, 0 failures):**
-- ✅ Message creation & viewing (55 tests: 19 creation + 19 viewing + 17 viral mechanics)
-- ✅ Custom URLs & branding (14 tests)
-- ✅ Gamification (12 tests)
-- ✅ Network effects (28 tests)
-- ✅ UI/UX polish (29 tests)
-- ✅ Mobile & PWA (26 tests)
-- ✅ Platform integrations (15 tests)
-- ✅ Security enhancements (32 tests)
-- ✅ Enterprise features (35 tests)
-- ✅ User authentication (25 tests)
-- ✅ Internationalization / i18n (35 tests)
-- ✅ Premium features (30 tests)
+**Test coverage:**
+- ✅ 22 Playwright spec files covering creation and viewing, security (API, UI, protections, concurrency, tenant isolation), accounts, teams, i18n, PWA, premium and integrations. Run on Chromium, Firefox, WebKit, Mobile Chrome and Mobile Safari; API-only tests run on Chromium.
+- ✅ Backend unit tests (72), frontend (17), extension (24), CSP checks (24)
+- Chromium: 471 passed, 8 skipped on the latest full run
+
+CI (`.github/workflows/e2e-tests.yml`) runs the unit tests, build and dependency audit, the five-browser matrix, and the CSP job.
 
 See [TEST_SUMMARY.md](./TEST_SUMMARY.md) for detailed testing documentation.
 
