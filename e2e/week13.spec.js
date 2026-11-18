@@ -140,6 +140,8 @@ test.describe('Week 13: Internationalization', () => {
             !msg.includes('NetworkError') &&
             !msg.includes('net::') &&
             !msg.includes('TypeError: Load failed') &&
+            // WebKit's wording for a fetch cancelled by navigating to the next locale page
+            !msg.includes('access control checks') &&
             !msg.includes('sw.js') &&
             !msg.includes('ServiceWorker')) {
           errors.push(msg);

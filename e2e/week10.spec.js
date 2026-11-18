@@ -110,8 +110,8 @@ test.describe('Week 10: Enterprise Features', () => {
           headers: { 'X-API-Key': apiKey },
           data: { 
             encryptedData: 'mock_encrypted_test_message',
-            iv: 'mock_iv_12345678',
-            salt: 'mock_salt_12345678',
+            iv: 'AAAAAAAAAAAAAAAAAAAAAA==',   // 16 bytes, as the API requires
+            salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
             maxViews: 5 
           }
         });
@@ -667,8 +667,8 @@ test.describe('Week 10: Enterprise Features', () => {
         headers: { 'X-API-Key': keyData.key },
         data: { 
           encryptedData: 'integration_test',
-          iv: 'test_iv',
-          salt: 'test_salt',
+          iv: 'AAAAAAAAAAAAAAAAAAAAAA==',
+          salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
           maxViews: 1 
         }
       });
@@ -733,8 +733,8 @@ test.describe('Week 10: Enterprise Features', () => {
           headers: { 'X-API-Key': keyData.key },
           data: { 
             encryptedData: `usage_test_${i}`,
-            iv: 'test_iv',
-            salt: 'test_salt',
+            iv: 'AAAAAAAAAAAAAAAAAAAAAA==',
+            salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
             maxViews: 1 
           }
         });

@@ -274,6 +274,136 @@ test.describe('Accounts', () => {
   });
 });
 
+test.describe('Country restriction in the UI', () => {
+  // Play visitors from different countries by adding the (dev-only) CF-IPCountry header to API calls.
+  test.use({ serviceWorkers: 'block' });
+  const asCountry = async (page, cc) => {
+    await page.route('**/api/**', (route) => route.continue({ headers: { ...route.request().headers(), 'cf-ipcountry': cc } }));
+  };
+  const newVisitor = async (browser, cc) => {
+    const context = await browser.newContext({
+      serviceWorkers: 'block',
+      extraHTTPHeaders: { 'CF-Connecting-IP': `172.${20 + Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250) + 1}` },
+    });
+    await context.addInitScript(() => { try { localStorage.setItem('noteburner_onboarding_complete', 'true'); } catch { /* ignore */ } });
+    const page = await context.newPage();
+    await asCountry(page, cc);
+    return { context, page };
+  };
+
+  test('the options say what they really do', async ({ page }) => {
+    await openCreate(page);
+    await expect(page.getByText('Restrict to same country')).toBeVisible();
+    await expect(page.getByText(/Cloudflare detects the country/i)).toBeVisible();
+    await expect(page.getByText('Auto-burn on suspicious activity')).toBeVisible();
+    await expect(page.getByText(/more than one country, or connects through Tor/i)).toBeVisible();
+  });
+
+  test('a restricted message opens in the sender\'s country and is blocked, with a clear notice, elsewhere', async ({ page, browser }) => {
+    await asCountry(page, 'DE');
+    await openCreate(page);
+    await page.fill('#message', 'Only for people in Germany');
+    await page.fill('#password', 'GeoTest-Passw0rd!');
+    await page.getByLabel('Restrict to same country').check();
+    await page.click('button[type="submit"]');
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    const url = await page.locator('input[readonly]').first().inputValue();
+
+    // a visitor from France sees why they can't open it, and cannot start
+    const fr = await newVisitor(browser, 'FR');
+    await fr.page.goto(url);
+    await expect(fr.page.getByRole('alert')).toContainText(/sender's country/i, { timeout: 20000 });
+    await expect(fr.page.locator('button:has-text("Unlock Secret Message")')).toBeDisabled();
+    await fr.context.close();
+
+    // a visitor from Germany is let through and can read it
+    const de = await newVisitor(browser, 'DE');
+    await de.page.goto(url);
+    await expect(de.page.locator('button:has-text("Unlock Secret Message")')).toBeEnabled({ timeout: 20000 });
+    await expect(de.page.getByRole('alert')).toHaveCount(0);
+    await de.page.click('button:has-text("Unlock Secret Message")');
+    await tryPassword(de.page, 'GeoTest-Passw0rd!');
+    await expect(de.page.getByText('Only for people in Germany')).toBeVisible({ timeout: 30000 });
+    await de.context.close();
+  });
+
+  test('creating a restricted message when the country is unknown explains what to do', async ({ page }) => {
+    await asCountry(page, 'XX');
+    await openCreate(page);
+    await page.fill('#message', 'x');
+    await page.fill('#password', 'GeoTest-Passw0rd!');
+    await page.getByLabel('Restrict to same country').check();
+    await page.click('button[type="submit"]');
+    await expect(page.getByText(/country could not be determined/i).first()).toBeVisible({ timeout: 30000 });
+  });
+});
+
+test.describe('Human verification (Turnstile)', () => {
+  // The server only asks for a challenge when TURNSTILE_SECRET_KEY is set (off in dev/CI), so both the
+  // server's refusal and Cloudflare's widget script are simulated here.
+  test.use({ serviceWorkers: 'block' });
+
+  const FAKE_TURNSTILE = `
+    window.__turnstile = { renders: [], removed: [] };
+    window.turnstile = {
+      render(el, opts) {
+        window.__turnstile.renders.push({ sitekey: opts.sitekey, appearance: opts.appearance });
+        setTimeout(() => (window.__MODE === 'fail' ? opts['error-callback']() : opts.callback('solved-123')), 30);
+        return 'widget-1';
+      },
+      remove(id) { window.__turnstile.removed.push(id); },
+    };`;
+
+  async function arm(page, { solveOk = true } = {}) {
+    const tokenRequests = [];
+    await page.route('**/challenges.cloudflare.com/turnstile/v0/api.js*', (route) =>
+      route.fulfill({ contentType: 'application/javascript', body: (solveOk ? '' : 'window.__MODE="fail";') + FAKE_TURNSTILE }));
+    await page.route('**/api/app-token', (route) => {
+      const body = route.request().postData();
+      tokenRequests.push(body);
+      if (!body || !body.includes('turnstileToken')) {
+        return route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'A quick verification is required.', code: 'CHALLENGE_REQUIRED', siteKey: 'test-site-key' }) });
+      }
+      return route.continue();
+    });
+    return tokenRequests;
+  }
+
+  test('a refused token request triggers the widget, then retries with the solved token and carries on', async ({ page }) => {
+    const tokenRequests = await arm(page);
+    const statsTokens = [];
+    page.on('request', (r) => { if (r.url().includes('/api/stats')) statsTokens.push(r.headers()['x-app-token']); });
+
+    await page.goto('/');
+    await expect.poll(() => statsTokens.length, { timeout: 20000 }).toBeGreaterThan(0);
+    expect(statsTokens.every(Boolean), 'API calls carry the app token obtained after the challenge').toBe(true);
+
+    expect(tokenRequests.length).toBe(2);                                        // refused once, then retried
+    expect(JSON.parse(tokenRequests[1])).toEqual({ turnstileToken: 'solved-123' });
+    const rendered = await page.evaluate(() => window.__turnstile);
+    expect(rendered.renders).toEqual([{ sitekey: 'test-site-key', appearance: 'interaction-only' }]);   // invisible unless needed
+    expect(rendered.removed).toEqual(['widget-1']);                              // widget is cleaned up
+    await expect(page.getByTestId('turnstile-box')).toHaveCount(0);
+  });
+
+  test('a creator can still make a message after passing the challenge', async ({ page }) => {
+    await arm(page);
+    const m = await createViaUi(page, { message: 'created behind a challenge' });
+    expect(m.url).toContain('/m/');
+  });
+
+  test('if the widget fails, the app does not crash (calls just go out unauthenticated)', async ({ page }) => {
+    await arm(page, { solveOk: false });
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.goto('/');
+    await page.waitForTimeout(2500);
+    await expect(page.locator('#root')).not.toBeEmpty();
+    expect(errors.filter((m) => !/access control checks|Load failed|Failed to fetch/.test(m)), errors.join(' | ')).toEqual([]);
+    await expect(page.getByTestId('turnstile-box')).toHaveCount(0);
+  });
+});
+
 test.describe('Light mode', () => {
   test.use({ colorScheme: 'light' });
 
