@@ -1,6 +1,11 @@
-const CACHE_NAME = 'noteburner-v1.14.0';
-const STATIC_CACHE = 'noteburner-static-v1.14.0';
-const DYNAMIC_CACHE = 'noteburner-dynamic-v1.14.0';
+// Replaced at build time by the `sw-build-version` Vite plugin (frontend/tooling/swVersion.js) with
+// "<version>-<commit>", so every deploy changes this file and browsers install the new worker.
+// In development the placeholder is left alone and the version is "dev".
+const BUILD_ID = '__BUILD_ID__';
+const VERSION = BUILD_ID.startsWith('__') ? 'dev' : BUILD_ID;
+const CACHE_NAME = `noteburner-${VERSION}`;
+const STATIC_CACHE = `noteburner-static-${VERSION}`;
+const DYNAMIC_CACHE = `noteburner-dynamic-${VERSION}`;
 
 // Assets to cache immediately
 // Only files that actually exist in public/ (a missing precache entry would pin the SPA-fallback HTML)
