@@ -31,7 +31,7 @@ test('the API host the extension calls is declared, and no dev host ships', () =
 
 test('every chrome.* API the code uses has its permission declared', () => {
   const code = sources.map(read).join('\n');
-  const needs = { notifications: /chrome\.notifications\./, contextMenus: /chrome\.contextMenus\./, storage: /chrome\.storage\./ };
+  const needs = { notifications: /chrome\.notifications\./, contextMenus: /chrome\.contextMenus\./, storage: /chrome\.storage\./, scripting: /chrome\.scripting\./ };
   for (const [perm, re] of Object.entries(needs)) {
     if (re.test(code)) {
       assert.ok(chrome.permissions.includes(perm), `chrome manifest lacks "${perm}"`);
@@ -48,7 +48,7 @@ test('Firefox manifest has an add-on id and a background script entry', () => {
 
 test('no file referenced by the manifests is missing', () => {
   const files = new Set([chrome.background.service_worker, ...firefox.background.scripts, chrome.action.default_popup,
-    ...chrome.content_scripts.flatMap((c) => c.js), ...Object.values(chrome.icons)]);
+    ...Object.values(chrome.icons)]);
   for (const f of files) assert.ok(fs.existsSync(path.join(EXT, f)), `${f} is referenced but missing`);
 });
 
@@ -65,4 +65,20 @@ test('the popup hands off to the website (text in the URL fragment) when a human
   const popup = read('popup.js');
   assert.match(popup, /CHALLENGE_REQUIRED/);
   assert.match(popup, /chrome\.tabs\.create\(\{ url: `https:\/\/noteburner\.work\/create#text=\$\{encodeURIComponent\(message\)\}` \}\)/);
+});
+
+test('no content script is injected into every site, and nothing is exposed to web pages', () => {
+  for (const m of [chrome, firefox]) {
+    assert.equal(m.content_scripts, undefined, 'content_scripts would run on every page');
+    assert.equal(m.web_accessible_resources, undefined);
+    assert.ok(!m.host_permissions.some((h) => /<all_urls>|\*:\/\/\*\/|https?:\/\/\*\//.test(h)), 'host access must stay limited to noteburner.work');
+    assert.ok(!m.permissions.includes('tabs'), 'the tabs permission would expose every URL');
+  }
+  assert.ok(!fs.existsSync(path.join(EXT, 'content.js')));
+});
+
+test('the popup reads the selection through activeTab + scripting, only when opened', () => {
+  const popup = read('popup.js');
+  assert.match(popup, /chrome\.scripting\.executeScript/);
+  assert.ok(!/tabs\.sendMessage/.test(popup + read('background.js')));
 });

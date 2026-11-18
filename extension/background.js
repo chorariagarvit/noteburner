@@ -24,28 +24,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-// Handle messages from content script and popup
+// Handle messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'getSelectedText') {
-    // Request selected text from active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'getSelection' })
-          .then((response) => {
-            sendResponse(response);
-          })
-          .catch((error) => {
-            // Content script not available
-            console.log('Content script not available:', error);
-            sendResponse({ text: '' });
-          });
-      } else {
-        sendResponse({ text: '' });
-      }
-    });
-    return true; // Keep message channel open for async response
-  }
-
   if (request.action === 'openNoteBurner') {
     // Open NoteBurner in new tab with encrypted message
     const url = request.url || 'https://noteburner.work/create';

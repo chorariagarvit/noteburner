@@ -64,7 +64,7 @@
 The extension requires these permissions:
 
 - **contextMenus**: For right-click "Encrypt with NoteBurner" option
-- **activeTab**: To read selected text from the current tab for quick encryption
+- **activeTab** + **scripting**: To read the text you selected on the current tab, only at the moment you open the popup. There is no content script: the extension does not run on pages you do not use it on
 - **storage**: To save dark mode preference and user settings
 - **host_permissions (noteburner.work)**: To communicate with NoteBurner API for message creation
 
@@ -103,7 +103,6 @@ The extension uses **Manifest V3** for Chrome/Edge compatibility and is also com
 **File Structure:**
 - `manifest.json` - Extension configuration (Manifest V3)
 - `background.js` - Background service worker (context menu)
-- `content.js` - Content script for page interaction (floating button)
 - `popup.html/js/css` - Extension popup UI with dark mode
 - `crypto.js` - Client-side encryption utilities (AES-256-GCM)
 - `icons/` - Extension icons (16, 48, 128px)

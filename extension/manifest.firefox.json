@@ -11,8 +11,9 @@
     "permissions": [
         "contextMenus",
         "activeTab",
+        "scripting",
         "storage",
-    "notifications"
+        "notifications"
     ],
     "host_permissions": [
         "https://api.noteburner.work/*",
@@ -23,17 +24,6 @@
             "background.js"
         ]
     },
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "content.js"
-            ],
-            "run_at": "document_end"
-        }
-    ],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
@@ -43,16 +33,6 @@
         },
         "default_title": "NoteBurner - Quick Encrypt"
     },
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "crypto-worker.js"
-            ],
-            "matches": [
-                "<all_urls>"
-            ]
-        }
-    ],
     "browser_specific_settings": {
         "gecko": {
             "id": "extension@noteburner.work",
