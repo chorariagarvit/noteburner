@@ -19,7 +19,7 @@
 Required screenshots to create:
 - Screenshot 1: Main popup interface with message input
 - Screenshot 2: Encrypted message result with shareable link
-- Screenshot 3: Right-click context menu "Encrypt with NoteBurner"
+- Screenshot 3: Right-click context menu "Send via NoteBurner"
 - Screenshot 4: Generate password feature
 - Screenshot 5: Dark mode interface
 
@@ -100,7 +100,7 @@ https://noteburner.work
 
 **Required Permissions:**
 1. **activeTab** - Access current tab to get selected text for quick encryption
-2. **contextMenus** - Add "Encrypt with NoteBurner" to right-click menu
+2. **contextMenus** - Add "Send via NoteBurner" to right-click menu
 3. **storage** - Save user preferences (dark mode, default expiration)
 
 **Host Permissions:**
