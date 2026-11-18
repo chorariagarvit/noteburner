@@ -18,6 +18,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 2,
+  // Creating/unlocking a message derives 2-3 PBKDF2 keys (+ file encryption and upload): slow on Safari
+  timeout: 60 * 1000,
   reporter: 'html',
 
   projects: [

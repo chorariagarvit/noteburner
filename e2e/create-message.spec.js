@@ -28,7 +28,7 @@ test.describe('Message Creation', () => {
     await page.click('button:has-text("Encrypt & Create Link")');
 
     // Wait for success page
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
     // Verify URL is shown
     const shareUrlInput = page.locator('input[readonly]').first();
@@ -88,7 +88,7 @@ test.describe('Message Creation', () => {
     await page.click('button:has-text("Encrypt & Create Link")');
 
     // Wait for success message
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
     
     // Check for file attachment indicator
     await expect(page.locator('text=1 encrypted file(s) attached')).toBeVisible({ timeout: 5000 });
@@ -120,7 +120,7 @@ test.describe('Message Creation', () => {
     await page.fill('input[placeholder="Enter a strong password"]', 'ClipTest123!');
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
     // Click copy button
     await page.click('button:has-text("Copy")');
@@ -144,7 +144,7 @@ test.describe('Message Creation', () => {
     await page.selectOption('#time-limit', '360'); // 6 hours = 360 minutes
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
     // Click "Create Similar Message"
     await page.click('button:has-text("Create Similar Message")');
@@ -172,7 +172,7 @@ test.describe('Message Creation', () => {
     await page.selectOption('#time-limit', '1440'); // 24 hours = 1440 minutes
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
     // Click "Create New Message"
     await page.click('button:has-text("Create New Message")');
@@ -204,7 +204,7 @@ test.describe('Message Creation', () => {
 
     await expect(page.locator('text=image.png')).toBeVisible();
     await page.click('button:has-text("Encrypt & Create Link")');
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
   });
 
   test('should remove file before submission', async ({ page }) => {
@@ -227,7 +227,7 @@ test.describe('Message Creation', () => {
 
     // Just submit without file - file clear might not be implemented
     await page.click('button:has-text("Encrypt & Create Link")');
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
   });
 
   test('should handle all expiration options', async ({ page }) => {
@@ -245,7 +245,7 @@ test.describe('Message Creation', () => {
       await page.fill('input[placeholder="Enter a strong password"]', 'ExpTest123!');
       await page.selectOption('#time-limit', exp.value);
       await page.click('button:has-text("Encrypt & Create Link")');
-      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
       
       // Delay to avoid rate limiting
       await page.waitForTimeout(1500);
@@ -273,7 +273,7 @@ test.describe('Message Creation', () => {
     await page.fill('input[placeholder="Enter a strong password"]', 'Unicode123!');
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
     
     // Get URL and verify the message can be decrypted
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
@@ -294,7 +294,7 @@ test.describe('Message Creation', () => {
     await page.fill('input[placeholder="Enter a strong password"]', specialPassword);
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
     
     // Verify decryption works

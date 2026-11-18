@@ -20,7 +20,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.fill('input[placeholder="Enter a strong password"]', password);
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
     const shareUrlInput = page.locator('input[readonly]').first();
     shareUrl = await shareUrlInput.inputValue();
@@ -137,7 +137,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.selectOption('#time-limit', '60'); // 1 hour (60 minutes)
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
     // Verify expiration notice is shown on success page
     await expect(page.locator('text=/expires in.*hour/i')).toBeVisible();
@@ -190,7 +190,7 @@ test.describe('Message Viewing and Decryption', () => {
     });
 
     await page.click('button:has-text("Encrypt & Create Link")');
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
     const urlWithFile = await page.locator('input[readonly]').first().inputValue();
 

@@ -11,8 +11,13 @@
 import { test as base, expect } from '@playwright/test';
 import crypto from 'node:crypto';
 
+// Rate-limit counters live in KV and PERSIST between runs (local state dir), while testIds are stable
+// between runs. Without a per-run nonce a re-run reuses the same IPs and inherits the previous run's
+// counters (e.g. login 10/5min), producing spurious 429s.
+const RUN_NONCE = crypto.randomBytes(6).toString('hex');
+
 function ipFor(testInfo) {
-  const h = crypto.createHash('sha1').update(`${testInfo.testId}:${testInfo.retry}:${testInfo.workerIndex}`).digest();
+  const h = crypto.createHash('sha1').update(`${RUN_NONCE}:${testInfo.testId}:${testInfo.retry}:${testInfo.workerIndex}`).digest();
   return `10.${h[0]}.${h[1]}.${(h[2] % 253) + 1}`;
 }
 

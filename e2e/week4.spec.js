@@ -23,7 +23,7 @@ test.describe('Week 4 - Gamification', () => {
     await page.click('button[type="submit"]');
     
     // Wait for success page
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 10000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 30000 });
     
     // Check if stats were updated in localStorage
     const stats = await page.evaluate(() => {
@@ -46,7 +46,7 @@ test.describe('Week 4 - Gamification', () => {
     await page.click('button[type="submit"]');
     
     // Wait for success page
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 10000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 30000 });
     
     // Check for achievement unlock popup
     const achievementUnlocked = await page.locator('text=Achievement Unlocked!').isVisible({ timeout: 5000 }).catch(() => false);
@@ -158,7 +158,7 @@ test.describe('Week 4 - Gamification', () => {
     await page.click('button[type="submit"]');
     
     // Wait for success
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 10000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 30000 });
     
     // Check if file upload was tracked
     const stats = await page.evaluate(() => {
@@ -179,7 +179,7 @@ test.describe('Week 4 - Gamification', () => {
     await page.click('button[type="submit"]');
     
     // Wait for success
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 10000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 30000 });
     
     // Check if max expiration was tracked
     const stats = await page.evaluate(() => {
@@ -256,7 +256,7 @@ test.describe('Week 4 - Gamification', () => {
     await page.click('button[type="submit"]');
     
     // Wait for success
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 10000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 30000 });
     
     // Check if mystery message was tracked
     const stats = await page.evaluate(() => {

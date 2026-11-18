@@ -178,7 +178,7 @@ test.describe('Week 7 - Mobile Optimization & PWA Features', () => {
       await page.click('button:has-text("Encrypt & Create Link")');
 
       // Should show success message on same page
-      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
       
       // Verify share URL is shown
       const shareUrlInput = page.locator('input[readonly]').first();
@@ -290,7 +290,7 @@ test.describe('Week 7 - Mobile Optimization & PWA Features', () => {
       await page.click('button:has-text("Encrypt & Create Link")');
 
       // Wait for success message
-      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
       // Check if Web Share API is available
       const shareSupported = await page.evaluate(() => {
@@ -308,7 +308,7 @@ test.describe('Week 7 - Mobile Optimization & PWA Features', () => {
       await page.click('button:has-text("Encrypt & Create Link")');
 
       // Wait for success message
-      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
       // Verify Copy button exists on success page
       await expect(page.locator('button:has-text("Copy")')).toBeVisible({ timeout: 5000 });
@@ -327,7 +327,7 @@ test.describe('Week 7 - Mobile Optimization & PWA Features', () => {
       await page.click('button:has-text("Encrypt & Create Link")');
 
       // Wait for success message
-      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
 
       // Wait for and click copy button
       const copyButton = page.locator('button:has-text("Copy")');

@@ -5,10 +5,22 @@ import path from 'node:path';
 // Plans are NOT client-selectable any more (teams always start on 'free'; paid plans come only from
 // verified billing). Tests that exercise paid features flip the plan directly in the local test DB.
 function upgradeTeam(teamId, plan = 'enterprise') {
-  execSync(
-    `npx wrangler d1 execute noteburner-db --local --command "UPDATE teams SET plan='${plan}', max_members=100 WHERE id='${teamId}'"`,
-    { cwd: path.resolve(process.cwd(), 'backend'), stdio: 'ignore' }
-  );
+  // The local D1 file is shared with the dev servers (and, when browsers run back to back, other
+  // wrangler processes), so a write can hit a transient lock: retry, and surface the real error.
+  const sql = `UPDATE teams SET plan='${plan}', max_members=100 WHERE id='${teamId}'`;
+  let lastError;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      execSync(`npx wrangler d1 execute noteburner-db --local --command "${sql}"`, {
+        cwd: path.resolve(process.cwd(), 'backend'), stdio: 'pipe', timeout: 90_000,
+      });
+      return;
+    } catch (err) {
+      lastError = err;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000 * attempt); // back off, synchronously
+    }
+  }
+  throw new Error(`upgradeTeam(${teamId}) failed after 4 attempts: ${lastError.stderr?.toString().slice(-600) || lastError.message}`);
 }
 
 // Adding a member requires a REGISTERED user (unknown emails are not revealed or added).
