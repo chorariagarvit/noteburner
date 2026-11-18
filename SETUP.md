@@ -285,7 +285,7 @@ openssl rand -hex 32 | wrangler secret put TOTP_ENCRYPTION_KEY --env production 
 wrangler secret put SLACK_SIGNING_SECRET --env production   # only if using Slack
 ```
 
-Set `TOTP_ENCRYPTION_KEY` **before** deploying and never change it afterwards (messages sealed with the old key would stop verifying). Without it, creating a message with 2FA fails instead of storing the secret in plain text. Apply migrations through `0014` before the new Worker goes live.
+Set `TOTP_ENCRYPTION_KEY` **before** deploying and never change it afterwards (messages sealed with the old key would stop verifying). Without it, new 2FA secrets are stored in plain text (and any already-encrypted ones can't be read), so set it before the first deploy of this version. Apply migrations through `0014` before the new Worker goes live.
 
 The API **fails closed**: without `APP_TOKEN_SECRET` anonymous calls get HTTP 503.
 Local dev (`npm run dev`) uses `dev-app-token-secret`; Playwright signs test tokens with the same value.
