@@ -20,6 +20,9 @@ import { detectLocale } from './middleware/locale.js';
 import { apiGate } from './middleware/apiGate.js';
 import appTokenRouter from './routes/app-token.js';
 
+// Durable Object classes must be exported from the Worker's entry module
+export { RateLimiter } from './durable/RateLimiter.js';
+
 const app = new Hono();
 
 // Security middleware (apply first)
