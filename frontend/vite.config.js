@@ -1,11 +1,16 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { readFileSync } from 'node:fs';
+import { swVersionPlugin } from './tooling/swVersion.js';
+
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 export default defineConfig({
   plugins: [
     tailwindcss(),
     react(),
+    swVersionPlugin(version), // stamps a unique build id into dist/sw.js
   ],
   resolve: {
     dedupe: ['react', 'react-dom'],

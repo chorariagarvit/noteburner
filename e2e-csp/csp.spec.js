@@ -64,6 +64,19 @@ test.describe('The policy itself', () => {
 });
 
 test.describe('The production build under that policy', () => {
+  test('the served service worker is stamped with a build id, and every PWA image is really served as an image', async ({ request }) => {
+    const sw = await request.get('/sw.js');
+    const body = await sw.text();
+    expect(body).not.toContain('__BUILD_ID__');
+    expect(body).toMatch(/const BUILD_ID = '\d+\.\d+\.\d+-[0-9a-z-]+';/);
+    const manifest = await (await request.get('/manifest.json')).json();
+    for (const src of [...manifest.icons.map((i) => i.src), ...manifest.screenshots.map((i) => i.src), ...manifest.shortcuts.flatMap((s) => s.icons.map((i) => i.src))]) {
+      const res = await request.get(src);
+      expect(res.status(), src).toBe(200);
+      expect(res.headers()['content-type'], `${src} must not fall back to index.html`).toMatch(/^image\/png/);
+    }
+  });
+
   test('the policy really is enforced (an injected inline script is blocked)', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => { const s = document.createElement('script'); s.textContent = 'window.__pwned = true'; document.body.appendChild(s); });
