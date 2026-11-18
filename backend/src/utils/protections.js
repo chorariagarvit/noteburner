@@ -13,15 +13,16 @@
 import { readCountry } from './geo.js';
 import { deleteExpiredMessage } from './messageHelpers.js';
 import { incrementStat } from './stats.js';
+import { bumpTeamStat } from './teamStats.js';
 
 const SUSPICION_WINDOW = '-10 minutes';
 
 async function logEvent(c, message, eventType, country, success = false, metadata = null) {
   try {
     await c.env.DB.prepare(
-      `INSERT INTO audit_logs (message_id, event_type, country, timestamp, success, metadata)
-       VALUES (?, ?, ?, datetime('now'), ?, ?)`
-    ).bind(message.token, eventType, country, success ? 1 : 0, metadata ? JSON.stringify(metadata) : null).run();
+      `INSERT INTO audit_logs (message_id, event_type, country, timestamp, success, metadata, team_id)
+       VALUES (?, ?, ?, datetime('now'), ?, ?, ?)`
+    ).bind(message.token, eventType, country, success ? 1 : 0, metadata ? JSON.stringify(metadata) : null, message.team_id || null).run();
   } catch (err) {
     console.warn('[protections] audit log failed:', err.message); // never fail the request over logging
   }
@@ -40,6 +41,7 @@ async function autoBurn(c, message, reason, country) {
   }
   await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, message.token, message);
   await incrementStat(c.env.DB, 'messages_burned');
+  await bumpTeamStat(c.env.DB, message.team_id, 'messages_burned');
   await logEvent(c, message, 'auto_burned', country, true, { reason });
   return c.json({
     error: 'This message was destroyed because of suspicious activity.',

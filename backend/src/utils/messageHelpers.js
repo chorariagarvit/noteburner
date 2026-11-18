@@ -7,7 +7,7 @@ const MESSAGE_COLUMNS = `
   token, encrypted_data, iv, salt, expires_at, created_at, accessed,
   custom_slug, creator_token, max_views, view_count, max_password_attempts,
   require_2fa, require_geo_match, creator_country, auto_burn_suspicious,
-  media_files, group_id
+  media_files, group_id, team_id
 `;
 
 /**
@@ -43,14 +43,14 @@ export async function getMessageByIdentifier(db, identifier, { includeSecrets = 
 export async function deleteMessageByIdentifier(db, identifier) {
   // Try token first
   const byToken = await db.prepare(
-    `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING media_files, token, group_id`
+    `UPDATE messages SET accessed = 1 WHERE token = ? AND accessed = 0 RETURNING media_files, token, group_id, team_id`
   ).bind(identifier).first();
 
   if (byToken) return byToken;
 
   // Fall back to slug
   return await db.prepare(
-    `UPDATE messages SET accessed = 1 WHERE custom_slug = ? AND accessed = 0 RETURNING media_files, token, group_id`
+    `UPDATE messages SET accessed = 1 WHERE custom_slug = ? AND accessed = 0 RETURNING media_files, token, group_id, team_id`
   ).bind(identifier).first();
 }
 

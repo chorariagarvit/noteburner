@@ -397,100 +397,79 @@ router.delete('/:teamId/members/:memberId', requireAuth, async (c) => {
 
 /**
  * GET /api/teams/:id/messages
- * List team messages
+ * List team messages (metadata only, never content). Burned messages are gone; see /stats.
  */
 router.get('/:id/messages', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
   const teamId = c.req.param('id');
-  const limit = parseInt(c.req.query('limit') || '50');
-  const offset = parseInt(c.req.query('offset') || '0');
+  const limit = Math.min(Math.max(parseInt(c.req.query('limit') || '50') || 50, 1), 200);
+  const offset = Math.max(parseInt(c.req.query('offset') || '0') || 0, 0);
 
-  // Optimized: Single query with permission check and message count
-  const result = await c.env.DB.prepare(`
-    WITH user_access AS (
-      SELECT 1 as has_access FROM team_members WHERE team_id = ? AND user_id = ?
-    )
-    SELECT 
-      m.id, m.created_at, m.expires_at, m.view_count, m.max_views,
-      m.custom_slug, tm.created_by,
-      (SELECT COUNT(*) FROM team_messages WHERE team_id = ?) as total_count
-    FROM messages m
-    JOIN team_messages tm ON m.id = tm.message_id
-    CROSS JOIN user_access
-    WHERE tm.team_id = ?
-    ORDER BY m.created_at DESC
-    LIMIT ? OFFSET ?
-  `).bind(teamId, userId, teamId, teamId, limit, offset).all();
-
-  if (!result.results || result.results.length === 0) {
-    // Check if it's access denied or just no messages
-    const hasAccess = await checkTeamPermission(c.env.DB, teamId, userId, 'viewer');
-    if (!hasAccess) {
-      return c.json({ error: 'Access denied', code: 'ACCESS_DENIED' }, 403);
-    }
+  if (!(await checkTeamPermission(c.env.DB, teamId, userId, 'viewer'))) {
+    return c.json({ error: 'Access denied', code: 'ACCESS_DENIED' }, 403);
   }
 
-  const total = result.results[0]?.total_count || 0;
+  const [list, count] = await Promise.all([
+    c.env.DB.prepare(`
+      SELECT id, created_at, expires_at, view_count, max_views, custom_slug, user_id AS created_by
+      FROM messages
+      WHERE team_id = ? AND accessed = 0
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `).bind(teamId, limit, offset).all(),
+    c.env.DB.prepare(
+      `SELECT COUNT(*) AS total FROM messages WHERE team_id = ? AND accessed = 0`
+    ).bind(teamId).first()
+  ]);
 
+  const total = count?.total || 0;
   return c.json({
-    messages: result.results || [],
-    pagination: {
-      total,
-      limit,
-      offset,
-      has_more: offset + limit < total
-    }
+    messages: list.results || [],
+    pagination: { total, limit, offset, has_more: offset + limit < total }
   });
 });
 
 /**
  * GET /api/teams/:id/stats
- * Get team usage statistics
+ * Team usage statistics (admins). Totals come from the daily counters, because burned
+ * messages are deleted; "active" figures describe what still exists.
  */
 router.get('/:id/stats', requireAuth, async (c) => {
   const userId = getUserId(c);
-  
   const teamId = c.req.param('id');
 
-  // Optimized: Single query combining permission check, stats, and member count
-  const stats = await c.env.DB.prepare(`
-    WITH user_role AS (
-      SELECT role FROM team_members WHERE team_id = ? AND user_id = ?
-    )
-    SELECT 
-      COUNT(DISTINCT tm.message_id) as total_messages,
-      COUNT(DISTINCT CASE WHEN m.accessed_at IS NOT NULL THEN m.id END) as burned_messages,
-      COUNT(DISTINCT CASE WHEN m.view_count > 0 THEN m.id END) as viewed_messages,
-      SUM(m.view_count) as total_views,
-      (SELECT COUNT(*) FROM team_members WHERE team_id = ?) as member_count,
-      (SELECT role FROM user_role) as user_role
-    FROM team_messages tm
-    LEFT JOIN messages m ON tm.message_id = m.id
-    CROSS JOIN user_role
-    WHERE tm.team_id = ? AND (SELECT role FROM user_role) = 'admin'
-  `).bind(teamId, userId, teamId, teamId).first();
-
-  if (!stats || !stats.user_role) {
+  if (!(await checkTeamPermission(c.env.DB, teamId, userId, 'admin'))) {
     return c.json({ error: 'Admin access required', code: 'ACCESS_DENIED' }, 403);
   }
 
-  // Get recent activity (parallel query using batch)
-  const recentStats = await c.env.DB.prepare(`
-    SELECT date, messages_created, messages_viewed, messages_burned
-    FROM team_stats
-    WHERE team_id = ? AND date >= date('now', '-30 days')
-    ORDER BY date DESC
-  `).bind(teamId).all();
+  const [totals, active, members, recent] = await Promise.all([
+    c.env.DB.prepare(`
+      SELECT COALESCE(SUM(messages_created), 0) AS created,
+             COALESCE(SUM(messages_viewed), 0) AS viewed,
+             COALESCE(SUM(messages_burned), 0) AS burned
+      FROM team_stats WHERE team_id = ?
+    `).bind(teamId).first(),
+    c.env.DB.prepare(
+      `SELECT COUNT(*) AS n FROM messages WHERE team_id = ? AND accessed = 0`
+    ).bind(teamId).first(),
+    c.env.DB.prepare(`SELECT COUNT(*) AS n FROM team_members WHERE team_id = ?`).bind(teamId).first(),
+    c.env.DB.prepare(`
+      SELECT date, messages_created, messages_viewed, messages_burned
+      FROM team_stats
+      WHERE team_id = ? AND date >= date('now', '-30 days')
+      ORDER BY date DESC
+    `).bind(teamId).all()
+  ]);
 
   return c.json({
     stats: {
-      total_messages: stats.total_messages || 0,
-      burned_messages: stats.burned_messages || 0,
-      viewed_messages: stats.viewed_messages || 0,
-      total_views: stats.total_views || 0,
-      member_count: stats.member_count || 0,
-      recent_activity: recentStats.results || []
+      total_messages: totals.created,
+      viewed_messages: totals.viewed,
+      total_views: totals.viewed,
+      burned_messages: totals.burned,
+      active_messages: active.n,
+      member_count: members.n,
+      recent_activity: recent.results || []
     }
   });
 });

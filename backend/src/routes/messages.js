@@ -2,11 +2,14 @@ import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { incrementStat } from '../utils/stats.js';
+import { bumpTeamStat } from '../utils/teamStats.js';
 import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValidation.js';
 import { getMessageByIdentifier, deleteMessageByIdentifier, deleteExpiredMessage } from '../utils/messageHelpers.js';
 import { createGroupMessage, incrementGroupAccess } from '../utils/groupMessages.js';
 import { sha256hex } from '../utils/password.js';
 import { readCountry } from '../utils/geo.js';
+import { hashCreatorToken, matchesCreatorToken } from '../utils/creatorToken.js';
+import { sealSecret, openSecret } from '../utils/secretBox.js';
 import { denyIfRestricted, recordFailure, geoVerdict } from '../utils/protections.js';
 import { clampInt, limitOrUnlimited, flag, MAX_EXPIRY_SECONDS } from '../utils/messageOptions.js';
 import crypto from 'node:crypto';
@@ -56,6 +59,7 @@ async function enforceAuthTag(c, message) {
   if (!unlimited && row.password_attempts === max) {
     await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, message.token, message);
     await incrementStat(c.env.DB, 'messages_burned');
+    await bumpTeamStat(c.env.DB, message.team_id, 'messages_burned');
     return c.json({ error: 'Too many incorrect attempts. The message has been destroyed.', code: 'BURNED_ATTEMPTS' }, 410);
   }
   const suspicious = await recordFailure(c, message, 'password');
@@ -199,8 +203,8 @@ app.post('/', rateLimitMiddleware(10, 60), async (c) => {
         ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?, ?)`
       ).bind(
         token, encryptedData, iv, salt, createdAt, expiresAt, finalSlug,
-        creatorToken, maxViews, maxPasswordAttempts, requireGeoMatch, 
-        creatorCountry, autoBurnOnSuspicious, require2FA, totpSecret, authHash
+        await hashCreatorToken(creatorToken), maxViews, maxPasswordAttempts, requireGeoMatch, 
+        creatorCountry, autoBurnOnSuspicious, require2FA, await sealSecret(c.env, totpSecret, token), authHash
       ).run();
     } catch (err) {
       if (/UNIQUE/i.test(String(err?.message))) {
@@ -368,7 +372,7 @@ app.get('/:identifier', async (c) => {
     // 2FA-protected: only reveal ciphertext to callers holding a valid TOTP proof
     if (result.require_2fa === 1) {
       const proof = c.req.header('X-TOTP-Proof');
-      if (!verifyTotpProof(proof, result.totp_secret, identifier)) {
+      if (!verifyTotpProof(proof, await openSecret(c.env, result.totp_secret, result.token), identifier)) {
         return c.json({
           totpRequired: true,
           expiresAt: result.expires_at,
@@ -393,6 +397,8 @@ app.get('/:identifier', async (c) => {
       await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
       return c.json({ error: 'This message has already been viewed and is destroyed.', code: 'ALREADY_VIEWED' }, 410);
     }
+
+    await bumpTeamStat(c.env.DB, result.team_id, 'messages_viewed');
 
     // How many views remain after this one (null = unlimited). The client burns only when 0.
     const viewsRemaining = claimed.max_views < 0
@@ -471,7 +477,8 @@ app.post('/:identifier/verify-totp', async (c) => {
     const restricted = await denyIfRestricted(c, result);
     if (restricted) return restricted;
 
-    const isValid = verifyTOTP(code, result.totp_secret, 1); // Allow 1 window drift (±30s)
+    const totpSecret = await openSecret(c.env, result.totp_secret, result.token);
+    const isValid = verifyTOTP(code, totpSecret, 1); // Allow 1 window drift (±30s)
 
     if (!isValid) {
       const suspicious = await recordFailure(c, result, 'totp');
@@ -493,7 +500,7 @@ app.post('/:identifier/verify-totp', async (c) => {
     return c.json({
       success: true,
       message: 'TOTP verified successfully',
-      proof: createTotpProof(result.totp_secret, identifier)
+      proof: createTotpProof(totpSecret, identifier)
     });
   } catch (error) {
     console.error('Error verifying TOTP:', error);
@@ -526,7 +533,7 @@ app.delete('/:identifier', async (c) => {
         return c.json({ error: 'Message not found or already deleted' }, 404);
       }
 
-      if (message.creator_token !== creatorToken) {
+      if (!(await matchesCreatorToken(message.creator_token, creatorToken)).ok) {
         return c.json({ error: 'Invalid creator token', code: 'INVALID_CREATOR_TOKEN' }, 403);
       }
       isCreator = true;
@@ -540,7 +547,7 @@ app.delete('/:identifier', async (c) => {
         if (restricted) return restricted;
       }
       if (protectedMsg?.require_2fa === 1 &&
-          !verifyTotpProof(c.req.header('X-TOTP-Proof'), protectedMsg.totp_secret, identifier)) {
+          !verifyTotpProof(c.req.header('X-TOTP-Proof'), await openSecret(c.env, protectedMsg.totp_secret, protectedMsg.token), identifier)) {
         return c.json({ error: 'TOTP verification required', code: 'TOTP_REQUIRED' }, 403);
       }
       // Burning without being the creator requires proof of the password (auth tag),
@@ -584,6 +591,7 @@ app.delete('/:identifier', async (c) => {
 
     // Increment stats
     await incrementStat(c.env.DB, 'messages_burned');
+    await bumpTeamStat(c.env.DB, result.team_id, 'messages_burned');
 
     // DON'T delete media files immediately - allow grace period for large file downloads
     // Track files in D1 for cleanup after 24 hours (avoids re-uploading large files to R2)
