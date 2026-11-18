@@ -56,3 +56,7 @@ noteburner-extension.zip
 # Extension signing keys / packages (never commit)
 *.pem
 *.crx
+
+# graphify (generated knowledge graph + installer backup)
+graphify-out/
+.claude/settings.json.graphify-bak

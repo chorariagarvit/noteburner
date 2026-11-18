@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Security
+- Server-enforced one-time access: password-derived auth tag, atomic attempt/view limits, burn requires proof (migration `0013`); server-side 2FA proof; every `/api/*` call needs a session, API key or signed app token; hashed sessions/API keys/tokens; Stripe-signature-verified billing webhook (`/subscribe` no longer grants plans); team plan/role hardening; creator-only uploads. See `CODE_REVIEW_AUDIT_OPUS.md` for the full list and remediation status.
+
+### Fixed
+- "Unlimited" max views / password attempts (`-1`) were clamped to 1; max views > 1 never worked because the page always burned after the first read. The server now returns `viewsRemaining` and the page burns only after the last view.
+- TOTP QR code never rendered; non-JSON API responses showed "Unexpected token '<'"; "Back online" popup on every load; achievements unreadable in light mode.
+- Rate limiters wrote counters without an expiry (permanent blocks) and now fail open on KV errors; both send `X-RateLimit-*` headers.
+
+### Tests
+- 105 new tests: backend unit (rate limiters, Stripe/Slack signatures, CORS, email escaping), frontend unit (auth tag), `security-api` (40) and `security-ui` (19 × 5 browsers); all five browsers enabled; per-test client IP fixture.
+
+---
+
 ## [1.14.0] - 2026-03-13
 
 ### Added - Premium Features (Week 14)

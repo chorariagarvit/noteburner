@@ -12,7 +12,7 @@ NoteBurner is a secure, one-time message encryption and decryption application. 
 - **Database**: Cloudflare D1 (SQLite) — migrations in `backend/migrations/` (0001–0013)
 - **Storage**: Cloudflare R2 (encrypted file attachments)
 - **Cache / counters**: Cloudflare KV
-- **E2E Tests**: Playwright, 15 suites, 346 tests per browser × 5 browser projects
+- **Tests**: Playwright e2e (17 spec files, 408 tests per browser × 5 browser projects), backend unit tests (`backend/test`, 37), frontend unit tests (`frontend/test`, 5)
 
 ## Development Commands
 
@@ -30,12 +30,14 @@ npm run dev:frontend       # UI at http://localhost:5173 (proxies API to :8787)
 
 ### Testing
 ```bash
-cd backend && npm test     # Unit tests (node --test): totp, app token, kv counter, signatures
+cd backend && npm test     # Unit tests (node --test): totp, app token, kv counter, rate limiters, signatures, cors, email escaping
+cd frontend && npm test    # Unit tests: auth tag / crypto, analytics path sanitising
 npm run test:e2e           # Playwright, all configured browsers (auto-starts servers + applies local migrations)
 npx playwright test --project=chromium   # one browser only
 npm run test:e2e:ui        # Interactive Playwright UI
 npm run test:report        # Open HTML test report
 ```
+`e2e/security-api.spec.js` (40 API tests, Chromium only) and `e2e/security-ui.spec.js` cover the server-enforced security behaviour; `e2e/fixtures.js` gives every test its own client IP (rate-limit counters persist in local KV, so don't reuse fixed IPs). Tests that need a paid plan flip it in the local D1 (`upgradeTeam` in week10).
 Browsers: chromium, firefox, webkit, Mobile Chrome (Pixel 6), Mobile Safari (iPhone 12). Install once with `npx playwright install`.
 
 ### Deployment (manual — see "Deploying" below before running)
@@ -154,6 +156,15 @@ Deploy is manual. Order matters because the frontend now depends on new endpoint
 - apiGate must stay fail-closed; do not add routes to its public allowlist without a signature/credential check.
 - Webhook handlers must verify signatures and fail closed when the secret is missing.
 - `extension.pem` / `*.crx` must never be committed (the old key is in history and must be rotated).
+
+## Code navigation: use graphify
+
+A knowledge graph of this repo (code, docs, migrations) lives in `graphify-out/` (git-ignored, regenerated locally).
+- For questions about the codebase, run `graphify query "<question>"` **before** grepping or reading files; use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for a single concept. Read raw files only for the lines the graph points to.
+- After modifying code, run `graphify update .` (AST-only, no LLM, no API cost).
+- Treat the graph as an index, not truth: it also contains docs such as the audit reports, and some of them describe issues that are since fixed. Confirm in the source before relying on a finding.
+- Setup (per machine): `python3 -m venv ~/.local/share/graphify-venv && ~/.local/share/graphify-venv/bin/pip install "graphifyy[sql]"`, link `graphify` into `~/.local/bin`, then in the repo `graphify install --project && graphify claude install && graphify update .`. The package name has a double "y" (`graphifyy`); other `graphify*` packages are unaffiliated.
+- `.claude/settings.json` hooks embed an absolute path to the executable, so they are machine-specific; don't commit them.
 
 ## Working agreements for agents
 
