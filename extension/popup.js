@@ -148,6 +148,10 @@ async function handleCreateMessage() {
     resultSection.classList.remove('hidden');
     
   } catch (error) {
+    if (error.code === 'CHALLENGE_REQUIRED') {
+      // The server wants a Cloudflare Turnstile check, which only works on a web page: finish on the site
+      chrome.tabs.create({ url: `https://noteburner.work/create#text=${encodeURIComponent(message)}` });
+    }
     showError(error.message || 'Failed to create message');
   }
 }

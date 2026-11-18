@@ -133,6 +133,76 @@ async function encryptMessage(message, password) {
 }
 
 /**
+ * Network helpers: every API call has a timeout (the popup must never hang) and failures are turned
+ * into messages a person can act on, instead of raw "429: Too Many Requests".
+ */
+const API_TIMEOUT_MS = 30000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err && err.name === 'AbortError') {
+      throw new Error('The server took too long to respond. Please try again.');
+    }
+    throw new Error('Could not reach NoteBurner. Check your connection and try again.');
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Build a user-facing message (and the server's machine-readable error code, if any) from a failed
+ * API response: JSON error body, HTML error page, or nothing.
+ */
+async function describeApiError(response, fallback) {
+  let serverMessage = '';
+  let code = '';
+  try {
+    const type = response.headers.get('content-type') || '';
+    if (type.includes('application/json')) {
+      const body = JSON.parse(await response.text());
+      serverMessage = body && typeof body.error === 'string' ? body.error : '';
+      code = body && typeof body.code === 'string' ? body.code : '';
+    }
+  } catch (e) {
+    // fall through to the status-based messages
+  }
+
+  const retryAfter = Number(response.headers.get('retry-after'));
+  let message;
+  if (response.status === 403 && code === 'CHALLENGE_REQUIRED') {
+    // Cloudflare Turnstile cannot run inside an extension: the popup hands off to the website
+    message = 'NoteBurner needs a quick human check. Opening noteburner.work so you can finish there.';
+  } else if (response.status === 429) {
+    message = retryAfter > 0
+      ? `Too many requests. Please wait ${retryAfter} second${retryAfter === 1 ? '' : 's'} and try again.`
+      : 'Too many requests. Please wait a minute and try again.';
+  } else if (response.status === 413) {
+    message = 'This message is too large to send.';
+  } else if (response.status === 503) {
+    message = 'NoteBurner is temporarily unavailable. Please try again shortly.';
+  } else if (serverMessage) {
+    message = serverMessage;
+  } else if (response.status >= 500) {
+    message = `NoteBurner had a problem (error ${response.status}). Please try again.`;
+  } else {
+    message = `${fallback} (error ${response.status}).`;
+  }
+  return { message, code };
+}
+
+/** An Error carrying the server's error code so callers (the popup) can react to it. */
+async function apiError(response, fallback) {
+  const { message, code } = await describeApiError(response, fallback);
+  const err = new Error(message);
+  err.code = code;
+  return err;
+}
+
+/**
  * Create a secure message via API
  */
 async function createSecureMessage(message, password, expiresIn = '24') {
@@ -153,8 +223,9 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     console.log('[NoteBurner Extension] API endpoint:', endpoint);
     console.log('[NoteBurner Extension] Request method: POST');
     
-    // Convert hours to seconds (same as website does)
-    const expirySeconds = parseInt(expiresIn) * 3600;
+    // Convert hours to seconds (same as the website). "No expiration" (empty) sends no expiry at all.
+    const hours = parseInt(expiresIn, 10);
+    const expirySeconds = Number.isFinite(hours) && hours > 0 ? hours * 3600 : undefined;
     
     const requestBody = {
       encryptedData: encrypted.encryptedData,
@@ -167,13 +238,13 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     // Create message via API
     console.log('[NoteBurner Extension] Sending request...');
     // The API requires a signed app token on every call: fetch a short-lived one first
-    const tokenRes = await fetch(`${apiUrl}/api/app-token`, { method: 'POST' });
+    const tokenRes = await fetchWithTimeout(`${apiUrl}/api/app-token`, { method: 'POST' });
     if (!tokenRes.ok) {
-      throw new Error(`Could not start API session (HTTP ${tokenRes.status})`);
+      throw await apiError(tokenRes, 'Could not start a secure session');
     }
     const { token: appToken } = await tokenRes.json();
 
-    const response = await fetch(endpoint, {
+    const response = await fetchWithTimeout(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -187,28 +258,10 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     console.log('[NoteBurner Extension] OK:', response.ok);
     
     if (!response.ok) {
-      let errorMessage = 'Failed to create message';
-      let errorDetails = null;
-      try {
-        const contentType = response.headers.get('content-type');
-        console.log('[NoteBurner Extension] Error response content-type:', contentType);
-        
-        const errorBody = await response.text();
-        
-        if (contentType && contentType.includes('application/json') && errorBody) {
-          errorDetails = JSON.parse(errorBody);
-          errorMessage = errorDetails.error || errorMessage;
-        } else {
-          errorMessage = `${response.status}: ${response.statusText}`;
-        }
-      } catch (e) {
-        console.error('[NoteBurner Extension] Failed to parse error response:', e);
-        errorMessage = `${response.status}: ${response.statusText}`;
-      }
-      console.error('[NoteBurner Extension] Request failed:', errorMessage);
-      throw new Error(errorMessage);
+      console.error('[NoteBurner Extension] Request failed:', response.status);
+      throw await apiError(response, 'Failed to create message');
     }
-    
+
     const responseText = await response.text();
     
     const data = JSON.parse(responseText);
