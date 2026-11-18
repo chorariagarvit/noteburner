@@ -6,24 +6,15 @@ import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValida
 import { getMessageByIdentifier, deleteMessageByIdentifier, deleteExpiredMessage } from '../utils/messageHelpers.js';
 import { createGroupMessage, incrementGroupAccess } from '../utils/groupMessages.js';
 import { sha256hex } from '../utils/password.js';
+import { readCountry } from '../utils/geo.js';
+import { denyIfRestricted, recordFailure, geoVerdict } from '../utils/protections.js';
+import { clampInt, limitOrUnlimited, flag, MAX_EXPIRY_SECONDS } from '../utils/messageOptions.js';
 import crypto from 'node:crypto';
 import { generateTOTPSecret, generateTOTPUri, verifyTOTP, createTotpProof, verifyTotpProof } from '../utils/totp.js';
 
 const app = new Hono();
 
 // ---- helpers -------------------------------------------------------------
-
-const clampInt = (value, min, max, fallback) => {
-  const n = typeof value === 'number' ? value : Number.parseInt(value, 10);
-  return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.trunc(n))) : fallback;
-};
-// -1 means "unlimited" (the UI offers it); anything else is clamped to 1..10
-const limitOrUnlimited = (value, fallback) => {
-  const n = typeof value === 'number' ? value : Number.parseInt(value, 10);
-  return n === -1 ? -1 : clampInt(value, 1, 10, fallback);
-};
-const flag = (v) => (v === true || v === 1 || v === '1' ? 1 : 0);
-const MAX_EXPIRY_SECONDS = 30 * 24 * 3600; // 30 days
 
 function safeEqualStr(a, b) {
   const x = Buffer.from(String(a));
@@ -51,14 +42,24 @@ async function enforceAuthTag(c, message) {
      WHERE token = ? AND accessed = 0
      RETURNING password_attempts, max_password_attempts`
   ).bind(message.token).first();
+  if (!row) {
+    // Burned (or consumed) by a concurrent request between our lookup and this update
+    return c.json({ error: 'Message not found or already accessed' }, 404);
+  }
   const configured = row?.max_password_attempts;
   const unlimited = configured < 0;
   const max = configured || 3;
-  if (!unlimited && row && row.password_attempts >= max) {
+  if (!unlimited && row.password_attempts > max) {
+    // Another request already crossed the limit and burned it: don't burn (or count) it twice
+    return c.json({ error: 'Message not found or already accessed' }, 404);
+  }
+  if (!unlimited && row.password_attempts === max) {
     await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, message.token, message);
     await incrementStat(c.env.DB, 'messages_burned');
     return c.json({ error: 'Too many incorrect attempts. The message has been destroyed.', code: 'BURNED_ATTEMPTS' }, 410);
   }
+  const suspicious = await recordFailure(c, message, 'password');
+  if (suspicious) return suspicious;
   return c.json({
     error: unlimited
       ? 'Incorrect password.'
@@ -148,7 +149,13 @@ app.post('/', rateLimitMiddleware(10, 60), async (c) => {
     const authHash = authTag ? await sha256hex(authTag) : null;
 
     // Get creator's country from CF headers (for geo-matching)
-    const creatorCountry = c.req.header('cf-ipcountry') || null;
+    const { country: creatorCountry } = readCountry(c);
+    if (requireGeoMatch && !creatorCountry) {
+      return c.json({
+        error: 'Your country could not be determined, so a country restriction cannot be applied. Turn it off or try again without a VPN/Tor.',
+        code: 'GEO_UNAVAILABLE'
+      }, 400);
+    }
 
     // Generate TOTP secret if 2FA is required
     let totpSecret = null;
@@ -181,18 +188,26 @@ app.post('/', rateLimitMiddleware(10, 60), async (c) => {
       finalSlug = sanitized;
     }
 
-   // Store in D1 with security options
-    await c.env.DB.prepare(
-      `INSERT INTO messages (
-        token, encrypted_data, iv, salt, created_at, expires_at, accessed, custom_slug,
-        creator_token, max_views, view_count, max_password_attempts, password_attempts,
-        require_geo_match, creator_country, auto_burn_suspicious, require_2fa, totp_secret, auth_hash
-      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      token, encryptedData, iv, salt, createdAt, expiresAt, finalSlug,
-      creatorToken, maxViews, maxPasswordAttempts, requireGeoMatch, 
-      creatorCountry, autoBurnOnSuspicious, require2FA, totpSecret, authHash
-    ).run();
+    // Store in D1 with security options. Two requests can pass the slug-availability check at the same
+    // time; the UNIQUE index decides, so answer 409 (not 500) to the loser.
+    try {
+      await c.env.DB.prepare(
+        `INSERT INTO messages (
+          token, encrypted_data, iv, salt, created_at, expires_at, accessed, custom_slug,
+          creator_token, max_views, view_count, max_password_attempts, password_attempts,
+          require_geo_match, creator_country, auto_burn_suspicious, require_2fa, totp_secret, auth_hash
+        ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        token, encryptedData, iv, salt, createdAt, expiresAt, finalSlug,
+        creatorToken, maxViews, maxPasswordAttempts, requireGeoMatch, 
+        creatorCountry, autoBurnOnSuspicious, require2FA, totpSecret, authHash
+      ).run();
+    } catch (err) {
+      if (/UNIQUE/i.test(String(err?.message))) {
+        return c.json({ error: 'This custom URL is already taken' }, 409);
+      }
+      throw err;
+    }
 
     // Log creation event
     await c.env.DB.prepare(
@@ -311,7 +326,10 @@ app.get('/:identifier/meta', async (c) => {
       expiresAt: result.expires_at,
       createdAt: result.created_at,
       totpRequired: result.require_2fa === 1,
-      authRequired: !!result.auth_hash
+      authRequired: !!result.auth_hash,
+      geoRestricted: result.require_geo_match === 1,
+      geoAllowed: geoVerdict(c, result).allowed,
+      autoBurn: result.auto_burn_suspicious === 1
     });
   } catch (error) {
     console.error('Error retrieving message metadata:', error);
@@ -342,6 +360,10 @@ app.get('/:identifier', async (c) => {
       await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
       return c.json({ error: 'Message has expired' }, 410);
     }
+
+    // Country restriction / suspicious-access protection (before anything is released)
+    const restricted = await denyIfRestricted(c, result);
+    if (restricted) return restricted;
 
     // 2FA-protected: only reveal ciphertext to callers holding a valid TOTP proof
     if (result.require_2fa === 1) {
@@ -446,9 +468,14 @@ app.post('/:identifier/verify-totp', async (c) => {
     }
 
     // Verify TOTP code
+    const restricted = await denyIfRestricted(c, result);
+    if (restricted) return restricted;
+
     const isValid = verifyTOTP(code, result.totp_secret, 1); // Allow 1 window drift (±30s)
 
     if (!isValid) {
+      const suspicious = await recordFailure(c, result, 'totp');
+      if (suspicious) return suspicious;
       // Increment attempt counter on failure
       if (kv) {
         const attempts = await kv.get(attemptsKey);
@@ -508,6 +535,10 @@ app.delete('/:identifier', async (c) => {
     // 2FA-protected messages can only be burned by the creator or with a valid TOTP proof
     if (!isCreator) {
       const protectedMsg = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
+      if (protectedMsg) {
+        const restricted = await denyIfRestricted(c, protectedMsg);
+        if (restricted) return restricted;
+      }
       if (protectedMsg?.require_2fa === 1 &&
           !verifyTotpProof(c.req.header('X-TOTP-Proof'), protectedMsg.totp_secret, identifier)) {
         return c.json({ error: 'TOTP verification required', code: 'TOTP_REQUIRED' }, 403);

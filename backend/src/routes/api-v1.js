@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
 import { sha256hex } from '../utils/password.js';
+import { readCountry } from '../utils/geo.js';
+import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValidation.js';
+import { limitOrUnlimited, flag, validIvOrSalt, MAX_ENCRYPTED_CHARS } from '../utils/messageOptions.js';
 
 const router = new Hono();
 
@@ -130,64 +133,102 @@ router.post('/messages', async (c) => {
   const userId = c.get('userId');
   const body = await c.req.json();
 
-  const {
-    encryptedData,
-    iv,
-    salt,
-    expiresInMinutes = 1440,
-    maxViews = 1,
-    customSlug,
-    teamId,
-    maxPasswordAttempts = 3,
-    requireGeoMatch = false,
-    autoBurnOnSuspicious = false
-  } = body;
+  const { encryptedData, iv, salt, customSlug, teamId, authTag } = body;
 
-  if (!encryptedData || !iv || !salt) {
+  if (typeof encryptedData !== 'string' || !encryptedData || !iv || !salt) {
     return c.json({ error: 'encryptedData, iv, and salt are required', code: 'ENCRYPTION_DATA_REQUIRED' }, 400);
   }
+  if (!validIvOrSalt(iv) || !validIvOrSalt(salt)) {
+    return c.json({ error: 'iv and salt must be 16 bytes (24 base64 characters)', code: 'INVALID_IV_OR_SALT' }, 400);
+  }
+  if (encryptedData.length > MAX_ENCRYPTED_CHARS) {
+    return c.json({ error: 'Message too large', code: 'MESSAGE_TOO_LARGE' }, 413);
+  }
+  if (authTag !== undefined && (typeof authTag !== 'string' || authTag.length < 32 || authTag.length > 128)) {
+    return c.json({ error: 'Invalid auth tag', code: 'INVALID_AUTH_TAG' }, 400);
+  }
 
-  // Validate custom slug if provided
+  // Same bounds as the public endpoint: 1 minute .. 30 days
+  const expiresInMinutes = body.expiresInMinutes === undefined ? 1440 : Number(body.expiresInMinutes);
+  if (!Number.isFinite(expiresInMinutes) || expiresInMinutes < 1 || expiresInMinutes > 30 * 24 * 60) {
+    return c.json({ error: 'expiresInMinutes must be between 1 and 43200', code: 'INVALID_EXPIRY' }, 400);
+  }
+  const maxViews = limitOrUnlimited(body.maxViews, 1);
+  const maxPasswordAttempts = limitOrUnlimited(body.maxPasswordAttempts, 3);
+  const requireGeoMatch = flag(body.requireGeoMatch);
+  const autoBurnOnSuspicious = flag(body.autoBurnOnSuspicious);
+
+  // Custom slug: same sanitising/validation/availability rules as the public endpoint
+  let finalSlug = null;
   if (customSlug) {
-    const existing = await c.env.DB.prepare(
-      'SELECT id FROM messages WHERE custom_slug = ?'
-    ).bind(customSlug).first();
-    
-    if (existing) {
+    const sanitized = sanitizeSlug(String(customSlug));
+    const validation = validateSlug(sanitized);
+    if (!validation.valid) {
+      return c.json({ error: validation.error, code: 'INVALID_SLUG' }, 400);
+    }
+    if (!(await isSlugAvailable(c.env.DB, sanitized))) {
       return c.json({ error: 'Custom slug already taken', code: 'SLUG_TAKEN' }, 409);
     }
+    finalSlug = sanitized;
   }
+
+  // A key may only write into teams its owner actually belongs to (members and admins, not viewers)
+  if (teamId) {
+    const membership = await c.env.DB.prepare(
+      `SELECT role FROM team_members WHERE team_id = ? AND user_id = ? AND role IN ('member', 'admin')`
+    ).bind(String(teamId), userId).first();
+    if (!membership) {
+      return c.json({ error: 'You are not a member of this team', code: 'TEAM_ACCESS_DENIED' }, 403);
+    }
+  }
+
+  const authHash = authTag ? await sha256hex(authTag) : null;
 
   const token = nanoid(32);
   const creatorToken = nanoid(32);
   const createdAt = Date.now();
   const expiresAt = createdAt + (expiresInMinutes * 60 * 1000);
-  const creatorCountry = c.req.header('cf-ipcountry') || null;
+  const { country: creatorCountry } = readCountry(c);
+  if (requireGeoMatch && !creatorCountry) {
+    return c.json({
+      error: 'Your country could not be determined, so a country restriction cannot be applied.',
+      code: 'GEO_UNAVAILABLE'
+    }, 400);
+  }
 
-  await c.env.DB.prepare(`
-    INSERT INTO messages (
-      token, encrypted_data, iv, salt, expires_at, created_at, 
-      custom_slug, user_id, team_id, created_via, creator_token,
-      max_views, view_count, max_password_attempts, 
-      require_geo_match, creator_country, auto_burn_suspicious, accessed
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'api', ?, ?, 0, ?, ?, ?, ?, 0)
-  `).bind(
-    token,
-    encryptedData,
-    iv,
-    salt,
-    expiresAt,
-    createdAt,
-    customSlug || null,
-    userId,
-    teamId || null,
-    creatorToken,
-    maxViews,
-    maxPasswordAttempts,
-    requireGeoMatch ? 1 : 0,
-    creatorCountry,
-    autoBurnOnSuspicious ? 1 : 0
-  ).run();
+  try {
+    await c.env.DB.prepare(`
+      INSERT INTO messages (
+        token, encrypted_data, iv, salt, expires_at, created_at, 
+        custom_slug, user_id, team_id, created_via, creator_token,
+        max_views, view_count, max_password_attempts, 
+        require_geo_match, creator_country, auto_burn_suspicious, accessed, auth_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'api', ?, ?, 0, ?, ?, ?, ?, 0, ?)
+    `).bind(
+      token,
+      encryptedData,
+      iv,
+      salt,
+      expiresAt,
+      createdAt,
+      finalSlug,
+      userId,
+      teamId ? String(teamId) : null,
+      creatorToken,
+      maxViews,
+      maxPasswordAttempts,
+      requireGeoMatch,
+      creatorCountry,
+      autoBurnOnSuspicious,
+      authHash
+    ).run();
+  } catch (err) {
+    // A concurrent request claimed the same slug between our availability check and the insert
+    if (/UNIQUE/i.test(String(err?.message))) {
+      return c.json({ error: 'Custom slug already taken', code: 'SLUG_TAKEN' }, 409);
+    }
+    throw err;
+  }
 
   // Log creation in audit log
   await c.env.DB.prepare(`
@@ -196,8 +237,8 @@ router.post('/messages', async (c) => {
   `).bind(token, creatorCountry, JSON.stringify({ via: 'api', user_id: userId })).run();
 
   const frontendUrl = c.env.FRONTEND_URL || 'https://noteburner.work';
-  const messageUrl = customSlug 
-    ? `${frontendUrl}/m/${customSlug}`
+  const messageUrl = finalSlug
+    ? `${frontendUrl}/m/${finalSlug}`
     : `${frontendUrl}/m/${token}`;
 
   return c.json({
