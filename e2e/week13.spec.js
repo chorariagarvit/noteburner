@@ -161,7 +161,7 @@ test.describe('Week 13: Internationalization', () => {
         await page.waitForLoadState('domcontentloaded');
       }
 
-      expect(errors.length).toBe(0);
+      expect(errors, `JS errors on locale pages: ${errors.join(' | ')}`).toEqual([]);
     });
 
     test('RTL direction applied for future RTL languages', async ({ page }) => {
