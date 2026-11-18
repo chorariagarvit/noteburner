@@ -12,7 +12,7 @@ NoteBurner is a secure, one-time message encryption and decryption application. 
 - **Database**: Cloudflare D1 (SQLite) — migrations in `backend/migrations/` (0001–0013)
 - **Storage**: Cloudflare R2 (encrypted file attachments)
 - **Cache / counters**: Cloudflare KV
-- **Tests**: Playwright e2e (17 spec files, 408 tests per browser × 5 browser projects), backend unit tests (`backend/test`, 37), frontend unit tests (`frontend/test`, 5)
+- **Tests**: Playwright e2e (21 spec files, 465 tests per browser × 5 browser projects; the 91 API-only tests run on Chromium and are skipped elsewhere), backend unit tests (`backend/test`, 64), CSP checks (`e2e-csp`, 23), frontend unit tests (`frontend/test`, 5), browser-extension tests (`extension/test`, 22)
 
 ## Development Commands
 
@@ -32,12 +32,13 @@ npm run dev:frontend       # UI at http://localhost:5173 (proxies API to :8787)
 ```bash
 cd backend && npm test     # Unit tests (node --test): totp, app token, kv counter, rate limiters, signatures, cors, email escaping
 cd frontend && npm test    # Unit tests: auth tag / crypto, analytics path sanitising
+npm run test:extension     # Extension: crypto parity with the web app, request contract vs a mock API, manifest/source consistency
 npm run test:e2e           # Playwright, all configured browsers (auto-starts servers + applies local migrations)
 npx playwright test --project=chromium   # one browser only
 npm run test:e2e:ui        # Interactive Playwright UI
 npm run test:report        # Open HTML test report
 ```
-`e2e/security-api.spec.js` (40 API tests, Chromium only) and `e2e/security-ui.spec.js` cover the server-enforced security behaviour; `e2e/fixtures.js` gives every test its own client IP (rate-limit counters persist in local KV, so don't reuse fixed IPs). Tests that need a paid plan flip it in the local D1 (`upgradeTeam` in week10).
+`e2e/security-api.spec.js` (40), `concurrency.spec.js` (12), `api-v1.spec.js` (7), `account-lifecycle.spec.js` (14) and `protections.spec.js` (18) are API-only (Chromium only) and `e2e/security-ui.spec.js` (27) runs on every browser; together they cover the server-enforced security behaviour, races, tenant isolation and the account lifecycle (shared helpers in `e2e/api-helpers.js`, including a `d1()` helper that seeds/reads the local test database); `e2e/fixtures.js` gives every test its own client IP (rate-limit counters persist in local KV, so don't reuse fixed IPs). Tests that need a paid plan flip it in the local D1 (`upgradeTeam` in week10).
 Browsers: chromium, firefox, webkit, Mobile Chrome (Pixel 6), Mobile Safari (iPhone 12). Install once with `npx playwright install`.
 
 ### Deployment (manual — see "Deploying" below before running)
@@ -94,10 +95,23 @@ noteburner/
 - `DELETE /api/messages/:id` (burn) needs the creator token **or** the auth tag (and the TOTP proof for 2FA messages). Messages without `auth_hash` (legacy, group messages) skip the tag check but still get the view limit.
 - **2FA (TOTP)** is enforced by the server: `POST /:id/verify-totp` returns an HMAC proof (`X-TOTP-Proof`, 10 min) required by GET/DELETE; guesses are capped atomically per message (`totp_attempts`).
 - `totp_secret` and `auth_hash` are excluded from default queries; read them only via `getMessageByIdentifier(db, id, { includeSecrets: true })`.
-- Frontend changes to `crypto.js` must stay in sync with `extension/crypto.js` (`deriveAuthTag`).
+- Frontend changes to `crypto.js` must stay in sync with `extension/crypto.js` (`deriveAuthTag`); `extension/test/crypto-parity.test.js` fails if they drift. When a server change alters request validation or error responses, update `extension/crypto.js` (`describeApiError`) and its contract test too.
+
+### Country restriction and auto-burn (enforced server-side)
+`utils/protections.js` enforces the two optional protections using the country Cloudflare resolves at the edge (`request.cf.country`, read by `utils/geo.js`):
+- **`require_geo_match`**: only visitors from the sender's country (`creator_country`, set at creation) can read, verify 2FA for, or burn the message. Others get 403 `GEO_RESTRICTED` and nothing is burned. It **fails closed**: an unknown country (`XX`) or Tor (`T1`) is blocked, and creating a restricted message when the sender's own country is unknown is refused (400 `GEO_UNAVAILABLE`). `GET /:id/meta` returns `geoRestricted`/`geoAllowed` so the page can explain before the password step.
+- **`auto_burn_suspicious`**: destroys the message at once (410 `AUTO_BURNED`, atomic, exactly once) on (1) an attempt from a blocked country, (2) failed password/2FA guesses from two or more countries within 10 minutes, (3) any access through Tor. Without the flag these only block or count.
+- The creator token bypasses both. Only country codes are logged (`audit_logs`, kept 30 days by the hourly cron), never IP addresses.
+- The `CF-IPCountry` header is honoured **only** when `ALLOW_COUNTRY_HEADER=1`, which only the dev script sets (so e2e tests can play visitors from `DE`/`FR`/`XX`/`T1`). Never add that variable to `wrangler.toml` or production secrets.
 
 ### API authentication (apiGate)
 Every `/api/*` request must carry one of: a user session (`Authorization: Bearer` / `X-Session-Token`), an API key (`X-API-Key`), or a signed anonymous **app token** (`X-App-Token`, from `POST /api/app-token`, 1 h, rate-limited). Public allowlist: app-token, login/signup/refresh/verify-email/forgot/reset, `/api/health` and `/ping`; Slack and Stripe webhooks authenticate by signature. It **fails closed** (503) if `APP_TOKEN_SECRET` is unset. The app token is anti-automation only, not an authorization mechanism. The frontend attaches it automatically (`installApiAuth` in `apiBase.js`); the extension fetches one itself; Playwright signs one in `playwright.config.js`.
+
+### Human check (Turnstile)
+Optional and off by default. When `TURNSTILE_SECRET_KEY` is set, `POST /api/app-token` answers 403 `CHALLENGE_REQUIRED` (plus the public `TURNSTILE_SITE_KEY`) until it receives a solved `turnstileToken`; the web app (`utils/apiBase.js` + `utils/turnstile.js`) shows an `interaction-only` widget and retries. If Cloudflare's verification is unreachable the answer is a retryable 503 (it never opens the door). The extension can't run the widget, so its popup opens the website with the text in the URL fragment (`CHALLENGE_REQUIRED` in `extension/crypto.js`).
+
+### Content-Security-Policy
+The policy lives in `frontend/public/_headers`; `npm run test:csp` (`e2e-csp/`, its own config) verifies it against the production build and fails on any violation. Adding a third-party origin, worker, or inline script means updating the policy AND that test. Don't use libraries' default blob workers (`canvas-confetti` is wrapped in `utils/confetti.js` for this reason).
 
 ### Sessions, API keys, tokens
 - Session tokens, API keys, verification and reset tokens are stored **hashed** (SHA-256); raw values only exist at the client / once at creation. Sessions are validated against D1 on every request (no KV session cache).
@@ -105,6 +119,7 @@ Every `/api/*` request must carry one of: a user session (`Authorization: Bearer
 - API keys are created only via session-authenticated `POST /api/api-keys`.
 
 ### Rate limiting
+- Limits are consumed through `utils/rateLimitStore.js` `consume()`: an **exact, atomic Durable Object** (`durable/RateLimiter.js`, binding `RATE_LIMITER`) when bound, otherwise the KV counters below. The KV path is eventually consistent and can be bypassed by a parallel burst (a measured 45/45 requests got through a limit of 30), so never rely on it alone for something that matters. Both fail open on store errors.
 - `utils/kvCounter.js` implements a fixed-window counter whose KV expiry is preserved (a plain KV `put` without a TTL removes the expiry — don't do that). Limiters take **seconds** (`rateLimitMiddleware(limit, windowSeconds)`).
 - Dev server uses higher limits (`RATE_LIMIT_REQUESTS` var).
 
@@ -168,7 +183,7 @@ A knowledge graph of this repo (code, docs, migrations) lives in `graphify-out/`
 - After modifying code, run `graphify update .` (AST-only, no LLM, no API cost).
 - Treat the graph as an index, not truth: it also contains docs such as the audit reports, and some of them describe issues that are since fixed. Confirm in the source before relying on a finding.
 - Setup (per machine): `python3 -m venv ~/.local/share/graphify-venv && ~/.local/share/graphify-venv/bin/pip install "graphifyy[sql]"`, link `graphify` into `~/.local/bin`, then in the repo `graphify install --project && graphify claude install && graphify update .`. The package name has a double "y" (`graphifyy`); other `graphify*` packages are unaffiliated.
-- `.claude/settings.json` hooks embed an absolute path to the executable, so they are machine-specific; don't commit them.
+- The graphify hooks embed an absolute path to the executable, so they live in the git-ignored `.claude/settings.local.json` (`graphify claude install` writes `.claude/settings.json`; move its `hooks` block into the local file and delete it before committing).
 
 ## Working agreements for agents
 

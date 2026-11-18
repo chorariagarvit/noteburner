@@ -252,3 +252,6 @@ Verified with 9 unit tests (`cd backend && npm test`) and a 27-check live run ag
 | NB-L12 | Mostly fixed | Auth tag, no secret logging, unbiased generator, production API host, no localhost host permission, notifications permission. **`content.js` still runs on `<all_urls>`.** |
 
 Needs your action: deploy secrets (`APP_TOKEN_SECRET`, `SLACK_SIGNING_SECRET` if used, `STRIPE_WEBHOOK_SECRET` if billing), apply migration `0013`, rotate the leaked extension key.
+
+### Follow-up: UI-only protections (NB-H1, remaining part)
+`require_geo_match` and `auto_burn_suspicious` were stored but never enforced. They are now enforced server-side (`backend/src/utils/protections.js`, `utils/geo.js`) using Cloudflare's country, with `backend/test/geo.test.js` and `e2e/protections.spec.js` (18 tests, mutation-checked) plus UI tests. See `AGENTS.md` for the exact rules.
