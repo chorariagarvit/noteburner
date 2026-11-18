@@ -85,11 +85,19 @@ router.post('/signup', rateLimitMiddleware(5, 600), async (c) => {
     const userId = nanoid(16);
     const verificationToken = generateVerificationToken();
 
-    // Create user
-    await c.env.DB.prepare(`
-      INSERT INTO users (id, email, password_hash, display_name, verification_token, email_verified)
-      VALUES (?, ?, ?, ?, ?, 0)
-    `).bind(userId, email.toLowerCase(), passwordHash, displayName || null, await sha256hex(verificationToken)).run(); // only the hash is stored
+    // Create user (only the verification token's hash is stored)
+    try {
+      await c.env.DB.prepare(`
+        INSERT INTO users (id, email, password_hash, display_name, verification_token, email_verified)
+        VALUES (?, ?, ?, ?, ?, 0)
+      `).bind(userId, email.toLowerCase(), passwordHash, displayName || null, await sha256hex(verificationToken)).run();
+    } catch (err) {
+      // Two simultaneous signups with the same email both pass the check above; the UNIQUE index decides
+      if (/UNIQUE/i.test(String(err?.message))) {
+        return c.json({ error: 'Email already registered', code: 'EMAIL_EXISTS' }, 409);
+      }
+      throw err;
+    }
 
     // Send verification email
     const emailSent = await sendVerificationEmail(
