@@ -5,7 +5,6 @@
 ## Features
 
 - **Right-click Context Menu**: Select text and right-click to send via NoteBurner
-- **Floating Action Button**: Quick access button appears when text is selected
 - **Quick Encrypt Popup**: Click extension icon for instant encryption
 - **Password Generation**: Built-in secure password generator
 - **Dark Mode**: Toggle between light and dark themes
@@ -20,34 +19,19 @@
 
 ### Manual Installation (Development)
 
-#### Chrome/Edge
+Per-browser guides (install, permissions, build, publish, troubleshooting):
 
-1. Open Chrome/Edge and navigate to `chrome://extensions/`
-2. Enable "Developer mode" (toggle in top-right)
-3. Click "Load unpacked"
-4. Select the `extension` folder from this repository
-5. The NoteBurner extension should now appear in your extensions
-
-#### Firefox
-
-1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
-2. Click "Load Temporary Add-on"
-3. Navigate to the `extension` folder and select `manifest.json`
-4. The extension will be loaded temporarily
+- **Chrome / Edge / Brave:** [README-chrome.md](./README-chrome.md): load the `extension/` folder unpacked.
+- **Firefox (142+):** [README-firefox.md](./README-firefox.md): Firefox needs its own manifest, so run `./extension/build.sh` and load `noteburner-firefox.zip`. Loading the folder directly does not work.
 
 ## Usage
 
 ### Method 1: Context Menu
 1. Select any text on a webpage
-2. Right-click and choose "Encrypt with NoteBurner"
+2. Right-click and choose "Send via NoteBurner"
 3. NoteBurner will open with the selected text pre-filled
 
-### Method 2: Floating Button
-1. Select text on any webpage
-2. Click the floating 🔥 button that appears
-3. NoteBurner will open with the selected text
-
-### Method 3: Extension Popup
+### Method 2: Extension Popup
 1. Click the NoteBurner extension icon in your browser toolbar
 2. Type or paste your message
 3. Set a password (or generate one with 🎲)
@@ -63,7 +47,7 @@
 
 The extension requires these permissions:
 
-- **contextMenus**: For right-click "Encrypt with NoteBurner" option
+- **contextMenus**: For right-click "Send via NoteBurner" option
 - **activeTab** + **scripting**: To read the text you selected on the current tab, only at the moment you open the popup. There is no content script: the extension does not run on pages you do not use it on
 - **storage**: To save dark mode preference and user settings
 - **host_permissions (noteburner.work)**: To communicate with NoteBurner API for message creation
@@ -117,6 +101,7 @@ MIT License - See main repository for details
 ## Changelog
 
 ### v1.14.0 (2026-11-17)
+- Removed the content script and floating button that ran on every site. The popup now reads your selection through `activeTab` + `scripting` only when opened, and no resources are exposed to web pages. Build script rewritten: the Firefox zip previously had no `manifest.json`.
 - Authenticates with the NoteBurner API: fetches a short-lived signed app token (`POST /api/app-token`) and sends it as `X-App-Token` on every request. Required since the API now rejects unauthenticated calls.
 - Added API hosts to `host_permissions` (Chrome and Firefox manifests)
 - Replaced `innerHTML` with `textContent` in the popup and content script
