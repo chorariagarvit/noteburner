@@ -21,6 +21,48 @@ const seedReset = (userId, token, expires = FUTURE) =>
 const newToken = () => `reset-${uniq()}-${Math.random().toString(36).slice(2)}`;
 const login = (request, email, password) => request.post(`${API}/auth/login`, { data: { email, password } });
 
+test.describe('Signup does not reveal registered emails', () => {
+  const signup = (request, data) => request.post(`${API}/auth/signup`, { data });
+
+  test('a new and an already-registered email get exactly the same answer', async ({ request }) => {
+    const email = `priv-${uniq()}@example.com`;
+    const first = await signup(request, { email, password: PASSWORD });
+    const again = await signup(request, { email, password: PASSWORD });
+    const upperCase = await signup(request, { email: email.toUpperCase(), password: PASSWORD });
+    expect([first.status(), again.status(), upperCase.status()]).toEqual([201, 201, 201]);
+    const bodies = await Promise.all([first, again, upperCase].map((r) => r.json()));
+    expect(JSON.stringify(bodies[1])).toBe(JSON.stringify(bodies[0]));
+    expect(JSON.stringify(bodies[2])).toBe(JSON.stringify(bodies[0]));
+    expect(JSON.stringify(bodies[0])).not.toMatch(/already|exists|registered|"id"|user/i);
+    expect(d1(`SELECT COUNT(*) AS n FROM users WHERE email = '${email}'`, { json: true })[0].n).toBe(1);
+  });
+
+  test('re-registering an address cannot overwrite or take over the real account', async ({ request }) => {
+    const email = `owner-${uniq()}@example.com`;
+    expect((await signup(request, { email, password: PASSWORD, displayName: 'The Owner' })).status()).toBe(201);
+    const attacker = await signup(request, { email, password: 'Attack3r!Passw0rd#9', displayName: 'Mallory' });
+    expect(attacker.status()).toBe(201);                                           // looks like success...
+
+    expect((await login(request, email, 'Attack3r!Passw0rd#9')).status()).toBe(401);   // ...but nothing changed
+    const ok = await login(request, email, PASSWORD);
+    expect(ok.status()).toBe(200);
+    const token = (await ok.json()).sessionToken;
+    const me = await (await request.get(`${API}/auth/me`, { headers: { 'X-Session-Token': token } })).json();
+    expect(me.user.displayName).toBe('The Owner');
+  });
+
+  test('validation errors do not depend on whether the email exists', async ({ request }) => {
+    const email = `val-${uniq()}@example.com`;
+    await signup(request, { email, password: PASSWORD });
+    for (const target of [email, `fresh-${uniq()}@example.com`]) {
+      const weak = await signup(request, { email: target, password: 'short' });
+      expect(weak.status()).toBe(400);
+      expect((await weak.json()).code).toBe('WEAK_PASSWORD');
+    }
+    expect((await signup(request, { email: 'not-an-email', password: PASSWORD })).status()).toBe(400);
+  });
+});
+
 test.describe('Password reset', () => {
   test('forgot-password answers identically for known and unknown emails', async ({ request }) => {
     const user = await newUser(request);

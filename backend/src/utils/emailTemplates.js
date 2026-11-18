@@ -333,9 +333,61 @@ function teamInvitationTemplate({ teamName, inviterName, role, loginUrl }) {
   `;
 }
 
+/**
+ * "Someone tried to sign up with your address, but you already have an account."
+ * Sent instead of an error so that signup never reveals whether an email is registered.
+ */
+function accountExistsTemplate({ displayName, loginUrl, resetUrl }) {
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You already have a NoteBurner account</title>
+  <style>${baseStyles}</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔥 NoteBurner</h1>
+      <p style="margin: 10px 0 0 0; opacity: 0.9;">Account notice</p>
+    </div>
+
+    <div class="content">
+      <h2 style="color: #1f2937; margin-top: 0;">You already have an account</h2>
+
+      <p>Hi ${esc(displayName)},</p>
+
+      <p>Someone just tried to create a NoteBurner account with this email address, but one already exists. Nothing was changed.</p>
+
+      <p>If it was you, you can simply log in, or reset your password if you've forgotten it:</p>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${esc(loginUrl)}" class="button">Log in</a>
+      </div>
+      <p style="text-align: center; font-size: 14px;"><a href="${esc(resetUrl)}">Forgot your password?</a></p>
+
+      <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 12px 16px; margin: 20px 0; border-radius: 4px;">
+        <p style="margin: 0; font-size: 14px; color: #991b1b;">
+          <strong>If this wasn't you</strong>, you can ignore this email. Your account and password are unchanged.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p style="margin: 0;"><strong>NoteBurner</strong> - Secure Self-Destructing Messages</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+}
+
 export const emailTemplates = {
   verification: verificationTemplate,
   passwordReset: passwordResetTemplate,
+  accountExists: accountExistsTemplate,
   welcome: welcomeTemplate,
   teamInvitation: teamInvitationTemplate
 };
