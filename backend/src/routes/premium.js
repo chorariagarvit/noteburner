@@ -154,27 +154,31 @@ app.post('/webhook', async (c) => {
     return c.json({ received: true, ignored: true });
   }
 
-  await c.env.DB.prepare(`
-    UPDATE user_subscriptions
-    SET status = 'cancelled', cancelled_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-    WHERE user_id = ? AND status IN ('active', 'trialing')
-  `).bind(userId).run();
-
   const now = new Date();
   const periodEnd = planId === 'lifetime'
     ? new Date('2099-12-31').toISOString()
     : new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()).toISOString();
 
-  await c.env.DB.prepare(`
-    INSERT INTO user_subscriptions
-      (id, user_id, plan_id, status, payment_method, stripe_customer_id,
-       stripe_subscription_id, current_period_start, current_period_end)
-    VALUES (?, ?, ?, 'active', 'stripe', ?, ?, ?, ?)
-  `).bind(
-    nanoid(), userId, planId,
-    session.customer || null, session.subscription || null,
-    now.toISOString(), periodEnd
-  ).run();
+  // One atomic batch: Stripe redelivers events and may send duplicates in parallel. Batches run one
+  // after another, and each one retires the previous active subscription before adding its own,
+  // so however many copies arrive exactly one subscription stays active.
+  await c.env.DB.batch([
+    c.env.DB.prepare(`
+      UPDATE user_subscriptions
+      SET status = 'cancelled', cancelled_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      WHERE user_id = ? AND status IN ('active', 'trialing')
+    `).bind(userId),
+    c.env.DB.prepare(`
+      INSERT INTO user_subscriptions
+        (id, user_id, plan_id, status, payment_method, stripe_customer_id,
+         stripe_subscription_id, current_period_start, current_period_end)
+      VALUES (?, ?, ?, 'active', 'stripe', ?, ?, ?, ?)
+    `).bind(
+      nanoid(), userId, planId,
+      session.customer || null, session.subscription || null,
+      now.toISOString(), periodEnd
+    ),
+  ]);
 
   return c.json({ received: true });
 });
