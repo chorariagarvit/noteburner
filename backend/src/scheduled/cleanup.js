@@ -83,6 +83,7 @@ export async function cleanupScheduled(env) {
     const housekeeping = [
       ['expired sessions', `DELETE FROM sessions WHERE expires_at < ?`, [nowIso]],
       ['used/expired password resets', `DELETE FROM password_resets WHERE used = 1 OR expires_at < ?`, [nowIso]],
+      ['audit logs older than 30 days', `DELETE FROM audit_logs WHERE timestamp < datetime('now', '-30 days')`, []],
       ['old login attempts', `DELETE FROM login_attempts WHERE attempted_at < ?`, [monthAgo]],
       ['accessed messages', `DELETE FROM messages WHERE accessed = 1 AND created_at < ?`, [Date.now() - 7 * 24 * 3600 * 1000]],
     ];

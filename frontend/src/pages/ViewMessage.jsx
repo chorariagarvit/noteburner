@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, X as XIcon, MessageSquare, Clock } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { fireConfetti } from '../utils/confetti';
 import { deriveAuthTag, decryptMessage, decryptFile } from '../utils/crypto';
 import { getMessage, getMessageMeta, getMedia, deleteMessage, confirmMediaDownload } from '../utils/api';
 import { useCountdown, formatTimeLeft } from '../hooks/useCountdown';
@@ -34,6 +34,8 @@ function ViewMessage() {
   const [totpVerified, setTotpVerified] = useState(false);
   const [totpProof, setTotpProof] = useState(null);
   const [meta, setMeta] = useState(null);
+  // The server says whether THIS visitor's country may open the message (Cloudflare geolocation)
+  const geoBlocked = !!(meta && meta.geoRestricted && !meta.geoAllowed);
   const [totpError, setTotpError] = useState('');
   const timeLeft = useCountdown(expiresAt);
   
@@ -176,7 +178,7 @@ function ViewMessage() {
       setDecrypted(true);
       
       // Trigger confetti celebration 🎉
-      confetti({
+      fireConfetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 }
@@ -184,13 +186,13 @@ function ViewMessage() {
       
       // Second burst for extra celebration
       setTimeout(() => {
-        confetti({
+        fireConfetti({
           particleCount: 50,
           angle: 60,
           spread: 55,
           origin: { x: 0 }
         });
-        confetti({
+        fireConfetti({
           particleCount: 50,
           angle: 120,
           spread: 55,
@@ -411,9 +413,16 @@ function ViewMessage() {
               ⏱️ One-time access only
             </p>
 
+            {geoBlocked && (
+              <div role="alert" className="mb-6 p-4 rounded-lg border border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
+                {t('view.geoBlocked')}
+              </div>
+            )}
+
             <button
               onClick={() => setShowPreview(false)}
-              className="btn-primary text-xl px-8 py-4 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+              disabled={geoBlocked}
+              className="btn-primary text-xl px-8 py-4 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <Lock className="w-6 h-6 inline-block mr-2" />
               {t('view.previewUnlock')}
