@@ -77,15 +77,17 @@ export const enhancedRateLimit = (options = {}) => {
     if (count >= maxRequests) {
       c.header('X-RateLimit-Limit', maxRequests.toString());
       c.header('X-RateLimit-Remaining', '0');
+      c.header('X-RateLimit-Reset', String(counter.resetAt));
       c.header('Retry-After', windowSeconds.toString());
       return c.json({ error: message, retryAfter: windowSeconds }, 429);
     }
 
     // Fixed window: keeps the original expiry on every write
-    await bumpCounter(kv, key, counter, windowSeconds);
+    const updated = await bumpCounter(kv, key, counter, windowSeconds);
 
     c.header('X-RateLimit-Limit', maxRequests.toString());
     c.header('X-RateLimit-Remaining', String(maxRequests - count - 1));
+    c.header('X-RateLimit-Reset', String(updated.resetAt));
 
     await next();
   };
