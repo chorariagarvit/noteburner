@@ -286,3 +286,18 @@ wrangler secret put SLACK_SIGNING_SECRET --env production   # only if using Slac
 
 The API **fails closed**: without `APP_TOKEN_SECRET` anonymous calls get HTTP 503.
 Local dev (`npm run dev`) uses `dev-app-token-secret`; Playwright signs test tokens with the same value.
+
+## Country restriction and auto-burn
+
+These use the visitor country Cloudflare resolves at the edge (IP Geolocation is on by default, no setup). **Do not** set `ALLOW_COUNTRY_HEADER` in production: it lets a caller dictate their own country and is only used by the local dev script and the e2e tests.
+
+## Optional hardening
+
+- **Exact rate limits (Durable Object).** `wrangler deploy` creates the `RateLimiter` Durable Object from the migration in `wrangler.toml` (SQLite-backed, works on the free plan). Without the binding the limiters fall back to KV counters, which parallel bursts can bypass.
+- **Human check on the anonymous token endpoint (Cloudflare Turnstile).** Create a Turnstile widget in the Cloudflare dashboard (hostname `noteburner.work`), then:
+  ```bash
+  cd backend
+  wrangler secret put TURNSTILE_SECRET_KEY --env production
+  ```
+  and add the public site key to `[env.production.vars]` as `TURNSTILE_SITE_KEY`. Nothing else to configure: the API tells the web app when a challenge is needed. Leave both unset to keep it off (local dev and CI do). The browser extension cannot run the widget; when a check is required it opens noteburner.work with the text prefilled.
+- **CSP check.** `npm run test:csp` loads the production build with the headers from `frontend/public/_headers` and fails on any violation. Run it after changing the policy, adding a third-party script, or a dependency that uses workers/inline scripts.

@@ -60,3 +60,6 @@ noteburner-extension.zip
 # graphify (generated knowledge graph + installer backup)
 graphify-out/
 .claude/settings.json.graphify-bak
+
+# Personal Claude Code settings (graphify hooks embed this machine's absolute path)
+.claude/settings.local.json

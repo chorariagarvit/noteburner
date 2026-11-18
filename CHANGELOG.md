@@ -17,11 +17,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TOTP QR code never rendered; non-JSON API responses showed "Unexpected token '<'"; "Back online" popup on every load; achievements unreadable in light mode.
 - Rate limiters wrote counters without an expiry (permanent blocks) and now fail open on KV errors; both send `X-RateLimit-*` headers.
 
+### Added
+- **Country restriction and auto-burn are now enforced** (they were previously stored but ignored): restricted messages open only from the sender's country (Cloudflare geolocation, fails closed for unknown/Tor), and auto-burn destroys a message immediately on access from a blocked country, failed guesses from two or more countries within 10 minutes, or Tor access. Country-level logging only; audit logs are now actually deleted after 30 days. The page tells blocked visitors why before the password step. Option descriptions rewritten (all six languages).
+
+### Hardening
+- **Exact rate limits:** a Durable Object (`RateLimiter`) now backs every limiter. The KV counters it replaces were bypassed completely by parallel bursts (45 of 45 requests passed a limit of 30; 12 signups passed a limit of 5). KV remains as a fallback when the binding is absent.
+- **Optional Cloudflare Turnstile** on `POST /api/app-token` (off unless `TURNSTILE_SECRET_KEY` is set), with the extension handing off to the website when a check is required.
+- **CSP verified** against the production build (`npm run test:csp`, also a CI job): 18 pages and the create-and-read flow have no violations. The check found that the confetti animation needs a blob worker that the policy blocks, so confetti now draws on the main thread. Policy updated for Turnstile and current Analytics endpoints.
+
+### Fixed (found by the new concurrency/isolation tests)
+- Simultaneous signups with one email returned 500s (now 409); duplicate/redelivered payment webhooks left several active subscriptions (now one, via an atomic batch); parallel wrong passwords reported the burn twice and returned a misleading "attempts remaining" for a destroyed message.
+- `POST /api/v1/messages` skipped validation: iv/salt/size, expiry and view bounds, slug rules, and it let a key write into teams its owner doesn't belong to. It now shares the public endpoint's rules and accepts the password-proof tag.
+
+### Extension
+- Friendlier errors (rate limits with the wait time, size, outages, gateway pages, network failures), 30 s timeouts, explicit "no expiration"; 19 new tests including crypto parity with the web app.
+
 ### CI
 - CI now runs the backend/frontend unit tests, the frontend build and a dependency audit, and runs the e2e suite as a parallel matrix over all five browser projects (it previously ran every project but installed only Chromium).
 
 ### Tests
-- 105 new tests: backend unit (rate limiters, Stripe/Slack signatures, CORS, email escaping), frontend unit (auth tag), `security-api` (40) and `security-ui` (19 × 5 browsers); all five browsers enabled; per-test client IP fixture.
+- 230+ new tests: backend unit (rate limiters incl. the Durable Object, Stripe/Slack signatures, Turnstile, CORS, email escaping, geo, option helpers), frontend unit (auth tag), extension (22), CSP checks (23), and e2e `security-api` (40), `concurrency` (12), `api-v1` (7), `account-lifecycle` (14), `protections` (18), `security-ui` (27 × 5 browsers); all five browsers enabled; per-test client IP fixture.
 
 ---
 

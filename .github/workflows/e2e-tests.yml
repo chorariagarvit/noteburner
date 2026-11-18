@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [ main, feature/* ]
+    branches: [ main, 'feature/**', 'bugfix/**', 'hotfix/**', 'release/**' ]
   pull_request:
     branches: [ main ]
 
@@ -30,6 +30,9 @@ jobs:
 
     - name: Frontend unit tests
       run: npm test --workspace=frontend
+
+    - name: Browser extension tests
+      run: npm run test:extension
 
     - name: Frontend production build
       run: npm run build --workspace=frontend
@@ -110,3 +113,42 @@ jobs:
         name: test-results-${{ steps.artifact.outputs.name }}
         path: test-results/
         retention-days: 30
+
+  # The Content-Security-Policy in frontend/public/_headers, checked against the production build
+  csp:
+    name: CSP (production build)
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright browser (chromium)
+      run: npx playwright install --with-deps chromium
+
+    - name: Apply D1 Migrations
+      run: cd backend && npx wrangler d1 migrations apply noteburner-db --local
+      env:
+        CI: true
+
+    - name: Run CSP checks
+      run: npm run test:csp
+      env:
+        CI: true
+
+    - name: Upload CSP results
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: csp-test-results
+        path: test-results/
+        retention-days: 14
