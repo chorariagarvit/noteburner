@@ -13,9 +13,9 @@
 
 ## Installation
 
-### From Web Stores (Coming Soon)
-- **Chrome Web Store**: [Add to Chrome](#) (Pending approval)
-- **Firefox Add-ons**: [Add to Firefox](#) (Pending approval)
+### From Web Stores
+- **Firefox Add-ons**: [Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/noteburner/) (live, version 1.14.0)
+- **Chrome Web Store**: update to 1.14.0 pending (the store's verified-upload key must be reset first)
 
 ### Manual Installation (Development)
 

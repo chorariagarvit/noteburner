@@ -2,6 +2,8 @@
 
 Send self-destructing encrypted messages from any page. Encryption happens in your browser; the server only stores ciphertext.
 
+**Install:** [https://addons.mozilla.org/en-US/firefox/addon/noteburner/](https://addons.mozilla.org/en-US/firefox/addon/noteburner/)
+
 Requires **Firefox 142 or newer** (set by `strict_min_version` in `manifest.firefox.json`, which is also what lets the add-on declare that it collects no data).
 
 ## Use it
