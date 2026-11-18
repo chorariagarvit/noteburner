@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TOTP QR code never rendered; non-JSON API responses showed "Unexpected token '<'"; "Back online" popup on every load; achievements unreadable in light mode.
 - Rate limiters wrote counters without an expiry (permanent blocks) and now fail open on KV errors; both send `X-RateLimit-*` headers.
 
+### CI
+- CI now runs the backend/frontend unit tests, the frontend build and a dependency audit, and runs the e2e suite as a parallel matrix over all five browser projects (it previously ran every project but installed only Chromium).
+
 ### Tests
 - 105 new tests: backend unit (rate limiters, Stripe/Slack signatures, CORS, email escaping), frontend unit (auth tag), `security-api` (40) and `security-ui` (19 × 5 browsers); all five browsers enabled; per-test client IP fixture.
 

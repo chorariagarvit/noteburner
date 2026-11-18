@@ -78,7 +78,7 @@ noteburner/
 │           └── session.js        # getSessionToken / getAuthHeaders
 ├── e2e/                          # Playwright suites
 ├── extension/                    # Chrome + Firefox extension (own manifests, no npm deps)
-├── .github/workflows/            # e2e-tests.yml (Chromium only), semgrep.yml
+├── .github/workflows/            # e2e-tests.yml (unit job + 5-browser e2e matrix), semgrep.yml
 ├── ROADMAP.md  CHANGELOG.md      # Status/next steps vs. release history
 ├── CODE_REVIEW_AUDIT*.md         # Security audit reports + remediation status
 └── playwright.config.js
@@ -123,6 +123,10 @@ Deploy is manual. Order matters because the frontend now depends on new endpoint
 3. `npm run deploy:backend`, then `npm run deploy:frontend` / push `main`
 4. Smoke test: create a message, open the link, decrypt, confirm it's gone.
 
+## CI
+
+`.github/workflows/e2e-tests.yml` has two jobs: **unit** (backend + frontend `npm test`, frontend build, `npm audit` — the backend runtime audit blocks on high+, the whole-tree audit is informational because Vite's glob helpers currently have an unfixable advisory) and **e2e**, a matrix with one job per Playwright project (chromium, firefox, webkit, Mobile Chrome, Mobile Safari) that installs only the browser it needs. A new Playwright project must be added to that matrix. Reproduce CI locally with `CI=true npx playwright test --project=<name>`.
+
 ## Key Configuration Files
 
 | File | Purpose |
@@ -131,7 +135,7 @@ Deploy is manual. Order matters because the frontend now depends on new endpoint
 | `frontend/vite.config.js` | Dev server, API proxy |
 | `frontend/public/_headers` | CSP, frame-ancestors, HSTS for the SPA (Pages) |
 | `playwright.config.js` | 5 browser projects, 2 workers, test app token |
-| `.github/workflows/e2e-tests.yml` | CI (Chromium only) |
+| `.github/workflows/e2e-tests.yml` | CI: unit tests + build + audit, then one e2e job per browser project (parallel) |
 | `SETUP.md` | First-time setup and required secrets |
 
 ## Coding Conventions
