@@ -161,12 +161,15 @@ function ViewMessage() {
       // Wait for unlock animation to complete
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Decryption successful - now permanently delete the message and media
-      try {
-        await deleteMessage(messageIdentifier, protection);
-      } catch (err) {
-        console.error('Failed to delete message:', err);
-        // Continue anyway - message was decrypted successfully
+      // Decryption successful. Burn now only if this was the last allowed view (the server tells us);
+      // for max-views > 1 or "unlimited" the message stays until its views/expiry run out.
+      if (data.viewsRemaining === 0 || data.viewsRemaining === undefined) {
+        try {
+          await deleteMessage(messageIdentifier, protection);
+        } catch (err) {
+          console.error('Failed to delete message:', err);
+          // Continue anyway - message was decrypted successfully
+        }
       }
 
       setUnlocking(false);

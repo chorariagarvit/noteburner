@@ -15,7 +15,15 @@ export function rateLimitMiddleware(limit = 10, windowSeconds = 60) {
     }
 
     const key = `rl:ip:${ip}:${limit}:${windowSeconds}`;
-    const counter = await readCounter(kv, key);
+    let counter;
+    try {
+      counter = await readCounter(kv, key);
+    } catch (err) {
+      // KV hiccup: rate limiting is best-effort, never take the API down with it
+      console.warn('[RateLimit] KV read failed, skipping rate limit:', err.message);
+      await next();
+      return;
+    }
     const count = counter.count;
 
     if (count >= limit) {
@@ -26,7 +34,14 @@ export function rateLimitMiddleware(limit = 10, windowSeconds = 60) {
       return c.json({ error: 'Rate limit exceeded. Please try again later.' }, 429);
     }
 
-    const updated = await bumpCounter(kv, key, counter, windowSeconds);
+    let updated;
+    try {
+      updated = await bumpCounter(kv, key, counter, windowSeconds);
+    } catch (err) {
+      // e.g. Cloudflare KV allows only ~1 write/second per key
+      console.warn('[RateLimit] KV write failed, request allowed:', err.message);
+      updated = { count: counter.count + 1, resetAt: counter.resetAt || Math.floor(Date.now() / 1000) + windowSeconds };
+    }
     c.header('X-RateLimit-Limit', String(limit));
     c.header('X-RateLimit-Remaining', String(Math.max(0, limit - updated.count)));
     c.header('X-RateLimit-Reset', String(updated.resetAt));

@@ -17,6 +17,11 @@ const clampInt = (value, min, max, fallback) => {
   const n = typeof value === 'number' ? value : Number.parseInt(value, 10);
   return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.trunc(n))) : fallback;
 };
+// -1 means "unlimited" (the UI offers it); anything else is clamped to 1..10
+const limitOrUnlimited = (value, fallback) => {
+  const n = typeof value === 'number' ? value : Number.parseInt(value, 10);
+  return n === -1 ? -1 : clampInt(value, 1, 10, fallback);
+};
 const flag = (v) => (v === true || v === 1 || v === '1' ? 1 : 0);
 const MAX_EXPIRY_SECONDS = 30 * 24 * 3600; // 30 days
 
@@ -46,14 +51,18 @@ async function enforceAuthTag(c, message) {
      WHERE token = ? AND accessed = 0
      RETURNING password_attempts, max_password_attempts`
   ).bind(message.token).first();
-  const max = row?.max_password_attempts || 3;
-  if (row && row.password_attempts >= max) {
+  const configured = row?.max_password_attempts;
+  const unlimited = configured < 0;
+  const max = configured || 3;
+  if (!unlimited && row && row.password_attempts >= max) {
     await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, message.token, message);
     await incrementStat(c.env.DB, 'messages_burned');
     return c.json({ error: 'Too many incorrect attempts. The message has been destroyed.', code: 'BURNED_ATTEMPTS' }, 410);
   }
   return c.json({
-    error: `Incorrect password. ${Math.max(0, max - (row?.password_attempts || 0))} attempt(s) remaining.`,
+    error: unlimited
+      ? 'Incorrect password.'
+      : `Incorrect password. ${Math.max(0, max - (row?.password_attempts || 0))} attempt(s) remaining.`,
     code: 'BAD_AUTH_TAG'
   }, 401);
 }
@@ -100,8 +109,8 @@ app.post('/', rateLimitMiddleware(10, 60), async (c) => {
       customSlug,
       authTag
     } = body;
-    const maxViews = clampInt(body.maxViews, 1, 10, 1);
-    const maxPasswordAttempts = clampInt(body.maxPasswordAttempts, 1, 10, 3);
+    const maxViews = limitOrUnlimited(body.maxViews, 1);
+    const maxPasswordAttempts = limitOrUnlimited(body.maxPasswordAttempts, 3);
     const requireGeoMatch = flag(body.requireGeoMatch);
     const autoBurnOnSuspicious = flag(body.autoBurnOnSuspicious);
     const require2FA = flag(body.require2FA);
@@ -354,16 +363,23 @@ app.get('/:identifier', async (c) => {
     // again, so link scanners/unfurlers cannot silently re-fetch it.
     const claimed = await c.env.DB.prepare(
       `UPDATE messages SET view_count = view_count + 1
-       WHERE token = ? AND accessed = 0 AND view_count < COALESCE(NULLIF(max_views, 0), 1)
-       RETURNING token`
+       WHERE token = ? AND accessed = 0
+         AND (max_views < 0 OR view_count < COALESCE(NULLIF(max_views, 0), 1))
+       RETURNING token, view_count, max_views`
     ).bind(result.token).first();
     if (!claimed) {
       await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
       return c.json({ error: 'This message has already been viewed and is destroyed.', code: 'ALREADY_VIEWED' }, 410);
     }
 
+    // How many views remain after this one (null = unlimited). The client burns only when 0.
+    const viewsRemaining = claimed.max_views < 0
+      ? null
+      : Math.max(0, (claimed.max_views || 1) - claimed.view_count);
+
     // Return message data for decryption attempt
     const response = {
+      viewsRemaining,
       encryptedData: result.encrypted_data,
       iv: result.iv,
       salt: result.salt,
