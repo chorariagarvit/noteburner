@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Country restriction and auto-burn are now enforced** (they were previously stored but ignored): restricted messages open only from the sender's country (Cloudflare geolocation, fails closed for unknown/Tor), and auto-burn destroys a message immediately on access from a blocked country, failed guesses from two or more countries within 10 minutes, or Tor access. Country-level logging only; audit logs are now actually deleted after 30 days. The page tells blocked visitors why before the password step. Option descriptions rewritten (all six languages).
 
 ### Hardening
+- **Firefox extension 1.14.0 is published:** https://addons.mozilla.org/en-US/firefox/addon/noteburner/ (Chrome Web Store update pending).
 - **Extension no longer runs on every site:** the `<all_urls>` content script and floating button are gone. The popup reads the selection through `activeTab` + `scripting` only when opened. Needs a rebuilt and republished extension.
 - **Exact rate limits:** a Durable Object (`RateLimiter`) now backs every limiter. The KV counters it replaces were bypassed completely by parallel bursts (45 of 45 requests passed a limit of 30; 12 signups passed a limit of 5). KV remains as a fallback when the binding is absent.
 - **Optional Cloudflare Turnstile** on `POST /api/app-token` (off unless `TURNSTILE_SECRET_KEY` is set), with the extension handing off to the website when a check is required.
