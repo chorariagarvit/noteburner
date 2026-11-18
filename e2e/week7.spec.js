@@ -196,16 +196,15 @@ test.describe('Week 7 - Mobile Optimization & PWA Features', () => {
       await page.goto('/');
       await page.waitForLoadState('networkidle');
 
+      // The worker registers asynchronously: reloading before it is active leaves the page uncontrolled
+      await page.evaluate(() => navigator.serviceWorker.ready);
+
       // Reload to trigger cache update
       await page.reload();
       await page.waitForLoadState('networkidle');
 
       // Verify service worker is controlling the page
-      const isControlled = await page.evaluate(async () => {
-        return navigator.serviceWorker.controller !== null;
-      });
-
-      expect(isControlled).toBe(true);
+      await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null), { timeout: 10000 }).toBe(true);
     });
   });
 
