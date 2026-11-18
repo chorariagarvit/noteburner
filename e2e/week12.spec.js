@@ -3,7 +3,7 @@
  * Tests for caching, CDN optimization, monitoring, and health checks
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8787';
 
@@ -360,8 +360,8 @@ test.describe('Week 12: Scaling & Performance', () => {
       // Create a test message
       const messageData = {
         encryptedData: 'test-encrypted-data',
-        iv: 'test-iv',
-        salt: 'test-salt',
+        iv: 'AAAAAAAAAAAAAAAAAAAAAA==',   // must be 16 bytes (24 base64 chars)
+        salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
         expiresIn: 3600
       };
       

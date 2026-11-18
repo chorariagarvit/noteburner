@@ -3,7 +3,7 @@
  * Tests for onboarding flow, message templates, keyboard shortcuts, and animations
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 test.describe('Week 6: UI/UX Polish', () => {
   

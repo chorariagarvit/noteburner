@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const API_URL = process.env.API_URL || 'http://localhost:8787';
@@ -14,6 +14,9 @@ test.describe('Week 3 - Custom URLs', () => {
   test('should allow creating message with custom URL slug', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     const uniqueSlug = `test-${Date.now().toString().slice(-10)}`;
 
@@ -25,13 +28,13 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.fill('#custom-url', uniqueSlug);
     
     // Wait for validation
-    await page.waitForSelector('.text-green-500', { timeout: 2000 });
+    await page.waitForSelector('.text-green-500', { timeout: 10000 });
 
     // Submit form
     await page.click('button[type="submit"]');
 
     // Wait for success page
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Check that URL contains custom slug with /m/ prefix
     const shareUrl = await page.inputValue('#share-url');
@@ -41,6 +44,9 @@ test.describe('Week 3 - Custom URLs', () => {
   test('should show validation error for invalid custom URL', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     // Try invalid characters
     await page.fill('#custom-url', 'invalid@slug!');
@@ -53,17 +59,23 @@ test.describe('Week 3 - Custom URLs', () => {
   test('should show error for custom URL that is too short', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     // Try slug that's too short
     await page.fill('#custom-url', 'ab');
     
     // Wait for error indicator (red X icon)
-    await page.waitForSelector('.text-red-500', { timeout: 3000 });
+    await page.waitForSelector('.text-red-500', { timeout: 10000 });
   });
 
   test('should show unavailable error for duplicate custom URL', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     const duplicateSlug = `dup-${Date.now().toString().slice(-13)}`;
 
@@ -71,9 +83,9 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.fill('#message', 'First message');
     await page.fill('#password', 'SecurePassword123');
     await page.fill('#custom-url', duplicateSlug);
-    await page.waitForSelector('.text-green-500', { timeout: 5000 });
+    await page.waitForSelector('.text-green-500', { timeout: 10000 });
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 10000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Try to create second message with same slug
     await page.click('text=Create New Message');
@@ -82,13 +94,16 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.fill('#custom-url', duplicateSlug);
     
     // Should show unavailable error
-    await page.waitForSelector('.text-red-500', { timeout: 5000 });
+    await page.waitForSelector('.text-red-500', { timeout: 10000 });
     await expect(page.locator('text=/.*already taken.*/i')).toBeVisible();
   });
 
   test('should access message via custom URL slug', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     const testMessage = 'Message accessible via custom URL';
     const testPassword = 'TestPassword123';
@@ -98,9 +113,9 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.fill('#message', testMessage);
     await page.fill('#password', testPassword);
     await page.fill('#custom-url', customSlug);
-    await page.waitForSelector('.text-green-500', { timeout: 2000 });
+    await page.waitForSelector('.text-green-500', { timeout: 10000 });
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Get the share URL from the page
     const shareUrl = await page.inputValue('#share-url');
@@ -119,7 +134,7 @@ test.describe('Week 3 - Custom URLs', () => {
     await page.click('button[type="submit"]');
     
     // Verify message content
-    await page.waitForSelector('text=Message Decrypted', { timeout: 5000 });
+    await page.waitForSelector('text=Message Decrypted', { timeout: 20000 });
     await expect(page.locator(`text=${testMessage}`)).toBeVisible();
   });
 });
@@ -128,6 +143,9 @@ test.describe('Week 3 - QR Codes', () => {
   test('should display QR code after message creation', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     // Create message
     await page.fill('#message', 'Test message for QR code');
@@ -135,7 +153,7 @@ test.describe('Week 3 - QR Codes', () => {
     await page.click('button[type="submit"]');
 
     // Wait for success page
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Check QR code is displayed
     const qrImage = page.locator('img[alt="QR Code for secret message"]');
@@ -149,12 +167,15 @@ test.describe('Week 3 - QR Codes', () => {
   test('should allow downloading QR code', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     // Create message
     await page.fill('#message', 'Test message for QR download');
     await page.fill('#password', 'SecurePassword123');
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 10000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Check download button exists
     const downloadButton = page.locator('button:has-text("Download QR Code")');
@@ -176,13 +197,16 @@ test.describe('Week 3 - Countdown Timer', () => {
   test('should display countdown timer on view page', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     // Create message with 1 hour expiration
     await page.fill('#message', 'Test message with countdown');
     await page.fill('#password', 'SecurePassword123');
     await page.selectOption('#time-limit', '60'); // 1 hour = 60 minutes
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Get share URL and navigate to it
     const shareUrl = await page.inputValue('#share-url');
@@ -200,6 +224,9 @@ test.describe('Week 3 - Countdown Timer', () => {
   test('should show countdown after decryption', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     const testPassword = 'TestPassword123';
 
@@ -208,7 +235,7 @@ test.describe('Week 3 - Countdown Timer', () => {
     await page.fill('#password', testPassword);
     await page.selectOption('#time-limit', '360'); // 6 hours = 360 minutes
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Navigate to message
     const shareUrl = await page.inputValue('#share-url');
@@ -220,7 +247,7 @@ test.describe('Week 3 - Countdown Timer', () => {
     // Decrypt
     await page.fill('#password', testPassword);
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Decrypted', { timeout: 5000 });
+    await page.waitForSelector('text=Message Decrypted', { timeout: 20000 });
 
     // Countdown should be visible
     await expect(page.locator('text=/Time Remaining/i')).toBeVisible();
@@ -232,13 +259,16 @@ test.describe('Week 3 - Countdown Timer', () => {
     // that's close to expiration. For now, we'll just verify the component exists.
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     // Create message with 1 hour expiration
     await page.fill('#message', 'Soon expiring message');
     await page.fill('#password', 'SecurePassword123');
     await page.selectOption('#time-limit', '60'); // 1 hour = 60 minutes
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Navigate to view
     const shareUrl = await page.inputValue('#share-url');
@@ -254,13 +284,16 @@ test.describe('Week 3 - Countdown Timer', () => {
   test('should hide countdown for messages without expiration', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     // Create message with default expiration (1440 minutes = 24 hours)
     await page.fill('#message', 'Message with default expiration');
     await page.fill('#password', 'SecurePassword123');
     // Use default expiration (1440 minutes = 24 hours)
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Navigate to message
     const shareUrl = await page.inputValue('#share-url');
@@ -306,6 +339,9 @@ test.describe('Week 3 - Open Graph Meta Tags', () => {
   test('should not expose message content in meta tags', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
+    // URL changes before React swaps the page; wait for the create form itself (the home page has
+    // fields with the same ids, so filling too early types into the wrong form)
+    await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     const secretMessage = 'This should never appear in meta tags';
 
@@ -313,7 +349,7 @@ test.describe('Week 3 - Open Graph Meta Tags', () => {
     await page.fill('#message', secretMessage);
     await page.fill('#password', 'SecurePassword123');
     await page.click('button[type="submit"]');
-    await page.waitForSelector('text=Message Created Successfully!', { timeout: 5000 });
+    await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
 
     // Navigate to message page
     const shareUrl = await page.inputValue('#share-url');

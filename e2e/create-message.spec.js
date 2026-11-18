@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 test.beforeEach(async ({ page }) => {
   // Disable onboarding modal for E2E tests
@@ -109,7 +109,10 @@ test.describe('Message Creation', () => {
 
   test('should copy share URL to clipboard', async ({ page, context, browserName }) => {
     // Grant clipboard permissions
-    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    // Only Chromium supports the clipboard-read permission
+    if (browserName === 'chromium') {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    }
 
     await page.goto('/');
 
