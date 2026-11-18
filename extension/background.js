@@ -31,16 +31,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const url = request.url || 'https://noteburner.work/create';
     chrome.tabs.create({ url });
   }
-
-  if (request.action === 'showNotification') {
-    // Show browser notification
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: request.title || 'NoteBurner',
-      message: request.message
-    });
-  }
 });
 
 // Listen for extension icon clicks
