@@ -1,9 +1,11 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
 import { sha256hex } from '../utils/password.js';
+import { hashCreatorToken } from '../utils/creatorToken.js';
 import { readCountry } from '../utils/geo.js';
 import { validateSlug, sanitizeSlug, isSlugAvailable } from '../utils/slugValidation.js';
 import { limitOrUnlimited, flag, validIvOrSalt, MAX_ENCRYPTED_CHARS } from '../utils/messageOptions.js';
+import { bumpTeamStat } from '../utils/teamStats.js';
 
 const router = new Hono();
 
@@ -89,7 +91,7 @@ router.get('/messages', async (c) => {
 
   let query = `
     SELECT token, created_at, expires_at, view_count, max_views, 
-           custom_slug, team_id, user_id, creator_token
+           custom_slug, team_id, user_id
     FROM messages 
     WHERE user_id = ?
   `;
@@ -214,7 +216,7 @@ router.post('/messages', async (c) => {
       finalSlug,
       userId,
       teamId ? String(teamId) : null,
-      creatorToken,
+      await hashCreatorToken(creatorToken),
       maxViews,
       maxPasswordAttempts,
       requireGeoMatch,
@@ -232,9 +234,11 @@ router.post('/messages', async (c) => {
 
   // Log creation in audit log
   await c.env.DB.prepare(`
-    INSERT INTO audit_logs (message_id, event_type, country, success, metadata)
-    VALUES (?, 'created', ?, 1, ?)
-  `).bind(token, creatorCountry, JSON.stringify({ via: 'api', user_id: userId })).run();
+    INSERT INTO audit_logs (message_id, event_type, country, success, metadata, team_id)
+    VALUES (?, 'created', ?, 1, ?, ?)
+  `).bind(token, creatorCountry, JSON.stringify({ via: 'api', user_id: userId }), teamId ? String(teamId) : null).run();
+
+  await bumpTeamStat(c.env.DB, teamId, 'messages_created');
 
   const frontendUrl = c.env.FRONTEND_URL || 'https://noteburner.work';
   const messageUrl = finalSlug
@@ -260,7 +264,7 @@ router.get('/messages/:id', async (c) => {
 
   const message = await c.env.DB.prepare(`
     SELECT token, created_at, expires_at, view_count, max_views,
-           custom_slug, team_id, creator_token, accessed
+           custom_slug, team_id, accessed
     FROM messages 
     WHERE token = ? AND user_id = ?
   `).bind(messageId, userId).first();
@@ -281,7 +285,7 @@ router.delete('/messages/:id', async (c) => {
   const messageId = c.req.param('id');
 
   const message = await c.env.DB.prepare(`
-    SELECT token FROM messages WHERE token = ? AND user_id = ?
+    SELECT token, team_id FROM messages WHERE token = ? AND user_id = ?
   `).bind(messageId, userId).first();
 
   if (!message) {
@@ -294,9 +298,11 @@ router.delete('/messages/:id', async (c) => {
 
   // Log the burn
   await c.env.DB.prepare(`
-    INSERT INTO audit_logs (message_id, event_type, success, metadata)
-    VALUES (?, 'burned', 1, ?)
-  `).bind(messageId, JSON.stringify({ via: 'api', user_id: userId })).run();
+    INSERT INTO audit_logs (message_id, event_type, success, metadata, team_id)
+    VALUES (?, 'burned', 1, ?, ?)
+  `).bind(messageId, JSON.stringify({ via: 'api', user_id: userId }), message.team_id || null).run();
+
+  await bumpTeamStat(c.env.DB, message.team_id, 'messages_burned');
 
   return c.json({ success: true, message: 'Message deleted' });
 });

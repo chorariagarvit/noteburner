@@ -148,11 +148,11 @@ router.get('/:teamId/export/audit-logs', requireAuth, async (c) => {
 
   // Get audit logs for team messages
   let query = `
-    SELECT al.*, tm.team_id, m.custom_slug
+    SELECT al.id, al.message_id, al.event_type, al.country, al.timestamp, al.success, al.metadata,
+           al.team_id, m.custom_slug
     FROM audit_logs al
-    JOIN team_messages tm ON al.message_id = tm.message_id
-    LEFT JOIN messages m ON al.message_id = m.id
-    WHERE tm.team_id = ?
+    LEFT JOIN messages m ON al.message_id = m.token
+    WHERE al.team_id = ?
   `;
   const params = [teamId];
 
@@ -220,7 +220,6 @@ router.get('/:teamId/export/messages', requireAuth, async (c) => {
   const messages = await c.env.DB.prepare(`
     SELECT 
       m.id,
-      m.token,
       m.created_at,
       m.expires_at,
       m.accessed_at,
@@ -228,22 +227,20 @@ router.get('/:teamId/export/messages', requireAuth, async (c) => {
       m.max_views,
       m.custom_slug,
       m.created_via,
-      tm.created_by,
+      m.user_id as created_by,
       LENGTH(m.encrypted_data) as content_length
     FROM messages m
-    JOIN team_messages tm ON m.id = tm.message_id
-    WHERE tm.team_id = ?
+    WHERE m.team_id = ?
     ORDER BY m.created_at DESC
     LIMIT 50000
   `).bind(teamId).all();
 
   if (format === 'csv') {
-    const csvLines = ['ID,Token,Created,Expires,Accessed,Views,Max Views,Slug,Created Via,Content Length'];
+    const csvLines = ['ID,Created,Expires,Accessed,Views,Max Views,Slug,Created Via,Content Length'];
     
     for (const msg of (messages.results || [])) {
       csvLines.push([
         msg.id,
-        msg.token,
         msg.created_at,
         msg.expires_at,
         msg.accessed_at || '',
@@ -315,6 +312,7 @@ router.post('/:teamId/gdpr/delete-all', requireAuth, async (c) => {
     await c.env.DB.prepare(`DELETE FROM audit_logs WHERE message_id IN (${ph})`).bind(...chunk).run();
     await c.env.DB.prepare(`DELETE FROM messages WHERE token IN (${ph})`).bind(...chunk).run();
   }
+  await c.env.DB.prepare(`DELETE FROM audit_logs WHERE team_id = ?`).bind(teamId).run();
   await c.env.DB.prepare(`DELETE FROM teams WHERE id = ?`).bind(teamId).run();
 
   return c.json({ 
@@ -352,20 +350,26 @@ router.get('/:teamId/report', requireAuth, async (c) => {
   const messageStats = await c.env.DB.prepare(`
     SELECT 
       COUNT(*) as total_messages,
-      COUNT(CASE WHEN accessed_at IS NOT NULL THEN 1 END) as accessed_messages,
-      COUNT(CASE WHEN view_count >= max_views THEN 1 END) as fully_viewed,
-      COUNT(CASE WHEN expires_at < datetime('now') THEN 1 END) as expired_messages
-    FROM messages m
-    JOIN team_messages tm ON m.id = tm.message_id
-    WHERE tm.team_id = ?
+      COUNT(CASE WHEN view_count > 0 THEN 1 END) as accessed_messages,
+      COUNT(CASE WHEN max_views > 0 AND view_count >= max_views THEN 1 END) as fully_viewed,
+      COUNT(CASE WHEN expires_at IS NOT NULL AND expires_at < ? THEN 1 END) as expired_messages
+    FROM messages
+    WHERE team_id = ?
+  `).bind(Date.now(), teamId).first();
+
+  // Lifetime activity from the daily counters (burned messages no longer have a row)
+  const lifetime = await c.env.DB.prepare(`
+    SELECT COALESCE(SUM(messages_created), 0) AS created,
+           COALESCE(SUM(messages_viewed), 0) AS viewed,
+           COALESCE(SUM(messages_burned), 0) AS burned
+    FROM team_stats WHERE team_id = ?
   `).bind(teamId).first();
 
   // Get audit log count
   const { audit_count } = await c.env.DB.prepare(`
     SELECT COUNT(*) as audit_count
-    FROM audit_logs al
-    JOIN team_messages tm ON al.message_id = tm.message_id
-    WHERE tm.team_id = ?
+    FROM audit_logs
+    WHERE team_id = ?
   `).bind(teamId).first();
 
   // Get member count
@@ -384,6 +388,9 @@ router.get('/:teamId/report', requireAuth, async (c) => {
       compliance_settings: settings,
       statistics: {
         ...messageStats,
+        lifetime_created: lifetime.created,
+        lifetime_viewed: lifetime.viewed,
+        lifetime_burned: lifetime.burned,
         audit_log_entries: audit_count,
         team_members: member_count
       },
