@@ -241,7 +241,6 @@ zip -r noteburner-extension.zip . -x "*.git*" -x "node_modules/*" -x "generate-i
 - manifest.json
 - popup.html, popup.css, popup.js
 - background.js
-- content.js
 - crypto.js
 - icons/ (all PNG files)
 - PRIVACY.md

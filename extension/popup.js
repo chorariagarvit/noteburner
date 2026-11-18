@@ -44,22 +44,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab && tab.id) {
-      chrome.tabs.sendMessage(tab.id, { action: 'getSelection' }, (response) => {
-        // Check for errors (e.g., content script not loaded)
-        if (chrome.runtime.lastError) {
-          console.log('Content script not ready:', chrome.runtime.lastError.message);
-          return;
-        }
-        
-        if (response && response.text && response.text.trim()) {
-          selectedPreview.textContent = response.text;
-          selectedTextSection.classList.remove('hidden');
-          messageInput.value = response.text;
-        }
+      // Read the selection only now, from the tab the user is on (activeTab grants this
+      // for the click that opened the popup). Nothing runs on pages the user does not use us on.
+      const [injection] = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => String(window.getSelection() || '')
       });
+      const text = injection && injection.result;
+      if (text && text.trim()) {
+        selectedPreview.textContent = text;
+        selectedTextSection.classList.remove('hidden');
+        messageInput.value = text;
+      }
     }
   } catch (error) {
-    console.log('Could not get selected text:', error);
+    console.log('No selection available on this page:', error && error.message); // chrome:// pages, the web store, etc.
   }
 });
 
