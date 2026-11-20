@@ -280,9 +280,9 @@ Every `/api/*` request must carry a user session, an API key, or a signed app to
 
 ```bash
 cd backend
-openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET --env production
-openssl rand -hex 32 | wrangler secret put TOTP_ENCRYPTION_KEY --env production   # encrypts 2FA secrets at rest
-wrangler secret put SLACK_SIGNING_SECRET --env production   # only if using Slack
+openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET
+openssl rand -hex 32 | wrangler secret put TOTP_ENCRYPTION_KEY   # encrypts 2FA secrets at rest
+wrangler secret put SLACK_SIGNING_SECRET   # only if using Slack
 ```
 
 Set `TOTP_ENCRYPTION_KEY` **before** deploying and never change it afterwards (messages sealed with the old key would stop verifying). Without it, new 2FA secrets are stored in plain text (and any already-encrypted ones can't be read), so set it before the first deploy of this version. Apply migrations through `0014` before the new Worker goes live.
@@ -300,7 +300,7 @@ These use the visitor country Cloudflare resolves at the edge (IP Geolocation is
 - **Human check on the anonymous token endpoint (Cloudflare Turnstile).** Create a Turnstile widget in the Cloudflare dashboard (hostname `noteburner.work`), then:
   ```bash
   cd backend
-  wrangler secret put TURNSTILE_SECRET_KEY --env production
+  wrangler secret put TURNSTILE_SECRET_KEY
   ```
-  and add the public site key to `[env.production.vars]` as `TURNSTILE_SITE_KEY`. Nothing else to configure: the API tells the web app when a challenge is needed. Leave both unset to keep it off (local dev and CI do). The browser extension cannot run the widget; when a check is required it opens noteburner.work with the text prefilled.
+  and add the public site key to `[vars]` in `backend/wrangler.toml` as `TURNSTILE_SITE_KEY`. Nothing else to configure: the API tells the web app when a challenge is needed. Leave both unset to keep it off (local dev and CI do). The browser extension cannot run the widget; when a check is required it opens noteburner.work with the text prefilled.
 - **CSP check.** `npm run test:csp` loads the production build with the headers from `frontend/public/_headers` and fails on any violation. Run it after changing the policy, adding a third-party script, or a dependency that uses workers/inline scripts.

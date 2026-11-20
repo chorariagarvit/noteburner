@@ -133,7 +133,7 @@ The Vite dev server proxies `/api/*` → `http://localhost:8787`. `API_BASE` is 
 ## Deploying
 
 Deploy is manual. Order matters because the frontend now depends on new endpoints:
-1. `openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET --env production` (once)
+1. `openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET` (once)
 2. `npm run d1:migrations:apply` (from `backend/`)
 3. `npm run deploy:backend`, then `npm run deploy:frontend` / push `main`
 4. Smoke test: create a message, open the link, decrypt, confirm it's gone.

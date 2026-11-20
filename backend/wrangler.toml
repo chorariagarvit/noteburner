@@ -54,45 +54,21 @@ MAX_MESSAGE_SIZE = "10485760"  # 10MB
 MAX_FILE_SIZE = "2147483648"   # 2GB (uses chunked uploads for files >100MB)
 RATE_LIMIT_REQUESTS = "10"
 RATE_LIMIT_WINDOW = "60"       # seconds
+ENVIRONMENT = "production"     # the top-level config IS production; `npm run dev` overrides it with --var ENVIRONMENT:development
 
 # Scheduled cleanup job (runs every hour)
 [triggers]
 crons = ["0 * * * *"]
 
-# Environment-specific overrides
-[env.production]
-name = "noteburner-api"
-
-[env.production.vars]
-FRONTEND_URL = "https://noteburner.work"
-ENVIRONMENT = "production"
-# Set secrets via: wrangler secret put TOTP_ENCRYPTION_KEY --env production   # `openssl rand -hex 32`; encrypts 2FA secrets at rest (they stay plaintext without it)
-# REQUIRED secrets (API refuses anonymous traffic without APP_TOKEN_SECRET):
-#   wrangler secret put APP_TOKEN_SECRET --env production   # e.g. `openssl rand -hex 32`
-#   wrangler secret put SLACK_SIGNING_SECRET --env production  # only if using the Slack integration
-# OPTIONAL human check (Cloudflare Turnstile) on the anonymous token endpoint. Off unless the secret is set:
-#   wrangler secret put TURNSTILE_SECRET_KEY --env production   # from the Turnstile widget in the dashboard
-#   and add the widget's PUBLIC site key as a var:  TURNSTILE_SITE_KEY = "0x4AAAAAA..."  (under [env.production.vars])
-# The Durable Object RATE_LIMITER above needs no secret; its migration is applied by `wrangler deploy`.
-
-[env.development]
-name = "noteburner-api-dev"
-
-[env.development.vars]
-ENVIRONMENT = "development"
-
-[[ env.production.durable_objects.bindings ]]
-name = "RATE_LIMITER"
-class_name = "RateLimiter"
-
-[[ env.production.migrations ]]
-tag = "v1"
-new_sqlite_classes = ["RateLimiter"]
-
-[[ env.development.durable_objects.bindings ]]
-name = "RATE_LIMITER"
-class_name = "RateLimiter"
-
-[[ env.development.migrations ]]
-tag = "v1"
-new_sqlite_classes = ["RateLimiter"]
+# There are deliberately NO [env.*] blocks. Wrangler does not inherit bindings (D1, KV, R2, Durable
+# Objects, routes, cron) into environments, so a separate "production" environment silently deploys a
+# Worker without them. Deploy with plain `wrangler deploy` / `npm run deploy` and manage secrets without --env.
+#
+# Secrets (wrangler secret put <NAME>):
+#   APP_TOKEN_SECRET     REQUIRED: the API refuses anonymous traffic without it (`openssl rand -hex 32`)
+#   TOTP_ENCRYPTION_KEY  encrypts 2FA secrets at rest (`openssl rand -hex 32`); set once, never change
+#   STRIPE_WEBHOOK_SECRET        only for the billing webhook
+#   SLACK_SIGNING_SECRET         only if using the Slack integration
+#   TURNSTILE_SECRET_KEY         OPTIONAL human check on the anonymous token endpoint; also add the widget's
+#                                PUBLIC key as a var above:  TURNSTILE_SITE_KEY = "0x4AAAAAA..."
+# The Durable Object RATE_LIMITER needs no secret; its migration is applied by `wrangler deploy`.
