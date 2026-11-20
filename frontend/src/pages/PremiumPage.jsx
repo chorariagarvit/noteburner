@@ -130,7 +130,6 @@ export default function PremiumPage() {
 
   const currentPlanId = status?.subscription?.plan_id || 'free';
   const meta = PLAN_META[currentPlanId] || PLAN_META.free;
-  const PlanIcon = meta.icon;
   const isActive = status?.subscription?.status === 'active';
   const isPremiumOrLifetime = currentPlanId !== 'free' && isActive;
 
@@ -161,74 +160,15 @@ export default function PremiumPage() {
           </div>
         )}
 
-        {/* Current plan card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Your Subscription</h1>
-
-          <div className="flex items-center gap-4 mb-6">
-            <div className={`p-3 rounded-xl ${
-              currentPlanId === 'premium' ? 'bg-amber-100 dark:bg-amber-900/30' :
-              currentPlanId === 'lifetime' ? 'bg-purple-100 dark:bg-purple-900/30' :
-              'bg-gray-100 dark:bg-gray-700'
-            }`}>
-              <PlanIcon className={`w-7 h-7 ${
-                currentPlanId === 'premium' ? 'text-amber-600' :
-                currentPlanId === 'lifetime' ? 'text-purple-600' :
-                'text-gray-600 dark:text-gray-400'
-              }`} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-gray-900 dark:text-white">{meta.label}</span>
-                {isActive && currentPlanId !== 'free' && (
-                  <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">
-                    Active
-                  </span>
-                )}
-              </div>
-              {status?.subscription?.expires_at && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {currentPlanId === 'lifetime' ? 'Never expires' : `Renews ${new Date(status.subscription.expires_at).toLocaleDateString()}`}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Plan limits */}
-          {status?.plan && (
-            <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-6 text-center">
-              <div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  {status.plan.file_size_limit >= 1073741824 ? '1GB' : '100MB'}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">File limit</div>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  {status.plan.custom_urls_limit === -1 ? '∞' : status.plan.custom_urls_limit}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Custom URLs</div>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  {status.plan.api_calls_limit === -1 ? '∞' : (status.plan.api_calls_limit / 1000).toFixed(0) + 'k'}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">API calls/day</div>
-              </div>
-            </div>
-          )}
-
-          {/* Cancel button */}
-          {isPremiumOrLifetime && currentPlanId !== 'lifetime' && (
-            <button
-              onClick={handleCancel}
-              disabled={canceling}
-              className="text-sm text-gray-500 hover:text-red-500 transition-colors disabled:opacity-50"
-            >
-              {canceling ? 'Cancelling…' : 'Cancel subscription'}
-            </button>
-          )}
-        </div>
+        <CurrentPlanCard
+          currentPlanId={currentPlanId}
+          meta={meta}
+          status={status}
+          isActive={isActive}
+          showCancel={isPremiumOrLifetime && currentPlanId !== 'lifetime'}
+          canceling={canceling}
+          onCancel={handleCancel}
+        />
 
         {/* Usage card */}
         {usage && (
@@ -260,74 +200,158 @@ export default function PremiumPage() {
 
         {/* Upgrade section — only shown for free users */}
         {!isPremiumOrLifetime && (
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200 dark:border-amber-700 p-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Upgrade to Premium</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Unlock 1GB uploads, unlimited custom URLs, and priority support.
-            </p>
-
-            {/* Payment method */}
-            <div className="mb-6">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Payment method</p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setPayMethod('stripe')}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
-                    payMethod === 'stripe'
-                      ? 'bg-amber-500 border-amber-500 text-white'
-                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  Card (Stripe)
-                </button>
-                <button
-                  onClick={() => setPayMethod('crypto')}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
-                    payMethod === 'crypto'
-                      ? 'bg-orange-500 border-orange-500 text-white'
-                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <Bitcoin className="w-4 h-4" />
-                  Crypto
-                </button>
-              </div>
-            </div>
-
-            {payMethod === 'crypto' && (
-              <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-700">
-                <p className="text-sm text-orange-800 dark:text-orange-300 font-medium mb-1">Crypto payments coming soon!</p>
-                <p className="text-xs text-orange-700 dark:text-orange-400">
-                  Bitcoin and Ethereum payments are in development. Use Stripe for now.
-                </p>
-              </div>
-            )}
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <button
-                onClick={() => handleSubscribe(planParam === 'lifetime' ? 'lifetime' : 'premium')}
-                disabled={subscribing || payMethod === 'crypto'}
-                className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-colors"
-              >
-                {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                {subscribing ? 'Processing…' : 'Subscribe — $5/month'}
-              </button>
-              <button
-                onClick={() => handleSubscribe('lifetime')}
-                disabled={subscribing || payMethod === 'crypto'}
-                className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-colors"
-              >
-                {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
-                {subscribing ? 'Processing…' : 'Lifetime — $49'}
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
-              Secure payment via Stripe. Cancel anytime. See our <Link to="/pricing" className="underline hover:text-amber-500">pricing page</Link> for details.
-            </p>
-          </div>
+          <UpgradeSection
+            payMethod={payMethod}
+            onPayMethodChange={setPayMethod}
+            subscribing={subscribing}
+            planParam={planParam}
+            onSubscribe={handleSubscribe}
+          />
         )}
       </div>
+    </div>
+  );
+}
+
+const PLAN_STYLES = {
+  free: { badge: 'bg-gray-100 dark:bg-gray-700', icon: 'text-gray-600 dark:text-gray-400' },
+  premium: { badge: 'bg-amber-100 dark:bg-amber-900/30', icon: 'text-amber-600' },
+  lifetime: { badge: 'bg-purple-100 dark:bg-purple-900/30', icon: 'text-purple-600' }
+};
+
+function CurrentPlanCard({ currentPlanId, meta, status, isActive, showCancel, canceling, onCancel }) {
+  const PlanIcon = meta.icon;
+  const planStyle = PLAN_STYLES[currentPlanId] || PLAN_STYLES.free;
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Your Subscription</h1>
+
+      <div className="flex items-center gap-4 mb-6">
+        <div className={`p-3 rounded-xl ${planStyle.badge}`}>
+          <PlanIcon className={`w-7 h-7 ${planStyle.icon}`} />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold text-gray-900 dark:text-white">{meta.label}</span>
+            {isActive && currentPlanId !== 'free' && (
+              <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">
+                Active
+              </span>
+            )}
+          </div>
+          {status?.subscription?.expires_at && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {currentPlanId === 'lifetime' ? 'Never expires' : `Renews ${new Date(status.subscription.expires_at).toLocaleDateString()}`}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Plan limits */}
+      {status?.plan && (
+        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl mb-6 text-center">
+          <div>
+            <div className="text-lg font-bold text-gray-900 dark:text-white">
+              {status.plan.file_size_limit >= 1073741824 ? '1GB' : '100MB'}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">File limit</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-gray-900 dark:text-white">
+              {status.plan.custom_urls_limit === -1 ? '∞' : status.plan.custom_urls_limit}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Custom URLs</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold text-gray-900 dark:text-white">
+              {status.plan.api_calls_limit === -1 ? '∞' : (status.plan.api_calls_limit / 1000).toFixed(0) + 'k'}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">API calls/day</div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel button */}
+      {showCancel && (
+        <button
+          onClick={onCancel}
+          disabled={canceling}
+          className="text-sm text-gray-500 hover:text-red-500 transition-colors disabled:opacity-50"
+        >
+          {canceling ? 'Cancelling…' : 'Cancel subscription'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function UpgradeSection({ payMethod, onPayMethodChange, subscribing, planParam, onSubscribe }) {
+  return (
+    <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200 dark:border-amber-700 p-6">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Upgrade to Premium</h2>
+      <p className="text-gray-600 dark:text-gray-400 mb-6">
+        Unlock 1GB uploads, unlimited custom URLs, and priority support.
+      </p>
+
+      {/* Payment method */}
+      <div className="mb-6">
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Payment method</p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => onPayMethodChange('stripe')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+              payMethod === 'stripe'
+                ? 'bg-amber-500 border-amber-500 text-white'
+                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            <CreditCard className="w-4 h-4" />
+            Card (Stripe)
+          </button>
+          <button
+            onClick={() => onPayMethodChange('crypto')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+              payMethod === 'crypto'
+                ? 'bg-orange-500 border-orange-500 text-white'
+                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            <Bitcoin className="w-4 h-4" />
+            Crypto
+          </button>
+        </div>
+      </div>
+
+      {payMethod === 'crypto' && (
+        <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-700">
+          <p className="text-sm text-orange-800 dark:text-orange-300 font-medium mb-1">Crypto payments coming soon!</p>
+          <p className="text-xs text-orange-700 dark:text-orange-400">
+            Bitcoin and Ethereum payments are in development. Use Stripe for now.
+          </p>
+        </div>
+      )}
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <button
+          onClick={() => onSubscribe(planParam === 'lifetime' ? 'lifetime' : 'premium')}
+          disabled={subscribing || payMethod === 'crypto'}
+          className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-colors"
+        >
+          {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+          {subscribing ? 'Processing…' : 'Subscribe — $5/month'}
+        </button>
+        <button
+          onClick={() => onSubscribe('lifetime')}
+          disabled={subscribing || payMethod === 'crypto'}
+          className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-colors"
+        >
+          {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+          {subscribing ? 'Processing…' : 'Lifetime — $49'}
+        </button>
+      </div>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
+        Secure payment via Stripe. Cancel anytime. See our <Link to="/pricing" className="underline hover:text-amber-500">pricing page</Link> for details.
+      </p>
     </div>
   );
 }

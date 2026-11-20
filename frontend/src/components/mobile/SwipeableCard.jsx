@@ -77,6 +77,15 @@ const SwipeableCard = ({
   );
 };
 
+/** Dominant swipe direction ('left' | 'right' | 'up' | 'down') or null when below the threshold. */
+function resolveSwipeDirection(deltaX, deltaY, threshold) {
+  const horizontal = Math.abs(deltaX) > Math.abs(deltaY);
+  const distance = horizontal ? Math.abs(deltaX) : Math.abs(deltaY);
+  if (distance <= threshold) return null;
+  if (horizontal) return deltaX > 0 ? 'right' : 'left';
+  return deltaY > 0 ? 'down' : 'up';
+}
+
 /**
  * useSwipe Hook - Detect swipe gestures on any element
  */
@@ -114,26 +123,9 @@ export const useSwipe = (callbacks = {}) => {
       // Ignore slow swipes
       if (deltaTime > 500) return;
       
-      // Horizontal swipe
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (Math.abs(deltaX) > threshold) {
-          if (deltaX > 0 && onSwipeRight) {
-            onSwipeRight();
-          } else if (deltaX < 0 && onSwipeLeft) {
-            onSwipeLeft();
-          }
-        }
-      } 
-      // Vertical swipe
-      else {
-        if (Math.abs(deltaY) > threshold) {
-          if (deltaY > 0 && onSwipeDown) {
-            onSwipeDown();
-          } else if (deltaY < 0 && onSwipeUp) {
-            onSwipeUp();
-          }
-        }
-      }
+      const direction = resolveSwipeDirection(deltaX, deltaY, threshold);
+      const callbacks = { right: onSwipeRight, left: onSwipeLeft, down: onSwipeDown, up: onSwipeUp };
+      callbacks[direction]?.();
     }
   };
 

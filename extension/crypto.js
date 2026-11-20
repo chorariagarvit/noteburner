@@ -158,40 +158,43 @@ async function fetchWithTimeout(url, options = {}) {
  * API response: JSON error body, HTML error page, or nothing.
  */
 async function describeApiError(response, fallback) {
-  let serverMessage = '';
-  let code = '';
+  const { serverMessage, code } = await readErrorBody(response);
+  const retryAfter = Number(response.headers.get('retry-after'));
+  return { message: statusMessage(response.status, code, serverMessage, retryAfter, fallback), code };
+}
+
+/** Pull `error` / `code` out of a JSON error body; empty strings for anything else. */
+async function readErrorBody(response) {
   try {
     const type = response.headers.get('content-type') || '';
     if (type.includes('application/json')) {
       const body = JSON.parse(await response.text());
-      serverMessage = body && typeof body.error === 'string' ? body.error : '';
-      code = body && typeof body.code === 'string' ? body.code : '';
+      return {
+        serverMessage: body && typeof body.error === 'string' ? body.error : '',
+        code: body && typeof body.code === 'string' ? body.code : ''
+      };
     }
   } catch (e) {
     // fall through to the status-based messages
   }
+  return { serverMessage: '', code: '' };
+}
 
-  const retryAfter = Number(response.headers.get('retry-after'));
-  let message;
-  if (response.status === 403 && code === 'CHALLENGE_REQUIRED') {
+function statusMessage(status, code, serverMessage, retryAfter, fallback) {
+  if (status === 403 && code === 'CHALLENGE_REQUIRED') {
     // Cloudflare Turnstile cannot run inside an extension: the popup hands off to the website
-    message = 'NoteBurner needs a quick human check. Opening noteburner.work so you can finish there.';
-  } else if (response.status === 429) {
-    message = retryAfter > 0
+    return 'NoteBurner needs a quick human check. Opening noteburner.work so you can finish there.';
+  }
+  if (status === 429) {
+    return retryAfter > 0
       ? `Too many requests. Please wait ${retryAfter} second${retryAfter === 1 ? '' : 's'} and try again.`
       : 'Too many requests. Please wait a minute and try again.';
-  } else if (response.status === 413) {
-    message = 'This message is too large to send.';
-  } else if (response.status === 503) {
-    message = 'NoteBurner is temporarily unavailable. Please try again shortly.';
-  } else if (serverMessage) {
-    message = serverMessage;
-  } else if (response.status >= 500) {
-    message = `NoteBurner had a problem (error ${response.status}). Please try again.`;
-  } else {
-    message = `${fallback} (error ${response.status}).`;
   }
-  return { message, code };
+  if (status === 413) return 'This message is too large to send.';
+  if (status === 503) return 'NoteBurner is temporarily unavailable. Please try again shortly.';
+  if (serverMessage) return serverMessage;
+  if (status >= 500) return `NoteBurner had a problem (error ${status}). Please try again.`;
+  return `${fallback} (error ${status}).`;
 }
 
 /** An Error carrying the server's error code so callers (the popup) can react to it. */

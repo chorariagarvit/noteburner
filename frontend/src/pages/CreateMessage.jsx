@@ -17,6 +17,35 @@ import KeyboardShortcutsModal from '../components/keyboard/KeyboardShortcutsModa
 import SelfDestructOptions from '../components/SelfDestructOptions';
 import { useI18n } from '../contexts/I18nContext';
 
+/** Throws an Error with a user-facing message when the form input is unusable. */
+function validateMessageInput(message, password) {
+  if (!message.trim()) {
+    throw new Error('Message cannot be empty');
+  }
+  if (!password) {
+    throw new Error('Password is required');
+  }
+  if (password.length < 8) {
+    throw new Error('Password must be at least 8 characters');
+  }
+}
+
+/** Encrypt and upload each attached file for a just-created message (sequentially, in order). */
+async function uploadEncryptedFiles(files, password, result) {
+  for (const file of files) {
+    const encryptedFile = await encryptFile(file, password);
+    await uploadMedia(
+      encryptedFile.encryptedData,
+      file.name,
+      file.type,
+      encryptedFile.iv,
+      encryptedFile.salt,
+      result.token,
+      result.creatorToken
+    );
+  }
+}
+
 function CreateMessage() {
   const { t } = useI18n();
   const location = useLocation();
@@ -171,17 +200,7 @@ function CreateMessage() {
     setLoading(true);
 
     try {
-      if (!message.trim()) {
-        throw new Error('Message cannot be empty');
-      }
-
-      if (!password) {
-        throw new Error('Password is required');
-      }
-
-      if (password.length < 8) {
-        throw new Error('Password must be at least 8 characters');
-      }
+      validateMessageInput(message, password);
 
       // Encrypt message
       const encrypted = await encryptMessage(message, password);
@@ -226,19 +245,8 @@ function CreateMessage() {
       }
 
       // Upload encrypted files if any (only for non-group messages for now)
-      if (files.length > 0 && !isGroupMessage) {
-        for (const file of files) {
-          const encryptedFile = await encryptFile(file, password);
-          await uploadMedia(
-            encryptedFile.encryptedData,
-            file.name,
-            file.type,
-            encryptedFile.iv,
-            encryptedFile.salt,
-            result.token,
-            result.creatorToken
-          );
-        }
+      if (!isGroupMessage) {
+        await uploadEncryptedFiles(files, password, result);
       }
 
       // Show locking animation

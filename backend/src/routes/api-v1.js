@@ -127,6 +127,23 @@ router.get('/messages', async (c) => {
   });
 });
 
+/** Validate the encrypted payload fields of a create request; returns an error descriptor or null. */
+function validateEncryptionFields({ encryptedData, iv, salt, authTag }) {
+  if (typeof encryptedData !== 'string' || !encryptedData || !iv || !salt) {
+    return { status: 400, error: 'encryptedData, iv, and salt are required', code: 'ENCRYPTION_DATA_REQUIRED' };
+  }
+  if (!validIvOrSalt(iv) || !validIvOrSalt(salt)) {
+    return { status: 400, error: 'iv and salt must be 16 bytes (24 base64 characters)', code: 'INVALID_IV_OR_SALT' };
+  }
+  if (encryptedData.length > MAX_ENCRYPTED_CHARS) {
+    return { status: 413, error: 'Message too large', code: 'MESSAGE_TOO_LARGE' };
+  }
+  if (authTag !== undefined && (typeof authTag !== 'string' || authTag.length < 32 || authTag.length > 128)) {
+    return { status: 400, error: 'Invalid auth tag', code: 'INVALID_AUTH_TAG' };
+  }
+  return null;
+}
+
 /**
  * POST /api/v1/messages
  * Create a new message programmatically
@@ -137,18 +154,8 @@ router.post('/messages', async (c) => {
 
   const { encryptedData, iv, salt, customSlug, teamId, authTag } = body;
 
-  if (typeof encryptedData !== 'string' || !encryptedData || !iv || !salt) {
-    return c.json({ error: 'encryptedData, iv, and salt are required', code: 'ENCRYPTION_DATA_REQUIRED' }, 400);
-  }
-  if (!validIvOrSalt(iv) || !validIvOrSalt(salt)) {
-    return c.json({ error: 'iv and salt must be 16 bytes (24 base64 characters)', code: 'INVALID_IV_OR_SALT' }, 400);
-  }
-  if (encryptedData.length > MAX_ENCRYPTED_CHARS) {
-    return c.json({ error: 'Message too large', code: 'MESSAGE_TOO_LARGE' }, 413);
-  }
-  if (authTag !== undefined && (typeof authTag !== 'string' || authTag.length < 32 || authTag.length > 128)) {
-    return c.json({ error: 'Invalid auth tag', code: 'INVALID_AUTH_TAG' }, 400);
-  }
+  const invalid = validateEncryptionFields(body);
+  if (invalid) return c.json({ error: invalid.error, code: invalid.code }, invalid.status);
 
   // Same bounds as the public endpoint: 1 minute .. 30 days
   const expiresInMinutes = body.expiresInMinutes === undefined ? 1440 : Number(body.expiresInMinutes);

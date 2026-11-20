@@ -50,6 +50,38 @@ router.get('/:teamId', async (c) => {
 });
 
 /**
+ * Translate the request body into SET clauses for an existing branding row.
+ * Returns { updates, params } or { error: { status, message, code } }.
+ */
+function buildBrandingUpdates(body, plan) {
+  const { logo_url, primary_color, secondary_color, custom_favicon, white_label, custom_footer } = body;
+  const updates = [];
+  const params = [];
+  const set = (column, value) => {
+    updates.push(`${column} = ?`);
+    params.push(value);
+  };
+
+  if (logo_url !== undefined) set('logo_url', logo_url || null);
+  if (primary_color) set('primary_color', primary_color);
+  if (secondary_color) set('secondary_color', secondary_color);
+  if (custom_favicon !== undefined) set('custom_favicon', custom_favicon || null);
+  if (white_label !== undefined) {
+    // White label only available for Enterprise
+    if (white_label && plan !== 'enterprise') {
+      return { error: { status: 403, message: 'White label requires Enterprise plan', code: 'UPGRADE_REQUIRED' } };
+    }
+    set('white_label', white_label ? 1 : 0);
+  }
+  if (custom_footer !== undefined) set('custom_footer', custom_footer || null);
+
+  if (updates.length === 0) {
+    return { error: { status: 400, message: 'No updates provided', code: 'NO_UPDATES' } };
+  }
+  return { updates, params };
+}
+
+/**
  * PUT /api/branding/:teamId
  * Update branding configuration (admin only)
  */
@@ -105,43 +137,9 @@ router.put('/:teamId', requireAuth, async (c) => {
 
   if (existing) {
     // Update existing
-    const updates = [];
-    const params = [];
-
-    if (logo_url !== undefined) {
-      updates.push('logo_url = ?');
-      params.push(logo_url || null);
-    }
-    if (primary_color) {
-      updates.push('primary_color = ?');
-      params.push(primary_color);
-    }
-    if (secondary_color) {
-      updates.push('secondary_color = ?');
-      params.push(secondary_color);
-    }
-    if (custom_favicon !== undefined) {
-      updates.push('custom_favicon = ?');
-      params.push(custom_favicon || null);
-    }
-    if (white_label !== undefined) {
-      // White label only available for Enterprise
-      if (white_label && team.plan !== 'enterprise') {
-        return c.json({ 
-          error: 'White label requires Enterprise plan', 
-          code: 'UPGRADE_REQUIRED' 
-        }, 403);
-      }
-      updates.push('white_label = ?');
-      params.push(white_label ? 1 : 0);
-    }
-    if (custom_footer !== undefined) {
-      updates.push('custom_footer = ?');
-      params.push(custom_footer || null);
-    }
-
-    if (updates.length === 0) {
-      return c.json({ error: 'No updates provided', code: 'NO_UPDATES' }, 400);
+    const { updates, params, error } = buildBrandingUpdates(body, team.plan);
+    if (error) {
+      return c.json({ error: error.message, code: error.code }, error.status);
     }
 
     updates.push('updated_at = datetime("now")');

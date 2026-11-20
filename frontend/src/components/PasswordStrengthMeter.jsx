@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../contexts/I18nContext';
 
+const STRENGTH_LEVELS = [
+  { label: 'tooWeak', color: 'bg-red-500', textColor: 'text-red-500' },
+  { label: 'weak', color: 'bg-orange-500', textColor: 'text-orange-500' },
+  { label: 'fair', color: 'bg-yellow-500', textColor: 'text-yellow-500' },
+  { label: 'good', color: 'bg-blue-500', textColor: 'text-blue-500' },
+  { label: 'strong', color: 'bg-green-500', textColor: 'text-green-500' }
+];
+
 /**
  * Password Strength Meter
  * Analyzes password strength and provides visual feedback
@@ -46,22 +54,14 @@ const PasswordStrengthMeter = ({ password, onChange }) => {
     else if (pwd.length >= 8) suggestions.push('suggest12chars');
 
     // Character variety
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) {
-      score++;
-    } else {
-      suggestions.push('suggestMixCase');
-    }
-
-    if (/\d/.test(pwd)) {
-      score++;
-    } else {
-      suggestions.push('suggestNumbers');
-    }
-
-    if (/[^a-zA-Z0-9]/.test(pwd)) {
-      score++;
-    } else {
-      suggestions.push('suggestSpecial');
+    const varietyChecks = [
+      [/[a-z]/.test(pwd) && /[A-Z]/.test(pwd), 'suggestMixCase'],
+      [/\d/.test(pwd), 'suggestNumbers'],
+      [/[^a-zA-Z0-9]/.test(pwd), 'suggestSpecial']
+    ];
+    for (const [passed, suggestion] of varietyChecks) {
+      if (passed) score++;
+      else suggestions.push(suggestion);
     }
 
     // Check for common patterns
@@ -86,28 +86,7 @@ const PasswordStrengthMeter = ({ password, onChange }) => {
     }
 
     // Determine label and color
-    let label, color, textColor;
-    if (score <= 1) {
-      label = 'tooWeak';
-      color = 'bg-red-500';
-      textColor = 'text-red-500';
-    } else if (score === 2) {
-      label = 'weak';
-      color = 'bg-orange-500';
-      textColor = 'text-orange-500';
-    } else if (score === 3) {
-      label = 'fair';
-      color = 'bg-yellow-500';
-      textColor = 'text-yellow-500';
-    } else if (score === 4) {
-      label = 'good';
-      color = 'bg-blue-500';
-      textColor = 'text-blue-500';
-    } else {
-      label = 'strong';
-      color = 'bg-green-500';
-      textColor = 'text-green-500';
-    }
+    const { label, color, textColor } = STRENGTH_LEVELS[Math.min(Math.max(score, 1), 5) - 1];
 
     return { score, label, color, textColor, suggestions, entropy };
   };

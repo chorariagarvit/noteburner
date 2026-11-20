@@ -1,6 +1,49 @@
 import React, { useRef, useState } from 'react';
 import { Camera, Video, X, Check, RotateCw } from 'lucide-react';
 
+/** Shown when camera permission is denied. */
+const CameraError = ({ message, onClose }) => (
+  <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+    <Camera className="w-16 h-16 text-red-500 mb-4" />
+    <p className="text-white text-lg mb-4">{message}</p>
+    <button
+      onClick={onClose}
+      className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold"
+    >
+      Close
+    </button>
+  </div>
+);
+
+/** Review the captured photo/video before confirming. */
+const CapturePreview = ({ preview, mode, onRetake, onConfirm }) => (
+  <div className="relative w-full h-full flex flex-col">
+    {mode === 'photo' ? (
+      <img src={preview} alt="Preview" className="w-full h-full object-contain" />
+    ) : (
+      <video src={preview} controls className="w-full h-full object-contain" />
+    )}
+
+    <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4">
+      <button
+        onClick={onRetake}
+        className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center"
+        aria-label="Retake"
+      >
+        <RotateCw className="w-6 h-6 text-white" />
+      </button>
+
+      <button
+        onClick={onConfirm}
+        className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center"
+        aria-label="Confirm"
+      >
+        <Check className="w-6 h-6 text-white" />
+      </button>
+    </div>
+  </div>
+);
+
 /**
  * CameraCapture Component - Native camera integration for mobile
  * 
@@ -133,45 +176,11 @@ const CameraCapture = ({ onCapture, onClose, mode = 'photo' }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
-      {error ? (
-        <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-          <Camera className="w-16 h-16 text-red-500 mb-4" />
-          <p className="text-white text-lg mb-4">{error}</p>
-          <button
-            onClick={onClose}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold"
-          >
-            Close
-          </button>
-        </div>
-      ) : preview ? (
-        // Preview mode
-        <div className="relative w-full h-full flex flex-col">
-          {mode === 'photo' ? (
-            <img src={preview} alt="Preview" className="w-full h-full object-contain" />
-          ) : (
-            <video src={preview} controls className="w-full h-full object-contain" />
-          )}
-          
-          <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-4">
-            <button
-              onClick={retake}
-              className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center"
-              aria-label="Retake"
-            >
-              <RotateCw className="w-6 h-6 text-white" />
-            </button>
-            
-            <button
-              onClick={confirmCapture}
-              className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center"
-              aria-label="Confirm"
-            >
-              <Check className="w-6 h-6 text-white" />
-            </button>
-          </div>
-        </div>
-      ) : (
+      {error && <CameraError message={error} onClose={onClose} />}
+      {!error && preview && (
+        <CapturePreview preview={preview} mode={mode} onRetake={retake} onConfirm={confirmCapture} />
+      )}
+      {!error && !preview && (
         // Camera mode
         <div className="relative w-full h-full">
           <video

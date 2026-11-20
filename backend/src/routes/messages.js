@@ -102,6 +102,46 @@ app.get('/check-slug/:slug', rateLimitMiddleware(30, 60), async (c) => {
   }
 });
 
+/** Validate the body of a create-message request; returns { status, error } or null. */
+function validateCreatePayload({ encryptedData, iv, salt, expiresIn, authTag }) {
+  if (typeof encryptedData !== 'string' || typeof iv !== 'string' || typeof salt !== 'string' || !encryptedData || !iv || !salt) {
+    return { status: 400, error: 'Missing required fields' };
+  }
+  if (authTag !== undefined && (typeof authTag !== 'string' || authTag.length < 32 || authTag.length > 128)) {
+    return { status: 400, error: 'Invalid auth tag' };
+  }
+  if (expiresIn !== undefined && expiresIn !== null &&
+      (!Number.isFinite(Number(expiresIn)) || Number(expiresIn) <= 0 || Number(expiresIn) > MAX_EXPIRY_SECONDS)) {
+    return { status: 400, error: 'expiresIn must be between 1 second and 30 days' };
+  }
+  // iv and salt must each be exactly 16 bytes = 24 base64 chars (or 16 raw chars)
+  if (iv.length !== 16 && iv.length !== 24) {
+    return { status: 400, error: 'Invalid iv length' };
+  }
+  if (salt.length !== 16 && salt.length !== 24) {
+    return { status: 400, error: 'Invalid salt length' };
+  }
+  // keep under D1's 2 MB row limit
+  if (encryptedData.length > 1.4 * 1024 * 1024) {
+    return { status: 413, error: 'Message too large' };
+  }
+  return null;
+}
+
+/** Sanitise, validate and check availability of an optional custom slug. */
+async function resolveCustomSlug(db, customSlug) {
+  if (!customSlug?.trim()) return { slug: null };
+  const sanitized = sanitizeSlug(customSlug);
+  const validation = validateSlug(sanitized);
+  if (!validation.valid) {
+    return { status: 400, error: validation.error };
+  }
+  if (!(await isSlugAvailable(db, sanitized))) {
+    return { status: 409, error: 'This custom URL is already taken' };
+  }
+  return { slug: sanitized };
+}
+
 // Create encrypted message
 app.post('/', rateLimitMiddleware(10, 60), async (c) => {
   try {
@@ -120,28 +160,9 @@ app.post('/', rateLimitMiddleware(10, 60), async (c) => {
     const autoBurnOnSuspicious = flag(body.autoBurnOnSuspicious);
     const require2FA = flag(body.require2FA);
 
-    if (typeof encryptedData !== 'string' || typeof iv !== 'string' || typeof salt !== 'string' || !encryptedData || !iv || !salt) {
-      return c.json({ error: 'Missing required fields' }, 400);
-    }
-    if (authTag !== undefined && (typeof authTag !== 'string' || authTag.length < 32 || authTag.length > 128)) {
-      return c.json({ error: 'Invalid auth tag' }, 400);
-    }
-    if (expiresIn !== undefined && expiresIn !== null &&
-        (!Number.isFinite(Number(expiresIn)) || Number(expiresIn) <= 0 || Number(expiresIn) > MAX_EXPIRY_SECONDS)) {
-      return c.json({ error: 'expiresIn must be between 1 second and 30 days' }, 400);
-    }
-
-    // Validate field sizes
-    // iv and salt must each be exactly 16 bytes = 24 base64 chars (or 16 raw chars)
-    if (iv.length !== 16 && iv.length !== 24) {
-      return c.json({ error: 'Invalid iv length' }, 400);
-    }
-    if (salt.length !== 16 && salt.length !== 24) {
-      return c.json({ error: 'Invalid salt length' }, 400);
-    }
-    // encryptedData max 2MB base64
-    if (encryptedData.length > 1.4 * 1024 * 1024) { // keep under D1's 2 MB row limit
-      return c.json({ error: 'Message too large' }, 413);
+    const invalid = validateCreatePayload({ encryptedData, iv, salt, expiresIn, authTag });
+    if (invalid) {
+      return c.json({ error: invalid.error }, invalid.status);
     }
 
     // Generate unique token and creator token
@@ -172,25 +193,11 @@ app.post('/', rateLimitMiddleware(10, 60), async (c) => {
     }
 
     // Handle custom slug if provided
-    let finalSlug = null;
-    if (customSlug?.trim()) {
-      // Sanitize the slug
-      const sanitized = sanitizeSlug(customSlug);
-      
-      // Validate the slug
-      const validation = validateSlug(sanitized);
-      if (!validation.valid) {
-        return c.json({ error: validation.error }, 400);
-      }
-      
-      // Check if slug is available
-      const available = await isSlugAvailable(c.env.DB, sanitized);
-      if (!available) {
-        return c.json({ error: 'This custom URL is already taken' }, 409);
-      }
-      
-      finalSlug = sanitized;
+    const slugResult = await resolveCustomSlug(c.env.DB, customSlug);
+    if (slugResult.error) {
+      return c.json({ error: slugResult.error }, slugResult.status);
     }
+    const finalSlug = slugResult.slug;
 
     // Store in D1 with security options. Two requests can pass the slug-availability check at the same
     // time; the UNIQUE index decides, so answer 409 (not 500) to the loser.
@@ -465,12 +472,8 @@ app.post('/:identifier/verify-totp', async (c) => {
     const kv = c.env.CACHE;
     const clientIp = c.req.header('CF-Connecting-IP') || 'unknown';
     const attemptsKey = `totp_attempts:${identifier}:${clientIp}`;
-    if (kv) {
-      const attempts = await kv.get(attemptsKey);
-      const count = attempts ? parseInt(attempts, 10) : 0;
-      if (count >= 5) {
-        return c.json({ error: 'Too many attempts. Please try again later.' }, 429);
-      }
+    if (kv && (await readAttemptCount(kv, attemptsKey)) >= 5) {
+      return c.json({ error: 'Too many attempts. Please try again later.' }, 429);
     }
 
     // Verify TOTP code
@@ -485,8 +488,7 @@ app.post('/:identifier/verify-totp', async (c) => {
       if (suspicious) return suspicious;
       // Increment attempt counter on failure
       if (kv) {
-        const attempts = await kv.get(attemptsKey);
-        const count = attempts ? parseInt(attempts, 10) : 0;
+        const count = await readAttemptCount(kv, attemptsKey);
         await kv.put(attemptsKey, String(count + 1), { expirationTtl: 300 });
       }
       return c.json({ error: 'Invalid or expired code. Please try again.' }, 401);
@@ -519,44 +521,8 @@ app.delete('/:identifier', async (c) => {
       return c.json({ error: 'Invalid identifier' }, 400);
     }
 
-    // If a creator token is provided, verify it before allowing deletion.
-    // This supports creator-initiated early burns. If not provided, allow
-    // the normal self-destruct flow (recipient burns after decryption).
-    const creatorToken = c.req.header('X-Creator-Token');
-    let isCreator = false;
-    if (creatorToken) {
-      const message = await c.env.DB.prepare(
-        `SELECT creator_token FROM messages WHERE token = ? OR custom_slug = ?`
-      ).bind(identifier, identifier).first();
-
-      if (!message) {
-        return c.json({ error: 'Message not found or already deleted' }, 404);
-      }
-
-      if (!(await matchesCreatorToken(message.creator_token, creatorToken)).ok) {
-        return c.json({ error: 'Invalid creator token', code: 'INVALID_CREATOR_TOKEN' }, 403);
-      }
-      isCreator = true;
-    }
-
-    // 2FA-protected messages can only be burned by the creator or with a valid TOTP proof
-    if (!isCreator) {
-      const protectedMsg = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
-      if (protectedMsg) {
-        const restricted = await denyIfRestricted(c, protectedMsg);
-        if (restricted) return restricted;
-      }
-      if (protectedMsg?.require_2fa === 1 &&
-          !verifyTotpProof(c.req.header('X-TOTP-Proof'), await openSecret(c.env, protectedMsg.totp_secret, protectedMsg.token), identifier)) {
-        return c.json({ error: 'TOTP verification required', code: 'TOTP_REQUIRED' }, 403);
-      }
-      // Burning without being the creator requires proof of the password (auth tag),
-      // so holders of only the link cannot destroy the message.
-      if (protectedMsg) {
-        const authFailure = await enforceAuthTag(c, protectedMsg);
-        if (authFailure) return authFailure;
-      }
-    }
+    const denied = await authorizeBurn(c, identifier);
+    if (denied) return denied;
 
     // Atomically mark as accessed and get message to prevent race condition
     const result = await deleteMessageByIdentifier(c.env.DB, identifier);
@@ -593,26 +559,7 @@ app.delete('/:identifier', async (c) => {
     await incrementStat(c.env.DB, 'messages_burned');
     await bumpTeamStat(c.env.DB, result.team_id, 'messages_burned');
 
-    // DON'T delete media files immediately - allow grace period for large file downloads
-    // Track files in D1 for cleanup after 24 hours (avoids re-uploading large files to R2)
-    let markedMediaCount = 0;
-    if (result.media_files) {
-      const mediaFiles = JSON.parse(result.media_files);
-      const deleteAfter = Date.now() + (24 * 60 * 60 * 1000); // 24 hours from now
-      const markedAt = Date.now();
-
-      for (const fileId of mediaFiles) {
-        try {
-          // Insert into media_cleanup table (lightweight D1 operation)
-          await c.env.DB.prepare(
-            `INSERT OR IGNORE INTO media_cleanup (file_id, delete_after, marked_at) VALUES (?, ?, ?)`
-          ).bind(fileId, deleteAfter, markedAt).run();
-          markedMediaCount++;
-        } catch (err) {
-          console.error('Failed to mark media file:', { fileId, error: err });
-        }
-      }
-    }
+    const markedMediaCount = await markMediaForCleanup(c.env.DB, result.media_files);
 
     console.log('Message deleted:', { token: result.token, identifier, markedMediaCount, messageAge: '24 hours' });
     return c.json({ success: true, markedMedia: markedMediaCount });
@@ -621,5 +568,75 @@ app.delete('/:identifier', async (c) => {
     return c.json({ error: 'Failed to delete message' }, 500);
   }
 });
+
+/** Current failed-attempt count stored in KV under `key` (0 when absent). */
+async function readAttemptCount(kv, key) {
+  const attempts = await kv.get(key);
+  return attempts ? Number.parseInt(attempts, 10) : 0;
+}
+
+/**
+ * Decide whether the caller may burn a message. Returns an error Response, or null when allowed.
+ * Creators prove themselves with X-Creator-Token; everyone else needs the TOTP proof (if 2FA) and auth tag.
+ */
+async function authorizeBurn(c, identifier) {
+  // If a creator token is provided, verify it before allowing deletion.
+  // This supports creator-initiated early burns. If not provided, allow
+  // the normal self-destruct flow (recipient burns after decryption).
+  const creatorToken = c.req.header('X-Creator-Token');
+  if (creatorToken) {
+    const message = await c.env.DB.prepare(
+      `SELECT creator_token FROM messages WHERE token = ? OR custom_slug = ?`
+    ).bind(identifier, identifier).first();
+
+    if (!message) {
+      return c.json({ error: 'Message not found or already deleted' }, 404);
+    }
+    if (!(await matchesCreatorToken(message.creator_token, creatorToken)).ok) {
+      return c.json({ error: 'Invalid creator token', code: 'INVALID_CREATOR_TOKEN' }, 403);
+    }
+    return null;
+  }
+
+  // 2FA-protected messages can only be burned by the creator or with a valid TOTP proof
+  const protectedMsg = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
+  if (!protectedMsg) return null;
+
+  const restricted = await denyIfRestricted(c, protectedMsg);
+  if (restricted) return restricted;
+  if (protectedMsg.require_2fa === 1 &&
+      !verifyTotpProof(c.req.header('X-TOTP-Proof'), await openSecret(c.env, protectedMsg.totp_secret, protectedMsg.token), identifier)) {
+    return c.json({ error: 'TOTP verification required', code: 'TOTP_REQUIRED' }, 403);
+  }
+  // Burning without being the creator requires proof of the password (auth tag),
+  // so holders of only the link cannot destroy the message.
+  return enforceAuthTag(c, protectedMsg);
+}
+
+/**
+ * DON'T delete media files immediately - allow grace period for large file downloads.
+ * Track files in D1 for cleanup after 24 hours (avoids re-uploading large files to R2).
+ * @returns {Promise<number>} number of files marked
+ */
+async function markMediaForCleanup(db, mediaFilesJson) {
+  if (!mediaFilesJson) return 0;
+  const mediaFiles = JSON.parse(mediaFilesJson);
+  const deleteAfter = Date.now() + (24 * 60 * 60 * 1000); // 24 hours from now
+  const markedAt = Date.now();
+  let marked = 0;
+
+  for (const fileId of mediaFiles) {
+    try {
+      // Insert into media_cleanup table (lightweight D1 operation)
+      await db.prepare(
+        `INSERT OR IGNORE INTO media_cleanup (file_id, delete_after, marked_at) VALUES (?, ?, ?)`
+      ).bind(fileId, deleteAfter, markedAt).run();
+      marked++;
+    } catch (err) {
+      console.error('Failed to mark media file:', { fileId, error: err });
+    }
+  }
+  return marked;
+}
 
 export default app;

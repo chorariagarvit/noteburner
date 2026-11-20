@@ -90,30 +90,19 @@ router.put('/:teamId/settings', requireAuth, async (c) => {
 
   const updates = [];
   const params = [];
-
-  if (data_retention_days !== undefined) {
-    updates.push('data_retention_days = ?');
-    params.push(data_retention_days);
-  }
-  if (gdpr_enabled !== undefined) {
-    updates.push('gdpr_enabled = ?');
-    params.push(gdpr_enabled ? 1 : 0);
-  }
-  if (auto_delete_enabled !== undefined) {
-    updates.push('auto_delete_enabled = ?');
-    params.push(auto_delete_enabled ? 1 : 0);
-  }
-  if (audit_log_retention !== undefined) {
-    updates.push('audit_log_retention = ?');
-    params.push(audit_log_retention);
-  }
-  if (require_password !== undefined) {
-    updates.push('require_password = ?');
-    params.push(require_password ? 1 : 0);
-  }
-  if (min_password_strength !== undefined) {
-    updates.push('min_password_strength = ?');
-    params.push(min_password_strength);
+  const fields = [
+    ['data_retention_days', data_retention_days, (v) => v],
+    ['gdpr_enabled', gdpr_enabled, (v) => (v ? 1 : 0)],
+    ['auto_delete_enabled', auto_delete_enabled, (v) => (v ? 1 : 0)],
+    ['audit_log_retention', audit_log_retention, (v) => v],
+    ['require_password', require_password, (v) => (v ? 1 : 0)],
+    ['min_password_strength', min_password_strength, (v) => v]
+  ];
+  for (const [column, value, toParam] of fields) {
+    if (value !== undefined) {
+      updates.push(`${column} = ?`);
+      params.push(toParam(value));
+    }
   }
 
   if (updates.length === 0) {
