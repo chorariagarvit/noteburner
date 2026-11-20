@@ -38,14 +38,18 @@ export const test = base.extend({
   page: async ({ page }, use) => {
     const fill = page.fill.bind(page);
     page.fill = async (selector, value, options) => {
-      // Fields may legitimately transform what is typed (e.g. the custom URL strips invalid
-      // characters), so only a value that went back to what it was before the fill counts as lost.
-      const before = await page.inputValue(selector, { timeout: 2000 }).catch(() => null);
+      // Fields may legitimately transform or clear what is typed (the custom URL strips characters;
+      // the 2FA code boxes clear themselves after a wrong code), so only a value that went back to what
+      // it was before the fill counts as lost. Single-character boxes are never retried: refilling one
+      // after the form reset itself would type into a cleared form and wipe its error message.
+      const probe = await page.locator(selector).first().evaluate((el) => ({ value: el.value, max: el.maxLength })).catch(() => null);
+      if (probe === null || probe.max === 1) return fill(selector, value, options);
+      const before = probe.value;
       for (let attempt = 0; attempt < 6; attempt++) {
         await fill(selector, value, options);
         await page.waitForTimeout(80);
         const now = await page.inputValue(selector, { timeout: 2000 }).catch(() => null);
-        if (now === null || before === null || now !== before || value === before) return;
+        if (now === null || now !== before || value === before) return;
       }
       throw new Error(`fill(${selector}) did not stick after 6 attempts`);
     };
