@@ -251,7 +251,7 @@ export default function ComplianceDashboard() {
                 value={settings.audit_log_retention}
                 onChange={(e) => setSettings({ ...settings, audit_log_retention: parseInt(e.target.value) })}
                 min="1"
-                max="3650"
+                max="30"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
