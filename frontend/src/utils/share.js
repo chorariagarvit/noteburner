@@ -206,7 +206,9 @@ export const ShareSheet = ({ isOpen, onClose, data }) => {
     <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center">
       <div 
         className="absolute inset-0 bg-black/50"
+        role="presentation"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
       />
       
       <div className="relative w-full md:max-w-md bg-slate-800 md:rounded-2xl rounded-t-2xl shadow-2xl p-6">

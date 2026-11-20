@@ -24,7 +24,7 @@ export function QRCodeDisplay({ url, showDownload = true, size = 256 }) {
     }
 
     if (url) {
-      generateCode();
+      void generateCode();
     }
   }, [url, size]);
 

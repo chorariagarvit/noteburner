@@ -143,7 +143,7 @@ export class ErrorTracker {
 
     // In production, you could send to Sentry or other error tracking service
     if (this.env.SENTRY_DSN) {
-      this.sendToSentry(errorData);
+      void this.sendToSentry(errorData);
     }
   }
 

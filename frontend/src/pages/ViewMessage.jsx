@@ -63,7 +63,7 @@ function ViewMessage() {
     }
     
     if (messageIdentifier) {
-      fetchMetadata();
+      void fetchMetadata();
     }
   }, [messageIdentifier]);
 

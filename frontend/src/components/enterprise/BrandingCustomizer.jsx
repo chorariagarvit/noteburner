@@ -21,7 +21,7 @@ export default function BrandingCustomizer() {
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
-    loadBranding();
+    void loadBranding();
   }, [teamId]);
 
   const loadBranding = async () => {
@@ -55,7 +55,7 @@ export default function BrandingCustomizer() {
       }
 
       setMessage({ type: 'success', text: 'Branding saved successfully!' });
-      loadBranding();
+      void loadBranding();
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
     } finally {

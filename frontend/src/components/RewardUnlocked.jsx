@@ -22,13 +22,17 @@ export default function RewardUnlocked({ reward, onClose }) {
       className={`fixed inset-0 flex items-center justify-center z-50 p-4 bg-black bg-opacity-50 transition-opacity duration-300 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
+      role="presentation"
       onClick={handleClose}
+      onKeyDown={(e) => { if (e.key === 'Escape') handleClose(); }}
     >
       <div
         className={`bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full p-8 transform transition-all duration-300 ${
           visible ? 'scale-100' : 'scale-95'
         }`}
+        role="presentation"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => { if (e.key !== 'Escape') e.stopPropagation(); }}
       >
         {/* Close button */}
         <button

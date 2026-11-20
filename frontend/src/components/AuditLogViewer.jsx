@@ -13,7 +13,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
   const { t } = useI18n();
 
   useEffect(() => {
-    fetchAuditLogs();
+    void fetchAuditLogs();
   }, [messageId, creatorToken]);
 
   const fetchAuditLogs = async () => {

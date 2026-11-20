@@ -10,7 +10,7 @@ export default function LeaderboardPage() {
   
   useEffect(() => {
     document.title = 'NoteBurner - Leaderboard';
-    fetchLeaderboard();
+    void fetchLeaderboard();
   }, []);
   
   const fetchLeaderboard = async () => {

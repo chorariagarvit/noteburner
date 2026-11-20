@@ -39,8 +39,8 @@ export default function PremiumPage() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    fetchStatus();
-    fetchUsage();
+    void fetchStatus();
+    void fetchUsage();
   }, [isAuthenticated, token]);
 
   async function fetchStatus() {
@@ -87,8 +87,8 @@ export default function PremiumPage() {
         throw new Error(err.error || 'Subscription failed');
       }
       setSuccess(`Successfully subscribed to ${planId} plan!`);
-      fetchStatus();
-      fetchUsage();
+      void fetchStatus();
+      void fetchUsage();
     } catch (e) {
       setError(e.message);
     } finally {
@@ -107,7 +107,7 @@ export default function PremiumPage() {
       });
       if (!res.ok) throw new Error('Cancellation failed');
       setSuccess('Subscription cancelled. Access continues until end of billing period.');
-      fetchStatus();
+      void fetchStatus();
     } catch (e) {
       setError(e.message);
     } finally {

@@ -15,7 +15,7 @@ export default function ApiKeyManager() {
   const [createdKey, setCreatedKey] = useState(null);
 
   useEffect(() => {
-    loadApiKeys();
+    void loadApiKeys();
   }, []);
 
   const loadApiKeys = async () => {
@@ -74,7 +74,7 @@ export default function ApiKeyManager() {
       setNewKeyName('');
       setNewKeyRateLimit(1000);
       setShowCreateModal(false);
-      loadApiKeys();
+      void loadApiKeys();
     } catch (err) {
       setError(err.message);
     }
@@ -100,14 +100,14 @@ export default function ApiKeyManager() {
         }
       }
 
-      loadApiKeys();
+      void loadApiKeys();
     } catch (err) {
       setError(err.message);
     }
   };
 
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
+    void navigator.clipboard.writeText(text).catch(() => { /* clipboard unavailable */ });
   };
 
   if (loading) {

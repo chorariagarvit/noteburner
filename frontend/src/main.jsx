@@ -21,7 +21,7 @@ if ('serviceWorker' in navigator) {
     if (registration) {
       console.log('[PWA] Service Worker registered');
     }
-  });
+  }).catch((error) => console.warn('[PWA] Service Worker registration failed:', error));
 }
 
 // Check PWA installability

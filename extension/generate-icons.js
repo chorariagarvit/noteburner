@@ -31,7 +31,7 @@ async function createIcon(size) {
   console.log(`✓ Created icon${size}.png (matching website favicon)`);
 }
 
-(async () => {
+void (async () => {
   try {
     await createIcon(16);
     await createIcon(48);

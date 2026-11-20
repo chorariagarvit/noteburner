@@ -72,11 +72,11 @@ Try it out: ${inviteUrl}`;
         });
       } catch (error) {
         if (error.name !== 'AbortError') {
-          handleCopyInvite();
+          await handleCopyInvite();
         }
       }
     } else {
-      handleCopyInvite();
+      await handleCopyInvite();
     }
   };
 

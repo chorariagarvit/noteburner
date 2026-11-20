@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
     };
 
-    checkAuth();
+    void checkAuth();
   }, []);
 
   const login = async (email, password, rememberMe = false) => {

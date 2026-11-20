@@ -10,7 +10,7 @@ export const registerServiceWorker = async () => {
       
       // Check for updates every hour
       setInterval(() => {
-        registration.update();
+        registration.update().catch(() => { /* offline: retry at the next interval */ });
       }, 60 * 60 * 1000);
       
       // Listen for updates

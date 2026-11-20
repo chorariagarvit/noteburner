@@ -16,7 +16,7 @@ export default function ComplianceDashboard() {
   const { t } = useI18n();
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, [teamId]);
 
   const loadData = async () => {
@@ -59,7 +59,7 @@ export default function ComplianceDashboard() {
       if (!response.ok) throw new Error('Failed to save settings');
 
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
-      loadData();
+      void loadData();
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
     } finally {

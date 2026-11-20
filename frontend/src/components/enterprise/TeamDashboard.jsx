@@ -19,7 +19,7 @@ export default function TeamDashboard() {
 
   useEffect(() => {
     if (teamId) {
-      loadTeamData();
+      void loadTeamData();
     }
   }, [teamId]);
 
@@ -81,7 +81,7 @@ export default function TeamDashboard() {
       setNewMemberEmail('');
       setNewMemberRole('member');
       setShowInviteModal(false);
-      loadTeamData();
+      void loadTeamData();
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -95,7 +95,7 @@ export default function TeamDashboard() {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
-      loadTeamData();
+      void loadTeamData();
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -111,7 +111,7 @@ export default function TeamDashboard() {
         },
         body: JSON.stringify({ role: newRole })
       });
-      loadTeamData();
+      void loadTeamData();
     } catch (err) {
       alert('Error: ' + err.message);
     }

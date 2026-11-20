@@ -58,22 +58,26 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
       } catch (error) {
         if (error.name !== 'AbortError') {
           console.error('Share failed:', error);
-          handleCopy();
+          void handleCopy();
         }
       }
     } else {
-      handleCopy();
+      void handleCopy();
     }
   };
 
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      role="presentation"
       onClick={onClose}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
     >
       <div 
         className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        role="presentation"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => { if (e.key !== 'Escape') e.stopPropagation(); }}
       >
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-blue-600 text-white p-6 rounded-t-lg">

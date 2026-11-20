@@ -122,12 +122,12 @@ const CameraCapture = ({ onCapture, onClose, mode = 'photo' }) => {
   // Retake
   const retake = () => {
     setPreview(null);
-    startCamera();
+    void startCamera();
   };
 
   // Initialize camera on mount
   React.useEffect(() => {
-    startCamera();
+    void startCamera();
     return () => stopCamera();
   }, [facingMode]);
 
@@ -282,8 +282,8 @@ export const useCamera = () => {
   };
 
   React.useEffect(() => {
-    checkPermission();
-    getDevices();
+    void checkPermission();
+    void getDevices();
   }, []);
 
   return {

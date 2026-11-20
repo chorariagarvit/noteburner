@@ -26,7 +26,7 @@ export function useStats(refreshInterval = 30000) {
       }
     };
 
-    fetchStats();
+    void fetchStats();
     
     // Refresh stats periodically
     const interval = setInterval(fetchStats, refreshInterval);

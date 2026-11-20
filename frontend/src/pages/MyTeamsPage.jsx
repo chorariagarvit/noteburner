@@ -13,7 +13,7 @@ export default function MyTeamsPage() {
   const { t } = useI18n();
 
   useEffect(() => {
-    loadTeams();
+    void loadTeams();
   }, []);
 
   const loadTeams = async () => {

@@ -36,7 +36,7 @@ export default function TOTPInput({ onVerify, error: externalError }) {
 
     // Auto-submit when all 6 digits are entered
     if (newCode.every(digit => digit !== '') && value) {
-      handleSubmit(newCode.join(''));
+      void handleSubmit(newCode.join(''));
     }
   };
 
@@ -53,9 +53,9 @@ export default function TOTPInput({ onVerify, error: externalError }) {
         const digits = text.replace(/\D/g, '').slice(0, 6).split('');
         if (digits.length === 6) {
           setCode(digits);
-          handleSubmit(digits.join(''));
+          void handleSubmit(digits.join(''));
         }
-      });
+      }).catch(() => { /* clipboard read denied: user can still type the code */ });
     }
   };
 
@@ -86,7 +86,7 @@ export default function TOTPInput({ onVerify, error: externalError }) {
     
     if (digits.length === 6) {
       setCode(digits);
-      handleSubmit(digits.join(''));
+      void handleSubmit(digits.join(''));
     }
   };
 

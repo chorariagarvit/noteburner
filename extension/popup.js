@@ -69,7 +69,7 @@ generatePasswordBtn.addEventListener('click', () => {
   passwordInput.value = password;
   
   // Copy to clipboard
-  navigator.clipboard.writeText(password);
+  void navigator.clipboard.writeText(password).catch(() => { /* clipboard unavailable */ });
   
   // Show feedback
   generatePasswordBtn.textContent = '✅';
@@ -93,19 +93,19 @@ encryptSelectedBtn.addEventListener('click', () => {
   
   // If password exists, proceed with creation
   if (passwordInput.value && passwordInput.value.length >= 8) {
-    handleCreateMessage();
+    void handleCreateMessage();
   }
 });
 
 // Create message
 createBtn.addEventListener('click', () => {
-  handleCreateMessage();
+  void handleCreateMessage();
 });
 
 // Handle Enter key in message input
 messageInput.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.key === 'Enter') {
-    handleCreateMessage();
+    void handleCreateMessage();
   }
 });
 

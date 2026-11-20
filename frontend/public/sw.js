@@ -79,7 +79,8 @@ self.addEventListener('fetch', (event) => {
           if (!sensitive && response.ok && (request.url.startsWith('http://') || request.url.startsWith('https://'))) {
             const responseClone = response.clone();
             caches.open(DYNAMIC_CACHE)
-              .then((cache) => cache.put(request, responseClone));
+              .then((cache) => cache.put(request, responseClone))
+              .catch(() => { /* caching is best effort */ });
           }
           return response;
         })
@@ -121,7 +122,8 @@ self.addEventListener('fetch', (event) => {
             if (request.url.startsWith('http://') || request.url.startsWith('https://')) {
               const responseClone = response.clone();
               caches.open(DYNAMIC_CACHE)
-                .then((cache) => cache.put(request, responseClone));
+                .then((cache) => cache.put(request, responseClone))
+                .catch(() => { /* caching is best effort */ });
             }
             return response;
           });

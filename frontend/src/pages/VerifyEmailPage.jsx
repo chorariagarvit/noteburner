@@ -14,7 +14,7 @@ export default function VerifyEmailPage() {
     // Remove the one-time token from the address bar/history right away
     globalThis.history.replaceState({}, document.title, globalThis.location.pathname);
 
-    (async () => {
+    void (async () => {
       try {
         const res = await fetch(`${API_BASE}/api/auth/verify-email`, {
           method: 'POST',
