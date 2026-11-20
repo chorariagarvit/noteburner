@@ -11,7 +11,7 @@ import { readCountry } from '../utils/geo.js';
 import { hashCreatorToken, matchesCreatorToken } from '../utils/creatorToken.js';
 import { sealSecret, openSecret } from '../utils/secretBox.js';
 import { denyIfRestricted, recordFailure, geoVerdict } from '../utils/protections.js';
-import { clampInt, limitOrUnlimited, flag, MAX_EXPIRY_SECONDS } from '../utils/messageOptions.js';
+import { clampInt, limitOrUnlimited, flag, validIvOrSalt, MAX_ENCRYPTED_CHARS, MAX_EXPIRY_SECONDS } from '../utils/messageOptions.js';
 import crypto from 'node:crypto';
 import { generateTOTPSecret, generateTOTPUri, verifyTOTP, createTotpProof, verifyTotpProof } from '../utils/totp.js';
 
@@ -258,29 +258,40 @@ app.post('/', rateLimitMiddleware(10, 60), async (c) => {
 // Create group message (1-to-many)
 app.post('/group', rateLimitMiddleware(5, 60), async (c) => {
   try {
-    const body = await c.req.json();
-    const { 
-      encryptedData, 
-      iv, 
-      salt, 
-      expiresIn, 
-      recipientCount = 1,
-      maxViews = null,
-      burnOnFirstView = false
-    } = body;
+    const body = await c.req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return c.json({ error: 'Request body must be a JSON object' }, 400);
+    }
+    const { encryptedData, iv, salt, expiresIn } = body;
+    const recipientCount = body.recipientCount === undefined ? 1 : body.recipientCount;
+    const maxViews = body.maxViews === undefined ? null : body.maxViews;
+    const burnOnFirstView = flag(body.burnOnFirstView) === 1;
 
-    if (!encryptedData || !iv || !salt) {
+    // Same rules as a single message; the ciphertext is stored once per recipient, so the size limit matters more here
+    if (typeof encryptedData !== 'string' || !encryptedData || !iv || !salt) {
       return c.json({ error: 'Missing required fields' }, 400);
     }
-
-    if (recipientCount < 1 || recipientCount > 100) {
-      return c.json({ error: 'Recipient count must be between 1 and 100' }, 400);
+    if (!validIvOrSalt(iv) || !validIvOrSalt(salt)) {
+      return c.json({ error: 'iv and salt must be 16 bytes (24 base64 characters)' }, 400);
+    }
+    if (encryptedData.length > MAX_ENCRYPTED_CHARS) {
+      return c.json({ error: 'Message too large' }, 413);
+    }
+    if (!Number.isInteger(recipientCount) || recipientCount < 1 || recipientCount > 100) {
+      return c.json({ error: 'Recipient count must be a whole number between 1 and 100' }, 400);
+    }
+    if (maxViews !== null && (!Number.isInteger(maxViews) || maxViews < 1 || maxViews > 100)) {
+      return c.json({ error: 'maxViews must be a whole number between 1 and 100' }, 400);
+    }
+    if (expiresIn !== undefined && expiresIn !== null &&
+        (!Number.isFinite(Number(expiresIn)) || Number(expiresIn) <= 0 || Number(expiresIn) > MAX_EXPIRY_SECONDS)) {
+      return c.json({ error: 'expiresIn must be between 1 second and 30 days' }, 400);
     }
 
     // Create group message with multiple links
     const groupData = await createGroupMessage(
       c.env.DB,
-      { encryptedData, iv, salt, expiresIn },
+      { encryptedData, iv, salt, expiresIn: expiresIn ? Number(expiresIn) : null },
       { recipientCount, maxViews, burnOnFirstView }
     );
 
