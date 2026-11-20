@@ -66,3 +66,29 @@ export async function newApiKey(request, user, rate_limit = 1000) {
 export async function bareContext(playwright) {
   return playwright.request.newContext({ baseURL: 'http://localhost:8787', extraHTTPHeaders: { 'CF-Connecting-IP': randomIp() } });
 }
+
+/** Run the hourly cleanup job (needs the dev Worker's --test-scheduled) until `done()` holds; each run is bounded, so a backlog needs several. */
+export async function runCleanupUntil(request, done, maxRuns = 40) {
+  for (let i = 0; i < maxRuns; i++) {
+    const res = await request.get('http://localhost:8787/__scheduled?cron=0+*+*+*+*');
+    if (res.status() === 404) throw new Error('dev Worker was started without --test-scheduled');
+    if (done()) return;
+  }
+  throw new Error(`cleanup did not reach the expected state after ${maxRuns} runs`);
+}
+
+/** Minimal RFC 4180 CSV parser (quoted fields, doubled quotes, newlines inside quotes). */
+export function parseCsv(text) {
+  const rows = []; let row = []; let field = ''; let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else quoted = false; } else field += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ',') { row.push(field); field = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(field); rows.push(row); row = []; field = ''; }
+    else field += ch;
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
