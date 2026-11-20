@@ -4,6 +4,7 @@ import { Palette, Upload, Eye, Save } from 'lucide-react';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
+import { readableTextColor } from '../../utils/color';
 
 export default function BrandingCustomizer() {
   const { teamId } = useParams();
@@ -108,11 +109,12 @@ export default function BrandingCustomizer() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="brand-primary" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('branding.primaryColor')}
                 </label>
                 <div className="flex gap-2">
                   <input
+                    id="brand-primary"
                     type="color"
                     value={branding.primary_color}
                     onChange={(e) => setBranding({ ...branding, primary_color: e.target.value })}
@@ -120,6 +122,7 @@ export default function BrandingCustomizer() {
                   />
                   <input
                     type="text"
+                    aria-label={`${t('branding.primaryColor')} (hex)`}
                     value={branding.primary_color}
                     onChange={(e) => setBranding({ ...branding, primary_color: e.target.value })}
                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -129,11 +132,12 @@ export default function BrandingCustomizer() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label htmlFor="brand-secondary" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('branding.secondaryColor')}
                 </label>
                 <div className="flex gap-2">
                   <input
+                    id="brand-secondary"
                     type="color"
                     value={branding.secondary_color}
                     onChange={(e) => setBranding({ ...branding, secondary_color: e.target.value })}
@@ -141,6 +145,7 @@ export default function BrandingCustomizer() {
                   />
                   <input
                     type="text"
+                    aria-label={`${t('branding.secondaryColor')} (hex)`}
                     value={branding.secondary_color}
                     onChange={(e) => setBranding({ ...branding, secondary_color: e.target.value })}
                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -173,6 +178,8 @@ export default function BrandingCustomizer() {
               <div>
                 <input
                   type="url"
+                  aria-label={t('branding.logoPlaceholder')}
+                  maxLength={2048}
                   value={branding.logo_url || ''}
                   onChange={(e) => setBranding({ ...branding, logo_url: e.target.value })}
                   placeholder={t('branding.logoPlaceholder')}
@@ -189,6 +196,8 @@ export default function BrandingCustomizer() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{t('branding.footerTitle')}</h2>
             <textarea
+              aria-label={t('branding.footerTitle')}
+              maxLength={500}
               value={branding.custom_footer || ''}
               onChange={(e) => setBranding({ ...branding, custom_footer: e.target.value })}
               placeholder={t('branding.footerPlaceholder')}
@@ -208,11 +217,12 @@ export default function BrandingCustomizer() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={t('branding.whiteLabelTitle')}
                   checked={branding.white_label}
                   onChange={(e) => setBranding({ ...branding, white_label: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-700"></div>
               </label>
             </div>
           </div>
@@ -221,7 +231,7 @@ export default function BrandingCustomizer() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full px-6 py-3 bg-amber-500 dark:bg-amber-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-amber-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-6 py-3 bg-amber-700 dark:bg-amber-700 text-white rounded-lg hover:bg-amber-800 dark:hover:bg-amber-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? t('branding.saving') : t('branding.saveBtn')}
           </button>
@@ -254,21 +264,21 @@ export default function BrandingCustomizer() {
               {/* Content Preview */}
               <div className="space-y-3">
                 <button
-                  className="w-full py-2 px-4 rounded-lg text-white font-medium"
-                  style={{ backgroundColor: branding.primary_color }}
+                  className="w-full py-2 px-4 rounded-lg font-medium"
+                  style={{ backgroundColor: branding.primary_color, color: readableTextColor(branding.primary_color) }}
                 >
                   Primary Button
                 </button>
                 
                 <button
-                  className="w-full py-2 px-4 rounded-lg text-white font-medium"
-                  style={{ backgroundColor: branding.secondary_color }}
+                  className="w-full py-2 px-4 rounded-lg font-medium"
+                  style={{ backgroundColor: branding.secondary_color, color: readableTextColor(branding.secondary_color) }}
                 >
                   Secondary Button
                 </button>
 
-                <div className="p-3 rounded-lg" style={{ backgroundColor: branding.primary_color + '20' }}>
-                  <div style={{ color: branding.primary_color }} className="font-medium">
+                <div className="p-3 rounded-lg" style={{ backgroundColor: branding.primary_color + '20', borderLeft: `4px solid ${branding.primary_color}` }}>
+                  <div className="font-medium text-gray-900 dark:text-white">
                     Accent Text
                   </div>
                 </div>

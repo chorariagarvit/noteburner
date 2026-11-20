@@ -87,7 +87,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
   const getEventColor = (type, success) => {
     if (type === 'burned') return 'text-orange-600 dark:text-orange-400';
     if (type === 'password_failed' || !success) return 'text-red-600 dark:text-red-400';
-    if (type === 'viewed') return 'text-green-600 dark:text-green-400';
+    if (type === 'viewed') return 'text-green-700 dark:text-green-400';
     return 'text-blue-600 dark:text-blue-400';
   };
 
@@ -133,7 +133,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
         </div>
 
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          <div className="text-2xl font-bold text-purple-600 dark:text-purple-300">
             {message.password_attempts}
           </div>
           <div className="text-xs text-purple-700 dark:text-purple-300 mt-1">
@@ -142,7 +142,7 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
         </div>
 
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+          <div className="text-2xl font-bold text-green-700 dark:text-green-400">
             {formatTimestamp(message.created_at)}
           </div>
           <div className="text-xs text-green-700 dark:text-green-300 mt-1">

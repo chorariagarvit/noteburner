@@ -89,7 +89,7 @@ export default function LeaderboardPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesCreated')}</span>
-                <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                <span className="text-2xl font-bold text-purple-600 dark:text-purple-300">
                   {stats.this_week?.messages_created || 0}
                 </span>
               </div>

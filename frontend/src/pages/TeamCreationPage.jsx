@@ -97,7 +97,7 @@ export default function TeamCreationPage() {
             <button
               type="submit"
               disabled={loading || !teamName}
-              className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              className="w-full bg-amber-700 hover:bg-amber-800 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               {loading ? t('teamCreation.creating') : t('teamCreation.createBtn')}
             </button>

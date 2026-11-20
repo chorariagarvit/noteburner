@@ -68,7 +68,7 @@ export default function SignupPage() {
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               {t('auth.signup.successMessage')}
             </p>
-            <p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
               {t('auth.signup.redirecting')}
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading || formData.password !== formData.confirmPassword}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('auth.signup.creating') : t('auth.signup.submitButton')}
             </button>
@@ -197,7 +197,7 @@ export default function SignupPage() {
           <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {t('auth.signup.hasAccount')}{' '}
-              <Link to="/login" className="font-medium text-amber-500 hover:text-amber-600">
+              <Link to="/login" className="font-medium text-amber-700 dark:text-amber-400 hover:text-amber-600">
                 {t('auth.signup.loginLink')}
               </Link>
             </p>

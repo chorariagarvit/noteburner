@@ -177,6 +177,7 @@ Try it out: ${inviteUrl}`;
                 type="text"
                 value={inviteUrl}
                 readOnly
+                aria-label={t('a11y.shareLink')}
                 className="input-field font-mono text-sm flex-1"
               />
               <button

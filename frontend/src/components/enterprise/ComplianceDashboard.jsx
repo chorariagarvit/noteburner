@@ -158,7 +158,7 @@ export default function ComplianceDashboard() {
             <div className="space-y-3">
               <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">{t('compliance.gdprEnabled')}</span>
-                <span className={`font-medium ${report.gdpr_compliance.enabled ? 'text-green-600' : 'text-gray-400'}`}>
+                <span className={`font-medium ${report.gdpr_compliance.enabled ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}`}>
                   {report.gdpr_compliance.enabled ? '✓ Yes' : '✗ No'}
                 </span>
               </div>
@@ -168,21 +168,21 @@ export default function ComplianceDashboard() {
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">{t('compliance.autoDelete')}</span>
-                <span className={`font-medium ${report.gdpr_compliance.auto_delete_enabled ? 'text-green-600' : 'text-gray-400'}`}>
+                <span className={`font-medium ${report.gdpr_compliance.auto_delete_enabled ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}`}>
                   {report.gdpr_compliance.auto_delete_enabled ? '✓ Enabled' : '✗ Disabled'}
                 </span>
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">{t('compliance.rightAccess')}</span>
-                <span className="text-green-600 dark:text-green-400 font-medium">{t('compliance.supported')}</span>
+                <span className="text-green-700 dark:text-green-400 font-medium">{t('compliance.supported')}</span>
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">{t('compliance.rightDeletion')}</span>
-                <span className="text-green-600 dark:text-green-400 font-medium">{t('compliance.supported')}</span>
+                <span className="text-green-700 dark:text-green-400 font-medium">{t('compliance.supported')}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">{t('compliance.rightExport')}</span>
-                <span className="text-green-600 dark:text-green-400 font-medium">{t('compliance.supported')}</span>
+                <span className="text-green-700 dark:text-green-400 font-medium">{t('compliance.supported')}</span>
               </div>
             </div>
           )}
@@ -204,7 +204,7 @@ export default function ComplianceDashboard() {
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">{t('compliance.statPasswordProtected')}</span>
-                <span className="font-bold text-lg text-green-600 dark:text-green-400">{report.statistics.password_protected || 0}</span>
+                <span className="font-bold text-lg text-green-700 dark:text-green-400">{report.statistics.password_protected || 0}</span>
               </div>
               <div className="flex justify-between items-center pb-2 border-b border-gray-100 dark:border-gray-700">
                 <span className="text-gray-600 dark:text-gray-400">{t('compliance.statAuditLogs')}</span>
@@ -226,10 +226,11 @@ export default function ComplianceDashboard() {
           
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="retention-days" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('compliance.retentionLabel')}
               </label>
               <input
+                id="retention-days"
                 type="number"
                 value={settings.data_retention_days}
                 onChange={(e) => setSettings({ ...settings, data_retention_days: parseInt(e.target.value) })}
@@ -243,10 +244,11 @@ export default function ComplianceDashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="audit-retention" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('compliance.auditRetentionLabel')}
               </label>
               <input
+                id="audit-retention"
                 type="number"
                 value={settings.audit_log_retention}
                 onChange={(e) => setSettings({ ...settings, audit_log_retention: parseInt(e.target.value) })}
@@ -257,10 +259,11 @@ export default function ComplianceDashboard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="min-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('compliance.minPasswordLabel')}
               </label>
               <select
+                id="min-password"
                 value={settings.min_password_strength}
                 onChange={(e) => setSettings({ ...settings, min_password_strength: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -281,11 +284,12 @@ export default function ComplianceDashboard() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={t('compliance.gdprToggle')}
                   checked={settings.gdpr_enabled}
                   onChange={(e) => setSettings({ ...settings, gdpr_enabled: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-700"></div>
               </label>
             </div>
 
@@ -297,11 +301,12 @@ export default function ComplianceDashboard() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={t('compliance.autoDeleteToggle')}
                   checked={settings.auto_delete_enabled}
                   onChange={(e) => setSettings({ ...settings, auto_delete_enabled: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-700"></div>
               </label>
             </div>
 
@@ -313,11 +318,12 @@ export default function ComplianceDashboard() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label={t('compliance.requirePasswordToggle')}
                   checked={settings.require_password}
                   onChange={(e) => setSettings({ ...settings, require_password: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-700"></div>
               </label>
             </div>
           </div>
@@ -325,7 +331,7 @@ export default function ComplianceDashboard() {
           <button
             onClick={handleSaveSettings}
             disabled={saving}
-            className="mt-6 px-6 py-2 bg-amber-500 dark:bg-amber-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-amber-500 font-medium disabled:opacity-50"
+            className="mt-6 px-6 py-2 bg-amber-700 dark:bg-amber-700 text-white rounded-lg hover:bg-amber-800 dark:hover:bg-amber-700 font-medium disabled:opacity-50"
           >
             {saving ? t('compliance.saving') : t('compliance.saveBtn')}
           </button>

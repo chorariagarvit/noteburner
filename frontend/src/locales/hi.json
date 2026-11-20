@@ -835,5 +835,13 @@
     "authTitle": "Authentication",
     "authDesc": "Include your API key in the X-API-Key header for all requests.",
     "baseUrl": "Base URL"
+  },
+  "a11y": {
+    "github": "GitHub पर NoteBurner",
+    "selectLanguage": "भाषा चुनें",
+    "showPassword": "पासवर्ड दिखाएँ",
+    "hidePassword": "पासवर्ड छिपाएँ",
+    "shareLink": "साझा करने का लिंक",
+    "userMenu": "खाता मेनू"
   }
 }

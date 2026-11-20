@@ -26,7 +26,7 @@ function EndpointCard({ method, path, description, authRequired, requestBody, re
               </span>
               <code className="text-sm font-mono text-gray-900 dark:text-gray-100">{path}</code>
               {authRequired && (
-                <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                <span className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
                   <Lock className="w-3 h-3" />
                   {t('apiDocs.authRequired')}
                 </span>
@@ -105,7 +105,7 @@ export default function APIDocumentationPage() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            <Code className="inline w-10 h-10 mr-3 text-amber-500" />
+            <Code className="inline w-10 h-10 mr-3 text-amber-700 dark:text-amber-400" />
             {t('apiDocs.title')}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
@@ -134,7 +134,7 @@ export default function APIDocumentationPage() {
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <Database className="w-8 h-8 text-amber-500" />
+                <Database className="w-8 h-8 text-amber-700 dark:text-amber-400" />
                 <div>
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">Rate Limited</div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">100-100k req/day</div>
@@ -202,7 +202,7 @@ export default function APIDocumentationPage() {
           {/* Messages */}
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Send className="w-5 h-5 text-amber-500" />
+              <Send className="w-5 h-5 text-amber-700 dark:text-amber-400" />
               Messages
             </h3>
 
@@ -287,7 +287,7 @@ export default function APIDocumentationPage() {
           {/* API Keys Management */}
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Key className="w-5 h-5 text-amber-500" />
+              <Key className="w-5 h-5 text-amber-700 dark:text-amber-400" />
               API Keys (Session Auth)
             </h3>
 
@@ -365,7 +365,7 @@ export default function APIDocumentationPage() {
           {/* Teams */}
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Database className="w-5 h-5 text-amber-500" />
+              <Database className="w-5 h-5 text-amber-700 dark:text-amber-400" />
               Teams (Enterprise)
             </h3>
 
@@ -587,7 +587,7 @@ def create_message(encrypted_data):
           <div className="flex gap-3">
             <Link
               to="/support"
-              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium"
+              className="px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 font-medium"
             >
               Contact Support
             </Link>
