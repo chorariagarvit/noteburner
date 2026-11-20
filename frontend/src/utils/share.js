@@ -113,7 +113,8 @@ export const copyToClipboard = async (text) => {
   
   // Fallback for older browsers
   const textArea = document.createElement('textarea');
-  textArea.value = text;
+  textArea.value = String(text);
+  textArea.setAttribute('readonly', '');
   textArea.style.position = 'fixed';
   textArea.style.left = '-999999px';
   document.body.appendChild(textArea);

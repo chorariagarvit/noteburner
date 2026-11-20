@@ -10,6 +10,7 @@ import { setMessageOpenGraph } from '../utils/openGraph';
 import TOTPInput from '../components/TOTPInput';
 import { useI18n } from '../contexts/I18nContext';
 import { API_BASE } from '../utils/apiBase';
+import { downloadBlob } from '../utils/download';
 
 function ViewMessage() {
   const { identifier } = useParams();
@@ -223,22 +224,8 @@ function ViewMessage() {
       );
       
       // Force download (not open in browser)
-      const url = URL.createObjectURL(decryptedFile.blob);
-      const a = document.createElement('a');
-      a.href = url;
-      // Sanitize filename and force download attribute
-      const sanitizedFilename = decryptedFile.fileName.replaceAll(/[<>:"/\\|?*]/g, '_');
-      a.download = sanitizedFilename;
-      a.setAttribute('download', sanitizedFilename); // Explicit attribute
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      
-      // Cleanup - delayed to ensure download starts
-      setTimeout(() => {
-        a.remove();
-        URL.revokeObjectURL(url);
-      }, 100);
+      // downloadBlob sanitizes the file name, forces the download attribute and cleans up after a short delay
+      downloadBlob(decryptedFile.blob, decryptedFile.fileName);
       
       // Only delete file after successful download
       // If there's a network error or decryption failure, file stays available

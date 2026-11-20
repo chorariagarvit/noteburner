@@ -19,8 +19,14 @@ export default function LoginPage() {
 
   // Honour ?redirect= only for same-origin relative paths (prevents open redirects)
   const redirectParam = new URLSearchParams(location.search).get('redirect');
-  const safeRedirect = redirectParam && /^\/(?![/\\])/.test(redirectParam) ? redirectParam : null;
-  const from = location.state?.from?.pathname || safeRedirect || '/';
+  const safeRedirect = (() => {
+    if (!redirectParam || !/^\/(?![/\\])/.test(redirectParam)) return null;
+    // Resolve against our own origin and keep only the path part: anything that escapes the origin is dropped
+    const resolved = new URL(redirectParam, globalThis.location.origin);
+    return resolved.origin === globalThis.location.origin ? `${resolved.pathname}${resolved.search}${resolved.hash}` : null;
+  })();
+  const fromState = location.state?.from?.pathname;
+  const from = typeof fromState === 'string' && /^\/(?![/\\])/.test(fromState) ? fromState : safeRedirect || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();

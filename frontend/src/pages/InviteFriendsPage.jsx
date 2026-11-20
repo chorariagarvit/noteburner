@@ -41,11 +41,16 @@ Try it out: ${inviteUrl}`;
       : defaultInviteMessage;
     const body = encodeURIComponent(fullMessage);
     
-    const mailto = emails.trim()
-      ? `mailto:${emails}?subject=${subject}&body=${body}`
-      : `mailto:?subject=${subject}&body=${body}`;
-    
-    window.open(mailto, '_blank');
+    // Only plain addresses go into the mailto: URL (no "?", "&", "#" or whitespace that could add headers)
+    const recipients = emails
+      .split(/[,;\s]+/)
+      .filter((addr) => /^[^\s@?&#<>"',;]+@[^\s@?&#<>"',;]+$/.test(addr))
+      .map((addr) => encodeURIComponent(addr).replaceAll('%40', '@'))
+      .join(',');
+    const mailto = `mailto:${recipients}?subject=${subject}&body=${body}`;
+
+    const mailtoUrl = new URL(mailto);
+    if (mailtoUrl.protocol === 'mailto:') window.open(mailtoUrl.href, '_blank', 'noopener,noreferrer');
     setSent(true);
     setTimeout(() => setSent(false), 2000);
   };

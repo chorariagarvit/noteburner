@@ -217,8 +217,8 @@ export default function APIDocumentationPage() {
               ]}
               requestBody={{
                 encryptedData: 'base64_encrypted_content',
-                iv: 'initialization_vector',
-                salt: 'password_salt',
+                iv: '<base64-iv>',
+                salt: '<base64-salt>',
                 maxViews: 1,
                 expiresIn: 86400,
                 passwordProtected: true
