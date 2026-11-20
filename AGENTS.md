@@ -12,7 +12,7 @@ NoteBurner is a secure, one-time message encryption and decryption application. 
 - **Database**: Cloudflare D1 (SQLite) — migrations in `backend/migrations/` (0001–0014)
 - **Storage**: Cloudflare R2 (encrypted file attachments)
 - **Cache / counters**: Cloudflare KV
-- **Tests**: Playwright e2e (22 spec files, 479 tests on Chromium (8 skipped) × 5 browser projects; the 91 API-only tests run on Chromium and are skipped elsewhere), backend unit tests (`backend/test`, 72), CSP checks (`e2e-csp`, 24), frontend unit tests (`frontend/test`, 17), browser-extension tests (`extension/test`, 24)
+- **Tests**: Playwright e2e (26 spec files, 549 tests on Chromium (8 skipped) × 5 browser projects; the 91 API-only tests run on Chromium and are skipped elsewhere), backend unit tests (`backend/test`, 72), CSP checks (`e2e-csp`, 24), frontend unit tests (`frontend/test`, 55), browser-extension tests (`extension/test`, 25)
 
 ## Development Commands
 
