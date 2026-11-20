@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler pages deploy dist",
-    "test": "node --test"
+    "test": "node --test",
+    "check:live-csp": "node scripts/check-live-csp.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.5",
