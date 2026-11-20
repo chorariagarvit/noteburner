@@ -35,6 +35,9 @@ I've been using NoteBurner to send secure, self-destructing messages and thought
 
 Try it out: ${inviteUrl}`;
 
+  const whatsappText = '🔥 Check out NoteBurner - Secure self-destructing messages: ' + inviteUrl;
+  const whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(whatsappText);
+
   const handleCopyInvite = async () => {
     const fullMessage = personalMessage 
       ? `${personalMessage}\n\n${defaultInviteMessage}`
@@ -232,7 +235,7 @@ Try it out: ${inviteUrl}`;
               </a>
               
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`🔥 Check out NoteBurner - Secure self-destructing messages: ${inviteUrl}`)}`}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary flex items-center justify-center gap-2 py-2"

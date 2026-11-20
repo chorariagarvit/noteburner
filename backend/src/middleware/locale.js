@@ -63,9 +63,13 @@ export function getLocale(c) {
  */
 export function getComplianceRequirements(locale) {
   const euLocales = ['de', 'fr', 'es'];
+  const isEu = euLocales.includes(locale);
+  let region = 'US';
+  if (locale === 'zh') region = 'CN';
+  else if (isEu) region = 'EU';
   return {
-    gdpr: euLocales.includes(locale),
+    gdpr: isEu,
     ccpa: locale === 'en', // US English users may be subject to CCPA
-    region: locale === 'zh' ? 'CN' : euLocales.includes(locale) ? 'EU' : 'US'
+    region
   };
 }

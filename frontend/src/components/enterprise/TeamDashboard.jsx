@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getSessionToken, getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
+import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
 
@@ -26,7 +26,6 @@ export default function TeamDashboard() {
   const loadTeamData = async () => {
     try {
       setLoading(true);
-      const sessionToken = getSessionToken();
       
       // Load team details
       const teamRes = await fetch(`${API_BASE}/api/teams/${teamId}`, {

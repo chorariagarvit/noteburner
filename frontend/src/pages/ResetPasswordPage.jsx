@@ -67,7 +67,7 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg">
           <div className="text-center">
-            <svg className="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox-="0 0 24 24">
+            <svg className="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">

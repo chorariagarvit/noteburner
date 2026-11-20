@@ -72,8 +72,8 @@ function SupportPage() {
                         </h2>
 
                         <div className="space-y-4">
-                            {faqs.map((faq, index) => (
-                                <div key={index} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 border border-gray-100 dark:border-gray-700">
+                            {faqs.map((faq) => (
+                                <div key={faq.q} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 border border-gray-100 dark:border-gray-700">
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                                         {faq.q}
                                     </h3>

@@ -172,9 +172,9 @@ const AuditLogViewer = ({ messageId, creatorToken }) => {
           </div>
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {events.map((event, index) => (
+            {events.map((event) => (
               <div
-                key={index}
+                key={`${event.timestamp}-${event.type}`}
                 className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <span className="text-2xl flex-shrink-0">

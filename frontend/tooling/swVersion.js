@@ -27,7 +27,8 @@ const readGitRef = () => {
 export function makeBuildId(version, env = process.env, gitRef = readGitRef, now = Date.now) {
   if (env.GITHUB_SHA) return `${version}-${env.GITHUB_SHA.slice(0, 8)}`;
   const ref = gitRef();
-  return `${version}-${ref ? `${ref}-` : ''}${now().toString(36)}`;
+  const refPart = ref ? `${ref}-` : '';
+  return `${version}-${refPart}${now().toString(36)}`;
 }
 
 export function swVersionPlugin(version) {

@@ -212,6 +212,7 @@ export default function BrandingCustomizer() {
                   onChange={(e) => setBranding({ ...branding, white_label: e.target.checked })}
                   className="sr-only peer"
                 />
+                <span className="sr-only">{t('branding.whiteLabelTitle')}</span>
                 <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
               </label>
             </div>
@@ -243,10 +244,10 @@ export default function BrandingCustomizer() {
               <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 {branding.logo_url ? (
                   <img src={branding.logo_url} alt="Logo" className="h-8 mb-2" />
-                ) : !branding.white_label ? (
-                  <div className="text-xl font-bold mb-2 text-gray-900 dark:text-white">🔥 NoteBurner</div>
                 ) : (
-                  <div className="text-xl font-bold mb-2 text-gray-900 dark:text-white">Your Brand</div>
+                  <div className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
+                    {branding.white_label ? 'Your Brand' : '🔥 NoteBurner'}
+                  </div>
                 )}
                 <div className="h-1 rounded" style={{ backgroundColor: branding.primary_color, width: '60px' }}></div>
               </div>

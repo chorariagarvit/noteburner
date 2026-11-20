@@ -66,7 +66,7 @@ async function initializeUpload(file, encryptedData, iv, salt, token, creatorTok
 /**
  * Upload a single chunk with retry logic
  */
-async function uploadChunk(fileId, uploadId, chunkIndex, chunkData, totalChunks, onProgress, currentProgress, token, creatorToken) {
+async function uploadChunk(chunkIndex, chunkData, { fileId, uploadId, totalChunks, onProgress, currentProgress, token, creatorToken }) {
   let lastError = null;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -177,7 +177,7 @@ export async function uploadLargeFile(file, encryptedData, iv, salt, token, crea
     const end = Math.min(start + chunkSize, encryptedData.length);
     const chunkData = encryptedData.slice(start, end);
     
-    const part = await uploadChunk(fileId, uploadId, i, chunkData, totalChunks, onProgress, currentProgress, token, creatorToken);
+    const part = await uploadChunk(i, chunkData, { fileId, uploadId, totalChunks, onProgress, currentProgress, token, creatorToken });
     parts.push(part);
   }
 

@@ -55,8 +55,8 @@ function PrivacyPolicy() {
                                         t('privacy.doNotCollect4'),
                                         t('privacy.doNotCollect5'),
                                         t('privacy.doNotCollect6')
-                                    ].map((item, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                                    ].map((item) => (
+                                        <li key={item} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                                             <span className="text-red-500 mt-1">✕</span>
                                             <span>{item}</span>
                                         </li>
@@ -75,8 +75,8 @@ function PrivacyPolicy() {
                                         t('privacy.onlyReceive2'),
                                         t('privacy.onlyReceive3'),
                                         t('privacy.onlyReceive4')
-                                    ].map((item, i) => (
-                                        <li key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
+                                    ].map((item) => (
+                                        <li key={item} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                                             <span className="text-emerald-500 mt-1">✓</span>
                                             <span>{item}</span>
                                         </li>

@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { Gift, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const CONFETTI_IDS = Array.from({ length: 20 }, (_, n) => `confetti-${n}`);
+
 export default function RewardUnlocked({ reward, onClose }) {
   const [visible, setVisible] = useState(false);
 
@@ -85,9 +87,9 @@ export default function RewardUnlocked({ reward, onClose }) {
 
         {/* Confetti effect (optional - can add later) */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(20)].map((_, i) => (
+          {CONFETTI_IDS.map((id) => (
             <div
-              key={i}
+              key={id}
               className="absolute animate-ping"
               style={{
                 left: `${Math.random() * 100}%`,

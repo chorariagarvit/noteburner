@@ -123,7 +123,7 @@ app.post('/chunk', rateLimitMiddleware(50, 60), async (c) => {
 app.post('/complete', async (c) => {
   try {
     const body = await c.req.json();
-    const { fileId, uploadId, parts, fileName, token, fileSize } = body;
+    const { fileId, uploadId, parts, fileName, token } = body;
 
     if (!fileId || !uploadId || !Array.isArray(parts) || parts.length === 0 || parts.length > MAX_PARTS || !token) {
       return c.json({ error: 'Missing or invalid fields' }, 400);

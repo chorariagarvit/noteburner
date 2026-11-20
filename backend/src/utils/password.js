@@ -13,7 +13,7 @@ const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_PATTERNS = {
   uppercase: /[A-Z]/,
   lowercase: /[a-z]/,
-  number: /[0-9]/,
+  number: /\d/,
   special: /[!@#$%^&*(),.?":{}|<>]/
 };
 
@@ -122,9 +122,7 @@ export function generateResetToken() {
  * @returns {string} - Random 32-character token
  */
 export function generateVerificationToken() {
-  const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  const nanoid = customAlphabet(alphabet, 32);
-  return nanoid();
+  return generateResetToken();
 }
 
 /**

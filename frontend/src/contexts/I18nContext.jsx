@@ -12,12 +12,12 @@ import {
 const I18nContext = createContext(null);
 
 export function I18nProvider({ children }) {
-  const [locale, setLocaleState] = useState(() => detectLocale());
+  const [locale, setLocaleValue] = useState(() => detectLocale());
 
   const setLocale = useCallback((newLocale) => {
     if (SUPPORTED_LOCALES.includes(newLocale)) {
       saveLocale(newLocale);
-      setLocaleState(newLocale);
+      setLocaleValue(newLocale);
       // Update html lang attribute
       document.documentElement.lang = newLocale;
       document.documentElement.dir = getTextDirection(newLocale);

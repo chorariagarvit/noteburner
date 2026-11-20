@@ -132,7 +132,6 @@ export const ddosProtection = () => {
     const banKey = `ddos:ban:${ip}`;
     const banned = await kv.get(banKey);
     if (banned) {
-      const ttl = parseInt(banned, 10);
       return c.json({
         error: 'Access temporarily blocked due to suspicious activity',
         retryAfter: BAN_SECONDS

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Star, Crown, Shield, Check, AlertCircle, Loader2, CreditCard, Bitcoin, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useI18n } from '../contexts/I18nContext';
 import { API_BASE } from '../utils/apiBase';
 import { getSessionToken } from '../utils/session';
 
@@ -15,9 +14,8 @@ const PLAN_META = {
 };
 
 export default function PremiumPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const token = getSessionToken();
-  const { t } = useI18n();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planParam = searchParams.get('plan');
@@ -368,18 +366,27 @@ function UsageBar({ label, used, limit, unit, format }) {
   const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
   const isNearLimit = pct >= 80;
   const isAtLimit = pct >= 100;
+  let textClass = 'text-gray-600 dark:text-gray-400';
+  let barClass = 'bg-green-500';
+  if (isAtLimit) {
+    textClass = 'text-red-600';
+    barClass = 'bg-red-500';
+  } else if (isNearLimit) {
+    textClass = 'text-amber-600';
+    barClass = 'bg-amber-500';
+  }
 
   return (
     <div>
       <div className="flex justify-between text-sm mb-1.5">
         <span className="text-gray-700 dark:text-gray-300">{label}</span>
-        <span className={`font-medium ${isAtLimit ? 'text-red-600' : isNearLimit ? 'text-amber-600' : 'text-gray-600 dark:text-gray-400'}`}>
+        <span className={`font-medium ${textClass}`}>
           {format === 'bytes' ? formatBytes(used) : used.toLocaleString()} / {format === 'bytes' ? formatBytes(limit) : limit.toLocaleString()} {format !== 'bytes' ? unit : ''}
         </span>
       </div>
       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all ${isAtLimit ? 'bg-red-500' : isNearLimit ? 'bg-amber-500' : 'bg-green-500'}`}
+          className={`h-full rounded-full transition-all ${barClass}`}
           style={{ width: `${pct}%` }}
         />
       </div>

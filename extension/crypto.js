@@ -186,9 +186,11 @@ function statusMessage(status, code, serverMessage, retryAfter, fallback) {
     return 'NoteBurner needs a quick human check. Opening noteburner.work so you can finish there.';
   }
   if (status === 429) {
-    return retryAfter > 0
-      ? `Too many requests. Please wait ${retryAfter} second${retryAfter === 1 ? '' : 's'} and try again.`
-      : 'Too many requests. Please wait a minute and try again.';
+    if (retryAfter > 0) {
+      const unit = retryAfter === 1 ? 'second' : 'seconds';
+      return `Too many requests. Please wait ${retryAfter} ${unit} and try again.`;
+    }
+    return 'Too many requests. Please wait a minute and try again.';
   }
   if (status === 413) return 'This message is too large to send.';
   if (status === 503) return 'NoteBurner is temporarily unavailable. Please try again shortly.';

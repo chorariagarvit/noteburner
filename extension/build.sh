@@ -26,7 +26,7 @@ echo "🔨 Building NoteBurner Browser Extension..."
 FILES=(background.js popup.html popup.js popup.css crypto.js icons/icon16.png icons/icon48.png icons/icon128.png)
 
 for f in "${FILES[@]}" manifest.json manifest.firefox.json; do
-  [ -f "$f" ] || { echo -e "${RED}Missing $f${NC}"; exit 1; }
+  [[ -f "$f" ]] || { echo -e "${RED}Missing $f${NC}"; exit 1; }
 done
 
 # Run the extension's own tests first: a broken package must not be produced
@@ -34,9 +34,11 @@ echo -e "${BLUE}🧪 Running extension tests...${NC}"
 (cd "$ROOT_DIR" && npm run --silent test:extension >/dev/null) || { echo -e "${RED}Extension tests failed${NC}"; exit 1; }
 
 stage() { # $1 = target dir, $2 = manifest source file
-  mkdir -p "$1/icons"
-  for f in "${FILES[@]}"; do cp "$f" "$1/$f"; done
-  cp "$2" "$1/manifest.json"
+  local target_dir="$1"
+  local manifest_src="$2"
+  mkdir -p "$target_dir/icons"
+  for f in "${FILES[@]}"; do cp "$f" "$target_dir/$f"; done
+  cp "$manifest_src" "$target_dir/manifest.json"
 }
 
 stage "$STAGE/chrome" manifest.json
@@ -45,7 +47,7 @@ stage "$STAGE/firefox" manifest.firefox.json
 # Both manifests must carry the same version, or one store will reject the upload
 CHROME_VERSION=$(node -p "require('$STAGE/chrome/manifest.json').version")
 FIREFOX_VERSION=$(node -p "require('$STAGE/firefox/manifest.json').version")
-[ "$CHROME_VERSION" = "$FIREFOX_VERSION" ] || { echo -e "${RED}Version mismatch: chrome $CHROME_VERSION vs firefox $FIREFOX_VERSION${NC}"; exit 1; }
+[[ "$CHROME_VERSION" = "$FIREFOX_VERSION" ]] || { echo -e "${RED}Version mismatch: chrome $CHROME_VERSION vs firefox $FIREFOX_VERSION${NC}"; exit 1; }
 
 echo -e "${BLUE}🧹 Cleaning old build files...${NC}"
 rm -f "$ROOT_DIR/noteburner-extension.crx" "$ROOT_DIR/noteburner-extension.zip" "$ROOT_DIR/noteburner-firefox.zip"
@@ -59,7 +61,7 @@ echo -e "${BLUE}🦊 Creating Firefox ZIP...${NC}"
 # Optional signed CRX (only needed for self-hosted or verified-upload flows). The private key
 # is NOT kept in this repository: point NOTEBURNER_KEY at it, or put it next to this script.
 KEY="${NOTEBURNER_KEY:-$EXT_DIR/noteburner-private-key.pem}"
-if [ -f "$KEY" ]; then
+if [[ -f "$KEY" ]]; then
   echo -e "${BLUE}🔐 Creating signed CRX...${NC}"
   (cd "$ROOT_DIR" && npx --yes crx3 "$STAGE/chrome" -p "$KEY" -o noteburner-extension.crx >/dev/null)
 else

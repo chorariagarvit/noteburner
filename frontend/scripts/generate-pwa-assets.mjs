@@ -34,19 +34,23 @@ const centred = (inner, size, fraction) => {
 
 const defs = `<defs><linearGradient id="g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#dc2626"/><stop offset="1" stop-color="#fb923c"/></linearGradient></defs>`;
 
+const flameGradient = `<path d="${FLAME}" fill="url(#g)" stroke="#fecaca" stroke-width="0.6" stroke-linejoin="round"/>`;
+const flameWhite = `<path d="${FLAME}" fill="#ffffff"/>`;
+
 const appIcon = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${defs}
   <rect width="${size}" height="${size}" fill="${NAVY}"/>
-  ${centred(`<path d="${FLAME}" fill="url(#g)" stroke="#fecaca" stroke-width="0.6" stroke-linejoin="round"/>`, size, 0.5)}</svg>`;
+  ${centred(flameGradient, size, 0.5)}</svg>`;
 
 const badge = (size) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  ${centred(`<path d="${FLAME}" fill="#ffffff"/>`, size, 0.8)}</svg>`;
+  ${centred(flameWhite, size, 0.8)}</svg>`;
 
 const shortcutBase = (size, glyph) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${defs}
   <rect width="${size}" height="${size}" rx="${size * 0.2}" fill="${NAVY}"/>
   <circle cx="${size / 2}" cy="${size / 2}" r="${size * 0.36}" fill="url(#g)"/>
   ${centred(glyph, size, 0.44)}</svg>`;
 const plus = `<g stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></g>`;
-const trophy = `<g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${TROPHY.map((d) => `<path d="${d}"/>`).join('')}</g>`;
+const trophyPaths = TROPHY.map((d) => `<path d="${d}"/>`).join('');
+const trophy = `<g fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${trophyPaths}</g>`;
 
 const browser = await chromium.launch();
 

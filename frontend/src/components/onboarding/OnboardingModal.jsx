@@ -93,7 +93,6 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
 
   if (!isOpen) return null;
 
-  const currentStepData = ONBOARDING_STEPS[currentStep - 1];
 
   return (
     <div 
@@ -126,9 +125,9 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
         {/* Progress bar */}
         <div className="px-6 pt-4">
           <div className="flex gap-2" role="progressbar" aria-valuenow={currentStep} aria-valuemin="1" aria-valuemax={ONBOARDING_STEPS.length} aria-label="Onboarding progress">
-            {ONBOARDING_STEPS.map((_, index) => (
+            {ONBOARDING_STEPS.map((stepItem, index) => (
               <div
-                key={index}
+                key={stepItem.id}
                 className={`h-1 flex-1 rounded-full transition-all duration-300 ${
                   index <= currentStep
                     ? 'bg-gradient-to-r from-red-500 to-orange-500'
@@ -153,11 +152,10 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
             </p>
           </div>
 
-          <div className="space-y-3 mb-8" role="list" aria-label="Key features">
+          <ul className="space-y-3 mb-8" aria-label="Key features">
             {step.features.map((feature, index) => (
-              <div
-                key={index}
-                role="listitem"
+              <li
+                key={feature}
                 className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
@@ -169,9 +167,9 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
                 <span className="text-gray-700 dark:text-gray-200 text-sm">
                   {feature}
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         {/* Footer */}

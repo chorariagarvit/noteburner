@@ -144,8 +144,8 @@ const PasswordStrengthMeter = ({ password, onChange }) => {
             {t('passwordMeter.strengthenTitle')}
           </p>
           <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
-            {strength.suggestions.map((key, index) => (
-              <li key={index} className="flex items-start">
+            {strength.suggestions.map((key) => (
+              <li key={key} className="flex items-start">
                 <span className="mr-2">•</span>
                 <span>{t(`passwordMeter.${key}`)}</span>
               </li>

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Check, Star, Zap, Shield, Infinity, Crown } from 'lucide-react';
-import { useI18n } from '../contexts/I18nContext';
 import { useAuth } from '../contexts/AuthContext';
 
 const PLANS = [
@@ -99,11 +98,14 @@ const COLOR_MAP = {
   }
 };
 
+function getIconTone(plan) {
+  if (plan.highlighted) return { box: 'bg-amber-100', icon: 'text-amber-600' };
+  if (plan.id === 'lifetime') return { box: 'bg-purple-100', icon: 'text-purple-600' };
+  return { box: 'bg-gray-100', icon: 'text-gray-600' };
+}
+
 export default function PricingPage() {
-  const { t } = useI18n();
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [billing, setBilling] = useState('monthly');
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16 px-4">
@@ -128,11 +130,16 @@ export default function PricingPage() {
           {PLANS.map((plan) => {
             const colors = COLOR_MAP[plan.color];
             const Icon = plan.icon;
+            const { box: iconBoxClass, icon: iconClass } = getIconTone(plan);
+            const highlightClass = plan.highlighted
+              ? colors.ring + ' shadow-lg shadow-amber-100 dark:shadow-amber-900/20'
+              : 'border border-gray-200 dark:border-gray-700';
+            const ctaTarget = plan.id === 'free' ? '/signup' : '/signup?redirect=' + encodeURIComponent(plan.ctaLink);
             return (
               <div
                 key={plan.id}
                 className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden flex flex-col
-                  ${plan.highlighted ? `${colors.ring} shadow-lg shadow-amber-100 dark:shadow-amber-900/20` : 'border border-gray-200 dark:border-gray-700'}`}
+                  ${highlightClass}`}
               >
                 {plan.badge && (
                   <div className="absolute top-4 right-4">
@@ -150,8 +157,8 @@ export default function PricingPage() {
                 {/* Plan header */}
                 <div className={`p-6 ${colors.header}`}>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className={`p-2 rounded-lg ${plan.highlighted ? 'bg-amber-100' : plan.id === 'lifetime' ? 'bg-purple-100' : 'bg-gray-100'}`}>
-                      <Icon className={`w-5 h-5 ${plan.highlighted ? 'text-amber-600' : plan.id === 'lifetime' ? 'text-purple-600' : 'text-gray-600'}`} />
+                    <div className={`p-2 rounded-lg ${iconBoxClass}`}>
+                      <Icon className={`w-5 h-5 ${iconClass}`} />
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">{plan.name}</h2>
                   </div>
@@ -177,7 +184,7 @@ export default function PricingPage() {
                 {/* CTA */}
                 <div className="p-6 pt-0">
                   <Link
-                    to={isAuthenticated ? plan.ctaLink : (plan.id === 'free' ? '/signup' : `/signup?redirect=${encodeURIComponent(plan.ctaLink)}`)}
+                    to={isAuthenticated ? plan.ctaLink : ctaTarget}
                     className={`w-full block text-center py-3 px-6 rounded-xl font-semibold transition-colors ${colors.button}`}
                   >
                     {plan.cta}

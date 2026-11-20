@@ -62,7 +62,7 @@ export function installApiAuth() {
     url.startsWith(apiPrefix) || (API_BASE === '' && url.startsWith(`${origin}/api/`));
 
   globalThis.fetch = async (input, init = {}) => {
-    const url = typeof input === 'string' ? input : input?.url || String(input);
+    const url = typeof input === 'string' ? input : (input?.url || input?.href || '');
     if (!isApiCall(url) || url.endsWith('/api/app-token')) {
       return rawFetch(input, init);
     }

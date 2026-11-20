@@ -20,7 +20,6 @@ export function GroupMessageLinks({ groupData }) {
   const formatExpiration = (timestamp) => {
     if (!timestamp) return 'Never';
     
-    const date = new Date(timestamp);
     const now = new Date();
     const diff = timestamp - now.getTime();
     

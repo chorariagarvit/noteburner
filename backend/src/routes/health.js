@@ -15,8 +15,7 @@ const app = new Hono();
 app.get('/', async (c) => {
   const health = await healthCheck(c.env);
   
-  const statusCode = health.status === 'healthy' ? 200 : 
-                     health.status === 'degraded' ? 503 : 500;
+  const statusCode = ({ healthy: 200, degraded: 503 })[health.status] ?? 500;
   
   return c.json(health, statusCode);
 });

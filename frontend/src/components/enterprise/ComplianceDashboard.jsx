@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Shield, Download, Trash2, Clock, MapPin, User } from 'lucide-react';
-import { getSessionToken, getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
+import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
 
@@ -22,7 +22,6 @@ export default function ComplianceDashboard() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const sessionToken = getSessionToken();
 
       // Load compliance settings
       const settingsRes = await fetch(`${API_BASE}/api/compliance/${teamId}/settings`, {
@@ -69,7 +68,6 @@ export default function ComplianceDashboard() {
 
   const handleExport = async (type, format = 'json') => {
     try {
-      const sessionToken = getSessionToken();
       const url = `${API_BASE}/api/compliance/${teamId}/export/${type}?format=${format}`;
       
       const response = await fetch(url, {
@@ -285,6 +283,7 @@ export default function ComplianceDashboard() {
                   onChange={(e) => setSettings({ ...settings, gdpr_enabled: e.target.checked })}
                   className="sr-only peer"
                 />
+                <span className="sr-only">{t('compliance.gdprToggle')}</span>
                 <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
               </label>
             </div>
@@ -301,6 +300,7 @@ export default function ComplianceDashboard() {
                   onChange={(e) => setSettings({ ...settings, auto_delete_enabled: e.target.checked })}
                   className="sr-only peer"
                 />
+                <span className="sr-only">{t('compliance.autoDeleteToggle')}</span>
                 <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
               </label>
             </div>
@@ -317,6 +317,7 @@ export default function ComplianceDashboard() {
                   onChange={(e) => setSettings({ ...settings, require_password: e.target.checked })}
                   className="sr-only peer"
                 />
+                <span className="sr-only">{t('compliance.requirePasswordToggle')}</span>
                 <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
               </label>
             </div>

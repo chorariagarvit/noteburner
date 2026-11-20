@@ -40,8 +40,8 @@ function EndpointCard({ method, path, description, authRequired, requestBody, re
           <div className="mt-3">
             <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{t('apiDocs.headersLabel')}</h4>
             <div className="bg-white dark:bg-gray-900 rounded p-2 space-y-1">
-              {headers.map((header, idx) => (
-                <div key={idx} className="text-xs font-mono text-gray-700 dark:text-gray-300">
+              {headers.map((header) => (
+                <div key={header.name} className="text-xs font-mono text-gray-700 dark:text-gray-300">
                   <span className="text-blue-600 dark:text-blue-400">{header.name}</span>: {header.value}
                 </div>
               ))}

@@ -35,9 +35,7 @@ function CreateMessageForm(props) {
         removeFile,
         error,
         loadingMessage,
-        showTemplates,
         setShowTemplates,
-        onSelectTemplate,
         selfDestructOptions,
         setSelfDestructOptions
     } = props;
@@ -127,7 +125,6 @@ function CreateMessageForm(props) {
                 )}
 
                 {!isGroupMessage && (
-                    <>
                         <div>
                             <label htmlFor="custom-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 <Link2 className="w-4 h-4 inline mr-1" />
@@ -163,7 +160,6 @@ function CreateMessageForm(props) {
                                 )}
                             </div>
                         </div>
-                    </>
                 )}
 
                 <div className="flex items-center gap-2 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">

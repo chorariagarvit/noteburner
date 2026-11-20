@@ -101,18 +101,19 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
           <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
             {categories[category]}
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3" role="list" aria-label={`${categories[category]} templates`}>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-3" aria-label={`${categories[category]} templates`}>
             {templates.map((template) => {
               const IconComponent = template.icon;
+              const templateName = t(`templates.${toCamel(template.id)}_name`, {}, template.name);
+              const templateDescription = t(`templates.${toCamel(template.id)}_desc`, {}, template.description);
               return (
+                <li key={template.id} className="contents">
                 <button
-                  key={template.id}
                   onClick={() => {
                     onSelectTemplate(template);
                     if (onClose) onClose();
                   }}
-                  role="listitem"
-                  aria-label={`${t(`templates.${toCamel(template.id)}_name`, {}, template.name)}: ${t(`templates.${toCamel(template.id)}_desc`, {}, template.description)}`}
+                  aria-label={`${templateName}: ${templateDescription}`}
                   className="group p-4 text-left bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-red-500 dark:hover:border-red-500 hover:shadow-lg transition-all duration-200"
                 >
                   <div className="flex items-start gap-3">
@@ -121,10 +122,10 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h5 className="font-semibold text-gray-900 dark:text-white mb-1">
-                        {t(`templates.${toCamel(template.id)}_name`, {}, template.name)}
+                        {templateName}
                       </h5>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {t(`templates.${toCamel(template.id)}_desc`, {}, template.description)}
+                        {templateDescription}
                       </p>
                       <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
                         <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded" aria-label={`Expires in: ${getExpirationLabel(template.expiration)}`}>
@@ -134,9 +135,10 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
                     </div>
                   </div>
                 </button>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
       ))}
 

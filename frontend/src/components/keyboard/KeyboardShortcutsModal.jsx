@@ -81,19 +81,18 @@ function KeyboardShortcutsModal({ isOpen, onClose }) {
             </div>
           </div>
 
-          <div className="space-y-6" role="list" aria-label="Keyboard shortcut categories">
+          <ul className="space-y-6" aria-label="Keyboard shortcut categories">
             {SHORTCUTS.map((category) => (
-              <div key={category.category} role="listitem">
+              <li key={category.category}>
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
                   {category.category}
                 </h3>
-                <div className="space-y-2" role="list" aria-label={`${category.category} shortcuts`}>
-                  {category.shortcuts.map((shortcut, index) => {
+                <ul className="space-y-2" aria-label={`${category.category} shortcuts`}>
+                  {category.shortcuts.map((shortcut) => {
                     const keys = isMac ? shortcut.mac : shortcut.keys;
                     return (
-                      <div
-                        key={index}
-                        role="listitem"
+                      <li
+                        key={shortcut.description}
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
                         <span className="text-gray-700 dark:text-gray-200">
@@ -101,7 +100,7 @@ function KeyboardShortcutsModal({ isOpen, onClose }) {
                         </span>
                         <div className="flex items-center gap-1" aria-label={`Press ${keys.join(' + ')}`}>
                           {keys.map((key, keyIndex) => (
-                            <span key={keyIndex} className="flex items-center gap-1">
+                            <span key={key} className="flex items-center gap-1">
                               <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-sm">
                                 {key}
                               </kbd>
@@ -111,13 +110,13 @@ function KeyboardShortcutsModal({ isOpen, onClose }) {
                             </span>
                           ))}
                         </div>
-                      </div>
+                      </li>
                     );
                   })}
-                </div>
-              </div>
+                </ul>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         {/* Footer */}

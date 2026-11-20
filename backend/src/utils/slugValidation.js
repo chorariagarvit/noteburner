@@ -39,7 +39,7 @@ export function validateSlug(slug) {
   }
 
   // Check format (alphanumeric, hyphens, underscores only)
-  const validFormat = /^[a-zA-Z0-9_\-]+$/;
+  const validFormat = /^[a-zA-Z0-9_-]+$/;
   if (!validFormat.test(slug)) {
     return { valid: false, error: 'Slug can only contain letters, numbers, hyphens, and underscores' };
   }
@@ -108,9 +108,9 @@ export function sanitizeSlug(slug) {
     .toLowerCase()
     .trim()
     .replaceAll(/\s+/g, '-')             // Replace spaces with hyphens
-    .replaceAll(/[^a-z0-9_\-]/g, '')     // Remove invalid characters
-    .replaceAll(/\-\-+/g, '-')           // Replace multiple hyphens with single
-    .replaceAll(/(^\-+)|(\-+$)/g, '')    // Remove leading/trailing hyphens
+    .replaceAll(/[^a-z0-9_-]/g, '')     // Remove invalid characters
+    .replaceAll(/--+/g, '-')           // Replace multiple hyphens with single
+    .replaceAll(/(^-+)|(-+$)/g, '')    // Remove leading/trailing hyphens
     .slice(0, 20);                       // Limit to 20 characters
 }
 

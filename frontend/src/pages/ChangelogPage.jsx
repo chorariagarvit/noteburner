@@ -39,8 +39,8 @@ function VersionCard({ version, date, title, features, technical, security, chan
             {t('changelog.sectionFeatures')}
           </h5>
           <ul className="space-y-1">
-            {features.map((feature, index) => (
-              <li key={index} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+            {features.map((feature) => (
+              <li key={feature} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-primary-500 mt-1">•</span>
                 <span>{feature}</span>
               </li>
@@ -56,8 +56,8 @@ function VersionCard({ version, date, title, features, technical, security, chan
             {t('changelog.sectionTechnical')}
           </h5>
           <ul className="space-y-1">
-            {technical.map((item, index) => (
-              <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+            {technical.map((item) => (
+              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-gray-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
@@ -73,8 +73,8 @@ function VersionCard({ version, date, title, features, technical, security, chan
             {t('changelog.sectionSecurity')}
           </h5>
           <ul className="space-y-1">
-            {security.map((item, index) => (
-              <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+            {security.map((item) => (
+              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-red-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
@@ -90,8 +90,8 @@ function VersionCard({ version, date, title, features, technical, security, chan
             {t('changelog.sectionChanged')}
           </h5>
           <ul className="space-y-1">
-            {changed.map((item, index) => (
-              <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+            {changed.map((item) => (
+              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-blue-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
@@ -107,8 +107,8 @@ function VersionCard({ version, date, title, features, technical, security, chan
             {t('changelog.sectionFixed')}
           </h5>
           <ul className="space-y-1">
-            {fixed.map((item, index) => (
-              <li key={index} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+            {fixed.map((item) => (
+              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-green-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
