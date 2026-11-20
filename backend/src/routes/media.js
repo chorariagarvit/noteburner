@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { incrementStat } from '../utils/stats.js';
+import { sanitizeForLog } from '../utils/logSafe.js';
 
 import { matchesCreatorToken, upgradeCreatorToken } from '../utils/creatorToken.js';
 
@@ -320,7 +321,7 @@ app.delete('/:fileId', async (c) => {
       `DELETE FROM media_cleanup WHERE file_id = ?`
     ).bind(fileId).run();
 
-    console.log(`Media file ${fileId} deleted after successful download`);
+    console.log(`Media file ${sanitizeForLog(fileId)} deleted after successful download`);
     return c.json({ success: true });
   } catch (error) {
     console.error('Error confirming media download:', error);

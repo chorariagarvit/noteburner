@@ -20,7 +20,7 @@ export async function sendEmail(env, { to, subject, html, text }) {
     // Check if email sender is configured
     if (!env.EMAIL_SENDER) {
       console.warn('EMAIL_SENDER not configured. Skipping email send.');
-      console.log(`[DEV] Would send email to ${to}: ${subject}`);
+      console.log('[DEV] Would send an email (EMAIL_SENDER not configured)');
       return false;
     }
 
@@ -45,7 +45,7 @@ export async function sendEmail(env, { to, subject, html, text }) {
     };
 
     await env.EMAIL_SENDER.send(message);
-    console.log(`Email sent successfully to ${to}: ${subject}`);
+    console.log('Email sent successfully');
     return true;
 
   } catch (error) {

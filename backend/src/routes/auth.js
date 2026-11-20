@@ -31,8 +31,13 @@ import {
 import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 
-// Valid bcrypt hash compared against for unknown emails so response time doesn't reveal account existence
-const DUMMY_BCRYPT_HASH = '$2b$10$/irzLbtFeEa2LzCJx3scjOC7BC1cKIn7ovEPEvpYcmuHBuIMTMsFK';
+// Hash compared against for unknown emails so response time doesn't reveal account existence.
+// Computed lazily once per isolate with the real hashing helper (no hash literal in source).
+let dummyHashPromise = null;
+function getDummyHash() {
+  dummyHashPromise ??= hashPassword(nanoid(32));
+  return dummyHashPromise;
+}
 
 const router = new Hono();
 
@@ -146,7 +151,7 @@ router.post('/login', rateLimitMiddleware(10, 300), async (c) => {
         VALUES (?, ?, 0, 'Email not found')
       `).bind(email.toLowerCase(), ipAddress).run();
 
-      await verifyPassword(password, DUMMY_BCRYPT_HASH); // constant-ish timing vs. real accounts
+      await verifyPassword(password, await getDummyHash()); // constant-ish timing vs. real accounts
       return c.json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }, 401);
     }
 
@@ -154,7 +159,7 @@ router.post('/login', rateLimitMiddleware(10, 300), async (c) => {
     if (user.locked_until) {
       const lockedUntil = new Date(user.locked_until);
       if (lockedUntil > new Date()) {
-        await verifyPassword(password, DUMMY_BCRYPT_HASH);
+        await verifyPassword(password, await getDummyHash());
         return c.json({ error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }, 401);
       } else {
         // Lock expired, reset failed attempts
@@ -395,7 +400,7 @@ router.post('/forgot-password', rateLimitMiddleware(5, 300), async (c) => {
 
     // Fallback: log generic message if email fails (dev mode)
     if (!emailSent) {
-      console.log(`[DEV] Password reset email not sent for ${email} - check email service config`);
+      console.log('[DEV] Password reset email not sent - check email service config');
     }
 
     return c.json({

@@ -506,6 +506,7 @@
     "emailLabel": "Email Addresses (Optional)",
     "emailPlaceholder": "friend1@example.com, friend2@example.com",
     "emailHint": "Separate multiple emails with commas",
+    "emailInvalid": "Ignored invalid email addresses",
     "sendEmailBtn": "Send via Email",
     "sendEmailSent": "Email Opened!",
     "shareBtn": "Share",

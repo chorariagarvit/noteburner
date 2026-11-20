@@ -547,6 +547,7 @@
     "emailLabel": "Correos Electrónicos (Opcional)",
     "emailPlaceholder": "amigo1@ejemplo.com, amigo2@ejemplo.com",
     "emailHint": "Separa varios correos con comas",
+    "emailInvalid": "Se ignoraron direcciones de correo no válidas",
     "sendEmailBtn": "Enviar por Correo",
     "sendEmailSent": "¡Correo Abierto!",
     "shareBtn": "Compartir",

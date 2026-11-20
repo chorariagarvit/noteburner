@@ -8,14 +8,16 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 export const PLACEHOLDER = '__BUILD_ID__';
 
 export const stampServiceWorker = (source, buildId) => source.split(PLACEHOLDER).join(buildId);
 
 const readGitRef = () => {
-  try { return execSync('git rev-parse --short=8 HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return ''; }
+  // Fixed system directories only, so a writable directory on the caller's PATH cannot shadow `git`.
+  const env = { ...process.env, PATH: '/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin' };
+  try { return execFileSync('git', ['rev-parse', '--short=8', 'HEAD'], { env, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return ''; }
 };
 
 /**

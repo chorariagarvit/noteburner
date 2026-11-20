@@ -1,4 +1,5 @@
 import { API_BASE } from './apiBase';
+import { sanitizeForLog } from './logSafe';
 const API_URL = API_BASE;
 
 const CHUNK_SIZE = 50 * 1024 * 1024; // 50MB chunks
@@ -111,7 +112,7 @@ async function uploadChunk(fileId, uploadId, chunkIndex, chunkData, totalChunks,
       return { partNumber, etag };
     } catch (error) {
       lastError = error;
-      console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} upload attempt ${attempt + 1} failed:`, error.message);
+      console.warn(`Chunk ${chunkIndex + 1}/${totalChunks} upload attempt ${attempt + 1} failed:`, sanitizeForLog(error?.message));
       
       if (attempt < MAX_RETRIES - 1) {
         await sleep(RETRY_DELAY * (attempt + 1));
