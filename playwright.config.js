@@ -1,9 +1,17 @@
 import crypto from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 // Mirrors backend/src/utils/appToken.js; secret matches the dev script's APP_TOKEN_SECRET
+// The dev Worker's APP_TOKEN_SECRET is the one passed by `npm run dev` in backend/package.json; read it from there
+// instead of repeating the value here.
+function devAppTokenSecret() {
+  const dev = JSON.parse(readFileSync(new URL('./backend/package.json', import.meta.url), 'utf8')).scripts.dev;
+  return /--var APP_TOKEN_SECRET:(\S+)/.exec(dev)[1];
+}
+
 function makeTestAppToken() {
-  const secret = process.env.APP_TOKEN_SECRET || 'dev-app-token-secret';
+  const secret = process.env.APP_TOKEN_SECRET || devAppTokenSecret();
   const payload = Buffer.from(JSON.stringify({ exp: Date.now() + 24 * 3600 * 1000, n: 'e2e' })).toString('base64url');
   return `${payload}.${crypto.createHmac('sha256', secret).update(payload).digest('hex')}`;
 }
