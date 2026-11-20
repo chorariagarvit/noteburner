@@ -72,6 +72,7 @@ function CreateMessageSuccess({
                                         type="text"
                                         value={shareUrl}
                                         readOnly
+                                        aria-label={t('a11y.shareLink')}
                                         className="input-field font-mono text-sm"
                                     />
                                     <button

@@ -31,7 +31,7 @@ export default function TOTPSetup({ totpData }) {
   return (
     <div className="mt-6 p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl">
       <div className="flex items-center gap-3 mb-4">
-        <Shield className="w-6 h-6 text-amber-600" />
+        <Shield className="w-6 h-6 text-amber-700 dark:text-amber-400" />
         <h3 className="text-lg font-semibold text-gray-900">
           {t('totpSetup.title')}
         </h3>

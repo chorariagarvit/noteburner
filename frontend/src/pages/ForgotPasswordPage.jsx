@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
             <div className="mt-6">
               <Link 
                 to="/login"
-                className="text-amber-500 hover:text-amber-600 font-medium"
+                className="text-amber-700 dark:text-amber-400 hover:text-amber-600 font-medium"
               >
                 {t('auth.forgotPassword.backToLogin')}
               </Link>
@@ -111,14 +111,14 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('auth.forgotPassword.sending') : t('auth.forgotPassword.submitButton')}
             </button>
           </div>
 
           <div className="text-center">
-            <Link to="/login" className="text-sm font-medium text-amber-500 hover:text-amber-600">
+            <Link to="/login" className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-600">
               {t('auth.forgotPassword.backToLogin')}
             </Link>
           </div>

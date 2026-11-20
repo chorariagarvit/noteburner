@@ -148,7 +148,7 @@ export default function PremiumPage() {
         {/* Success banner */}
         {success && (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4 flex items-start gap-3">
-            <Check className="w-5 h-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
+            <Check className="w-5 h-5 text-green-700 dark:text-green-400 shrink-0 mt-0.5" />
             <p className="text-sm text-green-800 dark:text-green-300">{success}</p>
           </div>
         )}
@@ -172,7 +172,7 @@ export default function PremiumPage() {
               'bg-gray-100 dark:bg-gray-700'
             }`}>
               <PlanIcon className={`w-7 h-7 ${
-                currentPlanId === 'premium' ? 'text-amber-600' :
+                currentPlanId === 'premium' ? 'text-amber-700 dark:text-amber-400' :
                 currentPlanId === 'lifetime' ? 'text-purple-600' :
                 'text-gray-600 dark:text-gray-400'
               }`} />
@@ -274,7 +274,7 @@ export default function PremiumPage() {
                   onClick={() => setPayMethod('stripe')}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
                     payMethod === 'stripe'
-                      ? 'bg-amber-500 border-amber-500 text-white'
+                      ? 'bg-amber-700 border-amber-500 text-white'
                       : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
                   }`}
                 >
@@ -308,7 +308,7 @@ export default function PremiumPage() {
               <button
                 onClick={() => handleSubscribe(planParam === 'lifetime' ? 'lifetime' : 'premium')}
                 disabled={subscribing || payMethod === 'crypto'}
-                className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-colors"
+                className="flex items-center justify-center gap-2 bg-amber-700 hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-colors"
               >
                 {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                 {subscribing ? 'Processing…' : 'Subscribe — $5/month'}
@@ -349,13 +349,13 @@ function UsageBar({ label, used, limit, unit, format }) {
     <div>
       <div className="flex justify-between text-sm mb-1.5">
         <span className="text-gray-700 dark:text-gray-300">{label}</span>
-        <span className={`font-medium ${isAtLimit ? 'text-red-600' : isNearLimit ? 'text-amber-600' : 'text-gray-600 dark:text-gray-400'}`}>
+        <span className={`font-medium ${isAtLimit ? 'text-red-600' : isNearLimit ? 'text-amber-700 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'}`}>
           {format === 'bytes' ? formatBytes(used) : used.toLocaleString()} / {format === 'bytes' ? formatBytes(limit) : limit.toLocaleString()} {format !== 'bytes' ? unit : ''}
         </span>
       </div>
       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all ${isAtLimit ? 'bg-red-500' : isNearLimit ? 'bg-amber-500' : 'bg-green-500'}`}
+          className={`h-full rounded-full transition-all ${isAtLimit ? 'bg-red-500' : isNearLimit ? 'bg-amber-700' : 'bg-green-500'}`}
           style={{ width: `${pct}%` }}
         />
       </div>

@@ -195,7 +195,7 @@ export default function TeamDashboard() {
             onClick={() => setActiveTab('overview')}
             className={`pb-3 font-medium ${
               activeTab === 'overview'
-                ? 'border-b-2 border-amber-500 text-amber-600 dark:text-amber-400'
+                ? 'border-b-2 border-amber-500 text-amber-700 dark:text-amber-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -205,7 +205,7 @@ export default function TeamDashboard() {
             onClick={() => setActiveTab('members')}
             className={`pb-3 font-medium ${
               activeTab === 'members'
-                ? 'border-b-2 border-amber-500 text-amber-600 dark:text-amber-400'
+                ? 'border-b-2 border-amber-500 text-amber-700 dark:text-amber-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -215,7 +215,7 @@ export default function TeamDashboard() {
             onClick={() => setActiveTab('messages')}
             className={`pb-3 font-medium ${
               activeTab === 'messages'
-                ? 'border-b-2 border-amber-500 text-amber-600 dark:text-amber-400'
+                ? 'border-b-2 border-amber-500 text-amber-700 dark:text-amber-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -255,7 +255,7 @@ export default function TeamDashboard() {
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('teamDashboard.membersTitle')}</h2>
             <button
               onClick={() => setShowInviteModal(true)}
-              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+              className="px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800"
             >
               {t('teamDashboard.inviteBtn')}
             </button>
@@ -387,7 +387,7 @@ export default function TeamDashboard() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-amber-500 dark:bg-amber-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-amber-500"
+                  className="flex-1 px-4 py-2 bg-amber-700 dark:bg-amber-700 text-white rounded-lg hover:bg-amber-800 dark:hover:bg-amber-700"
                 >
                   {t('teamDashboard.sendInviteBtn')}
                 </button>

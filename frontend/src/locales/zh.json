@@ -835,5 +835,13 @@
     "authTitle": "Authentication",
     "authDesc": "Include your API key in the X-API-Key header for all requests.",
     "baseUrl": "Base URL"
+  },
+  "a11y": {
+    "github": "GitHub 上的 NoteBurner",
+    "selectLanguage": "选择语言",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "shareLink": "分享链接",
+    "userMenu": "账户菜单"
   }
 }
