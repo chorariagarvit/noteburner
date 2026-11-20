@@ -290,6 +290,19 @@ Set `TOTP_ENCRYPTION_KEY` **before** deploying and never change it afterwards (m
 The API **fails closed**: without `APP_TOKEN_SECRET` anonymous calls get HTTP 503.
 Local dev (`npm run dev`) uses `dev-app-token-secret`; Playwright signs test tokens with the same value.
 
+## Cloudflare dashboard settings (check after every deploy)
+
+`frontend/public/_headers` is applied by Cloudflare Pages, but zone-level features can override or add to it.
+After a deploy run `npm run check:live-csp --workspace=frontend`: it compares the headers the live site serves with
+`_headers` and loads real pages in a browser looking for CSP violations. Settings that have caused failures:
+
+| Setting (dashboard) | Needed value | Why |
+|---|---|---|
+| Caching → Configuration → **Browser Cache TTL** | **Respect Existing Headers** | A fixed TTL (default 4 hours) overrides `Cache-Control: no-cache` on `/sw.js`, so installed apps keep an old service worker for hours. |
+| Speed → Optimization → **Rocket Loader** | **Off** | It rewrites script tags (the app's module script gets a different `type`) and is not compatible with a strict CSP. |
+| Analytics → **Web Analytics** (automatic setup) | **Off**, or allow it in the CSP | Pages injects `static.cloudflareinsights.com/beacon.min.js`, which `script-src` blocks. To keep it, add `https://static.cloudflareinsights.com` to `script-src` and `https://cloudflareinsights.com` to `connect-src`. |
+| Security → Bots → **JavaScript Detections** / Bot Fight Mode | **Off** for this site (or accept the report) | They inject an inline script that `script-src` blocks; an inline script can only be allowed with a hash or nonce, which Pages cannot provide for an injected snippet. |
+
 ## Country restriction and auto-burn
 
 These use the visitor country Cloudflare resolves at the edge (IP Geolocation is on by default, no setup). **Do not** set `ALLOW_COUNTRY_HEADER` in production: it lets a caller dictate their own country and is only used by the local dev script and the e2e tests.
