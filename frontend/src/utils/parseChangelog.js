@@ -100,7 +100,7 @@ export function getVersionStatus(version) {
  */
 export function formatDate(dateString) {
   const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime())) {
     return dateString; // Return as-is if invalid
   }
   

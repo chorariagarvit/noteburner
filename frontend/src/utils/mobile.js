@@ -35,10 +35,10 @@ export const hasTouchSupport = () => {
 export const getSafeAreaInsets = () => {
   const style = getComputedStyle(document.documentElement);
   return {
-    top: parseInt(style.getPropertyValue('env(safe-area-inset-top)') || '0', 10),
-    right: parseInt(style.getPropertyValue('env(safe-area-inset-right)') || '0', 10),
-    bottom: parseInt(style.getPropertyValue('env(safe-area-inset-bottom)') || '0', 10),
-    left: parseInt(style.getPropertyValue('env(safe-area-inset-left)') || '0', 10)
+    top: Number.parseInt(style.getPropertyValue('env(safe-area-inset-top)') || '0', 10),
+    right: Number.parseInt(style.getPropertyValue('env(safe-area-inset-right)') || '0', 10),
+    bottom: Number.parseInt(style.getPropertyValue('env(safe-area-inset-bottom)') || '0', 10),
+    left: Number.parseInt(style.getPropertyValue('env(safe-area-inset-left)') || '0', 10)
   };
 };
 

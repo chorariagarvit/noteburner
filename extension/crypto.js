@@ -229,7 +229,7 @@ async function createSecureMessage(message, password, expiresIn = '24') {
     console.log('[NoteBurner Extension] Request method: POST');
     
     // Convert hours to seconds (same as the website). "No expiration" (empty) sends no expiry at all.
-    const hours = parseInt(expiresIn, 10);
+    const hours = Number.parseInt(expiresIn, 10);
     const expirySeconds = Number.isFinite(hours) && hours > 0 ? hours * 3600 : undefined;
     
     const requestBody = {

@@ -21,7 +21,7 @@ function parseAcceptLanguage(header) {
     .split(',')
     .map((part) => {
       const [lang, q] = part.trim().split(';q=');
-      return { lang: lang.trim().split('-')[0].toLowerCase(), q: parseFloat(q || '1') };
+      return { lang: lang.trim().split('-')[0].toLowerCase(), q: Number.parseFloat(q || '1') };
     })
     .sort((a, b) => b.q - a.q);
 

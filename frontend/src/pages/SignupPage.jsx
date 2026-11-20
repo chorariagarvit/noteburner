@@ -47,7 +47,8 @@ export default function SignupPage() {
       } else {
         setError(result.error || 'Signup failed');
       }
-    } catch (err) {
+    } catch {
+      // Intentionally not logged: the failure is reported to the caller/user below
       setError('An error occurred during signup');
     } finally {
       setLoading(false);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Plus, Crown, Shield, Eye, UserCheck } from 'lucide-react';
+import { Users, Plus, Shield, Eye, UserCheck } from 'lucide-react';
 import { getAuthHeaders } from '../utils/session';
 import { useI18n } from '../contexts/I18nContext';
 import { API_BASE } from '../utils/apiBase';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Star, Zap, Shield, Infinity, Crown } from 'lucide-react';
+import { Check, Star, Shield, Crown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const PLANS = [

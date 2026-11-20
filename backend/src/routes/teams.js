@@ -402,8 +402,8 @@ router.delete('/:teamId/members/:memberId', requireAuth, async (c) => {
 router.get('/:id/messages', requireAuth, async (c) => {
   const userId = getUserId(c);
   const teamId = c.req.param('id');
-  const limit = Math.min(Math.max(parseInt(c.req.query('limit') || '50') || 50, 1), 200);
-  const offset = Math.max(parseInt(c.req.query('offset') || '0') || 0, 0);
+  const limit = Math.min(Math.max(Number.parseInt(c.req.query('limit') || '50') || 50, 1), 200);
+  const offset = Math.max(Number.parseInt(c.req.query('offset') || '0') || 0, 0);
 
   if (!(await checkTeamPermission(c.env.DB, teamId, userId, 'viewer'))) {
     return c.json({ error: 'Access denied', code: 'ACCESS_DENIED' }, 403);

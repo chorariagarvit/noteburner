@@ -11,7 +11,7 @@ import { readCountry } from '../utils/geo.js';
 import { hashCreatorToken, matchesCreatorToken } from '../utils/creatorToken.js';
 import { sealSecret, openSecret } from '../utils/secretBox.js';
 import { denyIfRestricted, recordFailure, geoVerdict } from '../utils/protections.js';
-import { clampInt, limitOrUnlimited, flag, MAX_EXPIRY_SECONDS } from '../utils/messageOptions.js';
+import { limitOrUnlimited, flag, MAX_EXPIRY_SECONDS } from '../utils/messageOptions.js';
 import crypto from 'node:crypto';
 import { generateTOTPSecret, generateTOTPUri, verifyTOTP, createTotpProof, verifyTotpProof } from '../utils/totp.js';
 

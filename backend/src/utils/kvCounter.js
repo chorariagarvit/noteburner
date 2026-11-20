@@ -10,8 +10,8 @@ export async function readCounter(kv, key) {
   const raw = await kv.get(key);
   if (!raw) return { count: 0, resetAt: 0 };
   const [countStr, resetStr] = raw.split('|');
-  const count = parseInt(countStr, 10) || 0;
-  const resetAt = parseInt(resetStr, 10) || 0;
+  const count = Number.parseInt(countStr, 10) || 0;
+  const resetAt = Number.parseInt(resetStr, 10) || 0;
   if (!resetAt || resetAt <= Date.now() / 1000) return { count: 0, resetAt: 0 }; // window over
   return { count, resetAt };
 }

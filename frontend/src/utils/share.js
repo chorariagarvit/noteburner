@@ -123,7 +123,8 @@ export const copyToClipboard = async (text) => {
     document.execCommand('copy');
     document.body.removeChild(textArea);
     return true;
-  } catch (error) {
+  } catch {
+    // Intentionally not logged: the failure is reported to the caller/user below
     document.body.removeChild(textArea);
     return false;
   }

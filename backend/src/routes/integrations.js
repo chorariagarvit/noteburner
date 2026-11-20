@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { findActiveApiKey } from '../utils/apiKeys.js';
 import { verifySlackSignature } from '../utils/slackSignature.js';
 

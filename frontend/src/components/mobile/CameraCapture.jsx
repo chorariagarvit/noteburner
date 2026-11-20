@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Camera, Video, X, Check, RotateCw } from 'lucide-react';
+import { Camera, X, Check, RotateCw } from 'lucide-react';
 
 /** Shown when camera permission is denied. */
 const CameraError = ({ message, onClose }) => (
@@ -284,7 +284,8 @@ export const useCamera = () => {
       stream.getTracks().forEach(track => track.stop());
       setHasPermission(true);
       return true;
-    } catch (error) {
+    } catch {
+      // Intentionally not logged: the failure is reported to the caller/user below
       setHasPermission(false);
       return false;
     }

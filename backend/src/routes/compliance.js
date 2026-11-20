@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { nanoid } from 'nanoid';
 import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 
 const router = new Hono();

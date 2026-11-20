@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Calendar, Package, CheckCircle, Code, Database, TestTube, Shield, Wrench } from 'lucide-react';
-import changelogRaw from '../../../CHANGELOG.md?raw';
-import { parseChangelog, getVersionStatus } from '../utils/parseChangelog';
+import { useEffect } from 'react';
+import { Calendar, Package, CheckCircle, Code, TestTube, Shield, Wrench } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 
 function VersionCard({ version, date, title, features, technical, security, changed, fixed, status = 'released' }) {

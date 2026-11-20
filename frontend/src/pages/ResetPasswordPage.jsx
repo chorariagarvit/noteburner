@@ -55,7 +55,8 @@ export default function ResetPasswordPage() {
       } else {
         setError(data.error || 'Failed to reset password');
       }
-    } catch (err) {
+    } catch {
+      // Intentionally not logged: the failure is reported to the caller/user below
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);

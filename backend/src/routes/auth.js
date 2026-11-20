@@ -13,21 +13,8 @@ import {
   generateVerificationToken,
   sha256hex
 } from '../utils/password.js';
-import {
-  createSession,
-  validateSession,
-  revokeSessionById,
-  revokeSession,
-  revokeAllUserSessions,
-  getUserSessions,
-  refreshSession
-} from '../utils/session.js';
-import { 
-  sendVerificationEmail,
-  sendAccountExistsEmail, 
-  sendPasswordResetEmail, 
-  sendWelcomeEmail 
-} from '../utils/email.js';
+import { createSession, revokeSessionById, revokeSession, revokeAllUserSessions, getUserSessions, refreshSession } from '../utils/session.js';
+import { sendVerificationEmail, sendAccountExistsEmail, sendPasswordResetEmail } from '../utils/email.js';
 import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 

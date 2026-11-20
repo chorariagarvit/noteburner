@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Palette, Upload, Eye, Save } from 'lucide-react';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
@@ -71,7 +70,8 @@ export default function BrandingCustomizer() {
       });
       setBranding({ ...branding, logo_url: null });
       setMessage({ type: 'success', text: 'Logo removed' });
-    } catch (err) {
+    } catch {
+      // Intentionally not logged: the failure is reported to the caller/user below
       setMessage({ type: 'error', text: 'Failed to remove logo' });
     }
   };

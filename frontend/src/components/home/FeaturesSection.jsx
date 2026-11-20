@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Lock, Flame, Shield, FileImage, Clock, Zap } from 'lucide-react';
+import { Lock, Flame, Shield, FileImage } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 
 function FeatureCard({ icon, title, description }) {

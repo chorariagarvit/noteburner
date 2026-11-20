@@ -85,8 +85,8 @@ router.use('*', requireApiKey);
  */
 router.get('/messages', async (c) => {
   const userId = c.get('userId');
-  const limit = parseInt(c.req.query('limit') || '50');
-  const offset = parseInt(c.req.query('offset') || '0');
+  const limit = Number.parseInt(c.req.query('limit') || '50');
+  const offset = Number.parseInt(c.req.query('offset') || '0');
   const teamId = c.req.query('team_id');
 
   let query = `

@@ -3,7 +3,7 @@
  * Implements RFC 6238 standard for 2FA authentication
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 function safeEqual(a, b) {
   const bufA = Buffer.from(String(a));
@@ -47,7 +47,7 @@ function base32Decode(base32) {
   
   const buffer = [];
   for (let i = 0; i + 8 <= bits.length; i += 8) {
-    buffer.push(parseInt(bits.slice(i, i + 8), 2));
+    buffer.push(Number.parseInt(bits.slice(i, i + 8), 2));
   }
   
   return Buffer.from(buffer);

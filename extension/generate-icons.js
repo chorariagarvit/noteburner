@@ -1,5 +1,5 @@
 const sharp = require('sharp');
-const fs = require('fs');
+const fs = require('node:fs');
 
 async function createIcon(size) {
   // Create SVG with flame icon matching website favicon

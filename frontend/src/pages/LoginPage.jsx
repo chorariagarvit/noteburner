@@ -36,7 +36,8 @@ export default function LoginPage() {
       } else {
         setError(result.error || 'Login failed');
       }
-    } catch (err) {
+    } catch {
+      // Intentionally not logged: the failure is reported to the caller/user below
       setError('An error occurred during login');
     } finally {
       setLoading(false);

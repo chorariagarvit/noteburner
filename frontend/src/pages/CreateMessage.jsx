@@ -14,7 +14,6 @@ import CreateMessageForm from '../components/create/CreateMessageForm';
 import CreateMessageSuccess from '../components/create/CreateMessageSuccess';
 import MessageTemplates from '../components/templates/MessageTemplates';
 import KeyboardShortcutsModal from '../components/keyboard/KeyboardShortcutsModal';
-import SelfDestructOptions from '../components/SelfDestructOptions';
 import { useI18n } from '../contexts/I18nContext';
 
 /** Throws an Error with a user-facing message when the form input is unusable. */

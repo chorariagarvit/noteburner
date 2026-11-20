@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Shield, Download, Trash2, Clock, MapPin, User } from 'lucide-react';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
@@ -230,7 +229,7 @@ export default function ComplianceDashboard() {
               <input
                 type="number"
                 value={settings.data_retention_days}
-                onChange={(e) => setSettings({ ...settings, data_retention_days: parseInt(e.target.value) })}
+                onChange={(e) => setSettings({ ...settings, data_retention_days: Number.parseInt(e.target.value) })}
                 min="1"
                 max="3650"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -247,7 +246,7 @@ export default function ComplianceDashboard() {
               <input
                 type="number"
                 value={settings.audit_log_retention}
-                onChange={(e) => setSettings({ ...settings, audit_log_retention: parseInt(e.target.value) })}
+                onChange={(e) => setSettings({ ...settings, audit_log_retention: Number.parseInt(e.target.value) })}
                 min="1"
                 max="3650"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -260,7 +259,7 @@ export default function ComplianceDashboard() {
               </label>
               <select
                 value={settings.min_password_strength}
-                onChange={(e) => setSettings({ ...settings, min_password_strength: parseInt(e.target.value) })}
+                onChange={(e) => setSettings({ ...settings, min_password_strength: Number.parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value={0}>{t('compliance.pwdNone')}</option>

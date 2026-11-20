@@ -141,7 +141,7 @@ export const ddosProtection = () => {
     // Increment request counter for this IP
     const countKey = `ddos:count:${ip}`;
     const current = await kv.get(countKey);
-    const count = current ? parseInt(current, 10) : 0;
+    const count = current ? Number.parseInt(current, 10) : 0;
 
     if (count >= THRESHOLD) {
       // Ban the IP

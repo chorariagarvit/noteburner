@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Flame, Clock, Eye, EyeOff, Upload, X, Link2, CheckCircle, XCircle, Loader, Users, FileText } from 'lucide-react';
+import { Flame, Eye, EyeOff, Upload, X, Link2, CheckCircle, XCircle, Loader, Users, FileText } from 'lucide-react';
 import PasswordStrengthMeter from '../PasswordStrengthMeter';
 import SelfDestructOptions from '../SelfDestructOptions';
 import { useI18n } from '../../contexts/I18nContext';

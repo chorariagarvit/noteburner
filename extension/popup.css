@@ -62,7 +62,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .dark-mode-toggle:hover {
@@ -177,7 +177,7 @@ select:focus {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,7 +235,7 @@ select:focus {
   margin-bottom: 12px;
   max-height: 100px;
   overflow-y: auto;
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* Result URL */
@@ -401,4 +401,11 @@ body.dark-mode .error-message {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo .icon,
+  .loader {
+    animation: none;
+  }
 }

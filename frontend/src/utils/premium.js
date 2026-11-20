@@ -32,7 +32,8 @@ export async function getPremiumStatus(token, { force = false } = {}) {
     const result = { ...data, _ts: Date.now() };
     sessionStorage.setItem(CACHE_KEY, JSON.stringify(result));
     return result;
-  } catch (_) {
+  } catch {
+    // Intentionally not logged: the failure is reported to the caller/user below
     return null;
   }
 }

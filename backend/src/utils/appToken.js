@@ -6,7 +6,7 @@
  *   base64url(JSON{exp,n}) + "." + hex(HMAC-SHA256(secret, payload))
  * Secret: Worker secret APP_TOKEN_SECRET (never in code).
  */
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const DEFAULT_TTL_MS = 60 * 60 * 1000; // 1 hour
 

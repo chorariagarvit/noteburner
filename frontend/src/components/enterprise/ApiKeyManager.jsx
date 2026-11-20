@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Key, Trash2, AlertCircle, CheckCircle, Copy, ExternalLink } from 'lucide-react';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
@@ -249,7 +248,7 @@ export default function ApiKeyManager() {
                 </label>
                 <select
                   value={newKeyRateLimit}
-                  onChange={(e) => setNewKeyRateLimit(parseInt(e.target.value))}
+                  onChange={(e) => setNewKeyRateLimit(Number.parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value={100}>{t('apiKeys.rate100')}</option>

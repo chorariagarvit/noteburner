@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 
 /**
  * SwipeableCard Component - Card with swipe gestures for mobile

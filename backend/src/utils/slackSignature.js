@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 /**
  * Verify a Slack request signature (v0 scheme). Fails closed when the secret is missing.

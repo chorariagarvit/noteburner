@@ -164,7 +164,8 @@ copyBtn.addEventListener('click', async () => {
     setTimeout(() => {
       copyBtn.textContent = '📋 Copy Link';
     }, 2000);
-  } catch (error) {
+  } catch {
+    // Intentionally not logged: the failure is reported to the caller/user below
     showError('Failed to copy link');
   }
 });
