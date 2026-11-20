@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (tests and checks)
+- Hourly cleanup job tested for real (`--test-scheduled`); group-message, branding/compliance (XSS payloads, CSV, retention), i18n-parity, large-file-upload-retry and accessibility (axe, light and dark) suites; `npm run check:live-csp` for the deployed site.
+
+### Fixed (found by those tests)
+- Branding: logo/favicon accept only plain https URLs, footer length-limited, white label Enterprise-only on first save too, invalid JSON is a 400. Compliance: strict number/boolean validation, audit retention capped at the 30 days actually kept, CSV exports quoted and spreadsheet-formula safe. Data retention and "require password" are now enforced instead of only stored.
+- Group messages: same limits as single messages (a fractional or null recipient count and unbounded ciphertext were accepted); expired group records are now cleaned up.
+- fr, de, hi, zh were missing the whole compliance section (shown in English).
+- Accessibility: every page now passes axe in both themes (amber brand colour darkened for text/buttons, dark-mode primary button, unnamed icon buttons and links, unlabeled form fields).
+- Test fixture: scripted fills on single-character boxes are not retried (broke the 2FA wrong-code test in CI).
+
 ### Security
 - Server-enforced one-time access: password-derived auth tag, atomic attempt/view limits, burn requires proof (migration `0013`); server-side 2FA proof; every `/api/*` call needs a session, API key or signed app token; hashed sessions/API keys/tokens; Stripe-signature-verified billing webhook (`/subscribe` no longer grants plans); team plan/role hardening; creator-only uploads. See `CODE_REVIEW_AUDIT_OPUS.md` for the full list and remediation status.
 

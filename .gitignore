@@ -63,3 +63,6 @@ graphify-out/
 
 # Personal Claude Code settings (graphify hooks embed this machine's absolute path)
 .claude/settings.local.json
+
+# Agent worktrees (isolated copies used by background agents)
+.claude/worktrees/
