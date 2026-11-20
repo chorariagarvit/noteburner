@@ -20,6 +20,14 @@ async function setup(request, plan = 'team') {
   return { admin, member, outsider, teamId: team.id };
 }
 
+/** A second team with the same admin and member (signups are rate limited, so don't register more users). */
+async function secondTeam(request, { admin, member }) {
+  const { team } = await (await request.post(`${API}/teams`, { headers: admin.headers, data: { name: 'Second Team' } })).json();
+  expect((await request.post(`${API}/teams/${team.id}/members`, { headers: admin.headers, data: { email: member.email, role: 'member' } })).status()).toBe(201);
+  d1(`UPDATE teams SET plan = 'team', max_members = 100 WHERE id = '${team.id}'`);
+  return { admin, member, teamId: team.id };
+}
+
 const putBranding = (request, u, teamId, data) => request.put(`${API}/branding/${teamId}`, { headers: u.headers, data });
 const getBranding = async (request, teamId) => (await (await request.get(`${API}/branding/${teamId}`)).json()).branding;
 
@@ -147,15 +155,17 @@ test.describe('Compliance API', () => {
     const bare = await bareContext(playwright);
     const enc = await encryptMessage('x', 'pw-compliance-1');
     expect((await bare.post(`${API}/v1/messages`, { headers: key.headers, data: { ...enc, teamId } })).status()).toBe(201);
-    d1(`INSERT INTO audit_logs (message_id, event_type, country, metadata, team_id) VALUES ('m-${uniq()}', 'created', 'DE', '{"note":"=cmd|calc, "quoted""}', '${teamId}')`.replace(/\\u0022/g, "''"));
+    // '#' stands for a double quote (the d1 helper refuses real ones); the country is a spreadsheet-formula lookalike
+    d1(`INSERT INTO audit_logs (message_id, event_type, country, metadata, team_id) VALUES ('m-${uniq()}', 'created', '=1+1', replace('{#note#:#a, b#, #c#}', '#', char(34)), '${teamId}')`);
     const res = await request.get(`${API}/compliance/${teamId}/export/audit-logs?format=csv`, { headers: admin.headers });
     expect(res.headers()['content-type']).toContain('text/csv');
     const rows = parseCsv(await res.text());
     expect(rows[0]).toEqual(['ID', 'Message ID', 'Event Type', 'Country', 'Timestamp', 'Success', 'Metadata']);
     expect(rows.length).toBeGreaterThanOrEqual(3);
     for (const r of rows) expect(r, JSON.stringify(r)).toHaveLength(7);
-    const injected = rows.find((r) => r[6].includes('calc'));
-    expect(injected[6].startsWith("'") || !/^[=+\-@]/.test(injected[6])).toBe(true);
+    const row = rows.find((r) => r[6].includes('a, b'));
+    expect(row[6], 'commas and quotes survive').toBe('{"note":"a, b", "c"}');
+    expect(row[3], 'a formula lookalike is neutralised').toBe("'=1+1");
   });
 
   test('message export lists metadata only: no ciphertext, no tokens', async ({ request, playwright }) => {
@@ -171,7 +181,7 @@ test.describe('Compliance API', () => {
   });
 
   test('data retention is enforced by the cleanup job (per team, only when auto-delete is on)', async ({ request, playwright }) => {
-    const on = await setup(request); const off = await setup(request);
+    const on = await setup(request); const off = await secondTeam(request, on);
     for (const [t, auto] of [[on, 1], [off, 0]]) {
       d1(`UPDATE compliance_settings SET data_retention_days = 1, auto_delete_enabled = ${auto} WHERE team_id = '${t.teamId}'`);
     }
@@ -179,7 +189,7 @@ test.describe('Compliance API', () => {
     const make = async (t, ageDays) => {
       const key = await newApiKey(request, t.member);
       const enc = await encryptMessage('x', 'pw-retention-1');
-      const m = await (await bare.post(`${API}/v1/messages`, { headers: key.headers, data: { ...enc, teamId: t.teamId, expiresIn: 0 } })).json();
+      const m = await (await bare.post(`${API}/v1/messages`, { headers: key.headers, data: { ...enc, teamId: t.teamId, expiresInMinutes: 1 } })).json();
       d1(`UPDATE messages SET expires_at = NULL, created_at = ${Date.now() - ageDays * 24 * 3600 * 1000} WHERE token = '${m.token}'`);
       return m.token;
     };

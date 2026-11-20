@@ -183,6 +183,17 @@ router.post('/messages', async (c) => {
       return c.json({ error: 'You are not a member of this team', code: 'TEAM_ACCESS_DENIED' }, 403);
     }
   }
+  // Teams can require a password on every message (compliance setting); the server can only check that
+  // the password proof was sent, never how strong the password is (it never sees it)
+  if (teamId) {
+    const policy = await c.env.DB.prepare(
+      `SELECT require_password FROM compliance_settings WHERE team_id = ?`
+    ).bind(String(teamId)).first();
+    if (policy?.require_password === 1 && !authTag) {
+      return c.json({ error: 'This team requires a password on every message', code: 'PASSWORD_REQUIRED' }, 400);
+    }
+  }
+
 
   const authHash = authTag ? await sha256hex(authTag) : null;
 
