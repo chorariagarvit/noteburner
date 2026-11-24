@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { Code, Key, Lock, Send, Database, Shield, Zap } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 
+/** Documentation examples show the shape of a value, never a value: this renders "<what it is>". */
+const placeholder = (description) => `<${description}>`;
+
 function EndpointCard({ method, path, description, authRequired, requestBody, responseExample, headers }) {
   const { t } = useI18n();
   const [showRequest, setShowRequest] = useState(false);
@@ -216,12 +219,12 @@ export default function APIDocumentationPage() {
                 { name: 'Content-Type', value: 'application/json' }
               ]}
               requestBody={{
-                encryptedData: 'base64_encrypted_content',
-                iv: '<base64-iv>',
-                salt: '<base64-salt>',
-                maxViews: 1,
-                expiresIn: 86400,
-                passwordProtected: true
+                encryptedData: placeholder('base64 ciphertext'),
+                iv: placeholder('16 random bytes, base64'),
+                salt: placeholder('16 random bytes, base64'),
+                authTag: placeholder('password proof derived from the salt'),
+                expiresInMinutes: 1440,
+                maxViews: 1
               }}
               responseExample={{
                 success: true,
