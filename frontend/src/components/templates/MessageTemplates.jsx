@@ -79,13 +79,7 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
     return t('templates.durationCustom');
   };
 
-  const groupedTemplates = MESSAGE_TEMPLATES.reduce((acc, template) => {
-    if (!acc[template.category]) {
-      acc[template.category] = [];
-    }
-    acc[template.category].push(template);
-    return acc;
-  }, {});
+  const groupedTemplates = Object.groupBy(MESSAGE_TEMPLATES, (template) => template.category);
 
   return (
     <div className="space-y-6" role="dialog" aria-labelledby="templates-title" aria-describedby="templates-description">

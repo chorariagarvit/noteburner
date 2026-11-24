@@ -91,7 +91,7 @@ function HeroSection({ stats, statsLoading }) {
                 }
             } catch (error_) {
                 // Provide more context on upload errors
-                throw new Error(`Failed to upload ${file.name}: ${error_.message}`);
+                throw new Error(`Failed to upload ${file.name}: ${error_.message}`, { cause: error_ });
             }
         }
     };
