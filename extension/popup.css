@@ -384,23 +384,40 @@ body.dark-mode .error-message {
   color: #d1d5db;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Scrollbar: standard properties (Chrome 121+, Firefox, Safari 26.2+) with the WebKit
+   pseudo-elements kept only as a fallback. Thumb vs track contrast is at least 3:1. */
+:root {
+  --scrollbar-thumb: #757e8b;
+  --scrollbar-thumb-hover: #5b6573;
+  --scrollbar-track: #f1f1f1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+:root:has(body.dark-mode) {
+  --scrollbar-thumb: #9ca3af;
+  --scrollbar-thumb-hover: #d1d5db;
+  --scrollbar-track: #1f2937;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 4px;
-}
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -34,6 +34,10 @@ jobs:
     - name: Browser extension tests
       run: npm run test:extension
 
+    # Google's Modern Web Guidance: fails if legacy web-platform patterns come back in the app or extension
+    - name: Modern web guidance scan
+      run: npm run test:modern-web
+
     - name: Frontend production build
       run: npm run build --workspace=frontend
 

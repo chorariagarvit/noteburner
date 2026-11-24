@@ -48,6 +48,9 @@ function App() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    // Tell the browser which scheme the page is in, so native controls, scrollbars and form fields match it
+    // (the CSS in index.css maps this <meta> to the color-scheme property)
+    document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', darkMode ? 'dark' : 'light');
     // Save preference
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);

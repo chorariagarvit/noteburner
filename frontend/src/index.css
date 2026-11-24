@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Native UI (form controls, scrollbars, canvas) follows <meta name="color-scheme">, which the theme toggle
+   keeps in step with the .dark class. The base declaration stays "light dark" so the page follows the
+   system preference whenever JavaScript has not run. */
+:root {
+  color-scheme: light dark;
+}
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  color-scheme: dark;
+}
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+  color-scheme: light;
+}
+
 /* Tailwind v4: define custom theme tokens via @theme */
 @theme {
   --color-primary-50: #eff6ff;

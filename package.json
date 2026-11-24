@@ -22,7 +22,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:report": "playwright show-report",
     "test:extension": "node --test \"extension/test/*.test.js\"",
-    "test:csp": "playwright test -c playwright.csp.config.js"
+    "test:csp": "playwright test -c playwright.csp.config.js",
+    "test:modern-web": "node --test scripts/*.test.mjs && node scripts/check-modern-web.mjs"
   },
   "keywords": [
     "encryption",
@@ -38,6 +39,7 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.65.1"
+    "@playwright/test": "^1.65.1",
+    "modern-web-guidance": "1.0.0"
   }
 }
