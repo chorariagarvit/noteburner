@@ -60,7 +60,7 @@ Try it out: ${inviteUrl}`;
     const recipients = valid.map((address) => encodeURIComponent(address)).join(',');
     const mailto = `mailto:${recipients}?subject=${subject}&body=${body}`;
     
-    window.open(mailto, '_blank');
+    window.open(mailto, '_blank', 'noopener,noreferrer');
     setSent(true);
     setTimeout(() => setSent(false), 2000);
   };

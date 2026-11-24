@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
+import { downloadBlob } from '../../utils/download';
 
 export default function ComplianceDashboard() {
   const { teamId } = useParams();
@@ -74,27 +75,12 @@ export default function ComplianceDashboard() {
       });
       if (!response.ok) throw new Error(`Export failed (HTTP ${response.status})`);
 
+      const day = new Date().toISOString().split('T')[0];
       if (format === 'csv') {
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `${type}-${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(downloadUrl);
-        a.remove();
+        downloadBlob(await response.blob(), `${type}-${day}.csv`);
       } else {
         const data = await response.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `${type}-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(downloadUrl);
-        a.remove();
+        downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `${type}-${day}.json`);
       }
 
       setMessage({ type: 'success', text: `${type} exported successfully!` });

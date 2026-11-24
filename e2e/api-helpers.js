@@ -6,8 +6,9 @@ import path from 'node:path';
 import { encryptMessage, deriveAuthTag } from '../frontend/src/utils/crypto.js';
 
 export const API = 'http://localhost:8787/api';
-export const IV = 'AAAAAAAAAAAAAAAAAAAAAA==';
-export const PASSWORD = 'Str0ng!Passw0rd#1';
+export const IV = Buffer.alloc(16).toString('base64'); // 16 zero bytes (a valid, fixed test IV)
+// Random per run: satisfies the password policy (upper, lower, digit, symbol, length) without a fixed credential in the repo.
+export const PASSWORD = `Aa1!${crypto.randomBytes(12).toString('base64url')}`;
 
 export const uniq = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -37,7 +38,7 @@ export function d1(sql, { json = false } = {}) {
   throw new Error(`d1() failed after 4 attempts: ${lastError.stderr?.toString().slice(-500) || lastError.message}`);
 }
 
-export async function createMessage(request, { password = 'correct-horse-1', text = 'top secret', body = {}, tag = true, headers = {} } = {}) {
+export async function createMessage(request, { password = `Bb2#${crypto.randomBytes(9).toString('base64url')}`, text = 'top secret', body = {}, tag = true, headers = {} } = {}) {
   const enc = await encryptMessage(text, password);
   const authTag = tag ? await deriveAuthTag(password, enc.salt) : undefined;
   const res = await request.post(`${API}/messages`, { headers, data: { ...enc, expiresIn: 3600, authTag, ...body } });
