@@ -839,6 +839,10 @@
     "showPassword": "显示密码",
     "hidePassword": "隐藏密码",
     "shareLink": "分享链接",
-    "userMenu": "账户菜单"
+    "userMenu": "账户菜单",
+    "theme": "主题",
+    "theme_system": "跟随系统",
+    "theme_light": "浅色",
+    "theme_dark": "深色"
   }
 }

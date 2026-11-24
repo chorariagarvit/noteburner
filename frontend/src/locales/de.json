@@ -839,6 +839,10 @@
     "showPassword": "Passwort anzeigen",
     "hidePassword": "Passwort verbergen",
     "shareLink": "Link zum Teilen",
-    "userMenu": "Kontomenü"
+    "userMenu": "Kontomenü",
+    "theme": "Design",
+    "theme_system": "System",
+    "theme_light": "Hell",
+    "theme_dark": "Dunkel"
   }
 }

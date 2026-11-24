@@ -839,6 +839,10 @@
     "showPassword": "पासवर्ड दिखाएँ",
     "hidePassword": "पासवर्ड छिपाएँ",
     "shareLink": "साझा करने का लिंक",
-    "userMenu": "खाता मेनू"
+    "userMenu": "खाता मेनू",
+    "theme": "थीम",
+    "theme_system": "सिस्टम",
+    "theme_light": "लाइट",
+    "theme_dark": "डार्क"
   }
 }

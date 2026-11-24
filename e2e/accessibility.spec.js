@@ -21,14 +21,14 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 async function scan(page, path, theme, testInfo, session) {
   await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
   await page.addInitScript(({ theme, session }) => {
-    localStorage.setItem('darkMode', String(theme === 'dark'));
+    localStorage.setItem('color-scheme', theme); // pin the scheme (no .dark class any more: the page follows <meta name=color-scheme>)
     localStorage.setItem('noteburner_onboarding_complete', 'true');
     if (session) sessionStorage.setItem('sessionToken', session);
   }, { theme, session });
   await page.goto(path, { waitUntil: 'networkidle' });
   await page.addStyleTag({ content: '*, *::before, *::after { animation: none !important; transition: none !important; }' });
   await page.waitForTimeout(400);
-  expect(await page.evaluate(() => document.documentElement.classList.contains('dark')), `dark class for ${theme}`).toBe(theme === 'dark');
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme), `colour scheme for ${theme}`).toBe(theme);
 
   const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
   const summary = (v) => `${v.id} [${v.impact}] x${v.nodes.length}: ${v.help} | e.g. ${v.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' ; ')}`;

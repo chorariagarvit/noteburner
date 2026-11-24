@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* Theme. <meta name="color-scheme"> is the single source of truth: "light dark" follows the system, "light" and
+   "dark" pin a scheme (theme-init.js and the ThemeProvider keep it in step with the user's choice). The CSS
+   color-scheme property below mirrors it, so native controls, scrollbars, light-dark() and the dark: variant
+   all agree, and with no JavaScript at all the page simply follows the system. */
+:root {
+  color-scheme: light dark;
+}
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+  color-scheme: dark;
+}
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+  color-scheme: light;
+}
+
 /* Tailwind v4: define custom theme tokens via @theme */
 @theme {
   --color-primary-50: #eff6ff;
@@ -52,26 +66,58 @@
   }
 }
 
-/* Dark mode via class strategy */
-@custom-variant dark (&:where(.dark, .dark *));
+/* The dark: variant is dark when the scheme is pinned to dark, or when it follows the system and the system is
+   dark. No .dark class is involved. */
+@custom-variant dark {
+  &:where(:root:has(> head > meta[name="color-scheme"][content="dark"]) *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:has(> head > meta[name="color-scheme"][content="light dark"]) *) {
+      @slot;
+    }
+  }
+}
 
 @layer base {
+  /* light-dark() picks by the active color-scheme; the plain declarations before each are the light-only
+     fallback for browsers without light-dark() */
   body {
-    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased;
+    background-color: var(--color-gray-50);
+    background-color: light-dark(var(--color-gray-50), var(--color-gray-900));
+    color: var(--color-gray-900);
+    color: light-dark(var(--color-gray-900), var(--color-gray-100));
+    @apply antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-all duration-200;
+    background-color: var(--color-gray-200);
+    background-color: light-dark(var(--color-gray-200), var(--color-gray-700));
+    color: var(--color-gray-800);
+    color: light-dark(var(--color-gray-800), var(--color-gray-200));
+    @apply font-semibold py-3 px-6 rounded-lg transition-all duration-200;
+
+    &:hover {
+      background-color: var(--color-gray-300);
+      background-color: light-dark(var(--color-gray-300), var(--color-gray-600));
+    }
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all;
+    border-color: var(--color-gray-300);
+    border-color: light-dark(var(--color-gray-300), var(--color-gray-600));
+    background-color: var(--color-white);
+    background-color: light-dark(var(--color-white), var(--color-gray-800));
+    color: var(--color-gray-900);
+    color: light-dark(var(--color-gray-900), var(--color-gray-100));
+    @apply w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all;
   }
 
   /* Hide browser's default password reveal button */
@@ -88,23 +134,33 @@
   }
 
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700;
+    background-color: var(--color-white);
+    background-color: light-dark(var(--color-white), var(--color-gray-800));
+    border-color: var(--color-gray-100);
+    border-color: light-dark(var(--color-gray-100), var(--color-gray-700));
+    @apply rounded-xl shadow-lg p-6 border;
   }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Custom scrollbar: the standard properties, themed with light-dark() (thumb vs track contrast is at least 3:1);
+   the WebKit pseudo-elements stay only as a fallback for browsers without scrollbar-color. */
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-500) var(--color-gray-100);
+  scrollbar-color: light-dark(var(--color-gray-500), var(--color-gray-400)) light-dark(var(--color-gray-100), var(--color-gray-800));
 }
 
-::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
-}
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
 
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 dark:bg-gray-600 rounded;
-}
+  ::-webkit-scrollbar-track {
+    background-color: light-dark(var(--color-gray-100), var(--color-gray-800));
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500 dark:bg-gray-500;
+  ::-webkit-scrollbar-thumb {
+    background-color: light-dark(var(--color-gray-500), var(--color-gray-400));
+    border-radius: 4px;
+  }
 }

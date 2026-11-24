@@ -1,13 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Flame, Moon, Sun, Trophy, Gift, Users, UserCircle, LogOut, LogIn, Star } from 'lucide-react';
+import { Flame, Moon, Sun, Monitor, Trophy, Gift, Users, UserCircle, LogOut, LogIn, Star } from 'lucide-react';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useI18n } from '../contexts/I18nContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
 function Header() {
-  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+  const { scheme, cycleScheme } = useContext(ThemeContext);
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -76,15 +76,16 @@ function Header() {
             <LanguageSwitcher />
             
             <button
-              onClick={toggleDarkMode}
+              type="button"
+              onClick={cycleScheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              aria-label="Toggle dark mode"
+              aria-label={`${t('a11y.theme')}: ${t(`a11y.theme_${scheme}`)}`}
+              title={`${t('a11y.theme')}: ${t(`a11y.theme_${scheme}`)}`}
+              data-scheme={scheme}
             >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-yellow-500" />
-              ) : (
-                <Moon className="w-5 h-5 text-gray-700" />
-              )}
+              {scheme === 'dark' && <Moon className="w-5 h-5 text-gray-700 dark:text-gray-200" aria-hidden="true" />}
+              {scheme === 'light' && <Sun className="w-5 h-5 text-yellow-500" aria-hidden="true" />}
+              {scheme === 'system' && <Monitor className="w-5 h-5 text-gray-700 dark:text-gray-200" aria-hidden="true" />}
             </button>
 
             {/* Authentication / User Menu */}

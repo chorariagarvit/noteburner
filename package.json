@@ -22,7 +22,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:report": "playwright show-report",
     "test:extension": "node --test \"extension/test/*.test.js\"",
-    "test:csp": "playwright test -c playwright.csp.config.js"
+    "test:csp": "playwright test -c playwright.csp.config.js",
+    "test:modern-web": "node --test scripts/*.test.mjs && node scripts/check-modern-web.mjs modern-web-guidance@1.0.2"
   },
   "keywords": [
     "encryption",

@@ -839,6 +839,10 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "shareLink": "Share link",
-    "userMenu": "Account menu"
+    "userMenu": "Account menu",
+    "theme": "Theme",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark"
   }
 }

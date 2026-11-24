@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CreateMessage from './pages/CreateMessage';
@@ -26,40 +26,14 @@ import BrandingCustomizer from './components/enterprise/BrandingCustomizer';
 import ComplianceDashboard from './components/enterprise/ComplianceDashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import { I18nProvider } from './contexts/I18nContext';
-import { ThemeContext } from './contexts/ThemeContext';
+import { ThemeProvider } from './contexts/ThemeProvider';
 import PricingPage from './pages/PricingPage';
 import PremiumPage from './pages/PremiumPage';
 
 
 function App() {
-  const [darkMode, setDarkMode] = useState(() => {
-    // Check localStorage first, then system preference
-    const saved = localStorage.getItem('darkMode');
-    if (saved !== null) {
-      return saved === 'true';
-    }
-    return globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  useEffect(() => {
-    // Apply dark mode class to document
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    // Save preference
-    localStorage.setItem('darkMode', darkMode);
-  }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
-  const contextValue = useMemo(() => ({ darkMode, toggleDarkMode }), [darkMode]);
-
   return (
-    <ThemeContext.Provider value={contextValue}>
+    <ThemeProvider>
       <I18nProvider>
       <AuthProvider>
         <Router>
@@ -110,7 +84,7 @@ function App() {
         </Router>
       </AuthProvider>
     </I18nProvider>
-  </ThemeContext.Provider>
+  </ThemeProvider>
   );
 }
 
