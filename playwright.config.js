@@ -1,12 +1,13 @@
 import crypto from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
 // Mirrors backend/src/utils/appToken.js; secret matches the dev script's APP_TOKEN_SECRET
 // The dev Worker's APP_TOKEN_SECRET is the one passed by `npm run dev` in backend/package.json; read it from there
 // instead of repeating the value here.
 function devAppTokenSecret() {
-  const dev = JSON.parse(readFileSync(new URL('./backend/package.json', import.meta.url), 'utf8')).scripts.dev;
+  const dev = JSON.parse(readFileSync(path.resolve(process.cwd(), 'backend/package.json'), 'utf8')).scripts.dev;
   return /--var APP_TOKEN_SECRET:(\S+)/.exec(dev)[1];
 }
 
