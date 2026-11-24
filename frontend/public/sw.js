@@ -14,7 +14,8 @@ const STATIC_ASSETS = [
   '/index.html',
   '/manifest.json',
   '/offline.html',
-  '/flame.svg'
+  '/flame.svg',
+  '/theme-init.js'
 ];
 
 // Install event - cache static assets

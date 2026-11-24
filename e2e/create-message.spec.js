@@ -348,23 +348,19 @@ test.describe('Message Creation', () => {
     expect(passwords.size).toBe(3);
   });
 
-  test('should persist dark mode toggle', async ({ page }) => {
+  test('should persist the chosen colour scheme across a reload', async ({ page }) => {
     await page.goto('/');
+    const toggle = page.locator('button[data-scheme]');
+    const meta = page.locator('meta[name="color-scheme"]');
+    await expect(meta).toHaveAttribute('content', 'light dark'); // default: follow the system
 
-    // Find and click dark mode toggle
-    const darkModeToggle = page.locator('button').filter({ has: page.locator('svg') }).first();
-    await darkModeToggle.click();
+    await toggle.click(); // System -> Light
+    await toggle.click(); // Light -> Dark
+    await expect(meta).toHaveAttribute('content', 'dark');
 
-    // Verify dark mode class is applied
-    const html = page.locator('html');
-    const isDark = await html.getAttribute('class');
-    
-    // Reload page
     await page.reload();
-
-    // Dark mode should persist
-    const isDarkAfterReload = await html.getAttribute('class');
-    expect(isDarkAfterReload).toBe(isDark);
+    await expect(meta).toHaveAttribute('content', 'dark');
+    expect(await page.evaluate(() => localStorage.getItem('color-scheme'))).toBe('dark');
   });
 
   test('should show appropriate file size limits', async ({ page }) => {

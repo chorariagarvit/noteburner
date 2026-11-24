@@ -832,5 +832,11 @@
     "authTitle": "Authentication",
     "authDesc": "Include your API key in the X-API-Key header for all requests.",
     "baseUrl": "Base URL"
+  },
+  "a11y": {
+    "theme": "Tema",
+    "theme_system": "Sistema",
+    "theme_light": "Claro",
+    "theme_dark": "Oscuro"
   }
 }
