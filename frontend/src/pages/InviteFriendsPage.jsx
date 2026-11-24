@@ -1,24 +1,12 @@
 import { useState } from 'react';
-import { Users, Mail, Copy, Check, Share2, Send, X as XIcon, MessageCircle } from 'lucide-react';
+import { Users, Copy, Check, Share2, Send, X as XIcon, MessageCircle } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
-
-// Conservative address check (no quotes, no comments, no whitespace); anything else is dropped.
-const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63})+$/;
-
-/** Split user input on commas/semicolons and keep only well-formed addresses. */
-function parseRecipients(input) {
-  const parts = String(input).split(/[,;]/).map((part) => part.trim()).filter(Boolean);
-  const valid = parts.filter((part) => part.length <= 254 && EMAIL_PATTERN.test(part));
-  return { valid, invalidCount: parts.length - valid.length };
-}
 
 export default function InviteFriendsPage() {
   const { t } = useI18n();
-  const [emails, setEmails] = useState('');
   const [personalMessage, setPersonalMessage] = useState('');
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
-  const [emailError, setEmailError] = useState(false);
 
   const inviteUrl = 'https://noteburner.work';
   const defaultInviteMessage = `Hey! 👋
@@ -48,19 +36,12 @@ Try it out: ${inviteUrl}`;
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleEmailInvite = () => {
-    const subject = encodeURIComponent('Check out NoteBurner - Secure Self-Destructing Messages');
-    const fullMessage = personalMessage 
-      ? `${personalMessage}\n\n${defaultInviteMessage}`
-      : defaultInviteMessage;
-    const body = encodeURIComponent(fullMessage);
-    
-    const { valid, invalidCount } = parseRecipients(emails);
-    setEmailError(invalidCount > 0);
-    const recipients = valid.map((address) => encodeURIComponent(address)).join(',');
-    const mailto = `mailto:${recipients}?subject=${subject}&body=${body}`;
-    
-    window.open(mailto, '_blank', 'noopener,noreferrer');
+  // The email link is built only from fixed text: no address, name or message typed on this page is ever part
+  // of it. The mail app (Gmail, Outlook, ...) suggests recipients from the user's own contacts.
+  const emailHref = `mailto:?subject=${encodeURIComponent('Check out NoteBurner - Secure Self-Destructing Messages')}`
+    + `&body=${encodeURIComponent(defaultInviteMessage)}`;
+
+  const handleEmailInviteClick = () => {
     setSent(true);
     setTimeout(() => setSent(false), 2000);
   };
@@ -116,39 +97,16 @@ Try it out: ${inviteUrl}`;
             </p>
           </div>
 
-          {/* Email Addresses */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              <Mail className="w-4 h-4 inline mr-1" />
-              {t('invite.emailLabel')}
-            </label>
-            <input
-              type="text"
-              value={emails}
-              onChange={(e) => { setEmails(e.target.value); setEmailError(false); }}
-              aria-invalid={emailError}
-              placeholder={t('invite.emailPlaceholder')}
-              className="input-field"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {t('invite.emailHint')}
-            </p>
-            {emailError && (
-              <p role="alert" className="text-xs text-red-600 dark:text-red-400 mt-1">
-                {t('invite.emailInvalid')}
-              </p>
-            )}
-          </div>
-
           {/* Action Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <button
-              onClick={handleEmailInvite}
-              className="btn-primary flex items-center justify-center gap-2"
+            <a
+              href={emailHref}
+              onClick={handleEmailInviteClick}
+              className="btn-primary flex items-center justify-center gap-2 no-underline"
             >
               {sent ? <Check className="w-5 h-5" /> : <Send className="w-5 h-5" />}
               {sent ? t('invite.sendEmailSent') : t('invite.sendEmailBtn')}
-            </button>
+            </a>
 
             <button
               onClick={handleShareInvite}

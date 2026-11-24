@@ -49,6 +49,22 @@ test.describe('Week 5 - Network Effects Features', () => {
       await expect(page.locator('textarea').first()).toBeVisible();
     });
 
+    test('the email invitation is a fixed mailto: link; nothing typed on the page ever goes into it', async ({ page }) => {
+      await page.goto('/invite');
+      const link = page.locator('a[href^="mailto:"]');
+      await expect(link).toHaveCount(1);
+      const before = await link.getAttribute('href');
+      expect(before).toMatch(/^mailto:\?subject=Check%20out%20NoteBurner/);
+      expect(before).toContain('&body=');
+
+      // the page no longer asks for recipients (the mail app suggests them from the user's contacts)
+      await expect(page.getByPlaceholder(/@example\.com/)).toHaveCount(0);
+
+      // text typed into the personal message (used for Copy and Share) must not change the link
+      await page.locator('textarea').first().fill('Hi friend@example.com <script>alert(1)</script> &body=evil');
+      expect(await link.getAttribute('href')).toBe(before);
+    });
+
     test('should have social share buttons', async ({ page }) => {
       await page.goto('/invite');
 
