@@ -10,7 +10,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const src = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/utils/chunkedUpload.js');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'chunked-'));
 const copy = path.join(tmp, 'chunkedUpload.mjs');
-fs.writeFileSync(copy, fs.readFileSync(src, 'utf8').replace("import { API_BASE } from './apiBase';", "const API_BASE = '';"));
+// its small helper is copied next to it (Vite resolves './logSafe' without an extension, Node does not)
+fs.copyFileSync(path.resolve(path.dirname(src), 'logSafe.js'), path.join(tmp, 'logSafe.mjs'));
+fs.writeFileSync(copy, fs.readFileSync(src, 'utf8')
+  .replace("import { API_BASE } from './apiBase';", "const API_BASE = '';")
+  .replace("from './logSafe'", "from './logSafe.mjs'"));
 const { uploadLargeFile, shouldUseChunkedUpload } = await import(pathToFileURL(copy).href);
 
 const realFetch = globalThis.fetch;
