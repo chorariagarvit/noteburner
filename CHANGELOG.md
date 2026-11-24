@@ -7,82 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.15.0] - 2026-11-24
 
-### Added (tests and checks)
-- Hourly cleanup job tested for real (`--test-scheduled`); group-message, branding/compliance (XSS payloads, CSV, retention), i18n-parity, large-file-upload-retry and accessibility (axe, light and dark) suites; `npm run check:live-csp` for the deployed site.
-
-### Fixed (found by those tests)
-- Branding: logo/favicon accept only plain https URLs, footer length-limited, white label Enterprise-only on first save too, invalid JSON is a 400. Compliance: strict number/boolean validation, audit retention capped at the 30 days actually kept, CSV exports quoted and spreadsheet-formula safe. Data retention and "require password" are now enforced instead of only stored.
-- Group messages: same limits as single messages (a fractional or null recipient count and unbounded ciphertext were accepted); expired group records are now cleaned up.
-- fr, de, hi, zh were missing the whole compliance section (shown in English).
-- Accessibility: every page now passes axe in both themes (amber brand colour darkened for text/buttons, dark-mode primary button, unnamed icon buttons and links, unlabeled form fields).
-- Test fixture: scripted fills on single-character boxes are not retried (broke the 2FA wrong-code test in CI).
+### Added - Security hardening, quality and a three state theme
+- **Three-state colour scheme (System, Light, Dark).** The header button cycles through them; "System" follows the OS, including live changes. The page is themed from `<meta name="color-scheme">`, so native controls, scrollbars and the `dark:` styles agree, it works before JavaScript loads, and a saved choice is applied before the first paint. The old on/off setting is migrated once.
+- **One-time access is enforced by the server:** a password-derived proof (the auth tag) is checked, attempt and view limits are atomic, and burning needs the proof or the creator token.
+- **Country restriction and auto-burn are enforced** (they were stored but ignored): restricted messages open only from the sender's country (Cloudflare geolocation, fails closed for unknown and Tor), and auto-burn destroys a message on access from a blocked country, on failed guesses from two or more countries within 10 minutes, or on Tor access. Only country codes are logged.
+- **Every `/api/*` call is authenticated:** a session, an API key or a signed anonymous app token (`POST /api/app-token`). Webhooks are signature-verified.
+- **Exact rate limits** through a Durable Object (`RateLimiter`); optional **Cloudflare Turnstile** on the app-token endpoint (off unless `TURNSTILE_SECRET_KEY` is set).
+- **Team data works:** message lists, stats, exports, the compliance report and GDPR delete now use `messages.team_id`, daily `team_stats` counters (kept after a message is burned) and `audit_logs.team_id`. Data retention and "require password" are enforced instead of only stored.
+- **Tooling:** `npm run check:live-csp` checks the deployed site against `_headers`; `npm run test:modern-web` runs Google's Modern Web Guidance scan (pinned); `npm run test:release` fails when the version numbers or the changelog disagree. The in-app changelog page is now generated from this file.
 
 ### Security
-- Server-enforced one-time access: password-derived auth tag, atomic attempt/view limits, burn requires proof (migration `0013`); server-side 2FA proof; every `/api/*` call needs a session, API key or signed app token; hashed sessions/API keys/tokens; Stripe-signature-verified billing webhook (`/subscribe` no longer grants plans); team plan/role hardening; creator-only uploads. See `CODE_REVIEW_AUDIT_OPUS.md` for the full list and remediation status.
+- Signup no longer reveals which emails are registered; creator tokens are stored hashed and TOTP secrets encrypted at rest (set `TOTP_ENCRYPTION_KEY`); sessions, API keys and tokens are hashed; file uploads are creator-only and a file id alone cannot delete a file; the Stripe webhook is signature-verified and `/subscribe` no longer grants plans; team plan and role checks hardened.
+- Branding accepts only plain https logo and favicon URLs; exports are valid CSV and neutralise spreadsheet formulas; the invite page's email link is built only from fixed text (the typed-recipients field is removed); the unused `share.js` is removed.
+- Static-analysis findings fixed: a hard-coded password hash and test credentials removed, user input kept out of logs, no dynamic code in test helpers, CI installs run without lifecycle scripts and with pinned tool versions. Dependency scans (Snyk and `npm audit`, dev dependencies included) report 0 vulnerabilities.
+- The browser extension no longer runs on every site: the `<all_urls>` content script and floating button are gone; the popup reads the selection through `activeTab` and `scripting` when opened.
+- The Content-Security-Policy is verified against the production build in CI; the confetti animation no longer needs a blocked blob worker.
+
+### Changed
+- Tailwind's `dark:` variant follows the browser's colour scheme instead of a JavaScript-set `.dark` class; shared styles (`body`, `.card`, `.input-field`, the secondary button, the scrollbar) use `light-dark()`. The primary button keeps one accessible blue in both themes.
+- The API reports its version from `package.json`; `wrangler.toml` has a single production configuration (the unused `env.*` blocks that dropped bindings are gone) and sets `ENVIRONMENT=production`.
+- Group messages share the single-message limits; the hourly cleanup also removes expired group records and applies each team's data retention.
+- The API documentation example matches the real create-message request; the extension popup scrollbars use the standard `scrollbar-color` and `scrollbar-width`.
 
 ### Fixed
-- **Signup no longer reveals registered emails:** the response is identical either way; an existing owner is told by email instead.
-- **Creator tokens are stored as SHA-256 hashes and TOTP secrets are encrypted at rest** (AES-GCM, key `TOTP_ENCRYPTION_KEY`; set it before deploying). Legacy rows keep working and are upgraded on use and by the hourly cleanup job. The public API no longer lists creator tokens.
-- **Team data was empty:** team message lists, stats, exports, compliance report and GDPR delete read a table nothing wrote to. They now use `messages.team_id`, daily `team_stats` counters (created/viewed/burned, kept after a message is burned) and a new `audit_logs.team_id` (migration `0014`).
-- **PWA icons and screenshots were missing** (generated by `frontend/scripts/generate-pwa-assets.mjs`); the service-worker cache version is now stamped per build so installed apps pick up new releases.
-- "Unlimited" max views / password attempts (`-1`) were clamped to 1; max views > 1 never worked because the page always burned after the first read. The server now returns `viewsRemaining` and the page burns only after the last view.
-- TOTP QR code never rendered; non-JSON API responses showed "Unexpected token '<'"; "Back online" popup on every load; achievements unreadable in light mode.
-- Rate limiters wrote counters without an expiry (permanent blocks) and now fail open on KV errors; both send `X-RateLimit-*` headers.
+- Team exports and stats were empty; PWA icons and screenshots were missing; the service-worker cache version was hand-edited (now stamped per build); "unlimited" max views and attempts were clamped to 1; the TOTP QR code never rendered; non-JSON API errors showed "Unexpected token '<'"; the "Back online" popup appeared on every load.
+- Concurrency bugs: simultaneous signups with one email returned 500s, redelivered payment webhooks left several active subscriptions, parallel wrong passwords reported the burn twice.
+- `POST /api/v1/messages` skipped validation and let a key write into teams its owner does not belong to.
+- Accessibility: every page passes axe (WCAG 2.1 A and AA, colour contrast included) in light and dark mode: the amber brand colour is darkened for text and buttons, icon-only buttons and links have names, form fields have labels.
+- French, German, Hindi and Chinese were missing the whole compliance section; the in-app changelog stopped at v1.9.0.
+- About 60 SonarCloud bugs (floating promises, clickable non-interactive elements, missing labels) and most code smells (13 high-complexity functions refactored).
 
-### Added
-- **Country restriction and auto-burn are now enforced** (they were previously stored but ignored): restricted messages open only from the sender's country (Cloudflare geolocation, fails closed for unknown/Tor), and auto-burn destroys a message immediately on access from a blocked country, failed guesses from two or more countries within 10 minutes, or Tor access. Country-level logging only; audit logs are now actually deleted after 30 days. The page tells blocked visitors why before the password step. Option descriptions rewritten (all six languages).
-
-### Hardening
-- **Firefox extension 1.14.0 is published:** https://addons.mozilla.org/en-US/firefox/addon/noteburner/ (Chrome Web Store update pending).
-- **Extension no longer runs on every site:** the `<all_urls>` content script and floating button are gone. The popup reads the selection through `activeTab` + `scripting` only when opened. Needs a rebuilt and republished extension.
-- **Exact rate limits:** a Durable Object (`RateLimiter`) now backs every limiter. The KV counters it replaces were bypassed completely by parallel bursts (45 of 45 requests passed a limit of 30; 12 signups passed a limit of 5). KV remains as a fallback when the binding is absent.
-- **Optional Cloudflare Turnstile** on `POST /api/app-token` (off unless `TURNSTILE_SECRET_KEY` is set), with the extension handing off to the website when a check is required.
-- **CSP verified** against the production build (`npm run test:csp`, also a CI job): 18 pages and the create-and-read flow have no violations. The check found that the confetti animation needs a blob worker that the policy blocks, so confetti now draws on the main thread. Policy updated for Turnstile and current Analytics endpoints.
-
-### Fixed (found by the new concurrency/isolation tests)
-- Simultaneous signups with one email returned 500s (now 409); duplicate/redelivered payment webhooks left several active subscriptions (now one, via an atomic batch); parallel wrong passwords reported the burn twice and returned a misleading "attempts remaining" for a destroyed message.
-- `POST /api/v1/messages` skipped validation: iv/salt/size, expiry and view bounds, slug rules, and it let a key write into teams its owner doesn't belong to. It now shares the public endpoint's rules and accepts the password-proof tag.
-
-### Extension
-- Friendlier errors (rate limits with the wait time, size, outages, gateway pages, network failures), 30 s timeouts, explicit "no expiration"; 19 new tests including crypto parity with the web app.
-
-### CI
-- CI now runs the backend/frontend unit tests, the frontend build and a dependency audit, and runs the e2e suite as a parallel matrix over all five browser projects (it previously ran every project but installed only Chromium).
-
-### Tests
-- 230+ new tests: backend unit (rate limiters incl. the Durable Object, Stripe/Slack signatures, Turnstile, CORS, email escaping, geo, option helpers), frontend unit (auth tag), extension (22), CSP checks (23), and e2e `security-api` (40), `concurrency` (12), `api-v1` (7), `account-lifecycle` (14), `protections` (18), `security-ui` (27 × 5 browsers); all five browsers enabled; per-test client IP fixture.
+### Technical - Upgrading from 1.14.0
+- Before deploying: set the secrets `APP_TOKEN_SECRET` (required) and `TOTP_ENCRYPTION_KEY`; apply migrations through `0014` (`0012` was never applied to production before); then deploy. Everyone is logged out once, and existing API keys must be regenerated.
+- Cloudflare dashboard (see `SETUP.md`): Browser Cache TTL "Respect Existing Headers", Rocket Loader off, and decide on Web Analytics auto-injection; `npm run check:live-csp` shows what the live site serves.
+- Browser extension 1.15.0 (Chrome and Firefox) must be republished: the old builds do not send the app token.
+- Tests: Playwright on five browsers (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari), backend, frontend and extension unit tests, production-build CSP checks, an axe accessibility scan in both themes, and a Snyk and SonarCloud clean-up; CI runs all of them.
 
 ---
 
 ## [1.14.0] - 2026-03-13
 
-### Added - Premium Features (Week 14)
+### Added - Premium Features
 - Premium plan ($5/month) and Lifetime plan ($49 one-time): 1GB uploads, unlimited custom URLs, 10,000 API calls/day
 - Stripe-ready subscription backend (`/api/premium/plans|status|subscribe|cancel|usage`), migration `0012_premium_features.sql`
 - `PricingPage` (3-tier comparison, FAQ) and `PremiumPage` (usage dashboard, cancel flow)
 - `PremiumBadge` component and `premium.js` utilities
-- 29 E2E tests (`e2e/week14.spec.js`)
+- 29 E2E tests (`e2e/premium.spec.js`)
 
-See [docs/WEEK14_SUMMARY.md](docs/WEEK14_SUMMARY.md).
 
 ---
 
 ## [1.13.0] - 2026-03-12
 
-### Added - Internationalization (Week 13)
+### Added - Internationalization
 - 6 languages (EN/ES/FR/DE/ZH/HI) with browser auto-detect and `LanguageSwitcher`
 - Locale-aware dates and numbers via `Intl`; RTL support ready
 - Backend `detectLocale()` middleware (`Content-Language` header) and GDPR/CCPA compliance flags
 
-See [docs/WEEK13_SUMMARY.md](docs/WEEK13_SUMMARY.md).
 
 ---
 
 ## [1.12.0] - 2026-03-04
 
-### Added - Scaling & Performance (Week 12)
+### Added - Scaling & Performance
 - Cloudflare KV cache-aside layer
 - 7 composite DB indexes (about 500ms down to 20-50ms)
 - Health endpoints `/ping`, `/health`, `/health/deep`
@@ -91,7 +80,6 @@ See [docs/WEEK13_SUMMARY.md](docs/WEEK13_SUMMARY.md).
 ### Notes
 - There is no v1.11. The API version string was set to `1.11.0` in code during this work, but the release is v1.12.0.
 
-See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
 
 ---
 
@@ -99,7 +87,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
 
 ### Added - Enhanced Test Coverage
 - **Expanded E2E Tests (35 new tests added)**:
-  - Week 1 Message Creation: 8 → 19 tests (+11 tests)
+  - Message Creation: 8 → 19 tests (+11 tests)
     - Multiple file type handling (images, PDFs, etc.)
     - File removal before submission
     - All expiration options (1h, 6h, 24h, 3d, 7d)
@@ -113,7 +101,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
     - File size limit information display
     - Form state management across navigation
 
-  - Week 2 Message Viewing: 10 → 19 tests (+9 tests)
+  - Message Viewing: 10 → 19 tests (+9 tests)
     - Multiple failed password attempts
     - Invalid message token handling
     - Password case sensitivity
@@ -124,7 +112,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
     - Empty password submission validation
     - Decryption performance timing
 
-  - Week 2 Viral Mechanics: 8 → 17 tests (+9 tests)
+  - Viral Mechanics: 8 → 17 tests (+9 tests)
     - Real-time stats updates
     - Stats number formatting
     - Different loading state variations
@@ -137,7 +125,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
     - Social share button icon verification
 
 - **Total Test Count**: 241 → **276 E2E tests** (before expansion: 241, after: 276)
-- **Documentation Updates**: Updated TEST_SUMMARY.md, README.md with new test counts
+- **Documentation Updates**: Updated the test documentation and README.md with new test counts
 
 ### Technical Improvements
 - More comprehensive file upload testing
@@ -150,7 +138,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
 
 ## [1.10.0] - 2026-02-24
 
-### Added - User Authentication System (Week 11)
+### Added - User Authentication System
 - **User Registration & Login**:
   - Email/password signup with validation
   - Email verification system (token-based, ready for email integration)
@@ -194,7 +182,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
   - Migration 0010_user_authentication.sql - 4 new tables (users, sessions, password_resets, login_attempts)
 
 - **Testing**:
-  - e2e/week11.spec.js (25 tests) - Comprehensive authentication flow testing
+  - e2e/authentication.spec.js (25 tests) - Comprehensive authentication flow testing
   - User signup (6 tests)
   - User login (5 tests)
   - User logout (1 test)
@@ -215,7 +203,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
 
 ## [1.9.0] - 2026-02-20
 
-### Added - Enterprise Features (Week 10)
+### Added - Enterprise Features
 - **Team Workspaces**:
   - Role-based access control (Owner, Admin, Member, Viewer)
   - Team creation and management API
@@ -262,7 +250,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
   - Data export utilities
 
 - **Testing**:
-  - e2e/week10.spec.js (35 tests) - Comprehensive enterprise feature testing
+  - e2e/enterprise.spec.js (35 tests) - Comprehensive enterprise feature testing
   - API v1 endpoints (4 tests)
   - Team workspaces (7 tests)
   - Custom branding (5 tests)
@@ -280,7 +268,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
 
 ## [1.8.0] - 2026-02-09
 
-### Added - Security Enhancements (Week 9)
+### Added - Security Enhancements
 - **Password Strength Meter**:
   - Real-time password analysis with 5-level strength score
   - Visual progress bar (color-coded: red → green)
@@ -331,17 +319,17 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
   - 10 new columns on messages table (max_views, view_count, password_attempts, etc.)
   - Indexes for performance
 
-### Technical (Week 9)
+### Technical
 - New components: 3 React components (628 lines)
 - Backend: 2 new routes (audit.js, security.js middleware)
 - Migration: 0008_security_enhancements.sql
-- E2E tests: 40+ new tests (week9.spec.js)
+- E2E tests: 40+ new tests (security-enhancements.spec.js)
 
 ---
 
 ## [1.7.0] - 2026-02-09
 
-### Added - Platform Integrations (Week 8)
+### Added - Platform Integrations
 - **Slack Integration**:
   - /noteburner slash command
   - Interactive actions (Share in Channel)
@@ -385,10 +373,10 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
   - created_via column on messages (track source: web, slack, zapier, discord, api)
   - user_id column on messages (link to API key owner)
 
-### Technical (Week 8)
+### Technical
 - Backend: integrations.js route (348 lines)
 - Migration: 0007_integrations.sql
-- E2E tests: 30+ new tests (week8.spec.js)
+- E2E tests: 30+ new tests (integrations.spec.js)
 - Supported platforms: 4 (Slack, Zapier, Discord, Generic API)
 
 ---
@@ -429,7 +417,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
   - Viewport optimization with safe area support for notches
 
 - **Testing**:
-  - 26 new E2E tests for PWA and mobile features (week7.spec.js)
+  - 26 new E2E tests for PWA and mobile features (mobile-pwa.spec.js)
   - 106 total E2E tests with 99.1% pass rate
 
 ### Changed
@@ -446,7 +434,7 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
 
 ---
 
-## [Week 6, no version] - 2026-01-20
+## [Unversioned] - 2026-01-20
 
 ### Added - UI/UX Polish
 - **Onboarding Flow**:
@@ -552,7 +540,6 @@ See [docs/WEEK12_SUMMARY.md](docs/WEEK12_SUMMARY.md).
 - Countdown timer with urgency states
 - Open Graph tags for share previews
 
-See [docs/WEEK3_SUMMARY.md](docs/WEEK3_SUMMARY.md).
 
 ---
 
@@ -641,34 +628,7 @@ See [docs/WEEK3_SUMMARY.md](docs/WEEK3_SUMMARY.md).
 
 ---
 
-## Version History Summary
-
-| Version | Release Date | Focus |
-|---------|-------------|-------|
-| 1.14.0  | 2026-03-13  | Premium Features |
-| 1.13.0  | 2026-03-12  | Internationalization |
-| 1.12.0  | 2026-03-04  | Scaling & Performance |
-| 1.10.1  | 2026-02-24  | Expanded E2E coverage |
-| 1.10.0  | 2026-02-24  | User Authentication |
-| 1.9.0   | 2026-02-20  | Enterprise Features |
-| 1.8.0   | 2026-02-09  | Security Enhancements |
-| 1.7.0   | 2026-02-09  | Platform Integrations |
-| 1.6.0   | 2026-01-23  | Mobile & PWA |
-| 1.5.0   | 2026-01-14  | Network Effects |
-| 1.4.0   | 2026-01-08  | Gamification |
-| 1.3.0   | 2025-12-28  | Custom URLs & Branding |
-| 1.2.0   | 2025-12-23  | Viral Mechanics |
-| 1.1.0   | 2025-12-17  | Analytics & Social Proof |
-| 1.0.0   | 2025-12-07  | Initial Release |
-
-Week 6 (UI/UX Polish, 2026-01-20) shipped without a version bump. See [ROADMAP.md](ROADMAP.md) for the week-to-version map.
-
-**Total E2E Tests**: 176+ (expected 99%+ pass rate)  
-**Total Lines**: ~13,000+ across all releases  
-**Total Commits**: 24+ feature branches merged
-
----
-
+[1.15.0]: https://github.com/noteburner/noteburner/releases/tag/v1.15.0
 [1.14.0]: https://github.com/noteburner/noteburner/releases/tag/v1.14.0
 [1.13.0]: https://github.com/noteburner/noteburner/releases/tag/v1.13.0
 [1.12.0]: https://github.com/noteburner/noteburner/releases/tag/v1.12.0

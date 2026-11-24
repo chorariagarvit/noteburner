@@ -5,7 +5,7 @@
 ### Extension Overview
 
 **Name:** NoteBurner - Self-Destructing Messages  
-**Version:** 1.14.0  
+**Version:** 1.15.0  
 **Category:** Productivity / Privacy & Security  
 **Platforms:** Chrome Web Store, Firefox Add-ons
 
@@ -233,18 +233,12 @@ Website: https://noteburner.work
 ### Create Distribution Package
 
 ```bash
-cd extension
-zip -r noteburner-extension.zip . -x "*.git*" -x "node_modules/*" -x "generate-icons.js" -x "icons/create-icons.html"
+./extension/build.sh   # from the repository root: stages the runtime files only, runs the tests and writes the zips there
 ```
 
-### Files to Include
-- manifest.json
-- popup.html, popup.css, popup.js
-- background.js
-- crypto.js
-- icons/ (all PNG files)
-- PRIVACY.md
-- README.md
+### What the packages contain
+- manifest.json (for Firefox: `manifest.firefox.json`, renamed), popup.html, popup.css, popup.js, background.js, crypto.js, and the three PNG icons in icons/
+- Nothing else: no tests, docs, build script, keys or the other browser's manifest (`build.sh` checks this and stops if anything extra slips in)
 
 ### Files to Exclude
 - .git

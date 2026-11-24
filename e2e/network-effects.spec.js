@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test.describe('Week 5 - Network Effects Features', () => {
+test.describe('Network Effects Features', () => {
   test.describe('Referral System', () => {
     test('should display referrals page', async ({ page }) => {
       await page.goto('/referrals');

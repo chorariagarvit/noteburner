@@ -33,11 +33,11 @@ async function registerUser(request) {
   return email;
 }
 
-test.describe('Week 10: Enterprise Features', () => {
+test.describe('Enterprise Features', () => {
   
   let sessionToken = '';
   const testUser = {
-    email: `e2e-week10-${Date.now()}@example.com`,
+    email: `e2e-enterprise-${Date.now()}@example.com`,
     password: 'TestPassword123!',
     displayName: 'E2E Test User'
   };
@@ -69,9 +69,9 @@ test.describe('Week 10: Enterprise Features', () => {
     if (loginRes.ok()) {
       const loginData = await loginRes.json();
       sessionToken = loginData.sessionToken;
-      console.log('Week 10: Test user logged in successfully');
+      console.log('E2E tests: Test user logged in successfully');
     } else {
-      throw new Error('Failed to login test user for Week 10 tests');
+      throw new Error('Failed to login test user for these tests');
     }
   });
   

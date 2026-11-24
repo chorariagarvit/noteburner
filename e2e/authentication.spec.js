@@ -1,5 +1,5 @@
 /**
- * Week 11: User Authentication System - E2E Tests
+ * E2E tests: User Authentication System
  * Tests for signup, login, logout, password reset, and session management
  */
 
@@ -15,7 +15,7 @@ const testUser = {
 const weakPassword = 'weak';
 const invalidEmail = 'invalid-email';
 
-test.describe('Week 11: Authentication System', () => {
+test.describe('Authentication System', () => {
   // The first-visit "Getting Started" modal (shown ~1s after the home page loads) can cover the
   // header and intercept clicks. These tests are about auth, not onboarding, so mark it done.
   test.beforeEach(async ({ page }) => {

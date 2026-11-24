@@ -1,10 +1,11 @@
 /**
- * Week 14: Premium Features - E2E Tests
+ * E2E tests: Premium Features
  * Tests for premium plans API, subscription management,
  * pricing page UI, premium dashboard, and feature gating.
  */
 
 import { test, expect } from './fixtures.js';
+import fs from 'node:fs';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8787';
 const APP_URL = process.env.APP_URL || 'http://localhost:5173';
@@ -32,7 +33,7 @@ async function createTestUser(request, suffix = '') {
 // API Tests
 // ──────────────────────────────────────────────────────────────────────────────
 
-test.describe('Week 14: Premium Features', () => {
+test.describe('Premium Features', () => {
 
   test.describe('GET /api/premium/plans', () => {
 
@@ -101,10 +102,10 @@ test.describe('Week 14: Premium Features', () => {
       }
     });
 
-    test('API version should match the released version (1.14.0)', async ({ request }) => {
+    test('API version should match the released version (backend/package.json)', async ({ request }) => {
       const response = await request.get(`${API_BASE_URL}/`);
       const data = await response.json();
-      expect(data.version).toBe('1.14.0');
+      expect(data.version).toBe(JSON.parse(fs.readFileSync('backend/package.json', 'utf8')).version);
     });
 
     test('API features should include premium', async ({ request }) => {

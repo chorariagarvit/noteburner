@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures.js';
 
 /**
- * Week 8 E2E Tests - Platform Integrations
+ * E2E tests: Platform Integrations
  * Tests for Slack, Zapier, Discord integrations and API
  */
 
@@ -23,7 +23,7 @@ async function createApiKey(request) {
   return (await created.json()).key;
 }
 
-test.describe('Week 8 - Platform Integrations', () => {
+test.describe('Platform Integrations', () => {
   
   // API Key Management Tests
   test.describe('API Key Management', () => {

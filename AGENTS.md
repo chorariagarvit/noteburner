@@ -12,7 +12,7 @@ NoteBurner is a secure, one-time message encryption and decryption application. 
 - **Database**: Cloudflare D1 (SQLite) — migrations in `backend/migrations/` (0001–0014)
 - **Storage**: Cloudflare R2 (encrypted file attachments)
 - **Cache / counters**: Cloudflare KV
-- **Tests**: Playwright e2e (26 spec files, 549 tests on Chromium (8 skipped) × 5 browser projects; the 91 API-only tests run on Chromium and are skipped elsewhere), backend unit tests (`backend/test`, 72), CSP checks (`e2e-csp`, 24), frontend unit tests (`frontend/test`, 55), browser-extension tests (`extension/test`, 25)
+- **Tests**: Playwright end-to-end on five browsers (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari; the API-only specs run on Chromium), backend / frontend / extension unit tests, production-build CSP and theme checks (`e2e-csp`), an axe accessibility scan of every page in light and dark mode, Google's Modern Web Guidance scan and a release/version check (`scripts/`). Details: `docs/E2E_TESTING.md`.
 
 ## Development Commands
 
@@ -30,15 +30,19 @@ npm run dev:frontend       # UI at http://localhost:5173 (proxies API to :8787)
 
 ### Testing
 ```bash
-cd backend && npm test     # Unit tests (node --test): totp, app token, kv counter, rate limiters, signatures, cors, email escaping
-cd frontend && npm test    # Unit tests: auth tag / crypto, analytics path sanitising
+cd backend && npm test     # Unit tests (node --test): totp, app token, kv counter, rate limiters, signatures, cors, email escaping, secrets
+cd frontend && npm test    # Unit tests: crypto / auth tag, theme logic, i18n key parity, large-file upload retry, service-worker version, PWA assets
 npm run test:extension     # Extension: crypto parity with the web app, request contract vs a mock API, manifest/source consistency
-npm run test:e2e           # Playwright, all configured browsers (auto-starts servers + applies local migrations)
+npm run test:csp           # Production build with the real security headers: CSP, theme, no-JavaScript (e2e-csp/, own config)
+npm run test:modern-web    # Google's Modern Web Guidance scan (pinned, via npx) for legacy web patterns; also runs in CI
+npm run test:release       # Version numbers, the changelog, README and ROADMAP agree (scripts/versions.test.mjs)
+npm run test:e2e           # Playwright, all five browsers (auto-starts servers + applies local migrations)
 npx playwright test --project=chromium   # one browser only
 npm run test:e2e:ui        # Interactive Playwright UI
 npm run test:report        # Open HTML test report
+npm run check:live-csp --workspace=frontend   # after a deploy: the live site's headers and CSP
 ```
-`e2e/security-api.spec.js` (40), `concurrency.spec.js` (12), `api-v1.spec.js` (7), `account-lifecycle.spec.js` (14) and `protections.spec.js` (18) are API-only (Chromium only) and `e2e/security-ui.spec.js` (27) runs on every browser; together they cover the server-enforced security behaviour, races, tenant isolation and the account lifecycle (shared helpers in `e2e/api-helpers.js`, including a `d1()` helper that seeds/reads the local test database); `e2e/fixtures.js` gives every test its own client IP (rate-limit counters persist in local KV, so don't reuse fixed IPs). Tests that need a paid plan flip it in the local D1 (`upgradeTeam` in week10).
+The API-only specs (`security-api`, `concurrency`, `api-v1`, `account-lifecycle`, `protections`, `cleanup-job`, `group-messages`, `branding-compliance`, `team-data`) and the axe scan run on Chromium only; `security-ui`, `theme` and the app specs run on every browser. Local runs need two things the specs assume: the dev servers (`playwright.config.js` starts them) and applied local migrations. The hourly cleanup job is run for real through wrangler's `/__scheduled` (the dev script passes `--test-scheduled`).
 Browsers: chromium, firefox, webkit, Mobile Chrome (Pixel 6), Mobile Safari (iPhone 12). Install once with `npx playwright install`.
 
 ### Deployment (manual — see "Deploying" below before running)
@@ -69,7 +73,7 @@ noteburner/
 │   ├── migrations/               # D1 SQL migrations (0001–0014)
 │   └── test/                     # Node unit tests
 ├── frontend/
-│   ├── public/                   # sw.js, manifest, _headers (CSP etc. for Pages)
+│   ├── public/                   # sw.js, theme-init.js, manifest, _headers (CSP etc. for Pages)
 │   └── src/
 │       ├── pages/ components/ contexts/ hooks/ locales/ (en es fr de zh hi)
 │       └── utils/
@@ -77,11 +81,12 @@ noteburner/
 │           ├── api.js            # Message/media API calls
 │           ├── apiBase.js        # API_BASE + automatic X-App-Token fetch wrapper
 │           └── session.js        # getSessionToken / getAuthHeaders
-├── e2e/                          # Playwright suites
+├── e2e/ e2e-csp/                 # Playwright suites (the app; the production build with the real headers)
+├── scripts/                      # Release and tooling checks (versions, Modern Web Guidance)
 ├── extension/                    # Chrome + Firefox extension (own manifests, no npm deps)
 ├── .github/workflows/            # e2e-tests.yml (unit job + 5-browser e2e matrix), semgrep.yml
-├── ROADMAP.md  CHANGELOG.md      # Status/next steps vs. release history
-├── CODE_REVIEW_AUDIT*.md         # Security audit reports + remediation status
+├── ROADMAP.md  CHANGELOG.md      # Status/next steps vs. release history (the in-app changelog page is generated from CHANGELOG.md)
+├── docs/                         # API, testing, large files, email, analytics
 └── playwright.config.js
 ```
 
@@ -132,15 +137,16 @@ The Vite dev server proxies `/api/*` → `http://localhost:8787`. `API_BASE` is 
 
 ## Deploying
 
-Deploy is manual. Order matters because the frontend now depends on new endpoints:
-1. `openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET` (once)
-2. `npm run d1:migrations:apply` (from `backend/`)
-3. `npm run deploy:backend`, then `npm run deploy:frontend` / push `main`
-4. Smoke test: create a message, open the link, decrypt, confirm it's gone.
+Deploy is manual. Order matters because the frontend depends on the backend's endpoints:
+1. Secrets, once: `openssl rand -hex 32 | wrangler secret put APP_TOKEN_SECRET` and the same for `TOTP_ENCRYPTION_KEY` (never change the latter).
+2. `npm run d1:migrations:apply` (from `backend/`; migrations through `0014`).
+3. `npm run deploy:backend`, then `npm run deploy:frontend` / push `main`. Deploy with the top-level wrangler config (no `--env`): `backend/wrangler.toml` has a single production configuration.
+4. Smoke test: create a message, open the link, decrypt, confirm it's gone; run `npm run check:live-csp --workspace=frontend`.
+5. Publish the extension builds (`./extension/build.sh`) when the extension changed.
 
 ## CI
 
-`.github/workflows/e2e-tests.yml` has two jobs: **unit** (backend + frontend `npm test`, frontend build, `npm audit` — the backend runtime audit blocks on high+, the whole-tree audit is informational because Vite's glob helpers currently have an unfixable advisory) and **e2e**, a matrix with one job per Playwright project (chromium, firefox, webkit, Mobile Chrome, Mobile Safari) that installs only the browser it needs. A new Playwright project must be added to that matrix. Reproduce CI locally with `CI=true npx playwright test --project=<name>`.
+`.github/workflows/e2e-tests.yml` has three kinds of jobs: **unit** (backend, frontend and extension tests, the Modern Web Guidance scan, the frontend build and `npm audit`: the backend runtime audit blocks on high or above, the whole-tree audit is informational), **e2e** (one parallel job per browser project) and **csp** (the production-build checks). Installs run with `npm ci --ignore-scripts` and tools run through `npx --no-install` at the lockfile's version.
 
 ## Key Configuration Files
 
@@ -150,6 +156,8 @@ Deploy is manual. Order matters because the frontend now depends on new endpoint
 | `frontend/vite.config.js` | Dev server, API proxy |
 | `frontend/public/_headers` | CSP, frame-ancestors, HSTS for the SPA (Pages) |
 | `playwright.config.js` | 5 browser projects, 2 workers, test app token |
+| `playwright.csp.config.js` | Production build + real headers (`npm run test:csp`) |
+| `scripts/` | Release (versions, changelog) and Modern Web Guidance checks |
 | `.github/workflows/e2e-tests.yml` | CI: unit tests + build + audit, then one e2e job per browser project (parallel) |
 | `SETUP.md` | First-time setup and required secrets |
 
@@ -167,7 +175,7 @@ Deploy is manual. Order matters because the frontend now depends on new endpoint
 - Component files `PascalCase.jsx`; hooks `useCamelCase.js`; utils `camelCase.js`.
 - Backend calls go through `utils/api.js` (messages/media) or use `API_BASE` and `getAuthHeaders()` — never hard-code hosts or read tokens from storage directly.
 - All crypto stays in `utils/crypto.js`. Never put plaintext, passwords or capability URLs in query strings or analytics.
-- Tailwind utilities for styling; dark mode via class toggle — always provide both light and `dark:` variants.
+- Tailwind utilities for styling. **Theme**: `<meta name="color-scheme">` is the single source of truth ("light dark" = follow the system, or a pinned "light"/"dark"; `public/theme-init.js` and `contexts/ThemeProvider.jsx` keep it in step with `localStorage['color-scheme']`). The `dark:` variant follows it (see `index.css`), so keep writing both light and `dark:` variants; use `light-dark()` for shared tokens; never rely on a `.dark` class. Keep text at WCAG AA contrast in both themes (the axe scan enforces it).
 
 ### Security — do not weaken
 - PBKDF2 300k iterations; AES-256-GCM; bcryptjs for passwords; CSPRNG (`crypto.getRandomValues`) for every secret/token — never `Math.random`.
@@ -181,7 +189,7 @@ Deploy is manual. Order matters because the frontend now depends on new endpoint
 A knowledge graph of this repo (code, docs, migrations) lives in `graphify-out/` (git-ignored, regenerated locally).
 - For questions about the codebase, run `graphify query "<question>"` **before** grepping or reading files; use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for a single concept. Read raw files only for the lines the graph points to.
 - After modifying code, run `graphify update .` (AST-only, no LLM, no API cost).
-- Treat the graph as an index, not truth: it also contains docs such as the audit reports, and some of them describe issues that are since fixed. Confirm in the source before relying on a finding.
+- Treat the graph as an index, not truth: confirm in the source before relying on a finding.
 - Setup (per machine): `python3 -m venv ~/.local/share/graphify-venv && ~/.local/share/graphify-venv/bin/pip install "graphifyy[sql]"`, link `graphify` into `~/.local/bin`, then in the repo `graphify install --project && graphify claude install && graphify update .`. The package name has a double "y" (`graphifyy`); other `graphify*` packages are unaffiliated.
 - The graphify hooks embed an absolute path to the executable, so they live in the git-ignored `.claude/settings.local.json` (`graphify claude install` writes `.claude/settings.json`; move its `hooks` block into the local file and delete it before committing).
 
@@ -193,13 +201,14 @@ A knowledge graph of this repo (code, docs, migrations) lives in `graphify-out/`
 - Never print, log or commit secrets, tokens, `.env*` files, `*.pem` or `*.crx`.
 - Don't kill processes you didn't start (other `wrangler dev`/`workerd` servers may be running on other ports).
 - Database changes need a new numbered migration in `backend/migrations/`; never edit an applied migration.
-- When behaviour changes, update `CHANGELOG.md` (what shipped) and, if status/next steps change, `ROADMAP.md`.
+- When behaviour changes, update `CHANGELOG.md` (what shipped) and, if status/next steps change, `ROADMAP.md`. To release: bump the version once (`npm version <x.y.z> --workspaces --include-workspace-root --no-git-tag-version`) and both extension manifests, add the changelog entry and run `npm run test:release`.
+- Do not hard-code counts (tests, files, versions) in docs: they drift; point to the command or file that knows.
 
 ## Important Context
 
-- **Version**: v1.14.0 in `package.json`; the security-hardening work after it is on `main` (unreleased/unversioned). See `CHANGELOG.md` and `ROADMAP.md` (week→version map).
-- **Audits**: `CODE_REVIEW_AUDIT.md` and `CODE_REVIEW_AUDIT_OPUS.md` list findings and their remediation status, including known open items (signup email enumeration, plaintext creator tokens/TOTP secrets, team exports not populated, PWA icons missing).
+- **Version**: `package.json` is the source of truth (the API reports it, the extension manifests and the docs must match: `npm run test:release`). The release history is `CHANGELOG.md`; status and next steps are `ROADMAP.md`.
 - **Disabled**: Slack/Zapier/Discord message creators (return 501), `/subscribe` (payments are webhook-only, no checkout flow yet).
 - **Group messages and legacy messages** have no auth tag.
-- **Locales**: en, es, fr, de, zh, hi in `frontend/src/locales/`.
-- **Uploads**: creator token required; chunked upload for large files (`chunkedUpload.js`), 100 MB free / 1 GB premium (UI-level), 2 GB hard cap server-side.
+- **Locales**: en, es, fr, de, zh, hi in `frontend/src/locales/`; a unit test fails if any language misses, adds or empties a key.
+- **Uploads**: creator token required; chunked upload with retries for large files (`chunkedUpload.js`), 100 MB free / 1 GB premium (UI-level), 2 GB hard cap server-side.
+- **Cloudflare dashboard settings** that affect the app (Browser Cache TTL, Rocket Loader, Web Analytics injection) are listed in `SETUP.md`; `check:live-csp` shows when they are wrong.

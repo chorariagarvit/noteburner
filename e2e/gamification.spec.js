@@ -2,7 +2,7 @@ import { test, expect } from './fixtures.js';
 
 const BASE_URL = 'http://localhost:5173';
 
-test.describe('Week 4 - Gamification', () => {
+test.describe('Gamification', () => {
   
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test

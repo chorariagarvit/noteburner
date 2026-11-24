@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test.describe('Week 7 - Mobile Optimization & PWA Features', () => {
+test.describe('Mobile Optimization & PWA Features', () => {
   test.describe('Progressive Web App (PWA)', () => {
     test('should have valid manifest.json', async ({ page, browserName }) => {
       // Load the homepage

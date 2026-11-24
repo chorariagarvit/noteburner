@@ -2,7 +2,7 @@
 
 ## Overview
 
-NoteBurner now supports file uploads up to **2GB** using chunked multipart uploads. This bypasses Cloudflare Workers' 100MB request body limit.
+NoteBurner supports file uploads up to **2GB** using chunked multipart uploads. This bypasses Cloudflare Workers' 100MB request body limit.
 
 ## How It Works
 
@@ -38,7 +38,7 @@ NoteBurner now supports file uploads up to **2GB** using chunked multipart uploa
 
 ### Decision Logic
 
-- **Files ≤ 100MB**: Use direct upload (legacy `/api/media` endpoint)
+- **Files ≤ 100MB**: Use direct upload (`POST /api/media`)
 - **Files > 100MB**: Use chunked upload (multipart API)
 
 ## Backend API
@@ -272,7 +272,7 @@ wrangler r2 object list noteburner-media --limit 10
 - ✅ Max concurrent chunks: 1 (sequential upload)
 - ✅ Encryption: Client-side AES-256-GCM
 - ⚠️ No pause/resume support
-- ⚠️ No automatic retry on chunk failure
+- ✅ Each chunk is retried up to 3 times, one second apart
 - ⚠️ No parallel chunk uploads
 
 ### Cloudflare R2 Limits
@@ -289,17 +289,3 @@ wrangler r2 object list noteburner-media --limit 10
 3. **Background uploads** - Use Service Workers
 4. **Compression** - Optional gzip before encryption
 5. **Incremental encryption** - Encrypt chunks on-the-fly instead of entire file
-
-## Deployment Checklist
-
-- [ ] Backend: Add multipart upload endpoints
-- [ ] Backend: Update `MAX_FILE_SIZE` to 2GB
-- [ ] Frontend: Implement chunked upload utility
-- [ ] Frontend: Add progress indicators
-- [ ] Frontend: Update file size validation
-- [ ] Documentation: Update SETUP.md
-- [ ] Deploy backend to Workers
-- [ ] Deploy frontend to Pages
-- [ ] Test with 500MB file
-- [ ] Test with 1.5GB file
-- [ ] Monitor R2 storage costs

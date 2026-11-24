@@ -1,6 +1,6 @@
 {
   "name": "noteburner",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "description": "Secure one-time message encryption and decryption app",
   "private": true,
   "workspaces": [
@@ -23,7 +23,8 @@
     "test:report": "playwright show-report",
     "test:extension": "node --test \"extension/test/*.test.js\"",
     "test:csp": "playwright test -c playwright.csp.config.js",
-    "test:modern-web": "node --test scripts/*.test.mjs && node scripts/check-modern-web.mjs modern-web-guidance@1.0.2"
+    "test:modern-web": "node --test scripts/*.test.mjs && node scripts/check-modern-web.mjs modern-web-guidance@1.0.2",
+    "test:release": "node --test scripts/versions.test.mjs"
   },
   "keywords": [
     "encryption",

@@ -1,5 +1,5 @@
 /**
- * Week 12: Scaling & Performance - E2E Tests
+ * E2E tests: Scaling & Performance
  * Tests for caching, CDN optimization, monitoring, and health checks
  */
 
@@ -7,7 +7,7 @@ import { test, expect } from './fixtures.js';
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8787';
 
-test.describe('Week 12: Scaling & Performance', () => {
+test.describe('Scaling & Performance', () => {
   
   test.describe('Health Check Endpoints', () => {
     
@@ -173,7 +173,7 @@ test.describe('Week 12: Scaling & Performance', () => {
     
     test('should handle team queries efficiently', async ({ request }) => {
       // Test that optimized queries work
-      // This tests the Week 12 database optimization work
+      // This tests the database optimizations
       
       const startTime = Date.now();
       const response = await request.get(`${API_BASE_URL}/api/teams`, {
@@ -340,7 +340,7 @@ test.describe('Week 12: Scaling & Performance', () => {
   test.describe('Backward Compatibility', () => {
     
     test('should maintain existing API functionality', async ({ request }) => {
-      // Test that existing endpoints still work after Week 12 optimizations
+      // Test that existing endpoints still work after the optimizations
       const response = await request.get(`${API_BASE_URL}/`);
       
       expect(response.status()).toBe(200);
@@ -351,7 +351,7 @@ test.describe('Week 12: Scaling & Performance', () => {
       expect(data).toHaveProperty('version');
       expect(data).toHaveProperty('features');
       
-      // Should include Week 12 features
+      // Should include the performance features
       expect(data.features).toContain('caching');
       expect(data.features).toContain('monitoring');
     });

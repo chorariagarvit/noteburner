@@ -1,120 +1,56 @@
 # NoteBurner Browser Extension
 
-🔥 Send self-destructing encrypted messages directly from any webpage.
+🔥 Send self-destructing, end-to-end encrypted messages from any webpage. Version v1.15.0 (Manifest V3) for Chrome, Edge, Brave and Firefox.
 
 ## Features
 
-- **Right-click Context Menu**: Select text and right-click to send via NoteBurner
-- **Quick Encrypt Popup**: Click extension icon for instant encryption
-- **Password Generation**: Built-in secure password generator
-- **Dark Mode**: Toggle between light and dark themes
-- **Cross-browser**: Works on Chrome, Edge, and Firefox
-- **Privacy-First**: All encryption happens locally in your browser
+- **Right-click menu**: select text, right-click, **Send via NoteBurner**; the website opens with your text prefilled
+- **Quick popup**: click the toolbar icon, type or paste a message (selected text is prefilled), set a password, choose an expiry and get a one-time link
+- **Password generator**, light and dark mode
+- **Private by design**: encryption happens in your browser (AES-256-GCM); only ciphertext and a password-derived proof are sent; no tracking, analytics or data collection
+- **Only runs when you use it**: there is no content script and nothing is injected into pages
 
-## Installation
+## Install
 
-### From Web Stores
-- **Firefox Add-ons**: [Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/noteburner/) (live, version 1.14.0)
-- **Chrome Web Store**: update to 1.14.0 pending (the store's verified-upload key must be reset first)
+- **Firefox (142 or newer)**: [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/noteburner/)
+- **Chrome / Edge / Brave**: the Chrome Web Store listing is being updated to 1.15.0
+- **From source**: [README-chrome.md](./README-chrome.md) (Chromium browsers, load the folder unpacked) or [README-firefox.md](./README-firefox.md) (build first: Firefox needs its own manifest)
 
-### Manual Installation (Development)
+## Using it
 
-Per-browser guides (install, permissions, build, publish, troubleshooting):
-
-- **Chrome / Edge / Brave:** [README-chrome.md](./README-chrome.md): load the `extension/` folder unpacked.
-- **Firefox (142+):** [README-firefox.md](./README-firefox.md): Firefox needs its own manifest, so run `./extension/build.sh` and load `noteburner-firefox.zip`. Loading the folder directly does not work.
-
-## Usage
-
-### Method 1: Context Menu
-1. Select any text on a webpage
-2. Right-click and choose "Send via NoteBurner"
-3. NoteBurner will open with the selected text pre-filled
-
-### Method 2: Extension Popup
-1. Click the NoteBurner extension icon in your browser toolbar
-2. Type or paste your message
-3. Set a password (or generate one with 🎲)
-4. Choose expiration time (1h - 7 days)
-5. Click "Encrypt & Create Link"
-6. Copy and share the generated link
-
-### Dark Mode
-- Click the 🌙/☀️ button in the popup header to toggle dark mode
-- Preference is saved across sessions
+1. **Context menu**: select text, right-click, choose **Send via NoteBurner**.
+2. **Popup**: click the icon, enter the message and a password (or generate one), pick an expiry (1 hour to 7 days, or none), click **Encrypt & Create Link**, then copy the link.
+3. If the server asks for a human check (Cloudflare Turnstile), the popup opens noteburner.work/create with your text in the URL fragment (`#text=`, which is never sent to a server), because the check cannot run inside an extension.
 
 ## Permissions
 
-The extension requires these permissions:
+| Permission | Why |
+|---|---|
+| `activeTab` + `scripting` | Read the text you selected on the current tab, only when you open the popup |
+| `contextMenus` | The right-click item |
+| `storage` | Remember dark mode |
+| Hosts `noteburner.work`, `api.noteburner.work` | Talk to the NoteBurner API; no other site is contacted |
 
-- **contextMenus**: For right-click "Send via NoteBurner" option
-- **activeTab** + **scripting**: To read the text you selected on the current tab, only at the moment you open the popup. There is no content script: the extension does not run on pages you do not use it on
-- **storage**: To save dark mode preference and user settings
-- **host_permissions (noteburner.work)**: To communicate with NoteBurner API for message creation
+Privacy policy: [PRIVACY.md](./PRIVACY.md).
 
-See [PRIVACY.md](./PRIVACY.md) for detailed privacy policy.
+## Files
 
-## Security
+- `manifest.json` (Chrome) and `manifest.firefox.json` (Firefox; shipped as `manifest.json` in its package)
+- `background.js` (context menu), `popup.html`, `popup.js`, `popup.css`, `crypto.js` (the same crypto as the web app, with a parity test), `icons/`
+- `build.sh` builds `noteburner-extension.zip` (Chrome) and `noteburner-firefox.zip` from an allowlist of runtime files, runs the tests first and checks the result; an optional signed `.crx` is built when `NOTEBURNER_KEY` points to your signing key
+- [PUBLISHING.md](./PUBLISHING.md): store listing text, permission justifications and the submission checklist
 
-- ✅ All encryption happens locally in your browser
-- ✅ Messages are encrypted using AES-256-GCM
-- ✅ Passwords never leave your device
-- ✅ Zero-knowledge architecture
-- ✅ Only encrypted ciphertext is transmitted to servers
-- ✅ No tracking, analytics, or data collection
+## Develop and test
 
-## Publishing
-
-See [PUBLISHING.md](./PUBLISHING.md) for complete guide to publishing on Chrome Web Store and Firefox Add-ons.
-
-### Quick Build
-
-Generate icons (already done):
 ```bash
-node generate-icons.js
+npm run test:extension     # from the repository root: crypto parity with the web app, the request contract against a mock API, manifest and source checks
+./extension/build.sh       # builds the store packages into the repository root
 ```
-
-Create distribution package:
-```bash
-cd extension
-zip -r noteburner-extension.zip . -x "*.git*" -x "generate-icons.js" -x "icons/create-icons.html"
-```
-
-## Development
-
-The extension uses **Manifest V3** for Chrome/Edge compatibility and is also compatible with Firefox WebExtensions.
-
-**File Structure:**
-- `manifest.json` - Extension configuration (Manifest V3)
-- `background.js` - Background service worker (context menu)
-- `popup.html/js/css` - Extension popup UI with dark mode
-- `crypto.js` - Client-side encryption utilities (AES-256-GCM)
-- `icons/` - Extension icons (16, 48, 128px)
-- `PRIVACY.md` - Privacy policy for store submission
-- `PUBLISHING.md` - Complete publishing guide
-
-## License
-
-MIT License - See main repository for details
-- `crypto.js` - Encryption utilities
 
 ## Changelog
 
-### v1.14.0 (2026-11-17)
-- Removed the content script and floating button that ran on every site. The popup now reads your selection through `activeTab` + `scripting` only when opened, and no resources are exposed to web pages. Build script rewritten: the Firefox zip previously had no `manifest.json`.
-- Authenticates with the NoteBurner API: fetches a short-lived signed app token (`POST /api/app-token`) and sends it as `X-App-Token` on every request. Required since the API now rejects unauthenticated calls.
-- Added API hosts to `host_permissions` (Chrome and Firefox manifests)
-- Replaced `innerHTML` with `textContent` in the popup and content script
-- Version aligned with the web app (was 1.0.0)
-- Friendlier errors: rate limiting ("wait N seconds"), oversized messages, outages, gateway error pages and network failures no longer show raw `429: Too Many Requests` text
-- 30-second timeout on every API call so the popup can't hang; "No expiration" now sends no expiry instead of `NaN`
-- When the server requires a Turnstile human check, the popup opens noteburner.work/create with the text prefilled (the widget can't run in an extension)
-- New tests (`npm run test:extension`): crypto parity with the web app (auth tag, cross-decryption), the request contract against a mock API, manifest/source consistency
+See the repository [CHANGELOG.md](../CHANGELOG.md). Extension changes in 1.15.0: standard `scrollbar-color` and `scrollbar-width` in the popup (with a dark variant); versions aligned with the web app; packages built from an allowlist (the Firefox package previously had no `manifest.json`); the unused `notifications` permission dropped. 1.14.0 removed the all-sites content script and added the signed app token.
 
-### v1.0.0 (2026-01-14)
-- Initial release
-- Context menu integration
-- Floating action button
-- Quick encrypt popup
-- Password generator
-- Chrome, Edge, and Firefox support
+## License
+
+MIT

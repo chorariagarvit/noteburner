@@ -2,78 +2,93 @@
 
 **Mission**: Make NoteBurner the go-to platform for secure, self-destructing messages.
 
-**Current version**: v1.14.0 (Mar 13, 2026) · **Next**: Week 15 — TBD
+**Current version**: v1.15.0 (Nov 24, 2026) · **Next**: v1.16.0, picked from section 2
 
-> This file covers **status and what's next**. Per-release details live elsewhere:
-> - [CHANGELOG.md](CHANGELOG.md) — what shipped in each version
-> - [docs/WEEKn_SUMMARY.md](docs/) — implementation notes, files and metrics for each week
-> - [docs/E2E_TESTING.md](docs/E2E_TESTING.md) — test suite
+> This file covers **status and what's next**. Details live elsewhere:
+> - [CHANGELOG.md](CHANGELOG.md): what shipped in each version
+> - [docs/E2E_TESTING.md](docs/E2E_TESTING.md): the test suites and how to run them
+> - [docs/API.md](docs/API.md): the public API
+> - [SETUP.md](SETUP.md): deploying and configuring (secrets, migrations, Cloudflare settings)
 
 ---
 
 ## 1. Where we are
 
-Weeks 1–14 are done and deployed to Cloudflare (Workers + Pages). Everything shipped so far:
+### v1.15.0: security hardening, quality and a three-state theme (Nov 24, 2026)
 
-| Week | Version | Released | Focus | Details |
-|---|---|---|---|---|
-| — | v1.0.0 | Dec 7, 2025 | Initial launch: AES-256-GCM client-side encryption, one-time access, file upload | — |
-| 1 | v1.1.0 | Dec 17, 2025 | Analytics & social proof (stats counters, platform stats) | [Week 1](docs/WEEK1_SUMMARY.md) |
-| 2 | v1.2.0 | Dec 23, 2025 | Viral mechanics (post-burn CTA, preview page, confetti) | [Week 2](docs/WEEK2_SUMMARY.md) |
-| 2.5 | — | Dec 23, 2025 | Playwright E2E test setup (no version bump) | [E2E](docs/E2E_TESTING.md) |
-| 3 | v1.3.0 | Dec 28, 2025 | Custom URLs, QR codes, countdown timer, OG tags | [Week 3](docs/WEEK3_SUMMARY.md) |
-| 4 | v1.4.0 | Jan 8, 2026 | Gamification (achievements, leaderboard, streaks, mystery mode) | [Week 4](docs/WEEK4_SUMMARY.md) |
-| 5 | v1.5.0 | Jan 14, 2026 | Network effects (group messages, referrals, browser extension, invite) | [Week 5](docs/WEEK5_SUMMARY.md) |
-| 6 | — | Jan 20, 2026 | UI/UX polish (onboarding, templates, shortcuts, a11y) — no version bump | [Week 6](docs/WEEK6_SUMMARY.md) |
-| 7 | v1.6.0 | Jan 23, 2026 | Mobile & PWA (installable, offline, camera, share sheet) | [Week 7](docs/WEEK7_SUMMARY.md) |
-| 8 | v1.7.0 | Feb 9, 2026 | Platform integrations (Slack, Discord, Zapier, webhooks, REST API) | [Week 8](docs/WEEK8_SUMMARY.md) |
-| 9 | v1.8.0 | Feb 9, 2026 | Security (password meter, self-destruct options, audit log, 2FA, headers) | [Week 9](docs/WEEK9_SUMMARY.md) |
-| 10 | v1.9.0 | Feb 20, 2026 | Enterprise (teams/RBAC, API keys, branding, GDPR dashboard) | [Week 10](docs/WEEK10_SUMMARY.md) |
-| 11 | v1.10.0 | Feb 24, 2026 | User authentication (signup, sessions, reset, brute-force lockout) | [Week 11](docs/WEEK11_SUMMARY.md) |
-| 12 | v1.12.0 | Mar 4, 2026 | Scaling & performance (KV cache, DB indexes, health checks) | [Week 12](docs/WEEK12_SUMMARY.md) |
-| 13 | v1.13.0 | Mar 12, 2026 | Internationalization (EN/ES/FR/DE/ZH/HI, locale middleware) | [Week 13](docs/WEEK13_SUMMARY.md) |
-| 14 | v1.14.0 | Mar 13, 2026 | Premium (Premium $5/mo, Lifetime $49, pricing page, dashboard) | [Week 14](docs/WEEK14_SUMMARY.md) |
+The release that turns the app from "stores the settings" into "enforces them", and cleans up everything the audits and scanners found.
 
-**Numbering notes**
-- Version numbers follow the git tags / `package.json`, not the week number. Weeks 2.5 and 6 shipped without a version bump.
-- Weeks 8 and 9 were released together on Feb 9.
-- There is no v1.11. The Week 12 API string was set to `1.11.0` in code, but the release is v1.12.0.
-- Dates come from git history. Older drafts of this file disagreed with each other and with the CHANGELOG.
+- **The server enforces the promises the UI makes.** One-time access, attempt and view limits, country restriction, auto-burn, data retention and "require password" are checked on the server, not just shown in the interface. Every API call needs a session, an API key or a signed app token; rate limits are exact (Durable Object); signup does not reveal which emails exist; creator tokens are hashed and 2FA secrets encrypted.
+- **Teams have real data.** Message lists, stats, exports, the compliance report and GDPR delete work, using daily counters that survive burned messages.
+- **A three-state theme (System, Light, Dark)** driven by the browser's colour scheme: it follows the OS live, applies before first paint, works without JavaScript and keeps native controls in step.
+- **Accessible everywhere.** Every page passes an axe scan (WCAG 2.1 A and AA, contrast included) in both themes.
+- **Cleaner and safer code.** SonarCloud and Snyk findings fixed (vulnerabilities, bugs, high-complexity functions), the dead `share.js` and an accidentally committed copy of the extension removed, CI installs without lifecycle scripts and with pinned tools, dependency scans at 0.
+- **Safer tooling.** The extension no longer runs on every site; the deployed site's headers and CSP can be checked with `npm run check:live-csp`; Google's Modern Web Guidance scan runs in CI; a release test keeps the version numbers and the changelog in step; the in-app changelog is generated from `CHANGELOG.md`.
+- **Tested on five browsers** (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari), with unit tests, production-build CSP checks and the accessibility scan.
+
+### Release history
+
+| Version | Released | Focus |
+|---|---|---|
+| v1.15.0 | Nov 24, 2026 | Security hardening, server-enforced protections, team data, three-state theme, accessibility, code quality |
+| v1.14.0 | Mar 13, 2026 | Premium (Premium $5/mo, Lifetime $49, pricing page, dashboard) |
+| v1.13.0 | Mar 12, 2026 | Internationalization (EN/ES/FR/DE/ZH/HI, locale middleware) |
+| v1.12.0 | Mar 4, 2026 | Scaling and performance (KV cache, DB indexes, health checks) |
+| v1.10.0 | Feb 24, 2026 | User authentication (signup, sessions, reset, brute-force lockout) |
+| v1.9.0 | Feb 20, 2026 | Enterprise (teams/RBAC, API keys, branding, GDPR dashboard) |
+| v1.8.0 | Feb 9, 2026 | Security (password meter, self-destruct options, audit log, 2FA, headers) |
+| v1.7.0 | Feb 9, 2026 | Platform integrations (Slack, Discord, Zapier, webhooks, REST API) |
+| v1.6.0 | Jan 23, 2026 | Mobile and PWA (installable, offline, camera, share sheet) |
+| v1.5.0 | Jan 14, 2026 | Network effects (group messages, referrals, browser extension, invite) |
+| v1.4.0 | Jan 8, 2026 | Gamification (achievements, leaderboard, streaks, mystery mode) |
+| v1.3.0 | Dec 28, 2025 | Custom URLs, QR codes, countdown timer, OG tags |
+| v1.2.0 | Dec 23, 2025 | Viral mechanics (post-burn CTA, preview page, confetti) |
+| v1.1.0 | Dec 17, 2025 | Analytics and social proof (stats counters, platform stats) |
+| v1.0.0 | Dec 7, 2025 | Initial launch: AES-256-GCM client-side encryption, one-time access, file upload |
+
+There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow the git tags and `package.json`.
 
 ---
 
 ## 2. What's next
 
-**Week 15: TBD.** Pick from the open items below.
+**v1.16.0** is picked from the open items below. In order of urgency:
+
+### To finish the v1.15.0 rollout
+- [ ] Push `security-all`, open the pull request and let CI, SonarCloud and Snyk re-scan; ignore the remaining Snyk false positives in the Snyk app (Turnstile script without an integrity hash, which cannot be pinned)
+- [ ] Publish the browser extension 1.15.0: Firefox (the listing is live at 1.14.0) and Chrome (blocked until Google support resets the verified-upload public key; a new key pair and a signed CRX are ready)
+- [ ] Cloudflare dashboard settings found by `npm run check:live-csp`: Browser Cache TTL "Respect Existing Headers" (so `/sw.js` is not cached for 4 hours), Rocket Loader off, a decision on Web Analytics auto-injection (see [SETUP.md](SETUP.md))
+- [ ] Set the production secrets `APP_TOKEN_SECRET` and `TOTP_ENCRYPTION_KEY` and apply migrations `0013` and `0014` (done once; repeat for any new environment)
+- [ ] Decide on Cloudflare Turnstile for the anonymous token endpoint: build is ready, off by default; enable it when bot traffic appears (see [SETUP.md](SETUP.md))
+
+### Follow-ups from this release
+- [ ] Remove `user-scalable=no` from the viewport (it blocks pinch-zoom): make the header responsive at 390 px first, then drop it and re-run the mobile suites
+- [ ] Remaining SonarCloud items: `await` inside loops where order does not matter, optional chains, SVG names, the duplicated crypto code between the web app and the extension
+- [ ] A three-state theme choice in a settings surface instead of the header (the guidance recommends this for rarely used controls), and optional `light-dark()` tokens for more of the interface
+- [ ] Make the rest of the app tolerate blocked browser storage (the theme does; onboarding, language and gamification still need `localStorage`)
 
 ### Launch checklist (still open)
 - [ ] Set up custom domain
-- [ ] Add analytics (GA4 / Clarity / Plausible — see [docs/ANALYTICS_SETUP.md](docs/ANALYTICS_SETUP.md))
+- [ ] Add analytics (GA4 / Clarity / Plausible; see [docs/ANALYTICS_SETUP.md](docs/ANALYTICS_SETUP.md))
 - [ ] Product Hunt submission
 - [ ] Social media accounts (Twitter/X, Reddit)
-- [ ] Connect Stripe for real payments (Week 14 backend is Stripe-ready but not live)
-- [ ] Load testing (planned in Week 12, not done)
+- [ ] Load testing
 
 ### Features not built yet (switched off or stubbed)
-- [ ] Payments: there is no checkout flow, only the signature-verified Stripe webhook; plans change only through it
+- [ ] Payments: there is no checkout flow, only the signature-verified Stripe webhook; plans change only through it. Set `STRIPE_WEBHOOK_SECRET` when billing goes live
+- [ ] Webhook delivery: `POST /api/integrations/webhooks/subscribe` stores subscriptions, but nothing sends `message.created` / `message.viewed` / `message.burned` events to them; build delivery with request signing and retries
 - [ ] Slack message creator (`/slack/command`, `/slack/actions`): returns 501. The old version put plaintext and the password in the link, so it needs a redesign around client-side encryption
 - [ ] Zapier message creator (`/zapier/create`): returns 501, same redesign needed
 - [ ] Discord message creator (`/discord/create`): returns 501, same redesign needed
 
-### Known dependency advisory
-- [ ] Vite's `picomatch` advisory (range <=4.0.7; 4.0.7 is the latest published release) has no patched version yet. CI reports it as informational (`continue-on-error` on the full audit step in `.github/workflows/e2e-tests.yml`). Re-check on each Vite upgrade, then make the audit blocking again.
-
-### Verify after deploy
-- [ ] Live-site CSP: `npm run test:csp` checks the policy against a local production build. Confirm the deployed site serves the same `_headers` (Cloudflare Pages) and has no violations.
-
 ### Technical debt
 - [ ] Comprehensive error boundaries
-- [ ] Request retry logic
+- [ ] Request retry logic in the web app (the large-file upload already retries)
 - [ ] Database migration rollback system
 - [ ] Automated backups
 - [ ] Disaster recovery runbook
 
-### Ideas (post-Q2, unscheduled)
+### Ideas (unscheduled)
 - Native mobile apps (React Native?)
 - Desktop app (Electron?)
 - Self-hosted version for enterprises
@@ -110,17 +125,14 @@ Weeks 1–14 are done and deployed to Cloudflare (Workers + Pages). Everything s
 ### Branches
 `feature/<name>` · `bugfix/<description>` · `hotfix/<fix>` · `release/v<version>`
 
-### Release cadence (target: weekly)
-1. **Mon** — branch from `main`
-2. **Mon–Thu** — develop and test
-3. **Fri** — code review, merge to `staging`
-4. **Sat** — staging deploy and QA
-5. **Sun** — production deploy and monitoring
-
-In practice weeks were sometimes merged straight to `main` or released together.
+### Releases
+1. Work on a branch from `main`; every change keeps the unit tests, the production-build CSP checks and the Playwright suites green.
+2. Bump the version once with `npm version <x.y.z> --workspaces --include-workspace-root --no-git-tag-version`, and the two extension manifests to match; add the `CHANGELOG.md` entry. `npm run test:release` fails if the versions, the changelog, the README or this file disagree.
+3. Apply new migrations, set any new secrets, deploy the backend, then the frontend; run `npm run check:live-csp` against the live site.
+4. Publish the browser extension builds (`./extension/build.sh`).
 
 ### Testing
-Unit tests for new functions · integration tests for API endpoints · E2E tests for critical flows · manual QA checklist per feature.
+Unit tests for new functions · API and browser tests for every critical flow · the axe accessibility scan in light and dark mode for new pages (see [docs/E2E_TESTING.md](docs/E2E_TESTING.md)).
 
 ### Review checklist
 - [ ] Linting passes (no warnings)
@@ -128,7 +140,7 @@ Unit tests for new functions · integration tests for API endpoints · E2E tests
 - [ ] Performance impact assessed
 - [ ] Security review completed
 - [ ] Documentation updated
-- [ ] CHANGELOG entry added
+- [ ] CHANGELOG entry added and `npm run test:release` passes
 
 ## 6. Contributing
 
@@ -140,4 +152,4 @@ Solo project for now, open to collaboration in Q2:
 
 ---
 
-**Last updated**: Mar 13, 2026 · **Current version**: v1.14.0 · **Next release**: Week 15 — TBD
+**Last updated**: Nov 24, 2026 · **Current version**: v1.15.0 · **Next release**: v1.16.0

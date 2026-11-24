@@ -38,6 +38,10 @@ jobs:
     - name: Modern web guidance scan
       run: npm run test:modern-web
 
+    # Versions, changelog, README and roadmap must agree before anything ships
+    - name: Release consistency
+      run: npm run test:release
+
     - name: Frontend production build
       run: npm run build --workspace=frontend
 

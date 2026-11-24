@@ -1,11 +1,11 @@
 import { test, expect } from './fixtures.js';
 
 /**
- * Week 9 E2E Tests - Security Enhancements
+ * E2E tests: Security Enhancements
  * Tests for password strength meter, self-destruct options, audit logs, 2FA
  */
 
-test.describe('Week 9 - Security Enhancements', () => {
+test.describe('Security Enhancements', () => {
 
   // Password Strength Meter Tests
   test.describe('Password Strength Meter', () => {

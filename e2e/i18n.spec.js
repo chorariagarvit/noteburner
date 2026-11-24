@@ -1,5 +1,5 @@
 /**
- * Week 13: Internationalization (i18n) - E2E Tests
+ * E2E tests: Internationalization (i18n)
  * Tests for multi-language support, locale detection, language switching,
  * date/number formatting, and regional compliance endpoints.
  */
@@ -13,7 +13,7 @@ const APP_URL = process.env.APP_URL || 'http://localhost:5173';
 // API: Locale Middleware & Compliance
 // ──────────────────────────────────────────────────────────────────────────────
 
-test.describe('Week 13: Internationalization', () => {
+test.describe('Internationalization', () => {
 
   test.describe('Backend: Locale Detection Middleware', () => {
 

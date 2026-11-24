@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test.describe('Week 3 - Custom URLs', () => {
+test.describe('Custom URLs', () => {
   test('should allow creating message with custom URL slug', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
@@ -139,7 +139,7 @@ test.describe('Week 3 - Custom URLs', () => {
   });
 });
 
-test.describe('Week 3 - QR Codes', () => {
+test.describe('QR Codes', () => {
   test('should display QR code after message creation', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
@@ -193,7 +193,7 @@ test.describe('Week 3 - QR Codes', () => {
   });
 });
 
-test.describe('Week 3 - Countdown Timer', () => {
+test.describe('Countdown Timer', () => {
   test('should display countdown timer on view page', async ({ page }) => {
     await page.goto(BASE_URL);
     await page.click('text=Create Message');
@@ -307,7 +307,7 @@ test.describe('Week 3 - Countdown Timer', () => {
   });
 });
 
-test.describe('Week 3 - Open Graph Meta Tags', () => {
+test.describe('Open Graph Meta Tags', () => {
   test('should have Open Graph meta tags in HTML', async ({ page }) => {
     await page.goto(BASE_URL);
 

@@ -49,10 +49,18 @@ export function parseChangelog(markdownText) {
     const line = rawLine.trim();
 
     // Match version header: ## [1.10.1] - 2026-02-24
-    const versionMatch = line.match(/^##\s+\[([^\]]+)\]\s+-\s+(.+)$/);
+    const versionMatch = line.match(/^##\s+\[(\d+\.\d+\.\d+)\]\s+-\s+(.+)$/);
     if (versionMatch) {
       if (currentVersion) versions.push(currentVersion);
       currentVersion = newVersion(versionMatch);
+      currentSection = null;
+      continue;
+    }
+
+    // Any other level 2 heading (Unversioned, a summary) ends the current version
+    if (currentVersion && /^##\s/.test(line)) {
+      versions.push(currentVersion);
+      currentVersion = null;
       currentSection = null;
       continue;
     }

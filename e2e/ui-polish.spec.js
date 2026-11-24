@@ -1,11 +1,11 @@
 /**
- * Week 6: UI/UX Polish - E2E Tests
+ * E2E tests: UI/UX Polish
  * Tests for onboarding flow, message templates, keyboard shortcuts, and animations
  */
 
 import { test, expect } from './fixtures.js';
 
-test.describe('Week 6: UI/UX Polish', () => {
+test.describe('UI/UX Polish', () => {
   
   test.describe('Onboarding Flow', () => {
     

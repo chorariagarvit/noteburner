@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import pkg from '../package.json'; // single source of truth for the version (the bundler inlines it)
 import { cors } from 'hono/cors';
 import { corsConfig } from './config/cors.js';
 import messagesRouter from './routes/messages.js';
@@ -44,7 +45,7 @@ app.get('/', (c) => {
   return c.json({
     status: 'ok',
     service: 'NoteBurner API',
-    version: '1.14.0',
+    version: pkg.version,
     features: ['authentication', 'enterprise', 'teams', 'api-v1', 'branding', 'compliance', 'caching', 'monitoring', 'i18n', 'premium']
   });
 });

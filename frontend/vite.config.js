@@ -16,6 +16,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   server: {
+    fs: { allow: ['..'] }, // the changelog page imports ../CHANGELOG.md
     port: 5173,
     proxy: {
       '^/api/': {
