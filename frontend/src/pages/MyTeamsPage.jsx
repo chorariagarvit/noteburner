@@ -39,7 +39,7 @@ export default function MyTeamsPage() {
   const getRoleIcon = (role) => {
     switch (role) {
       case 'admin':
-        return <Shield className="w-4 h-4 text-amber-500" />;
+        return <Shield className="w-4 h-4 text-amber-700 dark:text-amber-400" />;
       case 'member':
         return <UserCheck className="w-4 h-4 text-blue-500" />;
       case 'viewer':
@@ -103,7 +103,7 @@ export default function MyTeamsPage() {
             </div>
             <Link
               to="/teams/new"
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-lg font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-amber-700 dark:bg-amber-700 hover:bg-amber-800 dark:hover:bg-amber-700 text-white rounded-lg font-medium transition-colors"
             >
               <Plus className="w-5 h-5" />
               {t('myTeams.createBtn')}
@@ -130,7 +130,7 @@ export default function MyTeamsPage() {
             </p>
             <Link
               to="/teams/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-500 text-white rounded-lg font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-amber-700 dark:bg-amber-700 hover:bg-amber-800 dark:hover:bg-amber-700 text-white rounded-lg font-medium transition-colors"
             >
               <Plus className="w-5 h-5" />
               {t('myTeams.emptyBtn')}
@@ -180,7 +180,7 @@ export default function MyTeamsPage() {
 
                 {/* View Team Button */}
                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                  <div className="text-sm text-amber-600 dark:text-amber-400 font-medium group-hover:text-amber-700 dark:group-hover:text-amber-300">
+                  <div className="text-sm text-amber-700 dark:text-amber-400 font-medium group-hover:text-amber-700 dark:group-hover:text-amber-300">
                     {t('myTeams.viewDashboard')} →
                   </div>
                 </div>

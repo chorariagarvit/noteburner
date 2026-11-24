@@ -313,7 +313,7 @@ function ViewMessage() {
                 <p className="text-base text-gray-600 dark:text-gray-400 mb-1">
                   {t('view.afterBurnSendOwn')}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   No registration. No tracking. Just pure privacy.
                 </p>
               </div>
@@ -361,7 +361,7 @@ function ViewMessage() {
           <div className="relative inline-block mb-6">
             <div className="absolute inset-0 bg-green-400 dark:bg-green-500 rounded-full animate-ping opacity-75"></div>
             <div className="relative bg-white dark:bg-gray-800 rounded-full p-8 shadow-2xl">
-              <Lock className="w-16 h-16 text-green-600 dark:text-green-400 animate-bounce" />
+              <Lock className="w-16 h-16 text-green-700 dark:text-green-400 animate-bounce" />
             </div>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">{t('view.unlocking')}</h2>
@@ -461,6 +461,7 @@ function ViewMessage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? t('a11y.hidePassword') : t('a11y.showPassword')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -526,7 +527,7 @@ function ViewMessage() {
 
           <div className="mt-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <Flame className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <Flame className="w-5 h-5 text-amber-700 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800 dark:text-amber-300">
                   <p className="font-semibold mb-1">{t('view.warningTitle')}</p>
                   <p>{t('view.warningDesc')}</p>

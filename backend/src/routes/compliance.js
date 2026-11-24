@@ -3,6 +3,20 @@ import { requireAuth, getUserId } from '../middleware/requireAuth.js';
 
 const router = new Hono();
 
+// Audit logs are kept 30 days by the hourly cleanup job, so a team cannot be promised longer
+const MAX_AUDIT_RETENTION_DAYS = 30;
+
+/** One CSV field (RFC 4180): quoted when needed, and neutralised if a spreadsheet would read it as a formula. */
+function csvCell(value) {
+  if (value === null || value === undefined) return '';
+  let text = String(value);
+  if (typeof value === 'string' && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+const csvLine = (values) => values.map(csvCell).join(',');
+
+const isInteger = (v) => typeof v === 'number' && Number.isInteger(v);
+
 /**
  * Helper: Check team admin permission
  */
@@ -38,7 +52,7 @@ router.get('/:teamId/settings', requireAuth, async (c) => {
         data_retention_days: 30,
         gdpr_enabled: true,
         auto_delete_enabled: true,
-        audit_log_retention: 90,
+        audit_log_retention: MAX_AUDIT_RETENTION_DAYS,
         require_password: false,
         min_password_strength: 2
       }
@@ -48,6 +62,7 @@ router.get('/:teamId/settings', requireAuth, async (c) => {
   return c.json({ 
     settings: {
       ...settings,
+      audit_log_retention: Math.min(settings.audit_log_retention, MAX_AUDIT_RETENTION_DAYS),
       gdpr_enabled: Boolean(settings.gdpr_enabled),
       auto_delete_enabled: Boolean(settings.auto_delete_enabled),
       require_password: Boolean(settings.require_password)
@@ -62,11 +77,15 @@ router.get('/:teamId/settings', requireAuth, async (c) => {
 router.put('/:teamId/settings', requireAuth, async (c) => {
   const userId = getUserId(c);
   const teamId = c.req.param('teamId');
-  const body = await c.req.json();
 
   const isAdmin = await checkTeamAdmin(c.env.DB, teamId, userId);
   if (!isAdmin) {
     return c.json({ error: 'Admin access required', code: 'ACCESS_DENIED' }, 403);
+  }
+
+  const body = await c.req.json().catch(() => undefined);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return c.json({ error: 'Request body must be a JSON object', code: 'INVALID_BODY' }, 400);
   }
 
   const {
@@ -78,13 +97,19 @@ router.put('/:teamId/settings', requireAuth, async (c) => {
     min_password_strength
   } = body;
 
-  // Validate values
-  if (data_retention_days !== undefined && (data_retention_days < 1 || data_retention_days > 3650)) {
-    return c.json({ error: 'Retention days must be between 1 and 3650', code: 'INVALID_VALUE' }, 400);
+  // Validate values: whole numbers in range, real booleans
+  const invalid = (message) => c.json({ error: message, code: 'INVALID_VALUE' }, 400);
+  if (data_retention_days !== undefined && (!isInteger(data_retention_days) || data_retention_days < 1 || data_retention_days > 3650)) {
+    return invalid('Retention days must be a whole number between 1 and 3650');
   }
-
-  if (min_password_strength !== undefined && (min_password_strength < 0 || min_password_strength > 4)) {
-    return c.json({ error: 'Password strength must be between 0 and 4', code: 'INVALID_VALUE' }, 400);
+  if (audit_log_retention !== undefined && (!isInteger(audit_log_retention) || audit_log_retention < 1 || audit_log_retention > MAX_AUDIT_RETENTION_DAYS)) {
+    return invalid(`Audit log retention must be a whole number between 1 and ${MAX_AUDIT_RETENTION_DAYS} days`);
+  }
+  if (min_password_strength !== undefined && (!isInteger(min_password_strength) || min_password_strength < 0 || min_password_strength > 4)) {
+    return invalid('Password strength must be a whole number between 0 and 4');
+  }
+  for (const [name, value] of Object.entries({ gdpr_enabled, auto_delete_enabled, require_password })) {
+    if (value !== undefined && typeof value !== 'boolean') return invalid(`${name} must be true or false`);
   }
 
   const updates = [];
@@ -108,7 +133,7 @@ router.put('/:teamId/settings', requireAuth, async (c) => {
     return c.json({ error: 'No updates provided', code: 'NO_UPDATES' }, 400);
   }
 
-  updates.push('updated_at = datetime("now")');
+  updates.push("updated_at = datetime('now')");
   params.push(teamId);
 
   await c.env.DB.prepare(`
@@ -162,15 +187,7 @@ router.get('/:teamId/export/audit-logs', requireAuth, async (c) => {
     const csvLines = ['ID,Message ID,Event Type,Country,Timestamp,Success,Metadata'];
     
     for (const log of (logs.results || [])) {
-      csvLines.push([
-        log.id,
-        log.message_id,
-        log.event_type,
-        log.country || '',
-        log.timestamp,
-        log.success,
-        log.metadata || ''
-      ].join(','));
+      csvLines.push(csvLine([log.id, log.message_id, log.event_type, log.country, log.timestamp, log.success, log.metadata]));
     }
 
     const csv = csvLines.join('\n');
@@ -227,7 +244,7 @@ router.get('/:teamId/export/messages', requireAuth, async (c) => {
     const csvLines = ['ID,Created,Expires,Accessed,Views,Max Views,Slug,Created Via,Content Length'];
     
     for (const msg of (messages.results || [])) {
-      csvLines.push([
+      csvLines.push(csvLine([
         msg.id,
         msg.created_at,
         msg.expires_at,
@@ -237,7 +254,7 @@ router.get('/:teamId/export/messages', requireAuth, async (c) => {
         msg.custom_slug || '',
         msg.created_via || 'web',
         msg.content_length || 0
-      ].join(','));
+      ]));
     }
 
     const csv = csvLines.join('\n');
@@ -265,7 +282,7 @@ router.get('/:teamId/export/messages', requireAuth, async (c) => {
 router.post('/:teamId/gdpr/delete-all', requireAuth, async (c) => {
   const userId = getUserId(c);
   const teamId = c.req.param('teamId');
-  const body = await c.req.json();
+  const body = (await c.req.json().catch(() => null)) || {};
 
   // Verify team owner (not just admin)
   const team = await c.env.DB.prepare(`

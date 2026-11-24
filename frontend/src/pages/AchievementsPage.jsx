@@ -47,7 +47,7 @@ export default function AchievementsPage() {
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center">
-            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+            <div className="text-3xl font-bold text-purple-600 dark:text-purple-300">
               {unlocked.length}/{progress.length}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -63,7 +63,7 @@ export default function AchievementsPage() {
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center">
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-3xl font-bold text-green-700 dark:text-green-400">
               {stats.filesUploaded}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">

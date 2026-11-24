@@ -2,6 +2,7 @@
 // Processes at most 500 items per run to stay within Worker CPU/time limits
 import { migrateLegacyCreatorTokens } from '../utils/creatorToken.js';
 import { migrateLegacyTotpSecrets } from '../utils/secretBox.js';
+import { cleanupExpiredGroups } from '../utils/groupMessages.js';
 
 const BATCH_LIMIT = 500;
 const R2_CONCURRENCY = 25;
@@ -36,6 +37,19 @@ export async function cleanupScheduled(env) {
     await env.DB.prepare(
       `DELETE FROM stats WHERE period = 'this_week' AND date < ?`
     ).bind(weekDate).run();
+
+    // 0. Team data retention: a team that turned on auto-delete has its messages expire once they are
+    //    older than its retention period. They are only marked here; step 1 below removes them and
+    //    their stored files the same way as any other expired message.
+    await env.DB.prepare(
+      `UPDATE messages SET expires_at = ?1
+       WHERE accessed = 0 AND team_id IS NOT NULL AND (expires_at IS NULL OR expires_at > ?1)
+         AND EXISTS (
+           SELECT 1 FROM compliance_settings cs
+           WHERE cs.team_id = messages.team_id AND cs.auto_delete_enabled = 1
+             AND messages.created_at < ?1 - cs.data_retention_days * 86400000
+         )`
+    ).bind(now).run();
 
     // 1. Find expired messages (bounded to BATCH_LIMIT per run)
     const messagesToDelete = await env.DB.prepare(
@@ -94,10 +108,11 @@ export async function cleanupScheduled(env) {
     for (const [label, run] of [
       ['legacy creator tokens', () => migrateLegacyCreatorTokens(env.DB)],
       ['legacy TOTP secrets', () => migrateLegacyTotpSecrets(env)],
+      ['expired group records', () => cleanupExpiredGroups(env.DB)],
     ]) {
       try {
         const n = await run();
-        if (n) console.log(`Secured ${n} ${label}`);
+        if (n) console.log(`Cleanup step (${label}): ${n}`);
       } catch (err) {
         console.error(`Cleanup step failed (${label}):`, err.message);
       }

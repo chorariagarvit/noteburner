@@ -42,7 +42,7 @@ function CreateMessageSuccess({
             <div className="max-w-4xl mx-auto px-4">
                 <div className="card animate-fade-in">
                     <div className="text-center mb-6">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 mb-4">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 mb-4">
                             {groupData ? <Users className="w-8 h-8" /> : <Check className="w-8 h-8" />}
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -72,6 +72,7 @@ function CreateMessageSuccess({
                                         type="text"
                                         value={shareUrl}
                                         readOnly
+                                        aria-label={t('a11y.shareLink')}
                                         className="input-field font-mono text-sm"
                                     />
                                     <button

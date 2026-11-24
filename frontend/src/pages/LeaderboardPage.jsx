@@ -89,7 +89,7 @@ export default function LeaderboardPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesCreated')}</span>
-                <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                <span className="text-2xl font-bold text-purple-600 dark:text-purple-300">
                   {stats.this_week?.messages_created || 0}
                 </span>
               </div>
@@ -112,7 +112,7 @@ export default function LeaderboardPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.messagesCreated')}</span>
-                <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                <span className="text-2xl font-bold text-green-700 dark:text-green-400">
                   {stats.all_time?.messages_created?.toLocaleString() || 0}
                 </span>
               </div>
@@ -156,7 +156,7 @@ export default function LeaderboardPage() {
               <div className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.burnRate')}</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+              <div className="text-3xl font-bold text-green-700 dark:text-green-400 mb-2">
                 100%
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">{t('leaderboard.privacyProtected')}</div>

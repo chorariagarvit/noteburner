@@ -161,7 +161,7 @@ router.put('/:id', requireAuth, async (c) => {
     return c.json({ error: 'No updates provided', code: 'NO_UPDATES' }, 400);
   }
 
-  updates.push('updated_at = datetime("now")');
+  updates.push("updated_at = datetime('now')");
   params.push(teamId);
 
   await c.env.DB.prepare(`

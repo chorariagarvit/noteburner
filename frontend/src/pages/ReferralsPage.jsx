@@ -126,6 +126,7 @@ export default function ReferralsPage() {
               type="text"
               value={referralUrl}
               readOnly
+              aria-label={t('a11y.shareLink')}
               className="input-field font-mono text-sm flex-1"
             />
             <button
@@ -160,7 +161,7 @@ export default function ReferralsPage() {
               className={`card ${
                 reward.unlocked
                   ? 'border-2 border-green-500 dark:border-green-400 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
-                  : 'opacity-75'
+                  : 'border-2 border-dashed border-gray-300 dark:border-gray-600'
               }`}
             >
               <div className="flex items-start gap-4">
@@ -172,7 +173,7 @@ export default function ReferralsPage() {
                       {reward.title}
                     </h3>
                     {reward.unlocked ? (
-                      <Unlock className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      <Unlock className="w-5 h-5 text-green-700 dark:text-green-400" />
                     ) : (
                       <Lock className="w-5 h-5 text-gray-400 dark:text-gray-600" />
                     )}

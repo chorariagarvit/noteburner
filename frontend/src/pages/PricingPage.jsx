@@ -86,8 +86,8 @@ const COLOR_MAP = {
   amber: {
     header: 'bg-amber-50 dark:bg-amber-900/20',
     badge: 'bg-amber-100 text-amber-800',
-    check: 'text-amber-500',
-    button: 'bg-amber-500 hover:bg-amber-600 text-white',
+    check: 'text-amber-700 dark:text-amber-400',
+    button: 'bg-amber-700 hover:bg-amber-800 text-white',
     ring: 'ring-2 ring-amber-400'
   },
   purple: {
@@ -99,7 +99,7 @@ const COLOR_MAP = {
 };
 
 function getIconTone(plan) {
-  if (plan.highlighted) return { box: 'bg-amber-100', icon: 'text-amber-600' };
+  if (plan.highlighted) return { box: 'bg-amber-100', icon: 'text-amber-700 dark:text-amber-400' };
   if (plan.id === 'lifetime') return { box: 'bg-purple-100', icon: 'text-purple-600' };
   return { box: 'bg-gray-100', icon: 'text-gray-600' };
 }
@@ -149,7 +149,7 @@ export default function PricingPage() {
                   </div>
                 )}
                 {plan.highlighted && (
-                  <div className="bg-amber-500 text-white text-center py-1.5 text-xs font-bold uppercase tracking-wide">
+                  <div className="bg-amber-700 text-white text-center py-1.5 text-xs font-bold uppercase tracking-wide">
                     Most Popular
                   </div>
                 )}
@@ -206,8 +206,8 @@ export default function PricingPage() {
                 <tr className="bg-gray-50 dark:bg-gray-700/50">
                   <th className="text-left py-3 px-6 text-sm font-semibold text-gray-600 dark:text-gray-400">Feature</th>
                   <th className="text-center py-3 px-6 text-sm font-semibold text-gray-600 dark:text-gray-400">Free</th>
-                  <th className="text-center py-3 px-6 text-sm font-semibold text-amber-600 dark:text-amber-400">Premium</th>
-                  <th className="text-center py-3 px-6 text-sm font-semibold text-purple-600 dark:text-purple-400">Lifetime</th>
+                  <th className="text-center py-3 px-6 text-sm font-semibold text-amber-700 dark:text-amber-400">Premium</th>
+                  <th className="text-center py-3 px-6 text-sm font-semibold text-purple-600 dark:text-purple-300">Lifetime</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -225,8 +225,8 @@ export default function PricingPage() {
                   <tr key={feature} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                     <td className="py-3 px-6 text-sm text-gray-700 dark:text-gray-300 font-medium">{feature}</td>
                     <td className="py-3 px-6 text-sm text-center text-gray-600 dark:text-gray-400">{free}</td>
-                    <td className="py-3 px-6 text-sm text-center font-semibold text-amber-600 dark:text-amber-400">{premium}</td>
-                    <td className="py-3 px-6 text-sm text-center font-semibold text-purple-600 dark:text-purple-400">{lifetime}</td>
+                    <td className="py-3 px-6 text-sm text-center font-semibold text-amber-700 dark:text-amber-400">{premium}</td>
+                    <td className="py-3 px-6 text-sm text-center font-semibold text-purple-600 dark:text-purple-300">{lifetime}</td>
                   </tr>
                 ))}
               </tbody>
@@ -260,7 +260,7 @@ export default function PricingPage() {
           <p className="mb-6 opacity-90">Join thousands of users who trust NoteBurner for secure communication.</p>
           <Link
             to={isAuthenticated ? '/premium?plan=premium' : '/signup?redirect=/premium?plan=premium'}
-            className="inline-block bg-white text-amber-600 font-bold px-8 py-3 rounded-xl hover:bg-amber-50 transition-colors"
+            className="inline-block bg-white text-amber-700 font-bold px-8 py-3 rounded-xl hover:bg-amber-50 transition-colors"
           >
             Start Premium — $5/month
           </Link>

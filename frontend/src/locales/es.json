@@ -832,5 +832,13 @@
     "authTitle": "Authentication",
     "authDesc": "Include your API key in the X-API-Key header for all requests.",
     "baseUrl": "Base URL"
+  },
+  "a11y": {
+    "github": "NoteBurner en GitHub",
+    "selectLanguage": "Seleccionar idioma",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "shareLink": "Enlace para compartir",
+    "userMenu": "Menú de la cuenta"
   }
 }

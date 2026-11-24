@@ -27,7 +27,7 @@ export default function AchievementBadge({ achievement, unlocked = false, progre
           </p>
           {!unlocked && progress && progress.percentage > 0 && (
             <div className="mt-2">
-              <div className="flex justify-between text-xs text-gray-600 dark:text-gray-500 mb-1">
+              <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
                 <span>{t('achievementBadge.progress')}</span>
                 <span>{Math.round(progress.percentage)}%</span>
               </div>

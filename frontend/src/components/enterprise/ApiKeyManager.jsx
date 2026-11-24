@@ -122,7 +122,7 @@ export default function ApiKeyManager() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-medium"
+          className="px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 font-medium"
         >
           {t('apiKeys.createButton')}
         </button>
@@ -261,7 +261,7 @@ export default function ApiKeyManager() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-amber-500 dark:bg-amber-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-amber-500 font-medium"
+                  className="flex-1 px-4 py-2 bg-amber-700 dark:bg-amber-700 text-white rounded-lg hover:bg-amber-800 dark:hover:bg-amber-700 font-medium"
                 >
                   {t('apiKeys.createKeyButton')}
                 </button>

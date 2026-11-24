@@ -407,7 +407,7 @@ function ChangelogPage() {
               {t('changelog.footerDesc')}
             </p>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             Last updated: February 20, 2026
           </p>
         </div>

@@ -69,3 +69,6 @@ noteburner-extension/
 noteburner-extension.crx
 noteburner-extension.zip
 noteburner-firefox.zip
+
+# Agent worktrees (isolated copies used by background agents)
+.claude/worktrees/

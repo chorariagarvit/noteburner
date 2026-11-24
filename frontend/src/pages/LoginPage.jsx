@@ -119,7 +119,7 @@ export default function LoginPage() {
                 type="checkbox"
                 checked={formData.rememberMe}
                 onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded"
+                className="h-4 w-4 text-amber-700 dark:text-amber-400 focus:ring-amber-500 border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                 {t('auth.login.rememberMe')}
@@ -127,7 +127,7 @@ export default function LoginPage() {
             </div>
 
             <div className="text-sm">
-              <Link to="/forgot-password" className="font-medium text-amber-500 hover:text-amber-600">
+              <Link to="/forgot-password" className="font-medium text-amber-700 dark:text-amber-400 hover:text-amber-600">
                 {t('auth.login.forgotPassword')}
               </Link>
             </div>
@@ -137,7 +137,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('auth.login.signingIn') : t('auth.login.submitButton')}
             </button>
@@ -146,7 +146,7 @@ export default function LoginPage() {
           <div className="text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               {t('auth.login.noAccount')}{' '}
-              <Link to="/signup" className="font-medium text-amber-500 hover:text-amber-600">
+              <Link to="/signup" className="font-medium text-amber-700 dark:text-amber-400 hover:text-amber-600">
                 {t('auth.login.signupLink')}
               </Link>
             </p>

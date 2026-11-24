@@ -244,8 +244,11 @@ npm run test:report
 
 **Test coverage:**
 - ✅ 22 Playwright spec files covering creation and viewing, security (API, UI, protections, concurrency, tenant isolation), accounts, teams, i18n, PWA, premium and integrations. Run on Chromium, Firefox, WebKit, Mobile Chrome and Mobile Safari; API-only tests run on Chromium.
-- ✅ Backend unit tests (72), frontend (17), extension (24), CSP checks (24)
-- Chromium: 471 passed, 8 skipped on the latest full run
+- ✅ Backend unit tests (72), frontend (55), extension (25), CSP checks (24)
+- ✅ Accessibility: an axe-core scan of every page in light and dark mode (WCAG 2.1 A/AA, includes colour contrast)
+- ✅ i18n key parity across the six languages, the hourly cleanup job, branding/compliance (XSS, CSV, retention), group messages, large-file upload retry
+- Chromium: 541 passed, 8 skipped on the latest full run
+- After a deploy: `npm run check:live-csp --workspace=frontend` checks the live site's headers and CSP
 
 CI (`.github/workflows/e2e-tests.yml`) runs the unit tests, build and dependency audit, the five-browser matrix, and the CSP job.
 

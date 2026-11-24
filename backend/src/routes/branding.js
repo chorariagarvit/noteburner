@@ -49,36 +49,58 @@ router.get('/:teamId', async (c) => {
   });
 });
 
+const HEX_COLOR = /^#(?:[A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+const MAX_URL_LENGTH = 2048;
+const MAX_FOOTER_LENGTH = 500;
+
+/** Logos and favicons are loaded by every visitor's browser: only plain https URLs are accepted. */
+function validHttpsUrl(value) {
+  if (typeof value !== 'string' || value.length > MAX_URL_LENGTH) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password && url.hostname.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Translate the request body into SET clauses for an existing branding row.
- * Returns { updates, params } or { error: { status, message, code } }.
+ * Validate the editable fields. Returns { fields } (only what was sent; null/'' clears optional
+ * fields) or { error, code }.
  */
-function buildBrandingUpdates(body, plan) {
-  const { logo_url, primary_color, secondary_color, custom_favicon, white_label, custom_footer } = body;
-  const updates = [];
-  const params = [];
-  const set = (column, value) => {
-    updates.push(`${column} = ?`);
-    params.push(value);
-  };
+function parseBranding(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return { error: 'Request body must be a JSON object', code: 'INVALID_BODY' };
+  }
+  const fields = {};
 
-  if (logo_url !== undefined) set('logo_url', logo_url || null);
-  if (primary_color) set('primary_color', primary_color);
-  if (secondary_color) set('secondary_color', secondary_color);
-  if (custom_favicon !== undefined) set('custom_favicon', custom_favicon || null);
-  if (white_label !== undefined) {
-    // White label only available for Enterprise
-    if (white_label && plan !== 'enterprise') {
-      return { error: { status: 403, message: 'White label requires Enterprise plan', code: 'UPGRADE_REQUIRED' } };
+  for (const key of ['primary_color', 'secondary_color']) {
+    if (body[key] === undefined) continue;
+    if (typeof body[key] !== 'string' || !HEX_COLOR.test(body[key])) {
+      return { error: `Invalid ${key.replace('_', ' ')} format`, code: 'INVALID_COLOR' };
     }
-    set('white_label', white_label ? 1 : 0);
+    fields[key] = body[key];
   }
-  if (custom_footer !== undefined) set('custom_footer', custom_footer || null);
 
-  if (updates.length === 0) {
-    return { error: { status: 400, message: 'No updates provided', code: 'NO_UPDATES' } };
+  for (const key of ['logo_url', 'custom_favicon']) {
+    if (body[key] === undefined) continue;
+    if (body[key] === null || body[key] === '') { fields[key] = null; continue; }
+    if (!validHttpsUrl(body[key])) {
+      return { error: `${key} must be an https URL (no credentials, at most ${MAX_URL_LENGTH} characters)`, code: 'INVALID_URL' };
+    }
+    fields[key] = body[key];
   }
-  return { updates, params };
+
+  if (body.custom_footer !== undefined) {
+    const footer = body.custom_footer;
+    if (footer !== null && footer !== '' && (typeof footer !== 'string' || footer.length > MAX_FOOTER_LENGTH)) {
+      return { error: `custom_footer must be text of at most ${MAX_FOOTER_LENGTH} characters`, code: 'INVALID_FOOTER' };
+    }
+    fields.custom_footer = footer || null;
+  }
+
+  if (body.white_label !== undefined) fields.white_label = Boolean(body.white_label);
+  return { fields };
 }
 
 /**
@@ -88,7 +110,6 @@ function buildBrandingUpdates(body, plan) {
 router.put('/:teamId', requireAuth, async (c) => {
   const userId = getUserId(c);
   const teamId = c.req.param('teamId');
-  const body = await c.req.json();
 
   // Check admin permission
   const isAdmin = await checkTeamAdmin(c.env.DB, teamId, userId);
@@ -96,77 +117,37 @@ router.put('/:teamId', requireAuth, async (c) => {
     return c.json({ error: 'Admin access required', code: 'ACCESS_DENIED' }, 403);
   }
 
-  // Validate team plan supports branding
-  const team = await c.env.DB.prepare(`
-    SELECT plan FROM teams WHERE id = ?
-  `).bind(teamId).first();
+  const body = await c.req.json().catch(() => undefined);
+  const parsed = parseBranding(body);
+  if (parsed.error) return c.json({ error: parsed.error, code: parsed.code }, 400);
+  const { fields } = parsed;
 
+  // Validate team plan supports branding
+  const team = await c.env.DB.prepare(`SELECT plan FROM teams WHERE id = ?`).bind(teamId).first();
   if (!team) {
     return c.json({ error: 'Team not found', code: 'NOT_FOUND' }, 404);
   }
-
   if (team.plan === 'free') {
-    return c.json({ 
-      error: 'Custom branding requires Team or Enterprise plan', 
-      code: 'UPGRADE_REQUIRED' 
-    }, 403);
+    return c.json({ error: 'Custom branding requires Team or Enterprise plan', code: 'UPGRADE_REQUIRED' }, 403);
+  }
+  // White label is Enterprise-only, whether the config is being created or updated
+  if (fields.white_label && team.plan !== 'enterprise') {
+    return c.json({ error: 'White label requires Enterprise plan', code: 'UPGRADE_REQUIRED' }, 403);
+  }
+  if (Object.keys(fields).length === 0) {
+    return c.json({ error: 'No updates provided', code: 'NO_UPDATES' }, 400);
   }
 
-  const {
-    logo_url,
-    primary_color,
-    secondary_color,
-    custom_favicon,
-    white_label,
-    custom_footer
-  } = body;
-
-  // Validate colors (simple hex validation)
-  const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-  if (primary_color && !hexColorRegex.test(primary_color)) {
-    return c.json({ error: 'Invalid primary color format', code: 'INVALID_COLOR' }, 400);
-  }
-  if (secondary_color && !hexColorRegex.test(secondary_color)) {
-    return c.json({ error: 'Invalid secondary color format', code: 'INVALID_COLOR' }, 400);
-  }
-
-  // Check if branding config exists
-  const existing = await c.env.DB.prepare(`
-    SELECT id FROM branding_config WHERE team_id = ?
-  `).bind(teamId).first();
-
-  if (existing) {
-    // Update existing
-    const { updates, params, error } = buildBrandingUpdates(body, team.plan);
-    if (error) {
-      return c.json({ error: error.message, code: error.code }, error.status);
-    }
-
-    updates.push('updated_at = datetime("now")');
-    params.push(teamId);
-
-    await c.env.DB.prepare(`
-      UPDATE branding_config SET ${updates.join(', ')} WHERE team_id = ?
-    `).bind(...params).run();
-  } else {
-    // Create new
-    const id = nanoid(16);
-    await c.env.DB.prepare(`
-      INSERT INTO branding_config (
-        id, team_id, logo_url, primary_color, secondary_color, 
-        custom_favicon, white_label, custom_footer
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      id,
-      teamId,
-      logo_url || null,
-      primary_color || '#f59e0b',
-      secondary_color || '#1f2937',
-      custom_favicon || null,
-      white_label ? 1 : 0,
-      custom_footer || null
-    ).run();
-  }
+  // One upsert for both "first save" and "update"; only the fields that were sent change
+  const columns = Object.keys(fields);
+  const values = columns.map((key) => (key === 'white_label' ? (fields[key] ? 1 : 0) : fields[key]));
+  await c.env.DB.prepare(`
+    INSERT INTO branding_config (id, team_id, ${columns.join(', ')})
+    VALUES (?, ?, ${columns.map(() => '?').join(', ')})
+    ON CONFLICT(team_id) DO UPDATE SET
+      ${columns.map((key) => `${key} = excluded.${key}`).join(', ')},
+      updated_at = datetime('now')
+  `).bind(nanoid(16), teamId, ...values).run();
 
   return c.json({ success: true, message: 'Branding updated' });
 });

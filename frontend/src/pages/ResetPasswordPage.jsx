@@ -77,7 +77,7 @@ export default function ResetPasswordPage() {
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               {t('auth.resetPassword.successDesc')}
             </p>
-            <p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
               {t('auth.resetPassword.redirecting')}
             </p>
           </div>
@@ -160,7 +160,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading || !token || formData.newPassword !== formData.confirmPassword}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('auth.resetPassword.resetting') : t('auth.resetPassword.submitButton')}
             </button>

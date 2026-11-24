@@ -182,7 +182,7 @@ export default function TeamDashboard() {
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('teamDashboard.statActiveMembers')}</div>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.member_count || 0}</div>
+            <div className="text-2xl font-bold text-green-700 dark:text-green-400">{stats.member_count || 0}</div>
           </div>
         </div>
       )}
@@ -194,7 +194,7 @@ export default function TeamDashboard() {
             onClick={() => setActiveTab('overview')}
             className={`pb-3 font-medium ${
               activeTab === 'overview'
-                ? 'border-b-2 border-amber-500 text-amber-600 dark:text-amber-400'
+                ? 'border-b-2 border-amber-500 text-amber-700 dark:text-amber-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -204,7 +204,7 @@ export default function TeamDashboard() {
             onClick={() => setActiveTab('members')}
             className={`pb-3 font-medium ${
               activeTab === 'members'
-                ? 'border-b-2 border-amber-500 text-amber-600 dark:text-amber-400'
+                ? 'border-b-2 border-amber-500 text-amber-700 dark:text-amber-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -214,7 +214,7 @@ export default function TeamDashboard() {
             onClick={() => setActiveTab('messages')}
             className={`pb-3 font-medium ${
               activeTab === 'messages'
-                ? 'border-b-2 border-amber-500 text-amber-600 dark:text-amber-400'
+                ? 'border-b-2 border-amber-500 text-amber-700 dark:text-amber-400'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
@@ -234,7 +234,7 @@ export default function TeamDashboard() {
                   <div key={day.date} className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-gray-600 dark:text-gray-400">{new Date(day.date).toLocaleDateString()}</span>
                     <div className="flex gap-4 text-sm">
-                      <span className="text-green-600 dark:text-green-400">+{day.messages_created} {t('teamDashboard.created')}</span>
+                      <span className="text-green-700 dark:text-green-400">+{day.messages_created} {t('teamDashboard.created')}</span>
                       <span className="text-blue-600 dark:text-blue-400">{day.messages_viewed} {t('teamDashboard.viewed')}</span>
                       <span className="text-red-600 dark:text-red-400">{day.messages_burned} {t('teamDashboard.burned')}</span>
                     </div>
@@ -254,7 +254,7 @@ export default function TeamDashboard() {
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('teamDashboard.membersTitle')}</h2>
             <button
               onClick={() => setShowInviteModal(true)}
-              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+              className="px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800"
             >
               {t('teamDashboard.inviteBtn')}
             </button>
@@ -386,7 +386,7 @@ export default function TeamDashboard() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-amber-500 dark:bg-amber-600 text-white rounded-lg hover:bg-amber-600 dark:hover:bg-amber-500"
+                  className="flex-1 px-4 py-2 bg-amber-700 dark:bg-amber-700 text-white rounded-lg hover:bg-amber-800 dark:hover:bg-amber-700"
                 >
                   {t('teamDashboard.sendInviteBtn')}
                 </button>

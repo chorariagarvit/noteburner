@@ -88,7 +88,7 @@ function SupportPage() {
 
                 {/* Security Notice */}
                 <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-xl p-6 flex flex-col sm:flex-row gap-4 items-start">
-                    <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-1" />
+                    <AlertCircle className="w-6 h-6 text-amber-700 dark:text-amber-500 flex-shrink-0 mt-1" />
                     <div>
                         <h3 className="text-lg font-bold text-amber-900 dark:text-amber-400 mb-2">
                             {t('support.securityTitle')}

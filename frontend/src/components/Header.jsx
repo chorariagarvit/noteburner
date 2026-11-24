@@ -67,7 +67,7 @@ function Header() {
             </Link>
             <Link
               to="/pricing"
-              className="flex items-center gap-1 text-amber-500 hover:text-amber-600 font-medium transition-colors"
+              className="flex items-center gap-1 text-amber-700 dark:text-amber-400 hover:text-amber-600 font-medium transition-colors"
             >
               <Star className="w-4 h-4" />
               <span className="hidden sm:inline">{t('nav.premium')}</span>
@@ -92,6 +92,9 @@ function Header() {
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label={`${t('a11y.userMenu')}${user?.displayName ? `: ${user.displayName}` : ''}`}
+                  aria-expanded={showUserMenu}
+                  aria-haspopup="menu"
                   className="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   <UserCircle className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -159,7 +162,7 @@ function Header() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-amber-700 hover:bg-amber-800 rounded-lg transition-colors"
                 >
                   Sign up
                 </Link>
