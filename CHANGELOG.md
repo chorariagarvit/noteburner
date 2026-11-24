@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `POST /api/v1/messages` skipped validation and let a key write into teams its owner does not belong to.
 - Accessibility: every page passes axe (WCAG 2.1 A and AA, colour contrast included) in light and dark mode: the amber brand colour is darkened for text and buttons, icon-only buttons and links have names, form fields have labels.
 - French, German, Hindi and Chinese were missing the whole compliance section; the in-app changelog stopped at v1.9.0 and is now generated from this file, so it always shows the released version first.
-- The privacy policy and help text matched neither the app nor the extension: they now cover IP-based rate limiting, optional accounts, the extension's selected-text handling, the real expiry range (5 minutes to 7 days in the app, 30 days at most) and what is kept after deletion, and no longer claim there are no backups or that nothing is tracked. The pricing page no longer shows a "Week 14" badge.
+- The privacy policy and help text matched neither the app nor the extension: they now cover IP-based rate limiting, optional accounts, the extension's selected-text handling, the real expiry range (5 minutes to 7 days in the app, 30 days at most) and what is kept after deletion, and no longer claim there are no backups or that nothing is tracked. The pricing page no longer shows a leftover development badge.
 - About 60 SonarCloud bugs (floating promises, clickable non-interactive elements, missing labels) and most code smells (13 high-complexity functions refactored).
 
 ### Technical - Upgrading from 1.14.0

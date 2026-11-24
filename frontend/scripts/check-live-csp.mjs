@@ -7,14 +7,22 @@
  * (`npm run test:csp` does the second part against a local production build with the headers
  * emulated; this proves the real deployment applies them.)
  *
- *   node frontend/scripts/check-live-csp.mjs [https://noteburner.work]
+ *   node frontend/scripts/check-live-csp.mjs [https://noteburner.work | https://www.noteburner.work]
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 
-const base = (process.argv[2] || 'https://noteburner.work').replace(/\/$/, '');
+// Only NoteBurner's own hosts can be checked, so a mistyped or malicious argument cannot point this at anything else
+const HOSTS = ['noteburner.work', 'www.noteburner.work'];
+const requestedHost = new URL(process.argv[2] || 'https://noteburner.work').hostname;
+const host = HOSTS.find((allowed) => allowed === requestedHost);
+if (!host) {
+  console.error(`Refusing to check ${requestedHost}: allowed hosts are ${HOSTS.join(', ')}`);
+  process.exit(2);
+}
+const base = `https://${host}`;
 const headersFile = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public/_headers');
 
 function parseHeaders(text) {

@@ -14,10 +14,13 @@ export const PLACEHOLDER = '__BUILD_ID__';
 
 export const stampServiceWorker = (source, buildId) => source.split(PLACEHOLDER).join(buildId);
 
+// Absolute locations only, so nothing on the caller's PATH can stand in for `git`
+const GIT_LOCATIONS = ['/usr/bin/git', '/usr/local/bin/git', '/opt/homebrew/bin/git'];
+
 const readGitRef = () => {
-  // Fixed system directories only, so a writable directory on the caller's PATH cannot shadow `git`.
-  const env = { ...process.env, PATH: '/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin' };
-  try { return execFileSync('git', ['rev-parse', '--short=8', 'HEAD'], { env, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return ''; }
+  const git = GIT_LOCATIONS.find((candidate) => fs.existsSync(candidate));
+  if (!git) return '';
+  try { return execFileSync(git, ['rev-parse', '--short=8', 'HEAD'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return ''; }
 };
 
 /**

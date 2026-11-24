@@ -16,17 +16,15 @@ import { unlistedFindings, formatReport } from './modern-web.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['frontend/src', 'frontend/public', 'extension'];
 
-// The tool is run with npx at an exact version, given by the npm script (package.json): no dependency to
-// install, and no floating "latest" either. Lifecycle scripts are not needed and not run.
-const spec = process.argv[2];
-if (!/^modern-web-guidance@\d+\.\d+\.\d+$/.test(spec ?? '')) {
-  console.error('usage: node scripts/check-modern-web.mjs modern-web-guidance@<exact version>');
-  process.exit(2);
-}
+// The tool is run with npx at an exact version, fixed here: no dependency to install, no floating "latest",
+// and nothing from the command line reaches the command. Lifecycle scripts are not needed and not run.
+const spec = 'modern-web-guidance@1.0.2';
+// npx sits next to the node that is running this script, so no PATH lookup decides what gets executed
+const npx = path.join(path.dirname(process.execPath), 'npx');
 const allowed = JSON.parse(fs.readFileSync(path.join(root, 'scripts/modern-web-allowlist.json'), 'utf8'));
 
 const scans = TARGETS.map((target) =>
-  JSON.parse(execFileSync('npx', ['--yes', '--ignore-scripts', spec, 'legacy-scan', target, '--json'], { cwd: root, encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 })));
+  JSON.parse(execFileSync(npx, ['--yes', '--ignore-scripts', spec, 'legacy-scan', target, '--json'], { cwd: root, encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 })));
 
 const findings = unlistedFindings(scans, allowed);
 const rules = Math.max(...scans.map((s) => s.activeRuleCount ?? 0));

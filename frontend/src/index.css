@@ -66,19 +66,7 @@
   }
 }
 
-/* The dark: variant is dark when the scheme is pinned to dark, or when it follows the system and the system is
-   dark. No .dark class is involved. */
-@custom-variant dark {
-  &:where(:root:has(> head > meta[name="color-scheme"][content="dark"]) *) {
-    @slot;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    &:where(:root:has(> head > meta[name="color-scheme"][content="light dark"]) *) {
-      @slot;
-    }
-  }
-}
+@plugin "./dark-variant.js";
 
 @layer base {
   /* light-dark() picks by the active color-scheme; the plain declarations before each are the light-only
