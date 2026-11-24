@@ -1,6 +1,6 @@
 /**
  * Health Check and Monitoring Routes
- * Week 12 - Scaling & Performance
+ * Scaling & Performance
  */
 
 import { Hono } from 'hono';

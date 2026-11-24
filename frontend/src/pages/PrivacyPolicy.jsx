@@ -74,7 +74,9 @@ function PrivacyPolicy() {
                                         t('privacy.onlyReceive1'),
                                         t('privacy.onlyReceive2'),
                                         t('privacy.onlyReceive3'),
-                                        t('privacy.onlyReceive4')
+                                        t('privacy.onlyReceive4'),
+                                        t('privacy.onlyReceive5'),
+                                        t('privacy.onlyReceive6')
                                     ].map((item) => (
                                         <li key={item} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
                                             <span className="text-emerald-500 mt-1">✓</span>
@@ -124,6 +126,16 @@ function PrivacyPolicy() {
                             </div>
                         </section>
 
+                        {/* Browser extension */}
+                        <section>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                                {t('privacy.extensionTitle')}
+                            </h2>
+                            <p className="text-gray-600 dark:text-gray-300">
+                                {t('privacy.extensionDesc')}
+                            </p>
+                        </section>
+
                         {/* Data Retention */}
                         <section>
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
@@ -136,6 +148,7 @@ function PrivacyPolicy() {
                                 <li>{t('privacy.retentionItem1')}</li>
                                 <li>{t('privacy.retentionItem2')}</li>
                                 <li>{t('privacy.retentionItem3')}</li>
+                                <li>{t('privacy.retentionItem4')}</li>
                             </ul>
                         </section>
 

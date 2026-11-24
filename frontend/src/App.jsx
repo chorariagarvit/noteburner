@@ -72,7 +72,7 @@ function App() {
                 {/* Message routes */}
                 <Route path="/m/:identifier" element={<ViewMessage />} />
 
-                {/* Week 13/14: Pricing & Premium */}
+                {/* Pricing & Premium */}
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/premium" element={<PremiumPage />} />
 

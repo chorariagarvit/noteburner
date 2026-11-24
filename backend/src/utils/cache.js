@@ -1,6 +1,6 @@
 /**
  * Cloudflare KV Cache Utility
- * Week 12 - Performance Optimization
+ * Performance Optimization
  * 
  * Implements caching layer to reduce D1 database load
  * Uses Cloudflare KV for hot message caching

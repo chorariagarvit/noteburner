@@ -115,7 +115,7 @@ export default function PricingPage() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
             <Star className="w-4 h-4" />
-            Week 14 — Premium Features
+            Premium Features
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Simple, Transparent Pricing

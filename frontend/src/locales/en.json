@@ -20,7 +20,7 @@
       "cta": "Create Secret Message",
       "learnMore": "Learn How It Works",
       "tagline": "Burn After Reading",
-      "description": "Send encrypted messages and files that self-destruct after one read. No traces. No backups. Complete privacy.",
+      "description": "Send encrypted messages and files that self-destruct after one read. No traces. Complete privacy.",
       "formTitle": "Create Secure Message"
     },
     "stats": {
@@ -50,7 +50,7 @@
       },
       "autoExpire": {
         "title": "Auto-Expiry",
-        "desc": "Set messages to expire from 1 hour to 7 days."
+        "desc": "Set messages to expire from 5 minutes to 7 days."
       }
     },
     "cta": {
@@ -159,7 +159,7 @@
     "encryptedTitle": "Encrypted Message",
     "decryptPrompt": "Enter the password to decrypt and view this message",
     "warningTitle": "Warning: One-Time Access Only",
-    "warningDesc": "Once you decrypt this message, it will be permanently deleted from our servers. There are no backups or second chances.",
+    "warningDesc": "Once you decrypt this message, it will be deleted from our servers and we cannot recover it. There are no second chances.",
     "previewTitle": "Someone sent you a secret message...",
     "previewUnlock": "Unlock Secret Message",
     "geoBlocked": "This message can only be opened from the sender's country, and you appear to be elsewhere.",
@@ -348,7 +348,7 @@
     "securityTitle": "Important Security Notice",
     "tip1": "Share the password separately (not in the same channel as the link)",
     "tip2": "The message will be deleted after the first successful decryption",
-    "tip3": "There are no backups - once it's gone, it's gone forever",
+    "tip3": "Once it's gone, we cannot bring it back",
     "filesAttached": "{count} encrypted file(s) attached",
     "expiresIn": "Message expires in {n} hour(s)",
     "passwordLabel": "Password",
@@ -673,7 +673,7 @@
     "step2Title": "Create Your First Secret",
     "step2Desc": "Type your message, set a password, and choose when it expires. We'll generate a secure link.",
     "step2f1": "Strong password protection (PBKDF2 300k iterations)",
-    "step2f2": "Auto-expire from 1 hour to 7 days",
+    "step2f2": "Auto-expire from 5 minutes to 7 days",
     "step2f3": "Attach encrypted files up to 10MB",
     "step2f4": "Optional custom URLs",
     "step3Title": "Share Securely",
@@ -770,31 +770,31 @@
     "securityTitle": "Security Disclosure",
     "securityDesc": "If you discover a security vulnerability, please do NOT report it publicly on GitHub. Email us directly so we can address it responsibly.",
     "faq1q": "Can I recover a message after it's been burned?",
-    "faq1a": "No. Once a message is viewed (burned) or expired, it is permanently deleted from our servers. There are no backups.",
+    "faq1a": "No. Once a message is viewed (burned) or expired, it is deleted from our database and we cannot recover it. We keep no backups of message data of our own.",
     "faq2q": "I lost my password. Can you recover it?",
     "faq2a": "No. NoteBurner uses a zero-knowledge architecture. Your password never leaves your device, so we don't have it and cannot recover it for you.",
     "faq3q": "Is the browser extension safe?",
     "faq3a": "Yes. The extension encrypts selected text locally on your machine before sending only the encrypted data to our servers. It is open source and can be audited on GitHub.",
     "faq4q": "How long can a message last?",
-    "faq4a": "You can set messages to expire anywhere from 1 hour to 7 days. If not viewed by then, they are automatically deleted."
+    "faq4a": "You can set messages to expire anywhere from 5 minutes to 7 days (24 hours by default). If not viewed by then, they are automatically deleted."
   },
   "privacy": {
     "title": "Privacy Policy",
     "subtitle": "We believe privacy is a fundamental right. That's why NoteBurner is built with a zero-knowledge architecture.",
-    "lastUpdated": "Last Updated: January 17, 2026",
+    "lastUpdated": "Last Updated: November 24, 2026",
     "overviewTitle": "Overview",
-    "overviewText": "NoteBurner respects your privacy. Our browser extension and web application process your data locally in your browser and only communicate with NoteBurner servers to create encrypted messages. We have no way to decrypt your messages.",
+    "overviewText": "NoteBurner respects your privacy. Messages are encrypted in your browser before they leave your device, and our servers only ever hold ciphertext. We have no way to decrypt your messages. This policy covers the NoteBurner website and the NoteBurner browser extension.",
     "doNotCollectTitle": "We DO NOT Collect",
-    "doNotCollect1": "Your personal information or identity",
-    "doNotCollect2": "Browsing history or website visits",
-    "doNotCollect3": "Passwords or encryption keys",
-    "doNotCollect4": "Message content before encryption",
-    "doNotCollect5": "Analytics or tracking data",
-    "doNotCollect6": "Cookies or device identifiers",
+    "doNotCollect1": "The password you protect a message with, or any encryption key",
+    "doNotCollect2": "Your browsing history, or the pages you visit",
+    "doNotCollect3": "Message content in readable form: we only ever hold ciphertext",
+    "doNotCollect4": "Your identity when you send a message: sending needs no account",
+    "doNotCollect5": "Advertising or cross-site tracking data",
+    "doNotCollect6": "Tracking cookies: we do not set any",
     "onlyReceiveTitle": "We ONLY Receive",
     "onlyReceive1": "Encrypted ciphertext (already encrypted by you)",
-    "onlyReceive2": "Expiration timestamp",
-    "onlyReceive3": "Random access token (not linked to you)",
+    "onlyReceive2": "The expiry time and self-destruct options you choose",
+    "onlyReceive3": "A random access token (not linked to you)",
     "onlyReceive4": "Optional metadata (size, creation time)",
     "encryptionTitle": "Encryption & Security",
     "enc1Title": "Client-Side Encryption",
@@ -805,12 +805,17 @@
     "enc3Desc": "All data is transmitted over HTTPS (TLS 1.3) with HSTS enabled.",
     "retentionTitle": "Data Retention & Deletion",
     "retentionDesc": "Your data is ephemeral by design. We strictly enforce deletion policies:",
-    "retentionItem1": "Automatic Deletion: Messages are deleted immediately after the first successful decryption (for \"Burn on read\" messages).",
-    "retentionItem2": "Expiration: All messages have a hard expiration time (default 24 hours, max 7 days).",
-    "retentionItem3": "Permanent Removal: When a message is deleted, it is permanently purged from our database. No backups are retained.",
+    "retentionItem1": "Burn on read: a message is deleted immediately after its first successful decryption.",
+    "retentionItem2": "Expiration: every message has a hard expiry. You can choose from 5 minutes to 7 days in the app (default 24 hours), and the service never keeps a message longer than 30 days.",
+    "retentionItem3": "Permanent removal: expired and read messages are purged from our database by an hourly cleanup job. We keep no backups of message data of our own. Our hosting provider may keep short-lived infrastructure recovery data that we cannot shorten.",
     "questionsTitle": "Questions?",
     "questionsDesc": "If you have any questions about our privacy practices, please contact us.",
-    "sourceCode": "Source Code on GitHub"
+    "sourceCode": "Source Code on GitHub",
+    "onlyReceive5": "Your IP address, used only for rate limiting and abuse protection, and the country it maps to when a message has a country restriction",
+    "onlyReceive6": "If you choose to create an account: your email address and a salted hash of your account password (never the password itself)",
+    "extensionTitle": "Browser Extension",
+    "extensionDesc": "The extension reads the text you have selected only when you open it or use its right-click menu item. It encrypts that text on your device and sends only the ciphertext to api.noteburner.work. It stores one setting, your dark mode preference, in your browser sync storage. It does not read your browsing history or any other page content.",
+    "retentionItem4": "Logs: audit logs and failed-login records are deleted after 30 days. Account data is kept until you delete your account."
   },
   "changelog": {
     "title": "Changelog",
@@ -820,7 +825,7 @@
     "sectionSecurity": "Security",
     "sectionChanged": "Changed",
     "sectionFixed": "Fixed",
-    "footerDesc": "All features are thoroughly tested with 186 E2E tests before release"
+    "footerDesc": "Every release is tested end to end in five browsers before it ships"
   },
   "apiDocs": {
     "authRequired": "Auth Required",

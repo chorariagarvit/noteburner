@@ -1,6 +1,6 @@
 /**
  * Internationalization (i18n) utility
- * Week 13 - Internationalization
+ * Internationalization
  *
  * Lightweight i18n without external dependencies.
  * Supports: en, es, fr, de, zh, hi

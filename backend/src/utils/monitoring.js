@@ -1,6 +1,6 @@
 /**
  * Performance Monitoring & Observability Utilities
- * Week 12 - Scaling & Performance
+ * Scaling & Performance
  * 
  * Provides performance tracking, error monitoring, and uptime utilities
  */

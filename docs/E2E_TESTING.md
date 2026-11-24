@@ -52,6 +52,7 @@ Playwright starts the backend and frontend itself (see `playwright.config.js`). 
 | Country restriction | `protections.spec.js` |
 | Scheduled cleanup | `cleanup-job.spec.js` |
 | Theme (light, dark, system) | `theme.spec.js` |
+| Changelog and privacy pages | `static-pages.spec.js` |
 | Accessibility (axe-core, both colour schemes) | `accessibility.spec.js` |
 
 ### Helpers

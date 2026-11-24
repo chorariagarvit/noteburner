@@ -1,6 +1,6 @@
 /**
  * Locale detection middleware
- * Week 13 - Internationalization
+ * Internationalization
  *
  * Detects user locale from Accept-Language header and attaches it to context.
  */

@@ -1,6 +1,6 @@
 /**
  * Premium Features Routes
- * Week 14 - Premium Tier
+ * Premium Tier
  *
  * Handles premium plan management, subscriptions, and usage tracking.
  */
