@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { Flame, Lock, Zap, Shield, Clock, Eye, EyeOff, Upload, X, TrendingUp, Link2, CheckCircle, XCircle, Loader, Settings } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword, deriveAuthTag } from '../../utils/crypto';
 import { createMessage, uploadMedia } from '../../utils/api';
@@ -387,7 +386,7 @@ function HeroSection({ stats, statsLoading }) {
                             )}
 
                             {error && (
-                                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-3 py-2 rounded-lg text-sm">
+                                <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-3 py-2 rounded-lg text-sm">
                                     {error}
                                 </div>
                             )}
@@ -418,10 +417,4 @@ function HeroSection({ stats, statsLoading }) {
         </section>
     );
 }
-
-HeroSection.propTypes = {
-    stats: PropTypes.object,
-    statsLoading: PropTypes.bool
-};
-
 export default HeroSection;

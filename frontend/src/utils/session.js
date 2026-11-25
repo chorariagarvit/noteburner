@@ -3,13 +3,15 @@
  * Handles retrieval of session token from either localStorage or sessionStorage
  */
 
+import { localStore, sessionStore } from './storage';
+
 /**
  * Get session token from storage
  * Checks localStorage first (remember me), then sessionStorage
  * @returns {string|null} Session token or null if not found
  */
 export function getSessionToken() {
-  return localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+  return localStore.get('sessionToken') || sessionStore.get('sessionToken');
 }
 
 /**

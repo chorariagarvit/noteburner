@@ -54,9 +54,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
             {t('auth.login.title')}
-          </h2>
+          </h1>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             {t('auth.login.subtitle')}
           </p>
@@ -64,7 +64,7 @@ export default function LoginPage() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+            <div role="alert" className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <div className="flex">
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-red-800 dark:text-red-200">

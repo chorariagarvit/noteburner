@@ -1,45 +1,73 @@
-import React from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import CreateMessage from './pages/CreateMessage';
-import ViewMessage from './pages/ViewMessage';
-import AchievementsPage from './pages/AchievementsPage';
-import LeaderboardPage from './pages/LeaderboardPage';
-import ReferralsPage from './pages/ReferralsPage';
-import InviteFriendsPage from './pages/InviteFriendsPage';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import SupportPage from './pages/SupportPage';
-import ChangelogPage from './pages/ChangelogPage';
-import APIDocumentationPage from './pages/APIDocumentationPage';
-import TeamCreationPage from './pages/TeamCreationPage';
-import MyTeamsPage from './pages/MyTeamsPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import VerifyEmailPage from './pages/VerifyEmailPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import ApiKeyManager from './components/enterprise/ApiKeyManager';
-import TeamDashboard from './components/enterprise/TeamDashboard';
-import BrandingCustomizer from './components/enterprise/BrandingCustomizer';
-import ComplianceDashboard from './components/enterprise/ComplianceDashboard';
 import { AuthProvider } from './contexts/AuthContext';
 import { I18nProvider } from './contexts/I18nContext';
 import { ThemeProvider } from './contexts/ThemeProvider';
-import PricingPage from './pages/PricingPage';
-import PremiumPage from './pages/PremiumPage';
+import { useI18n } from './contexts/I18nContext';
+import A11yRouteAnnouncer, { SkipLink } from './components/A11yRouteAnnouncer';
+
+// Every page except the landing page is its own chunk, so a visitor downloads only the code for the page
+// they open. The two core flows are fetched in the background once the browser is idle, so they open instantly.
+const CreateMessage = lazy(() => import('./pages/CreateMessage'));
+const ViewMessage = lazy(() => import('./pages/ViewMessage'));
+const AchievementsPage = lazy(() => import('./pages/AchievementsPage'));
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
+const ReferralsPage = lazy(() => import('./pages/ReferralsPage'));
+const InviteFriendsPage = lazy(() => import('./pages/InviteFriendsPage'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const SupportPage = lazy(() => import('./pages/SupportPage'));
+const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
+const APIDocumentationPage = lazy(() => import('./pages/APIDocumentationPage'));
+const TeamCreationPage = lazy(() => import('./pages/TeamCreationPage'));
+const MyTeamsPage = lazy(() => import('./pages/MyTeamsPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const ApiKeyManager = lazy(() => import('./components/enterprise/ApiKeyManager'));
+const TeamDashboard = lazy(() => import('./components/enterprise/TeamDashboard'));
+const BrandingCustomizer = lazy(() => import('./components/enterprise/BrandingCustomizer'));
+const ComplianceDashboard = lazy(() => import('./components/enterprise/ComplianceDashboard'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const PremiumPage = lazy(() => import('./pages/PremiumPage'));
+// A failed prefetch (offline, or the visitor navigated away mid-download) is harmless: the page loads normally when opened
+const preloadCoreFlows = () => {
+  import('./pages/CreateMessage').catch(() => {});
+  import('./pages/ViewMessage').catch(() => {});
+};
+
+function PageFallback() {
+  const { t } = useI18n();
+  return (
+    <div role="status" data-page-loading="true" className="flex items-center justify-center py-24 text-gray-600 dark:text-gray-300">
+      <span className="w-5 h-5 mr-3 border-2 border-current border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+      {t('common.loading')}
+    </div>
+  );
+}
+
 
 
 function App() {
+  useEffect(() => {
+    const idle = globalThis.requestIdleCallback ?? ((callback) => setTimeout(callback, 2000));
+    idle(preloadCoreFlows);
+  }, []);
+
   return (
     <ThemeProvider>
       <I18nProvider>
       <AuthProvider>
         <Router>
           <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors">
+            <SkipLink />
             <Header />
-            <main className="flex-grow">
+            <main id="main-content" tabIndex={-1} className="flex-grow focus:outline-none">
+              <Suspense fallback={<PageFallback />}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/create" element={<CreateMessage />} />
@@ -78,8 +106,10 @@ function App() {
 
                 <Route path="*" element={<HomePage />} />
               </Routes>
+              </Suspense>
             </main>
             <Footer />
+            <A11yRouteAnnouncer />
           </div>
         </Router>
       </AuthProvider>

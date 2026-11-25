@@ -86,6 +86,7 @@ Try it out: ${inviteUrl}`;
               {t('invite.personalMessageLabel')}
             </label>
             <textarea
+              aria-label={t('invite.personalMessageLabel')}
               value={personalMessage}
               onChange={(e) => setPersonalMessage(e.target.value)}
               placeholder={t('invite.personalMessagePlaceholder')}

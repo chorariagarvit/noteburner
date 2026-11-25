@@ -20,7 +20,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.fill('input[placeholder="Enter a strong password"]', password);
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
 
     const shareUrlInput = page.locator('input[readonly]').first();
     shareUrl = await shareUrlInput.inputValue();
@@ -30,7 +30,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.goto(shareUrl);
 
     // Verify preview page is shown
-    await expect(page.locator('h1:has-text("Someone sent you a secret message")')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Someone sent you a secret message' })).toBeVisible();
     await expect(page.locator('text=🔐 Encrypted end-to-end')).toBeVisible();
     await expect(page.locator('text=🔥 Self-destructs after reading')).toBeVisible();
     await expect(page.locator('text=⏱️ One-time access only')).toBeVisible();
@@ -49,7 +49,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.click('button:has-text("Unlock Secret Message")');
 
     // Verify password form is shown
-    await expect(page.locator('h2:has-text("Encrypted Message")')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Encrypted Message' })).toBeVisible();
     await expect(page.locator('input[placeholder="Enter message password"]')).toBeVisible();
     await expect(page.locator('button:has-text("Decrypt Message")')).toBeVisible();
 
@@ -68,7 +68,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.click('button:has-text("Decrypt Message")');
 
     // Wait for unlocking animation
-    await expect(page.locator('h2:has-text("Unlocking Message")')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Unlocking Message' })).toBeVisible();
 
     // Verify decrypted message is shown
     await expect(page.locator('text=Secret test message for viewing')).toBeVisible({ timeout: 5000 });
@@ -137,7 +137,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.selectOption('#time-limit', '60'); // 1 hour (60 minutes)
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
 
     // Verify expiration notice is shown on success page
     await expect(page.locator('text=/expires in.*hour/i')).toBeVisible();
@@ -152,7 +152,7 @@ test.describe('Message Viewing and Decryption', () => {
     await expect(page.locator('text=Secret test message for viewing')).toBeVisible({ timeout: 5000 });
 
     // Verify CTA section
-    await expect(page.locator('h3:has-text("Your secret has self-destructed")')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your secret has self-destructed' })).toBeVisible();
     await expect(page.locator('button:has-text("Create Your Secret Message")')).toBeVisible();
 
     // Verify social share buttons
@@ -190,7 +190,7 @@ test.describe('Message Viewing and Decryption', () => {
     });
 
     await page.click('button:has-text("Encrypt & Create Link")');
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
 
     const urlWithFile = await page.locator('input[readonly]').first().inputValue();
 
@@ -261,7 +261,7 @@ test.describe('Message Viewing and Decryption', () => {
     await page.click('button:has-text("Decrypt Message")');
 
     // Wait for unlocking state
-    await expect(page.locator('h2:has-text("Unlocking Message")')).toBeVisible().catch(() => {});
+    await expect(page.getByRole('heading', { name: 'Unlocking Message' })).toBeVisible().catch(() => {});
 
     // Try to go back
     await page.goBack();

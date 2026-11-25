@@ -851,6 +851,20 @@
     "theme": "主题",
     "theme_system": "跟随系统",
     "theme_light": "浅色",
-    "theme_dark": "深色"
+    "theme_dark": "深色",
+    "skipToContent": "跳到主要内容",
+    "mainNavigation": "主导航",
+    "footerNavigation": "页脚",
+    "apiKeyName": "API 密钥名称",
+    "memberRole": "成员角色",
+    "inviteEmail": "要邀请的电子邮件地址",
+    "personalMessage": "个人留言",
+    "digitOf": "第 {n} 位，共 {total} 位",
+    "pageLoaded": "{title}，页面已加载"
+  },
+  "pwa": {
+    "updateAvailable": "NoteBurner 有新版本可用。",
+    "reload": "重新加载",
+    "later": "稍后"
   }
 }

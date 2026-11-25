@@ -1,6 +1,5 @@
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useI18n } from '../../contexts/I18nContext';
 
 function StepCard({ number, title, description }) {
@@ -14,13 +13,6 @@ function StepCard({ number, title, description }) {
         </div>
     );
 }
-
-StepCard.propTypes = {
-    number: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-};
-
 function HowItWorksSection() {
     const { t } = useI18n();
     return (

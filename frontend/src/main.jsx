@@ -6,6 +6,7 @@ import { initClarity } from './utils/clarity';
 import { initGTM, initGA4 } from './utils/analytics';
 import { installApiAuth } from './utils/apiBase';
 import { registerServiceWorker, checkInstallability, setupOnlineStatusDetection } from './utils/pwa';
+import { detectLocale, loadLocale } from './utils/i18n';
 
 // Attach signed app token to all API calls (must run before any fetch)
 installApiAuth();
@@ -17,40 +18,32 @@ initClarity();    // Microsoft Clarity
 
 // Register service worker for PWA functionality
 if ('serviceWorker' in navigator) {
-  registerServiceWorker().then((registration) => {
-    if (registration) {
-      console.log('[PWA] Service Worker registered');
-    }
-  }).catch((error) => console.warn('[PWA] Service Worker registration failed:', error));
+  registerServiceWorker().catch((error) => console.warn('[PWA] Service Worker registration failed:', error));
 }
 
 // Check PWA installability
 checkInstallability();
 
+// A short notice in a corner that screen readers announce (role="status"); it removes itself after 3 seconds
+function showNotice(text, colorClass) {
+  const notice = document.createElement('div');
+  notice.setAttribute('role', 'status');
+  notice.className = `fixed top-4 right-4 ${colorClass} text-white px-4 py-2 rounded-lg shadow-lg z-50`;
+  notice.textContent = text;
+  document.body.appendChild(notice);
+  setTimeout(() => notice.remove(), 3000);
+}
+
 // Setup online/offline status detection
 setupOnlineStatusDetection(
-  () => {
-    console.log('[PWA] Back online');
-    // Show reconnected notification
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-    notification.textContent = '✓ Back online';
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
-  },
-  () => {
-    console.log('[PWA] Offline');
-    // Show offline notification
-    const notification = document.createElement('div');
-    notification.className = 'fixed top-4 right-4 bg-orange-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-    notification.textContent = '⚠ You are offline';
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
-  }
+  () => showNotice('✓ Back online', 'bg-green-600'),
+  () => showNotice('⚠ You are offline', 'bg-orange-700')
 );
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// Start from the visitor's own language, so the first paint is not English text that then switches
+const render = () => ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
 );
+loadLocale(detectLocale()).catch(() => { /* offline: English is bundled */ }).finally(render);

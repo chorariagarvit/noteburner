@@ -1,6 +1,5 @@
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Flame, Eye, EyeOff, Upload, X, Link2, CheckCircle, XCircle, Loader, Users, FileText } from 'lucide-react';
 import PasswordStrengthMeter from '../PasswordStrengthMeter';
 import SelfDestructOptions from '../SelfDestructOptions';
@@ -44,9 +43,9 @@ function CreateMessageForm(props) {
         <div className="card">
             <div className="text-center mb-8">
                 <Flame className="w-12 h-12 text-red-600 dark:text-red-500 mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                     {t('create.heading')}
-                </h2>
+                </h1>
                 <p className="text-gray-600 dark:text-gray-300">
                     {t('create.subheading')}
                 </p>
@@ -284,7 +283,7 @@ function CreateMessageForm(props) {
                 )}
 
                 {error && (
-                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
+                    <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
                         {error}
                     </div>
                 )}
@@ -310,39 +309,4 @@ function CreateMessageForm(props) {
         </div>
     );
 }
-
-CreateMessageForm.propTypes = {
-    handleSubmit: PropTypes.func.isRequired,
-    loading: PropTypes.bool.isRequired,
-    message: PropTypes.string.isRequired,
-    setMessage: PropTypes.func.isRequired,
-    password: PropTypes.string.isRequired,
-    setPassword: PropTypes.func.isRequired,
-    showPassword: PropTypes.bool.isRequired,
-    setShowPassword: PropTypes.func.isRequired,
-    handleGeneratePassword: PropTypes.func.isRequired,
-    customSlug: PropTypes.string,
-    handleCustomSlugChange: PropTypes.func.isRequired,
-    slugStatus: PropTypes.string.isRequired,
-    slugError: PropTypes.string,
-    mysteryMode: PropTypes.bool.isRequired,
-    setMysteryMode: PropTypes.func.isRequired,
-    isGroupMessage: PropTypes.bool.isRequired,
-    setIsGroupMessage: PropTypes.func.isRequired,
-    recipientCount: PropTypes.number.isRequired,
-    setRecipientCount: PropTypes.func.isRequired,
-    burnOnFirstView: PropTypes.bool.isRequired,
-    setBurnOnFirstView: PropTypes.func.isRequired,
-    files: PropTypes.array.isRequired,
-    handleFileUpload: PropTypes.func.isRequired,
-    removeFile: PropTypes.func.isRequired,
-    error: PropTypes.string,
-    loadingMessage: PropTypes.string,
-    showTemplates: PropTypes.bool,
-    setShowTemplates: PropTypes.func,
-    onSelectTemplate: PropTypes.func,
-    selfDestructOptions: PropTypes.object.isRequired,
-    setSelfDestructOptions: PropTypes.func.isRequired
-};
-
 export default CreateMessageForm;

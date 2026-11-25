@@ -16,10 +16,10 @@ test.describe('UI/UX Polish', () => {
       await page.reload();
       
       // Wait for onboarding modal to appear (1 second delay)
-      await expect(page.locator('h3:has-text("Welcome to NoteBurner")').first()).toBeVisible({ timeout: 6000 });
+      await expect(page.getByRole('heading', { name: 'Welcome to NoteBurner' }).first()).toBeVisible({ timeout: 6000 });
       
       // Check header
-      await expect(page.locator('h2:has-text("Getting Started")').first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Getting Started' }).first()).toBeVisible();
       
       // Check progress bar
       const progressBar = page.locator('[role="progressbar"]').first();
@@ -35,22 +35,22 @@ test.describe('UI/UX Polish', () => {
       await page.evaluate(() => localStorage.removeItem('noteburner_onboarding_complete'));
       await page.reload();
       
-      await expect(page.locator('h3:has-text("Welcome to NoteBurner")').first()).toBeVisible({ timeout: 6000 });
+      await expect(page.getByRole('heading', { name: 'Welcome to NoteBurner' }).first()).toBeVisible({ timeout: 6000 });
       
       // Click Next to go to Step 2
       await page.click('button:has-text("Next")');
       await page.waitForTimeout(600);
-      await expect(page.locator('h3:has-text("Create Your First Secret")').first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Create Your First Secret' }).first()).toBeVisible();
       
       // Click Next to go to Step 3
       await page.click('button:has-text("Next")');
       await page.waitForTimeout(600);
-      await expect(page.locator('h3:has-text("Share Securely")').first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Share Securely' }).first()).toBeVisible();
       
       // Click Previous to go back
       await page.click('button:has-text("Previous")');
       await page.waitForTimeout(600);
-      await expect(page.locator('h3:has-text("Create Your First Secret")').first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Create Your First Secret' }).first()).toBeVisible();
       
       // Close modal for cleanup
       await page.click('button:has-text("Skip tutorial")');
@@ -108,7 +108,7 @@ test.describe('UI/UX Polish', () => {
       await page.evaluate(() => localStorage.removeItem('noteburner_onboarding_complete'));
       await page.reload();
       
-      await expect(page.locator('h3:has-text("Welcome to NoteBurner")').first()).toBeVisible({ timeout: 3000 });
+      await expect(page.getByRole('heading', { name: 'Welcome to NoteBurner' }).first()).toBeVisible({ timeout: 3000 });
       
       // Press Escape multiple times to ensure modal closes
       await page.keyboard.press('Escape');
@@ -237,7 +237,7 @@ test.describe('UI/UX Polish', () => {
       const templateButton = page.locator('button:has-text("Use Template")').or(page.locator('button:has-text("Templates")')).first();
       await templateButton.click();
       
-      await expect(page.locator('h3:has-text("Message Templates")').or(page.locator('h3:has-text("Templates")')).first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Message Templates' }).or(page.getByRole('heading', { name: 'Templates' })).first()).toBeVisible();
       
       // Click outside modal or close button instead of Escape (Escape may not be implemented)
       const skipButton = page.locator('button:has-text("Cancel")').or(page.locator('button').filter({ has: page.locator('svg') }).last());

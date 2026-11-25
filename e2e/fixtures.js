@@ -53,6 +53,28 @@ export const test = base.extend({
       }
       throw new Error(`fill(${selector}) did not stick after 6 attempts`);
     };
+
+    // Every page except the landing page is its own code chunk, loaded on demand, so right after a navigation
+    // the app may still be showing its loading placeholder. Wait for the real page, so a test that reads the
+    // DOM straight after goto() sees the page and not the placeholder. Never fails a test by itself: pages
+    // that are not the app (or that never settle) simply fall through to the test's own assertions.
+    const appReady = () => page.waitForFunction(
+      () => document.querySelector('main#main-content') && !document.querySelector('[data-page-loading]'),
+      undefined,
+      { timeout: 10000 },
+    ).catch(() => {});
+    const goto = page.goto.bind(page);
+    page.goto = async (url, options) => {
+      const response = await goto(url, options);
+      await appReady();
+      return response;
+    };
+    const reload = page.reload.bind(page);
+    page.reload = async (options) => {
+      const response = await reload(options);
+      await appReady();
+      return response;
+    };
     await use(page);
   },
 

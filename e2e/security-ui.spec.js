@@ -31,7 +31,7 @@ async function createViaUi(page, { message = 'UI secret message', password = 'Ui
   if (attempts) await page.selectOption('#max-password-attempts', String(attempts));
   if (twoFA) await page.getByLabel('Require 2FA code (TOTP)').check();
   await page.click('button[type="submit"]');
-  await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+  await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
   const url = await page.locator('input[readonly]').first().inputValue();
   let secret;
   if (twoFA) {
@@ -306,7 +306,7 @@ test.describe('Country restriction in the UI', () => {
     await page.fill('#password', 'GeoTest-Passw0rd!');
     await page.getByLabel('Restrict to same country').check();
     await page.click('button[type="submit"]');
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const url = await page.locator('input[readonly]').first().inputValue();
 
     // a visitor from France sees why they can't open it, and cannot start

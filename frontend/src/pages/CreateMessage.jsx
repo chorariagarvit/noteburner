@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { encryptMessage, encryptFile, generatePassword, deriveAuthTag } from '../utils/crypto';
@@ -15,6 +15,7 @@ import CreateMessageSuccess from '../components/create/CreateMessageSuccess';
 import MessageTemplates from '../components/templates/MessageTemplates';
 import KeyboardShortcutsModal from '../components/keyboard/KeyboardShortcutsModal';
 import { useI18n } from '../contexts/I18nContext';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 /** Throws an Error with a user-facing message when the form input is unusable. */
 function validateMessageInput(message, password) {
@@ -79,6 +80,8 @@ function CreateMessage() {
 
   // UI state
   const [showTemplates, setShowTemplates] = useState(false);
+  const templatesDialogRef = useRef(null);
+  useModalA11y(templatesDialogRef, showTemplates, () => setShowTemplates(false));
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
   // Use custom hooks for file upload and slug validation
@@ -299,7 +302,7 @@ function CreateMessage() {
               <Lock className="w-16 h-16 text-blue-600 dark:text-blue-400 animate-pulse" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">{t('create.securing')}</h2>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 animate-pulse">{t('create.securing')}</h1>
           <p className="text-gray-600 dark:text-gray-300">{t('create.encryptingAES')}</p>
         </div>
       </div>
@@ -366,7 +369,7 @@ function CreateMessage() {
       {/* Message Templates Modal */}
       {showTemplates && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
+          <div ref={templatesDialogRef} tabIndex={-1} className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
             <div className="p-6 overflow-y-auto max-h-[90vh]">
               <MessageTemplates 
                 onSelectTemplate={handleSelectTemplate}

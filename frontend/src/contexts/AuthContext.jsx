@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import { localStore, sessionStore } from '../utils/storage';
 
 const AuthContext = createContext(null);
 
@@ -120,7 +121,7 @@ export function AuthProvider({ children }) {
       if (response.ok) {
         const data = await response.json();
         // Read the explicitly-persisted preference rather than inferring from storage state
-        const rememberMe = localStorage.getItem('rememberMe') === 'true';
+        const rememberMe = localStore.get('rememberMe') === 'true';
         saveSession(data.sessionToken, data.expiresAt, rememberMe);
         return true;
       } else {
@@ -158,20 +159,20 @@ export function useAuth() {
 // Helper functions for session management
 function saveSession(sessionToken, expiresAt, rememberMe) {
   // Persist the rememberMe preference explicitly so refreshSession can honour it
-  localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
+  localStore.set('rememberMe', rememberMe ? 'true' : 'false');
   const storage = rememberMe ? localStorage : sessionStorage;
   storage.setItem('sessionToken', sessionToken);
   storage.setItem('expiresAt', expiresAt);
 }
 
 function getSessionToken() {
-  return localStorage.getItem('sessionToken') || sessionStorage.getItem('sessionToken');
+  return localStore.get('sessionToken') || sessionStore.get('sessionToken');
 }
 
 function clearSession() {
-  localStorage.removeItem('sessionToken');
-  localStorage.removeItem('expiresAt');
-  localStorage.removeItem('rememberMe');
-  sessionStorage.removeItem('sessionToken');
-  sessionStorage.removeItem('expiresAt');
+  localStore.remove('sessionToken');
+  localStore.remove('expiresAt');
+  localStore.remove('rememberMe');
+  sessionStore.remove('sessionToken');
+  sessionStore.remove('expiresAt');
 }

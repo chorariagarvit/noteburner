@@ -851,6 +851,20 @@
     "theme": "Thème",
     "theme_system": "Système",
     "theme_light": "Clair",
-    "theme_dark": "Sombre"
+    "theme_dark": "Sombre",
+    "skipToContent": "Passer au contenu principal",
+    "mainNavigation": "Principale",
+    "footerNavigation": "Pied de page",
+    "apiKeyName": "Nom de la clé d'API",
+    "memberRole": "Rôle du membre",
+    "inviteEmail": "Adresse e-mail à inviter",
+    "personalMessage": "Message personnel",
+    "digitOf": "Chiffre {n} sur {total}",
+    "pageLoaded": "{title}, page chargée"
+  },
+  "pwa": {
+    "updateAvailable": "Une nouvelle version de NoteBurner est disponible.",
+    "reload": "Recharger",
+    "later": "Plus tard"
   }
 }

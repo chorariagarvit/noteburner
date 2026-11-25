@@ -71,9 +71,9 @@ export default function ResetPasswordPage() {
             <svg className="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
               {t('auth.resetPassword.successTitle')}
-            </h2>
+            </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               {t('auth.resetPassword.successDesc')}
             </p>
@@ -90,9 +90,9 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
             {t('auth.resetPassword.title')}
-          </h2>
+          </h1>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             {t('auth.resetPassword.subtitle')}
           </p>
@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+            <div role="alert" className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <p className="text-sm font-medium text-red-800 dark:text-red-200">
                 {error}
               </p>

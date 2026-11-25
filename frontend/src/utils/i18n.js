@@ -7,23 +7,34 @@
  */
 
 import en from '../locales/en.json';
-import es from '../locales/es.json';
-import fr from '../locales/fr.json';
-import de from '../locales/de.json';
-import zh from '../locales/zh.json';
-import hi from '../locales/hi.json';
+import { localStore } from './storage';
 
 export const SUPPORTED_LOCALES = ['en', 'es', 'fr', 'de', 'zh', 'hi'];
 export const DEFAULT_LOCALE = 'en';
 
-const translations = { en, es, fr, de, zh, hi };
+// English is always bundled: it is the fallback for any missing key. The other languages are separate chunks,
+// downloaded only when a visitor actually uses them.
+const translations = { en };
+const localeLoaders = import.meta.glob(['../locales/*.json', '!../locales/en.json'], { import: 'default' });
+
+/**
+ * Make sure a locale's translations are loaded (a no-op for English and for locales already loaded).
+ * Until it resolves, translate() simply falls back to English.
+ * @param {string} locale
+ * @returns {Promise<void>}
+ */
+export async function loadLocale(locale) {
+  if (translations[locale] || !SUPPORTED_LOCALES.includes(locale)) return;
+  const load = localeLoaders[`../locales/${locale}.json`];
+  if (load) translations[locale] = await load();
+}
 
 /**
  * Detect user's preferred locale from browser settings
  * @returns {string} - Detected locale code or default
  */
 export function detectLocale() {
-  const stored = localStorage.getItem('noteburner_locale');
+  const stored = localStore.get('noteburner_locale');
   if (stored && SUPPORTED_LOCALES.includes(stored)) {
     return stored;
   }
@@ -45,7 +56,7 @@ export function detectLocale() {
  * @param {string} locale
  */
 export function saveLocale(locale) {
-  localStorage.setItem('noteburner_locale', locale);
+  localStore.set('noteburner_locale', locale);
 }
 
 /**

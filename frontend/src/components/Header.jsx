@@ -25,12 +25,12 @@ function Header() {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Flame className="w-8 h-8 text-red-600 dark:text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">
               NoteBurner
-            </h1>
+            </span>
           </Link>
           
-          <nav className="flex items-center gap-4">
+          <nav aria-label={t('a11y.mainNavigation')} className="flex items-center gap-4">
             <Link 
               to="/create" 
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors"
@@ -42,21 +42,21 @@ function Header() {
               className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-yellow-600 dark:hover:text-yellow-400 font-medium transition-colors"
             >
               <Trophy className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('nav.achievements')}</span>
+              <span className="sr-only sm:not-sr-only">{t('nav.achievements')}</span>
             </Link>
             <Link 
               to="/referrals" 
               className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 font-medium transition-colors"
             >
               <Gift className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('nav.rewards')}</span>
+              <span className="sr-only sm:not-sr-only">{t('nav.rewards')}</span>
             </Link>
             <Link 
               to="/invite" 
               className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
             >
               <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('nav.invite')}</span>
+              <span className="sr-only sm:not-sr-only">{t('nav.invite')}</span>
             </Link>
             <Link 
               to="/leaderboard" 
@@ -70,7 +70,7 @@ function Header() {
               className="flex items-center gap-1 text-amber-700 dark:text-amber-400 hover:text-amber-600 font-medium transition-colors"
             >
               <Star className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('nav.premium')}</span>
+              <span className="sr-only sm:not-sr-only">{t('nav.premium')}</span>
             </Link>
             
             <LanguageSwitcher />
@@ -159,13 +159,13 @@ function Header() {
                   className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   <LogIn className="w-4 h-4" />
-                  <span className="hidden sm:inline">Login</span>
+                  <span className="sr-only sm:not-sr-only">{t('nav.login')}</span>
                 </Link>
                 <Link
                   to="/signup"
                   className="px-4 py-2 text-sm font-medium text-white bg-amber-700 hover:bg-amber-800 rounded-lg transition-colors"
                 >
-                  Sign up
+                  {t('nav.signup')}
                 </Link>
               </div>
             )}

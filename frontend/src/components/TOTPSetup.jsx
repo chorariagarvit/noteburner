@@ -53,6 +53,9 @@ export default function TOTPSetup({ totpData }) {
               <img
                 src={qrCodeUrl}
                 alt="TOTP QR Code"
+                width={256}
+                height={256}
+                decoding="async"
                 className="w-64 h-64"
               />
             )}

@@ -26,11 +26,6 @@ export default function ForgotPasswordPage() {
 
       if (response.ok) {
         setSuccess(true);
-        // For development, log the reset token
-        if (data.resetToken) {
-          console.log('Reset token:', data.resetToken);
-          console.log('Reset URL:', `/reset-password?token=${data.resetToken}`);
-        }
       } else {
         setError(data.error || 'Failed to send reset email');
       }
@@ -50,9 +45,9 @@ export default function ForgotPasswordPage() {
             <svg className="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
               {t('auth.forgotPassword.successMessage')}
-            </h2>
+            </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               {t('auth.forgotPassword.subtitle')}
             </p>
@@ -74,9 +69,9 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="mt-6 text-center text-3xl font-bold text-gray-900 dark:text-white">
             {t('auth.forgotPassword.title')}
-          </h2>
+          </h1>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             {t('auth.forgotPassword.subtitle')}
           </p>
@@ -84,7 +79,7 @@ export default function ForgotPasswordPage() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+            <div role="alert" className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
               <p className="text-sm font-medium text-red-800 dark:text-red-200">
                 {error}
               </p>

@@ -19,18 +19,27 @@ const { uploadLargeFile, shouldUseChunkedUpload } = await import(pathToFileURL(c
 
 const realFetch = globalThis.fetch;
 const realSetTimeout = globalThis.setTimeout;
+const realAbortTimeout = AbortSignal.timeout;
 const realWarn = console.warn;
 let delays; let calls; let respond;
 
 beforeEach(() => {
   delays = []; calls = []; respond = null;
   console.warn = () => {};
-  // Retry back-off waits run immediately but are recorded; the 30s/120s request timeouts fire
-  // at once only for the call that wants to time out.
+  // Retry back-off waits run immediately but are recorded.
   globalThis.setTimeout = (fn, ms, ...rest) => {
     if (ms < 10000) { delays.push(ms); return realSetTimeout(fn, 0, ...rest); } // back-off waits: instant, but recorded
-    if (ms === 120000 && globalThis.__timeoutNext) { globalThis.__timeoutNext = false; return realSetTimeout(fn, 0, ...rest); }
-    return realSetTimeout(() => {}, 0); // request timeouts (30 s / 120 s) never fire unless a test asks
+    return realSetTimeout(() => {}, 0);
+  };
+  // The 120 s request timeout (AbortSignal.timeout) fires at once, with a TimeoutError, only for the call
+  // that wants to time out; every other request gets a signal that never aborts.
+  AbortSignal.timeout = (ms) => {
+    const controller = new AbortController();
+    if (ms === 120000 && globalThis.__timeoutNext) {
+      globalThis.__timeoutNext = false;
+      realSetTimeout(() => controller.abort(new DOMException('The operation timed out.', 'TimeoutError')), 0);
+    }
+    return controller.signal;
   };
   globalThis.fetch = async (url, opts) => {
     const endpoint = String(url).split('/').pop();
@@ -39,7 +48,7 @@ beforeEach(() => {
     return respond(endpoint, body, opts);
   };
 });
-afterEach(() => { globalThis.fetch = realFetch; globalThis.setTimeout = realSetTimeout; console.warn = realWarn; });
+afterEach(() => { globalThis.fetch = realFetch; globalThis.setTimeout = realSetTimeout; AbortSignal.timeout = realAbortTimeout; console.warn = realWarn; });
 
 const json = (data, status = 200) => ({ ok: status < 400, status, json: async () => data });
 const file = (size = 10) => ({ name: 'big.bin', type: 'application/octet-stream', size });

@@ -1,6 +1,5 @@
 import React from 'react';
 import { FileText, Gift, Heart, Briefcase, Key, Star } from 'lucide-react';
-import PropTypes from 'prop-types';
 import { useI18n } from '../../contexts/I18nContext';
 
 export const MESSAGE_TEMPLATES = [
@@ -82,7 +81,7 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
   const groupedTemplates = Object.groupBy(MESSAGE_TEMPLATES, (template) => template.category);
 
   return (
-    <div className="space-y-6" role="dialog" aria-labelledby="templates-title" aria-describedby="templates-description">
+    <div className="space-y-6" role="dialog" aria-modal="true" aria-labelledby="templates-title" aria-describedby="templates-description">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 id="templates-title" className="text-lg font-bold text-gray-900 dark:text-white">{t('templates.title')}</h3>
@@ -144,10 +143,4 @@ function MessageTemplates({ onSelectTemplate, onClose }) {
     </div>
   );
 }
-
-MessageTemplates.propTypes = {
-  onSelectTemplate: PropTypes.func.isRequired,
-  onClose: PropTypes.func
-};
-
 export default MessageTemplates;

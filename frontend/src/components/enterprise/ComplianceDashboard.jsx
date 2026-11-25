@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
 import { downloadBlob } from '../../utils/download';
+import { alertDialog } from '../../utils/dialog';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export default function ComplianceDashboard() {
   const { teamId } = useParams();
@@ -13,6 +15,8 @@ export default function ComplianceDashboard() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const deleteDialogRef = useRef(null);
+  useModalA11y(deleteDialogRef, showDeleteConfirm, () => setShowDeleteConfirm(false));
   const { t } = useI18n();
 
   useEffect(() => {
@@ -102,7 +106,7 @@ export default function ComplianceDashboard() {
 
       if (!response.ok) throw new Error('Failed to delete data');
 
-      alert('All team data has been deleted per GDPR request');
+      await alertDialog('All team data has been deleted per GDPR request');
       window.location.href = '/';
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
@@ -123,7 +127,7 @@ export default function ComplianceDashboard() {
       </div>
 
       {message && (
-        <div className={`mb-6 px-4 py-3 rounded-lg ${
+        <div role={message.type === 'error' ? 'alert' : 'status'} className={`mb-6 px-4 py-3 rounded-lg ${
           message.type === 'success' 
             ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
             : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
@@ -387,8 +391,8 @@ export default function ComplianceDashboard() {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold text-red-900 dark:text-red-200 mb-4">{t('compliance.confirmTitle')}</h2>
+          <div ref={deleteDialogRef} role="alertdialog" aria-modal="true" aria-labelledby="delete-data-title" tabIndex={-1} className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6">
+            <h2 id="delete-data-title" className="text-2xl font-bold text-red-900 dark:text-red-200 mb-4">{t('compliance.confirmTitle')}</h2>
             <p className="text-gray-700 dark:text-gray-300 mb-6">
               {t('compliance.confirmDesc')}
             </p>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { Download } from 'lucide-react';
 import { generateQRCode, downloadQRCode } from '../utils/qrcode';
 
@@ -56,6 +55,9 @@ export function QRCodeDisplay({ url, showDownload = true, size = 256 }) {
         <img 
           src={qrCodeUrl} 
           alt="QR Code for secret message" 
+          width={size}
+          height={size}
+          decoding="async"
           className="w-full h-auto"
           style={{ maxWidth: `${size}px` }}
         />
@@ -77,9 +79,3 @@ export function QRCodeDisplay({ url, showDownload = true, size = 256 }) {
     </div>
   );
 }
-
-QRCodeDisplay.propTypes = {
-  url: PropTypes.string.isRequired,
-  showDownload: PropTypes.bool,
-  size: PropTypes.number
-};

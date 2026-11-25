@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { Clock, AlertCircle } from 'lucide-react';
 import { useI18n } from '../contexts/I18nContext';
 
@@ -126,8 +125,3 @@ export function CountdownTimer({ expiresAt, onExpire }) {
     </div>
   );
 }
-
-CountdownTimer.propTypes = {
-  expiresAt: PropTypes.string.isRequired,
-  onExpire: PropTypes.func
-};

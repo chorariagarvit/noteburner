@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getAuthHeaders, getAuthHeadersWithJSON } from '../../utils/session';
 import { useI18n } from '../../contexts/I18nContext';
 import { API_BASE } from '../../utils/apiBase';
+import { confirmDialog, alertDialog } from '../../utils/dialog';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 export default function TeamDashboard() {
   const { teamId } = useParams();
@@ -13,6 +15,8 @@ export default function TeamDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const inviteDialogRef = useRef(null);
+  useModalA11y(inviteDialogRef, showInviteModal, () => setShowInviteModal(false));
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [newMemberRole, setNewMemberRole] = useState('member');
   const { t } = useI18n();
@@ -82,27 +86,28 @@ export default function TeamDashboard() {
       setShowInviteModal(false);
       void loadTeamData();
     } catch (err) {
-      alert('Error: ' + err.message);
+      await alertDialog('Error: ' + err.message);
     }
   };
 
   const handleRemoveMember = async (memberId) => {
-    if (!confirm('Remove this member from the team?')) return;
+    if (!(await confirmDialog('Remove this member from the team?'))) return;
 
     try {
-      await fetch(`${API_BASE}/api/teams/${teamId}/members/${memberId}`, {
+      const response = await fetch(`${API_BASE}/api/teams/${teamId}/members/${memberId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
+      if (!response.ok) throw new Error('Failed to remove member');
       void loadTeamData();
     } catch (err) {
-      alert('Error: ' + err.message);
+      await alertDialog('Error: ' + err.message);
     }
   };
 
   const handleUpdateRole = async (memberId, newRole) => {
     try {
-      await fetch(`${API_BASE}/api/teams/${teamId}/members/${memberId}`, {
+      const response = await fetch(`${API_BASE}/api/teams/${teamId}/members/${memberId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -110,9 +115,10 @@ export default function TeamDashboard() {
         },
         body: JSON.stringify({ role: newRole })
       });
+      if (!response.ok) throw new Error('Failed to change role');
       void loadTeamData();
     } catch (err) {
-      alert('Error: ' + err.message);
+      await alertDialog('Error: ' + err.message);
     }
   };
 
@@ -275,6 +281,7 @@ export default function TeamDashboard() {
                   <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{member.email}</td>
                   <td className="px-6 py-4">
                     <select
+                      aria-label={`${t('a11y.memberRole')}: ${member.email}`}
                       value={member.role}
                       onChange={(e) => handleUpdateRole(member.id, e.target.value)}
                       className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -356,13 +363,14 @@ export default function TeamDashboard() {
       {/* Invite Member Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{t('teamDashboard.inviteModalTitle')}</h2>
+          <div ref={inviteDialogRef} role="dialog" aria-modal="true" aria-labelledby="invite-member-title" tabIndex={-1} className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6">
+            <h2 id="invite-member-title" className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{t('teamDashboard.inviteModalTitle')}</h2>
             <form onSubmit={handleInviteMember}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('teamDashboard.inviteEmailLabel')}</label>
                 <input
                   type="email"
+                  aria-label={t('teamDashboard.inviteEmailLabel')}
                   value={newMemberEmail}
                   onChange={(e) => setNewMemberEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -373,6 +381,7 @@ export default function TeamDashboard() {
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('teamDashboard.inviteRoleLabel')}</label>
                 <select
+                  aria-label={t('teamDashboard.inviteRoleLabel')}
                   value={newMemberRole}
                   onChange={(e) => setNewMemberRole(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"

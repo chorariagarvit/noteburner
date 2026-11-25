@@ -1,4 +1,5 @@
 import { API_BASE } from './apiBase';
+import { sessionStore } from './storage';
 /**
  * Frontend utility for checking and caching premium status.
  */
@@ -16,7 +17,7 @@ export async function getPremiumStatus(token, { force = false } = {}) {
 
   if (!force) {
     try {
-      const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+      const cached = JSON.parse(sessionStore.get(CACHE_KEY) || 'null');
       if (cached && Date.now() - cached._ts < CACHE_TTL) {
         return cached;
       }
@@ -30,7 +31,7 @@ export async function getPremiumStatus(token, { force = false } = {}) {
     if (!res.ok) return null;
     const data = await res.json();
     const result = { ...data, _ts: Date.now() };
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(result));
+    sessionStore.set(CACHE_KEY, JSON.stringify(result));
     return result;
   } catch {
     // Intentionally not logged: the failure is reported to the caller/user below
@@ -40,7 +41,7 @@ export async function getPremiumStatus(token, { force = false } = {}) {
 
 /** Clear the cached premium status (e.g. after subscribing or cancelling). */
 export function clearPremiumCache() {
-  sessionStorage.removeItem(CACHE_KEY);
+  sessionStore.remove(CACHE_KEY);
 }
 
 /** Returns true if the user has an active premium or lifetime subscription. */

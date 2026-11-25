@@ -103,7 +103,7 @@ test.describe('The production build under that policy', () => {
     await page.fill('#message', 'CSP end to end');
     await page.fill('#password', 'Csp-Passw0rd!');
     await page.click('button[type="submit"]');
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     await expect(page.locator('img[alt="QR Code for secret message"]')).toBeVisible();   // data: image allowed
     // the server builds links with FRONTEND_URL (the dev port); open the same path on the server under test
     const url = new URL(await page.locator('input[readonly]').first().inputValue()).pathname;

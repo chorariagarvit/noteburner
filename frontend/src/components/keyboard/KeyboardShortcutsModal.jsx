@@ -1,7 +1,7 @@
 import { X, Command, Keyboard } from 'lucide-react';
-import PropTypes from 'prop-types';
 import { useEscapeKey } from '../../hooks/useKeyboardShortcuts';
-import React from 'react';
+import React, { useRef } from 'react';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 const SHORTCUTS = [
   {
@@ -34,6 +34,8 @@ const SHORTCUTS = [
 
 function KeyboardShortcutsModal({ isOpen, onClose }) {
   useEscapeKey(onClose, isOpen);
+  const dialogRef = useRef(null);
+  useModalA11y(dialogRef, isOpen);
 
   if (!isOpen) return null;
 
@@ -41,6 +43,8 @@ function KeyboardShortcutsModal({ isOpen, onClose }) {
 
   return (
     <div 
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
@@ -129,10 +133,4 @@ function KeyboardShortcutsModal({ isOpen, onClose }) {
     </div>
   );
 }
-
-KeyboardShortcutsModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
-};
-
 export default KeyboardShortcutsModal;

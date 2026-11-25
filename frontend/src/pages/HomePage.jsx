@@ -12,6 +12,7 @@ import HowItWorksSection from '../components/home/HowItWorksSection';
 import StatsSection from '../components/home/StatsSection';
 import CTASection from '../components/home/CTASection';
 import OnboardingModal from '../components/onboarding/OnboardingModal';
+import { localStore } from '../utils/storage';
 
 function HomePage() {
   const [searchParams] = useSearchParams();
@@ -28,7 +29,7 @@ function HomePage() {
     }
 
     // Check if user has seen onboarding
-    const hasSeenOnboarding = localStorage.getItem('noteburner_onboarding_complete');
+    const hasSeenOnboarding = localStore.get('noteburner_onboarding_complete');
     if (!hasSeenOnboarding) {
       // Show onboarding after a brief delay for better UX
       setTimeout(() => setShowOnboarding(true), 1000);
@@ -36,7 +37,7 @@ function HomePage() {
   }, [searchParams]);
 
   const handleOnboardingComplete = () => {
-    localStorage.setItem('noteburner_onboarding_complete', 'true');
+    localStore.set('noteburner_onboarding_complete', 'true');
     setShowOnboarding(false);
   };
 

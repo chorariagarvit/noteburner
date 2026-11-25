@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { Gift, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -108,13 +107,3 @@ export default function RewardUnlocked({ reward, onClose }) {
     </div>
   );
 }
-
-RewardUnlocked.propTypes = {
-  reward: PropTypes.shape({
-    icon: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    reward: PropTypes.string.isRequired,
-  }).isRequired,
-  onClose: PropTypes.func.isRequired,
-};

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { fireConfetti } from '../utils/confetti';
 
 export default function AchievementUnlocked({ achievement, onClose }) {
@@ -29,6 +28,7 @@ export default function AchievementUnlocked({ achievement, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
       <div 
+        role="status"
         className={`
           max-w-md w-full bg-gradient-to-br from-yellow-500/20 to-orange-500/20 
           border-2 border-yellow-500/50 rounded-lg p-6 shadow-2xl shadow-yellow-500/30
@@ -63,13 +63,3 @@ export default function AchievementUnlocked({ achievement, onClose }) {
     </div>
   );
 }
-
-AchievementUnlocked.propTypes = {
-  achievement: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired
-  }).isRequired,
-  onClose: PropTypes.func.isRequired
-};

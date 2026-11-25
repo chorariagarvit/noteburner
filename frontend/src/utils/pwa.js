@@ -1,3 +1,6 @@
+import { sessionStore } from './storage';
+import { translate, detectLocale } from './i18n';
+
 // PWA installation and service worker registration
 export const registerServiceWorker = async () => {
   if ('serviceWorker' in navigator) {
@@ -5,8 +8,6 @@ export const registerServiceWorker = async () => {
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'
       });
-      
-      console.log('[PWA] Service Worker registered successfully:', registration.scope);
       
       // Check for updates every hour
       setInterval(() => {
@@ -33,11 +34,38 @@ export const registerServiceWorker = async () => {
   return null;
 };
 
-// Show update notification
+// A new version has installed. The service worker already took over, so this only offers to reload the page
+// to use it: a quiet banner (not a blocking pop-up), announced to screen readers, shown at most once per session.
+const UPDATE_SHOWN_KEY = 'noteburner_update_notice_shown';
+
 const showUpdateNotification = () => {
-  if (window.confirm('A new version of NoteBurner is available. Reload to update?')) {
-    window.location.reload();
-  }
+  if (sessionStore.get(UPDATE_SHOWN_KEY)) return;
+  sessionStore.set(UPDATE_SHOWN_KEY, '1');
+
+  const locale = detectLocale();
+  const banner = document.createElement('div');
+  banner.setAttribute('role', 'status');
+  banner.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center justify-center gap-3 px-4 py-3 rounded-xl shadow-2xl ' +
+    'bg-gray-900 text-white dark:bg-white dark:text-gray-900 max-w-[calc(100%-2rem)]';
+
+  const text = document.createElement('span');
+  text.className = 'text-sm';
+  text.textContent = translate(locale, 'pwa.updateAvailable');
+
+  const reload = document.createElement('button');
+  reload.type = 'button';
+  reload.className = 'px-3 py-1 rounded-lg text-sm font-semibold bg-primary-700 text-white hover:bg-primary-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white';
+  reload.textContent = translate(locale, 'pwa.reload');
+  reload.addEventListener('click', () => window.location.reload());
+
+  const later = document.createElement('button');
+  later.type = 'button';
+  later.className = 'px-3 py-1 rounded-lg text-sm font-semibold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600';
+  later.textContent = translate(locale, 'pwa.later');
+  later.addEventListener('click', () => banner.remove());
+
+  banner.append(text, reload, later);
+  document.body.append(banner);
 };
 
 // Check if PWA is installable
@@ -56,7 +84,6 @@ export const checkInstallability = () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
           const { outcome } = await deferredPrompt.userChoice;
-          console.log(`[PWA] User response to install prompt: ${outcome}`);
           deferredPrompt = null;
           installBtn.style.display = 'none';
         }
@@ -66,7 +93,6 @@ export const checkInstallability = () => {
   
   // Detect if app is installed
   window.addEventListener('appinstalled', () => {
-    console.log('[PWA] App was installed successfully');
     deferredPrompt = null;
     // Track installation
     if (window.gtag) {
@@ -86,7 +112,6 @@ export const isPWA = () => {
 // Request notification permission
 export const requestNotificationPermission = async () => {
   if (!('Notification' in window)) {
-    console.log('[PWA] Notifications not supported');
     return false;
   }
   
@@ -162,7 +187,6 @@ export const registerBackgroundSync = async (tag) => {
     const registration = await navigator.serviceWorker.ready;
     try {
       await registration.sync.register(tag);
-      console.log(`[PWA] Background sync registered: ${tag}`);
       return true;
     } catch (error) {
       console.error('[PWA] Background sync registration failed:', error);

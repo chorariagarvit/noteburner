@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 
 export function AnimatedCounter({ value, duration = 1000 }) {
   const [count, setCount] = useState(0);
@@ -31,8 +30,3 @@ export function AnimatedCounter({ value, duration = 1000 }) {
 
   return <span className="tabular-nums">{count.toLocaleString()}</span>;
 }
-
-AnimatedCounter.propTypes = {
-  value: PropTypes.number,
-  duration: PropTypes.number
-};

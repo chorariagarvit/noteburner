@@ -98,7 +98,7 @@ test.describe('Viral Mechanics Features', () => {
     ]);
 
     // Upload might be too fast in tests, so we just verify it completes
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 20000 });
   });
 
   test('should trigger confetti animation on message burn', async ({ page, context }) => {
@@ -112,7 +112,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', password);
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
 
     // View and decrypt
@@ -136,7 +136,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', password);
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
 
     await page.goto(shareUrl);
@@ -147,7 +147,7 @@ test.describe('Viral Mechanics Features', () => {
     await expect(page.locator('text=CTA test message')).toBeVisible({ timeout: 5000 });
 
     // Verify enhanced CTA elements
-    await expect(page.locator('h3:has-text("Your secret has self-destructed! 🔥")')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Your secret has self-destructed! 🔥' })).toBeVisible();
     await expect(page.locator('text=Want to send your own encrypted message?')).toBeVisible();
 
     // Verify large prominent button
@@ -166,7 +166,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', 'PreviewTest123!');
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
 
     // Visit preview page
@@ -180,7 +180,7 @@ test.describe('Viral Mechanics Features', () => {
     await expect(page.locator('.bg-gradient-to-br').first()).toBeVisible();
 
     // Verify mystery text
-    await expect(page.locator('h1:has-text("Someone sent you a secret message")')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Someone sent you a secret message' })).toBeVisible();
   });
 
   test('should provide quick recreation workflow', async ({ page }) => {
@@ -192,13 +192,13 @@ test.describe('Viral Mechanics Features', () => {
     await page.selectOption('#time-limit', '360'); // 6 hours = 360 minutes
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
 
     // Use "Create Similar"
     await page.click('button:has-text("Create Similar Message")');
 
     // Verify quick workflow
-    await expect(page.locator('h2:has-text("Create Encrypted Message")')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Create Encrypted Message' })).toBeVisible();
 
     // Password and expiration should be preserved
     const passwordInput = page.locator('input[placeholder="Enter a strong password"]');
@@ -215,7 +215,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Second message');
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
   });
 
   test('should show social share buttons', async ({ page }) => {
@@ -226,7 +226,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', password);
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
 
     await page.goto(shareUrl);
@@ -260,7 +260,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Stats update test');
     await page.fill('input[placeholder="Enter a strong password"]', 'StatsTest123!');
     await page.click('button:has-text("Encrypt & Create Link")');
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
 
     // Navigate back to homepage
     await page.goto('/');
@@ -303,7 +303,7 @@ test.describe('Viral Mechanics Features', () => {
     // Button should change during processing
     const isDisabled = await submitButton.isDisabled({ timeout: 1000 }).catch(() => false);
     
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
   });
 
   test('should animate homepage elements on load', async ({ page }) => {
@@ -325,7 +325,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', password);
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const shareUrl = await page. locator('input[readonly]').first().inputValue();
 
     await page.goto(shareUrl);
@@ -354,7 +354,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.selectOption('#time-limit', '60'); // 1 hour
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     
     // Should mention expiration
     const expiresText = page.locator('text=/expire|hour/i');
@@ -371,7 +371,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', 'Mystery123!');
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
 
     await page.goto(shareUrl);
@@ -379,7 +379,7 @@ test.describe('Viral Mechanics Features', () => {
 
     // Check for mystery/intrigue elements (preview page or direct to password form)
     const hasPreview = await page.locator('text=Someone sent you a secret message').isVisible().catch(() => false);
-    const hasPasswordForm = await page.locator('h2:has-text("Encrypted Message")').isVisible().catch(() => false);
+    const hasPasswordForm = await page.getByRole('heading', { name: 'Encrypted Message' }).isVisible().catch(() => false);
     
     // Should show either preview or password form
     expect(hasPreview || hasPasswordForm).toBeTruthy();
@@ -399,7 +399,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', 'Success123!');
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
 
     // Check for copy button
     const copyButton = page.locator('button:has-text("Copy")');
@@ -412,7 +412,7 @@ test.describe('Viral Mechanics Features', () => {
     await page.fill('input[placeholder="Enter a strong password"]', 'Error123!');
     await page.click('button:has-text("Encrypt & Create Link")');
 
-    await expect(page.locator('h2:has-text("Message Created Successfully")')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
     const shareUrl = await page.locator('input[readonly]').first().inputValue();
 
     await page.goto(shareUrl);

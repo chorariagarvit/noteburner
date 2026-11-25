@@ -1,3 +1,4 @@
+import { localStore } from './storage';
 // Achievement definitions
 export const ACHIEVEMENTS = {
   FIRST_BURN: {
@@ -60,7 +61,7 @@ export const ACHIEVEMENTS = {
 
 // Get user stats from localStorage
 export function getUserStats() {
-  const saved = localStorage.getItem('noteburner_stats');
+  const saved = localStore.get('noteburner_stats');
   if (!saved) {
     return {
       messagesCreated: 0,
@@ -81,7 +82,7 @@ export function getUserStats() {
 
 // Save user stats to localStorage
 export function saveUserStats(stats) {
-  localStorage.setItem('noteburner_stats', JSON.stringify(stats));
+  localStore.set('noteburner_stats', JSON.stringify(stats));
 }
 
 // Update stats after creating a message

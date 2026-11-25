@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Lock, Share2, Flame, ChevronRight, ChevronLeft } from 'lucide-react';
-import PropTypes from 'prop-types';
 import { useI18n } from '../../contexts/I18nContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 const ONBOARDING_STEPS = [
   {
@@ -46,6 +46,8 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
   const { t } = useI18n();
   const [currentStep, setCurrentStep] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const dialogRef = useRef(null);
+  useModalA11y(dialogRef, isOpen);
 
   const step = ONBOARDING_STEPS[currentStep];
   const IconComponent = step.icon;
@@ -93,9 +95,10 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
 
   if (!isOpen) return null;
 
-
   return (
     <div 
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
       role="dialog"
       aria-modal="true"
@@ -206,11 +209,4 @@ function OnboardingModal({ isOpen, onClose, onComplete }) {
     </div>
   );
 }
-
-OnboardingModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onComplete: PropTypes.func.isRequired
-};
-
 export default OnboardingModal;

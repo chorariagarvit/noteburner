@@ -265,9 +265,10 @@ test.describe('Enterprise Features', () => {
       // Switch to Members tab
       await page.click('button:has-text("Members")');
       
-      page.on('dialog',dialog => dialog.accept());
       const memberRow = page.locator(`tr:has-text("${removeEmail}")`);
       await memberRow.locator('button:has-text("Remove")').click();
+      // A native <dialog> asks for confirmation (it used to be a browser confirm() pop-up)
+      await page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click();
       await expect(page.locator(`text=${removeEmail}`)).not.toBeVisible();
     });
 
@@ -509,11 +510,6 @@ test.describe('Enterprise Features', () => {
 
       await page.goto(`http://localhost:5173/teams/${teamId}/compliance`);
       
-      page.on('dialog', dialog => {
-        expect(dialog.message()).toContain('delete');
-        dialog.dismiss();
-      });
-      
       const deleteButton = page.locator('button:has-text("Delete")').first();
       if (await deleteButton.isVisible()) {
         await deleteButton.click();
@@ -617,8 +613,9 @@ test.describe('Enterprise Features', () => {
       await page.waitForSelector('main');
       await page.waitForTimeout(2000);
       
-      page.on('dialog', dialog => dialog.accept());
       await page.locator('button:has-text("Revoke")').first().click({ timeout: 15000 });
+      // A native <dialog> asks for confirmation (it used to be a browser confirm() pop-up)
+      await page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click();
       
       await expect(page.locator('text=Revoked').first()).toBeVisible();
     });

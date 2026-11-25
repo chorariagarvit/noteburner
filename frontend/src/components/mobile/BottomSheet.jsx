@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 /**
  * BottomSheet Component - Mobile-optimized modal that slides up from bottom
@@ -21,6 +22,7 @@ const BottomSheet = ({
   closeOnBackdrop = true 
 }) => {
   const sheetRef = useRef(null);
+  useModalA11y(sheetRef, isOpen);
   const startYRef = useRef(0);
   const currentYRef = useRef(0);
 
@@ -90,6 +92,7 @@ const BottomSheet = ({
         }}
         role="dialog"
         aria-modal="true"
+        tabIndex={-1}
         aria-labelledby={title ? 'bottom-sheet-title' : undefined}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

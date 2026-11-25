@@ -51,7 +51,7 @@ export default function TeamCreationPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('teamCreation.title')}</h1>
 
           {message && (
-            <div className={`p-4 rounded-md mb-6 ${
+            <div role={message.type === 'error' ? 'alert' : 'status'} className={`p-4 rounded-md mb-6 ${
               message.type === 'success' 
                 ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200' 
                 : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200'

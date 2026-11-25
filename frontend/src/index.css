@@ -68,6 +68,12 @@
 
 @plugin "./dark-variant.js";
 
+/* Elements focused only by script (the page heading and <main> after a route change) get no ring: they are
+   not interactive, and the announcement already tells the user where they are */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 @layer base {
   /* light-dark() picks by the active color-scheme; the plain declarations before each are the light-only
      fallback for browsers without light-dark() */

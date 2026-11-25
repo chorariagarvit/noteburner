@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Copy, Check, Users, Link2, Clock, Shield } from 'lucide-react';
-import PropTypes from 'prop-types';
 import { useI18n } from '../contexts/I18nContext';
 
 export function GroupMessageLinks({ groupData }) {
@@ -152,18 +151,3 @@ export function GroupMessageLinks({ groupData }) {
     </div>
   );
 }
-
-GroupMessageLinks.propTypes = {
-  groupData: PropTypes.shape({
-    groupId: PropTypes.string.isRequired,
-    recipientCount: PropTypes.number.isRequired,
-    links: PropTypes.arrayOf(PropTypes.shape({
-      recipientIndex: PropTypes.number.isRequired,
-      token: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired
-    })).isRequired,
-    expiresAt: PropTypes.number,
-    burnOnFirstView: PropTypes.bool,
-    maxViews: PropTypes.number
-  }).isRequired
-};

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Lock, Flame, Shield, FileImage } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 
@@ -13,13 +12,6 @@ function FeatureCard({ icon, title, description }) {
         </div>
     );
 }
-
-FeatureCard.propTypes = {
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-};
-
 function FeaturesSection() {
     const { t } = useI18n();
     return (

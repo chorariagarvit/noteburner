@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 
 export function SkeletonText({ className = '', width = 'full' }) {
   const widthClasses = {
@@ -13,12 +12,6 @@ export function SkeletonText({ className = '', width = 'full' }) {
     <div className={`h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse ${widthClasses[width]} ${className}`} />
   );
 }
-
-SkeletonText.propTypes = {
-  className: PropTypes.string,
-  width: PropTypes.oneOf(['full', '3/4', '1/2', '1/3', '1/4'])
-};
-
 export function SkeletonCard({ className = '' }) {
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
@@ -38,31 +31,16 @@ export function SkeletonCard({ className = '' }) {
     </div>
   );
 }
-
-SkeletonCard.propTypes = {
-  className: PropTypes.string
-};
-
 export function SkeletonButton({ className = '' }) {
   return (
     <div className={`h-10 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse ${className}`} />
   );
 }
-
-SkeletonButton.propTypes = {
-  className: PropTypes.string
-};
-
 export function SkeletonInput({ className = '' }) {
   return (
     <div className={`h-12 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse ${className}`} />
   );
 }
-
-SkeletonInput.propTypes = {
-  className: PropTypes.string
-};
-
 export function SkeletonAvatar({ size = 'md', className = '' }) {
   const sizeClasses = {
     sm: 'w-8 h-8',
@@ -75,12 +53,6 @@ export function SkeletonAvatar({ size = 'md', className = '' }) {
     <div className={`${sizeClasses[size]} bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse ${className}`} />
   );
 }
-
-SkeletonAvatar.propTypes = {
-  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
-  className: PropTypes.string
-};
-
 export function MessageFormSkeleton() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">

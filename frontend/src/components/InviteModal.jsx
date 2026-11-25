@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Copy, Check, Mail, Share2, X as XIcon, MessageCircle } from 'lucide-react';
-import PropTypes from 'prop-types';
 import { useI18n } from '../contexts/I18nContext';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const dialogRef = useRef(null);
+  // Escape is handled by the backdrop's own key handler below
+  useModalA11y(dialogRef, isOpen);
 
   if (!isOpen) return null;
 
@@ -74,8 +77,12 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
       onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
     >
       <div 
+        ref={dialogRef}
         className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        role="presentation"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="invite-modal-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => { if (e.key !== 'Escape') e.stopPropagation(); }}
       >
@@ -85,7 +92,7 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
             <div className="flex items-center gap-3">
               <Share2 className="w-8 h-8" />
               <div>
-                <h2 className="text-2xl font-bold">{t('inviteModal.title')}</h2>
+                <h2 id="invite-modal-title" className="text-2xl font-bold">{t('inviteModal.title')}</h2>
                 <p className="text-sm opacity-90">{t('inviteModal.subtitle')}</p>
               </div>
             </div>
@@ -199,10 +206,3 @@ export default function InviteModal({ isOpen, onClose, shareUrl, messagePreview 
     </div>
   );
 }
-
-InviteModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  shareUrl: PropTypes.string.isRequired,
-  messagePreview: PropTypes.string
-};

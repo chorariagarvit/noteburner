@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Shield, Loader2 } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
 
 export default function TOTPInput({ onVerify, error: externalError }) {
+  const { t } = useI18n();
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
@@ -107,6 +109,7 @@ export default function TOTPInput({ onVerify, error: externalError }) {
         {code.map((digit, index) => (
           <input
             key={index}
+            aria-label={t('a11y.digitOf', { n: index + 1, total: code.length })}
             ref={el => inputRefs.current[index] = el}
             type="text"
             inputMode="numeric"
@@ -127,7 +130,7 @@ export default function TOTPInput({ onVerify, error: externalError }) {
       </div>
 
       {error && (
-        <div className="p-3 bg-red-100 border border-red-300 rounded-lg mb-4">
+        <div role="alert" className="p-3 bg-red-100 border border-red-300 rounded-lg mb-4">
           <p className="text-sm text-red-800 text-center">{error}</p>
         </div>
       )}

@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { Check, Users, Copy, Flame, UserPlus } from 'lucide-react';
 import { QRCodeDisplay } from '../QRCodeDisplay';
 import { GroupMessageLinks } from '../GroupMessageLinks';
@@ -45,9 +44,9 @@ function CreateMessageSuccess({
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-400 mb-4">
                             {groupData ? <Users className="w-8 h-8" /> : <Check className="w-8 h-8" />}
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                             {groupData ? t('createSuccess.groupTitle') : t('createSuccess.title')}
-                        </h2>
+                        </h1>
                         <p className="text-gray-600 dark:text-gray-300">
                             {groupData
                                 ? t('createSuccess.groupSubtitle').replace('{count}', groupData.recipientCount)
@@ -195,21 +194,4 @@ function CreateMessageSuccess({
         </div>
     );
 }
-
-CreateMessageSuccess.propTypes = {
-    shareUrl: PropTypes.string,
-    groupData: PropTypes.object,
-    password: PropTypes.string.isRequired,
-    expiresIn: PropTypes.string,
-    filesCount: PropTypes.number,
-    messageId: PropTypes.string,
-    creatorToken: PropTypes.string,
-    onReset: PropTypes.func.isRequired,
-    onCreateSimilar: PropTypes.func.isRequired,
-    newAchievements: PropTypes.array,
-    setNewAchievements: PropTypes.func,
-    newRewards: PropTypes.array,
-    setNewRewards: PropTypes.func,
-};
-
 export default CreateMessageSuccess;

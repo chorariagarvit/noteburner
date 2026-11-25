@@ -851,6 +851,20 @@
     "theme": "Theme",
     "theme_system": "System",
     "theme_light": "Light",
-    "theme_dark": "Dark"
+    "theme_dark": "Dark",
+    "skipToContent": "Skip to main content",
+    "mainNavigation": "Main",
+    "footerNavigation": "Footer",
+    "apiKeyName": "API key name",
+    "memberRole": "Member role",
+    "inviteEmail": "Email address to invite",
+    "personalMessage": "Personal message",
+    "digitOf": "Digit {n} of {total}",
+    "pageLoaded": "{title}, page loaded"
+  },
+  "pwa": {
+    "updateAvailable": "A new version of NoteBurner is available.",
+    "reload": "Reload",
+    "later": "Later"
   }
 }

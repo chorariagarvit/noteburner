@@ -1,3 +1,4 @@
+import { localStore } from './storage';
 // Referral system - Privacy-first, localStorage-based
 // No server tracking, all rewards are client-side
 
@@ -36,12 +37,12 @@ export const REWARDS = {
  * Get or create user's referral code
  */
 export function getReferralCode() {
-  let code = localStorage.getItem(REFERRAL_CODE_KEY);
+  let code = localStore.get(REFERRAL_CODE_KEY);
   
   if (!code) {
     // Generate a random 6-character code
     code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    localStorage.setItem(REFERRAL_CODE_KEY, code);
+    localStore.set(REFERRAL_CODE_KEY, code);
   }
   
   return code;
@@ -51,7 +52,7 @@ export function getReferralCode() {
  * Get referral stats
  */
 export function getReferralStats() {
-  const saved = localStorage.getItem(REFERRAL_STORAGE_KEY);
+  const saved = localStore.get(REFERRAL_STORAGE_KEY);
   
   if (!saved) {
     return {
@@ -77,7 +78,7 @@ export function getReferralStats() {
  * Save referral stats
  */
 function saveReferralStats(stats) {
-  localStorage.setItem(REFERRAL_STORAGE_KEY, JSON.stringify(stats));
+  localStore.set(REFERRAL_STORAGE_KEY, JSON.stringify(stats));
 }
 
 /**

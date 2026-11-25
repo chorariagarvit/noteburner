@@ -19,20 +19,12 @@ function sleep(ms) {
  * Fetch with timeout
  */
 async function fetchWithTimeout(url, options, timeout = UPLOAD_TIMEOUT) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
   try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    return response;
+    return await fetch(url, { ...options, signal: AbortSignal.timeout(timeout) });
   } catch (error) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      throw new Error('Upload timeout - please check your connection');
+    // AbortSignal.timeout() reports a TimeoutError; older code paths and test doubles report an AbortError
+    if (error.name === 'TimeoutError' || error.name === 'AbortError') {
+      throw new Error('Upload timeout - please check your connection', { cause: error });
     }
     throw error;
   }
@@ -120,7 +112,7 @@ async function uploadChunk(chunkIndex, chunkData, { fileId, uploadId, totalChunk
     }
   }
 
-  throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks} after ${MAX_RETRIES} attempts: ${lastError?.message || 'Unknown error'}`);
+  throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks} after ${MAX_RETRIES} attempts: ${lastError?.message || 'Unknown error'}`, { cause: lastError });
 }
 
 /**

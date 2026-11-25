@@ -851,6 +851,20 @@
     "theme": "थीम",
     "theme_system": "सिस्टम",
     "theme_light": "लाइट",
-    "theme_dark": "डार्क"
+    "theme_dark": "डार्क",
+    "skipToContent": "मुख्य सामग्री पर जाएँ",
+    "mainNavigation": "मुख्य",
+    "footerNavigation": "फ़ुटर",
+    "apiKeyName": "API कुंजी का नाम",
+    "memberRole": "सदस्य की भूमिका",
+    "inviteEmail": "आमंत्रित करने के लिए ईमेल पता",
+    "personalMessage": "व्यक्तिगत संदेश",
+    "digitOf": "अंक {n} / {total}",
+    "pageLoaded": "{title}, पृष्ठ लोड हुआ"
+  },
+  "pwa": {
+    "updateAvailable": "NoteBurner का नया संस्करण उपलब्ध है।",
+    "reload": "रीलोड करें",
+    "later": "बाद में"
   }
 }

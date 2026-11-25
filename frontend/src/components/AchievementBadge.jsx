@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useI18n } from '../contexts/I18nContext';
 
 export default function AchievementBadge({ achievement, unlocked = false, progress = null }) {
@@ -51,18 +50,3 @@ export default function AchievementBadge({ achievement, unlocked = false, progre
     </div>
   );
 }
-
-AchievementBadge.propTypes = {
-  achievement: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired
-  }).isRequired,
-  unlocked: PropTypes.bool,
-  progress: PropTypes.shape({
-    percentage: PropTypes.number,
-    current: PropTypes.number,
-    target: PropTypes.number
-  })
-};

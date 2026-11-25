@@ -4,6 +4,7 @@ import { Star, Crown, Shield, Check, AlertCircle, Loader2, CreditCard, Bitcoin, 
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE } from '../utils/apiBase';
 import { getSessionToken } from '../utils/session';
+import { confirmDialog } from '../utils/dialog';
 
 const API_URL = API_BASE;
 
@@ -96,7 +97,7 @@ export default function PremiumPage() {
   }
 
   async function handleCancel() {
-    if (!confirm('Cancel your premium subscription? You will keep access until the end of the billing period.')) return;
+    if (!(await confirmDialog('Cancel your premium subscription? You will keep access until the end of the billing period.'))) return;
     setCanceling(true);
     setError(null);
     try {
@@ -145,7 +146,7 @@ export default function PremiumPage() {
 
         {/* Success banner */}
         {success && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4 flex items-start gap-3">
+          <div role="status" className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4 flex items-start gap-3">
             <Check className="w-5 h-5 text-green-700 dark:text-green-400 shrink-0 mt-0.5" />
             <p className="text-sm text-green-800 dark:text-green-300">{success}</p>
           </div>
@@ -153,7 +154,7 @@ export default function PremiumPage() {
 
         {/* Error banner */}
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4 flex items-start gap-3">
+          <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
             <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
           </div>

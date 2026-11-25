@@ -3,7 +3,6 @@ import React from 'react';
 import { AnimatedCounter } from '../AnimatedCounter';
 import { useI18n } from '../../contexts/I18nContext';
 
-// eslint-disable-next-line react/prop-types
 function StatsSection({ stats, loading }) {
     const { t } = useI18n();
     return (

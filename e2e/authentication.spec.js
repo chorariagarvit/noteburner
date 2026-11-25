@@ -31,7 +31,7 @@ test.describe('Authentication System', () => {
       await page.goto('/signup');
       
       // Check page title
-      await expect(page.locator('h2')).toContainText('Create Account');
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Create Account');
       
       // Check form fields exist
       await expect(page.locator('#email')).toBeVisible();
@@ -149,7 +149,7 @@ test.describe('Authentication System', () => {
     test('should display login form correctly', async ({ page }) => {
       await page.goto('/login');
       
-      await expect(page.locator('h2')).toContainText('Welcome Back');
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Welcome Back');
       await expect(page.locator('#email')).toBeVisible();
       await expect(page.locator('#password')).toBeVisible();
       await expect(page.locator('#remember-me')).toBeVisible();
@@ -260,7 +260,7 @@ test.describe('Authentication System', () => {
     test('should display forgot password form', async ({ page }) => {
       await page.goto('/forgot-password');
       
-      await expect(page.locator('h2')).toContainText('Reset Password');
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Reset Password');
       await expect(page.locator('#email')).toBeVisible();
       await expect(page.locator('button[type="submit"]')).toContainText('Send Reset Link');
       await expect(page.locator('main a[href="/login"]').or(page.locator('form a[href="/login"]')).first()).toBeVisible();
@@ -293,7 +293,7 @@ test.describe('Authentication System', () => {
       await page.click('button[type="submit"]');
       
       // Should still show success message (security best practice)
-      await expect(page.locator('h2:has-text("Check your email")').or(page.locator('p:has-text("If an account exists")')).first()).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole('heading', { name: 'Check your email' }).or(page.locator('p:has-text("If an account exists")')).first()).toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -440,7 +440,7 @@ test.describe('Authentication System', () => {
       
       // Should show password strength error or requirements (check for heading or first match)
       await expect(
-        page.locator('h3:has-text("Password does not meet")').or(
+        page.getByRole('heading', { name: 'Password does not meet' }).or(
           page.locator('span:has-text("at least 8 characters")').or(
             page.locator('p:has-text("Must be at least 8")')
           )

@@ -13,7 +13,7 @@ test.describe('Network Effects Features', () => {
       await page.goto('/referrals');
 
       // Verify page loads
-      await expect(page.locator('h1:has-text("Referrals")')).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1, name: 'Referrals' })).toBeVisible();
 
       // Verify referral code section exists
       await expect(page.locator('code').first()).toBeVisible();
@@ -39,7 +39,7 @@ test.describe('Network Effects Features', () => {
       await page.goto('/invite');
 
       // Verify page loads
-      await expect(page.locator('h1:has-text("Invite")')).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1, name: 'Invite' })).toBeVisible();
     });
 
     test('should have customization options', async ({ page }) => {
@@ -289,7 +289,7 @@ test.describe('Network Effects Features', () => {
       await page.goto('/invite');
       
       // Page should load (message persistence optional)
-      await expect(page.locator('h1:has-text("Invite")')).toBeVisible();
+      await expect(page.getByRole('heading', { level: 1, name: 'Invite' })).toBeVisible();
     });
 
     test('should show all social platform options', async ({ page }) => {
