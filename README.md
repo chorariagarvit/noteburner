@@ -16,7 +16,7 @@ Send a secret that destroys itself after it is read. Messages are encrypted in y
 ### Sharing
 - 🌐 Custom short URLs, 📱 QR codes, ⏱️ countdown timers, 🔗 social previews
 - 👥 **Group messages**: 1 to 100 unique recipient links from one message
-- 🧩 **Browser extension** (Chrome and Firefox): right-click to send selected text; it only runs when you use it
+- 🧩 **Browser extension**: right-click to send selected text; it only runs when you use it. Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/noteburner/jibijfhlnoealebkcibpfpomfdllhhdc) or [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/noteburner/)
 - 🎁 Referral rewards and an invite page; message templates and keyboard shortcuts
 
 ### Accounts, teams and the API

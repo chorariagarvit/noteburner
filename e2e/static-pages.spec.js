@@ -46,3 +46,16 @@ test.describe('Privacy policy', () => {
     expect(text).not.toMatch(/max 7 days/i);
   });
 });
+
+test.describe('Footer', () => {
+  test('links to both browser extension stores on every page', async ({ page }) => {
+    for (const path of ['/', '/privacy']) {
+      await page.goto(path);
+      const links = page.getByTestId('extension-links');
+      await expect(links.getByRole('link', { name: 'Chrome Web Store' }))
+        .toHaveAttribute('href', 'https://chromewebstore.google.com/detail/noteburner/jibijfhlnoealebkcibpfpomfdllhhdc');
+      await expect(links.getByRole('link', { name: 'Firefox Add-ons' }))
+        .toHaveAttribute('href', 'https://addons.mozilla.org/en-US/firefox/addon/noteburner/');
+    }
+  });
+});

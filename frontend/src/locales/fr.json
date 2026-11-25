@@ -691,7 +691,10 @@
     "copyright": "© {year} NoteBurner. All messages self-destruct.",
     "privacy": "Privacy",
     "changelog": "Changelog",
-    "support": "Support"
+    "support": "Support",
+    "getExtension": "Obtenez l'extension de navigateur",
+    "chromeStore": "Chrome Web Store",
+    "firefoxStore": "Firefox Add-ons"
   },
   "countdown": {
     "expired": "Expired",
