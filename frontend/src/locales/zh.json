@@ -51,6 +51,14 @@
       "autoExpire": {
         "title": "自动过期",
         "desc": "Set messages to expire from 5 minutes to 7 days."
+      },
+      "password": {
+        "title": "密码保护",
+        "desc": "只有知道密码的人才能打开。我们永远看不到密码。"
+      },
+      "files": {
+        "title": "也支持文件",
+        "desc": "可附加文件和图片，它们同样在您的浏览器中加密。"
       }
     },
     "cta": {

@@ -51,6 +51,14 @@
       "autoExpire": {
         "title": "Auto-Expiry",
         "desc": "Set messages to expire from 5 minutes to 7 days."
+      },
+      "password": {
+        "title": "Password Protected",
+        "desc": "Only people with the password can open it. We never see the password."
+      },
+      "files": {
+        "title": "Files Too",
+        "desc": "Attach files and images. They are encrypted in your browser as well."
       }
     },
     "cta": {

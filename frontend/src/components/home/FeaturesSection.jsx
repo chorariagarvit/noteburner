@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Lock, Flame, Shield, FileImage } from 'lucide-react';
+import { Lock, Flame, Shield, Clock, KeyRound, Paperclip } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 
 function FeatureCard({ icon, title, description }) {
@@ -41,9 +41,21 @@ function FeaturesSection() {
                     />
 
                     <FeatureCard
-                        icon={<FileImage className="w-8 h-8" />}
+                        icon={<Clock className="w-8 h-8" />}
                         title={t('home.features.autoExpire.title')}
                         description={t('home.features.autoExpire.desc')}
+                    />
+
+                    <FeatureCard
+                        icon={<KeyRound className="w-8 h-8" />}
+                        title={t('home.features.password.title')}
+                        description={t('home.features.password.desc')}
+                    />
+
+                    <FeatureCard
+                        icon={<Paperclip className="w-8 h-8" />}
+                        title={t('home.features.files.title')}
+                        description={t('home.features.files.desc')}
                     />
                 </div>
             </div>
