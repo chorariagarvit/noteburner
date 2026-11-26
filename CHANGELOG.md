@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Pinch-zoom works on phones.** `user-scalable=no` is gone from the page, and an unused script that locked zoom while a field had focus was deleted. Fields use 16 px text on touch screens instead, which stops iOS zooming into them without taking zoom away.
-- The header wraps on narrow screens, so every link stays on screen at 390 px, and long file paths in the changelog page no longer push the page wider than the screen.
+- The header wraps on narrow screens, so every link stays on screen at 390 px, long file paths in the changelog page no longer push the page wider than the screen, and the tables on the team and API key pages scroll sideways inside their own box instead of widening the whole page.
 - The extension keeps its own version number: it may trail the website (it does not change in 1.16.0, so the extension stays at 1.15.1), and the release test now checks that it is never ahead.
 - A few SonarCloud findings fixed (nested template strings, a duplicate import, an unlabelled icon, object stringification in the log helper, reduced-motion in the extension popup and offline page); the theme script's storage name no longer looks like a secret to Snyk.
 - The ping and stats latency tests allow 1 second instead of 0.5 s, because they flaked when five browsers shared one local server.

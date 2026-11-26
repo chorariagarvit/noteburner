@@ -266,7 +266,8 @@ export default function TeamDashboard() {
             </button>
           </div>
 
-          <table className="w-full">
+          <div className="overflow-x-auto">
+<table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('teamDashboard.colEmail')}</th>
@@ -306,6 +307,7 @@ export default function TeamDashboard() {
               ))}
             </tbody>
           </table>
+</div>
         </div>
       )}
 
@@ -318,7 +320,8 @@ export default function TeamDashboard() {
           {messages.length === 0 ? (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">{t('teamDashboard.noMessages')}</div>
           ) : (
-            <table className="w-full">
+            <div className="overflow-x-auto">
+<table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-900">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{t('teamDashboard.colId')}</th>
@@ -356,6 +359,7 @@ export default function TeamDashboard() {
                 ))}
               </tbody>
             </table>
+</div>
           )}
         </div>
       )}

@@ -170,7 +170,8 @@ export default function ApiKeyManager() {
             <p className="text-gray-500 dark:text-gray-400">{t('apiKeys.empty')}</p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+<table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('apiKeys.colName')}</th>
@@ -223,6 +224,7 @@ export default function ApiKeyManager() {
               ))}
             </tbody>
           </table>
+</div>
         )}
       </div>
 
