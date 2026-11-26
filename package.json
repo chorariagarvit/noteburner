@@ -1,6 +1,6 @@
 {
   "name": "noteburner",
-  "version": "1.15.0",
+  "version": "1.15.1",
   "description": "Secure one-time message encryption and decryption app",
   "private": true,
   "workspaces": [

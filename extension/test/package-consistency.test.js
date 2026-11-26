@@ -90,3 +90,12 @@ test('every shipped script parses', () => {
     assert.equal(r.status, 0, `${f} has a syntax error:\n${r.stderr}`);
   }
 });
+
+test('the Firefox manifest declares the data the extension sends, with categories Mozilla accepts', () => {
+  const allowed = ['authenticationInfo', 'bookmarksInfo', 'browsingActivity', 'financialAndPaymentInfo', 'healthInfo', 'locationInfo',
+    'personalCommunications', 'personallyIdentifyingInfo', 'searchTerms', 'websiteActivity', 'websiteContent'];
+  const { required } = firefox.browser_specific_settings.gecko.data_collection_permissions;
+  assert.ok(!required.includes('none'), 'the extension sends the user\'s (encrypted) message, so it cannot declare "none"');
+  assert.ok(required.includes('personalCommunications') && required.includes('websiteContent'));
+  for (const category of required) assert.ok(allowed.includes(category), `${category} is not a valid category`);
+});

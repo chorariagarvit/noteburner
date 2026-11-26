@@ -1,6 +1,6 @@
 /**
  * Colour scheme of the popup: "system" (the default: follow the browser/OS), "light" or "dark".
- * The choice is kept in chrome.storage.sync as `colorScheme`. Extensions before 1.15.0 stored a boolean
+ * The choice is kept in chrome.storage.sync as `colorScheme`. Extensions before 1.15.1 stored a boolean
  * `darkMode`: true becomes "dark", anything else becomes "system" (the old default was always light, which
  * ignored the OS, so only an explicit "dark" is worth keeping).
  *

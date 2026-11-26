@@ -2,7 +2,7 @@
 
 **Mission**: Make NoteBurner the go-to platform for secure, self-destructing messages.
 
-**Current version**: v1.15.0 (Nov 24, 2026) · **Next**: v1.16.0, picked from section 2
+**Current version**: v1.15.1 (Nov 26, 2026) · **Next**: v1.16.0, picked from section 2
 
 > This file covers **status and what's next**. Details live elsewhere:
 > - [CHANGELOG.md](CHANGELOG.md): what shipped in each version
@@ -13,6 +13,15 @@
 ---
 
 ## 1. Where we are
+
+### v1.15.1: screen reader support, faster loading and safer links (Nov 26, 2026)
+
+A follow-up that makes the site work with screen readers, loads much faster, and stops invalid links looking alive.
+
+- **Screen readers:** skip link, landmarks, announced page changes, one heading per page, announced errors, labelled fields, focus-trapping dialogs.
+- **Links are checked first:** unknown, expired and already-read links show "Message not found"; the lookup is rate limited.
+- **Faster:** the main script shrank from 862 KB to about 340 KB (pages and languages load on demand).
+- **Extension 1.15.1:** the popup follows the system light or dark setting; the Firefox manifest declares the data it sends.
 
 ### v1.15.0: security hardening, quality and a three-state theme (Nov 24, 2026)
 
@@ -30,6 +39,7 @@ The release that turns the app from "stores the settings" into "enforces them", 
 
 | Version | Released | Focus |
 |---|---|---|
+| v1.15.1 | Nov 26, 2026 | Screen reader support, faster loading, "Message not found" for invalid links, extension follows the system theme |
 | v1.15.0 | Nov 24, 2026 | Security hardening, server-enforced protections, team data, three-state theme, accessibility, code quality |
 | v1.14.0 | Mar 13, 2026 | Premium (Premium $5/mo, Lifetime $49, pricing page, dashboard) |
 | v1.13.0 | Mar 12, 2026 | Internationalization (EN/ES/FR/DE/ZH/HI, locale middleware) |
@@ -54,9 +64,9 @@ There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow th
 
 **v1.16.0** is picked from the open items below. In order of urgency:
 
-### To finish the v1.15.0 rollout
+### To finish the v1.15 rollout
 - [ ] Push `security-all`, open the pull request and let CI, SonarCloud and Snyk re-scan; ignore the remaining Snyk false positives in the Snyk app (Turnstile script without an integrity hash, which cannot be pinned)
-- [ ] Publish the browser extension 1.15.0: Firefox (the listing is live at 1.14.0) and Chrome (blocked until Google support resets the verified-upload public key; a new key pair and a signed CRX are ready)
+- [ ] Publish the browser extension 1.15.1: Firefox (the listing is live at 1.14.0) and Chrome (blocked until Google support resets the verified-upload public key; a new key pair and a signed CRX are ready)
 - [ ] Cloudflare dashboard settings found by `npm run check:live-csp`: Browser Cache TTL "Respect Existing Headers" (so `/sw.js` is not cached for 4 hours), Rocket Loader off, a decision on Web Analytics auto-injection (see [SETUP.md](SETUP.md))
 - [ ] Set the production secrets `APP_TOKEN_SECRET` and `TOTP_ENCRYPTION_KEY` and apply migrations `0013` and `0014` (done once; repeat for any new environment)
 - [ ] Decide on Cloudflare Turnstile for the anonymous token endpoint: build is ready, off by default; enable it when bot traffic appears (see [SETUP.md](SETUP.md))
@@ -152,4 +162,4 @@ Solo project for now, open to collaboration in Q2:
 
 ---
 
-**Last updated**: Nov 24, 2026 · **Current version**: v1.15.0 · **Next release**: v1.16.0
+**Last updated**: Nov 26, 2026 · **Current version**: v1.15.1 · **Next release**: v1.16.0

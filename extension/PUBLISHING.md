@@ -5,7 +5,7 @@
 ### Extension Overview
 
 **Name:** NoteBurner - Self-Destructing Messages  
-**Version:** 1.15.0  
+**Version:** 1.15.1  
 **Category:** Productivity / Privacy & Security  
 **Platforms:** Chrome Web Store, Firefox Add-ons
 

@@ -40,7 +40,7 @@ A temporary add-on is removed when Firefox closes. After code changes, rebuild a
 | `storage` | Remember your theme choice (System, Light or Dark). |
 | Host access: `noteburner.work`, `api.noteburner.work` | Talk to the NoteBurner API. No other site is contacted. |
 
-Data collection: none (`data_collection_permissions: required: none`). Privacy policy: [PRIVACY.md](./PRIVACY.md).
+Data collection: the manifest declares `personalCommunications` (the message) and `websiteContent` (text selected on a page) as required, because the extension sends them, encrypted, to create the message. Nothing else is collected. Privacy policy: [PRIVACY.md](./PRIVACY.md).
 
 ## Differences from the Chrome build
 

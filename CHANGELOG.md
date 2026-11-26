@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.15.1] - 2026-11-26
+
+### Added - Screen reader support, faster loading and safer links
+- **Screen reader support across the site:** a skip link and labelled landmarks; focus moves to the new page's heading and the page is announced after every navigation; one `<h1>` per page and a title for every page; errors and success messages are announced; unlabelled fields (including the authenticator code boxes) have names; modal dialogs keep focus inside them, close on Escape and return focus; `<html lang>` follows the chosen language; the header's icon links keep their names on phones.
+- **Links are checked against the database before a message is shown.** An unknown, expired or already-read message (by ID or custom slug) shows one "Message not found" page that does not say which; a failed check shows a retry page. A message whose views are used up is now reported as destroyed by the lookup, and the lookup is limited to 60 per minute per client so identifiers cannot be probed quickly.
+- **Browser extension 1.15.1:** the popup follows the system light or dark setting by default; its theme button cycles System, Light and Dark (an earlier "dark" choice is kept). The Firefox manifest now declares the data it sends (personal communications and website content) instead of "none".
+- The footer links to the Chrome Web Store and Firefox Add-ons with their logos, and the home page shows six feature cards (new: password protection and files) with a clock icon for auto-expiry.
+
+### Changed
+- **Faster loading:** every page except the landing page is its own download, and the five non-English languages load only when used. The main script went from 862 KB to about 340 KB. The unused PostCSS, autoprefixer, Tailwind JS config, `nanoid` and `prop-types` are gone.
+- The "new version available" prompt is a quiet banner shown once per session instead of a blocking pop-up; the other `confirm()` and `alert()` calls use a native `<dialog>`.
+- The site name in the header is no longer a heading, and "Login" and "Sign up" are translated.
+
+### Fixed
+- Removing a team member or changing a role ignored server errors and failed silently.
+- A browser with blocked site data no longer breaks the site (one safe storage wrapper replaces 17 direct uses of `localStorage`).
+- The upload timeout uses `AbortSignal.timeout`, and errors keep their cause.
+
+### Technical - Upgrading from 1.15.0
+- Publish browser extension 1.15.1 to Chrome and Firefox (1.15.0 is replaced). Nothing else needs doing: no new secrets or migrations.
+
+---
+
 ## [1.15.0] - 2026-11-24
 
 ### Added - Security hardening, quality and a three state theme
@@ -29,7 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tailwind's `dark:` variant follows the browser's colour scheme instead of a JavaScript-set `.dark` class; shared styles (`body`, `.card`, `.input-field`, the secondary button, the scrollbar) use `light-dark()`. The primary button keeps one accessible blue in both themes.
 - The API reports its version from `package.json`; `wrangler.toml` has a single production configuration (the unused `env.*` blocks that dropped bindings are gone) and sets `ENVIRONMENT=production`.
 - Group messages share the single-message limits; the hourly cleanup also removes expired group records and applies each team's data retention.
-- The browser extension popup follows the system light or dark setting by default; its theme button cycles System, Light and Dark (an earlier "dark" choice is kept).
 - The API documentation example matches the real create-message request; the extension popup scrollbars use the standard `scrollbar-color` and `scrollbar-width`.
 
 ### Fixed
@@ -44,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical - Upgrading from 1.14.0
 - Before deploying: set the secrets `APP_TOKEN_SECRET` (required) and `TOTP_ENCRYPTION_KEY`; apply migrations through `0014` (`0012` was never applied to production before); then deploy. Everyone is logged out once, and existing API keys must be regenerated.
 - Cloudflare dashboard (see `SETUP.md`): Browser Cache TTL "Respect Existing Headers", Rocket Loader off, and decide on Web Analytics auto-injection; `npm run check:live-csp` shows what the live site serves.
-- Browser extension 1.15.0 (Chrome and Firefox) must be republished: the old builds do not send the app token.
+- Browser extension (Chrome and Firefox) must be republished: the old builds do not send the app token. Use 1.15.1 or newer.
 - Tests: Playwright on five browsers (Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari), backend, frontend and extension unit tests, production-build CSP checks, an axe accessibility scan in both themes, and a Snyk and SonarCloud clean-up; CI runs all of them.
 
 ---
@@ -630,6 +652,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[1.15.1]: https://github.com/noteburner/noteburner/releases/tag/v1.15.1
 [1.15.0]: https://github.com/noteburner/noteburner/releases/tag/v1.15.0
 [1.14.0]: https://github.com/noteburner/noteburner/releases/tag/v1.14.0
 [1.13.0]: https://github.com/noteburner/noteburner/releases/tag/v1.13.0

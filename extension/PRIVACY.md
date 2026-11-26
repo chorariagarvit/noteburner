@@ -1,42 +1,44 @@
 # NoteBurner Extension - Privacy Policy
 
-**Last Updated:** January 17, 2026  
-**Version:** 1.0.0
+**Last Updated:** November 26, 2026  
+**Version:** 1.15.1
 
 ## Overview
 
-NoteBurner respects your privacy. This browser extension processes your data locally in your browser and only communicates with NoteBurner servers to create encrypted messages.
+NoteBurner respects your privacy. This browser extension encrypts your message in your browser, before it leaves your device, and only communicates with NoteBurner servers to create the encrypted message. Our servers only ever hold ciphertext, and we have no way to decrypt it. The website's [privacy policy](https://noteburner.work/privacy) covers the same practices.
 
 ## Information We Collect
 
 ### Data We DO NOT Collect
-The NoteBurner extension does NOT collect, store, or transmit:
-- ❌ Your personal information or identity
-- ❌ Browsing history or website visits
-- ❌ Passwords or encryption keys
-- ❌ Message content before encryption
-- ❌ Analytics or tracking data
+The NoteBurner extension does NOT collect:
+- ❌ Your browsing history, or the pages you visit
+- ❌ The password you protect a message with, or any encryption key
+- ❌ Your message in readable form: only ciphertext is sent
+- ❌ Your name, email address or other identity (the extension has no accounts)
+- ❌ Advertising, analytics or tracking data
 - ❌ Cookies or device identifiers
 
 ### Data Stored Locally (Your Device Only)
-- **Dark Mode Preference:** Saved in Chrome/Firefox sync storage for your convenience
-- **Default Settings:** Your preferred message expiration time (stored locally)
+- **Theme choice:** System, Light or Dark, saved in the browser's sync storage for your convenience
 
-This data never leaves your device and is controlled entirely by you.
+This setting is never sent to NoteBurner. Nothing else is stored.
 
 ### Data Sent to NoteBurner Servers
 
-When you explicitly create an encrypted message, we receive:
-- **Encrypted ciphertext** - Your message already encrypted with AES-256 in your browser
-- **Expiration timestamp** - When the message should auto-delete
-- **Random access token** - A unique ID for the message (not linked to you)
-- **Optional metadata** - Message size, creation time (for server management)
+When you create an encrypted message, the extension reads the text you selected on the page (only when you open it or use its right-click menu item) or the text you type in the popup, encrypts it on your device, and sends:
+- **Encrypted ciphertext** - your message, already encrypted with AES-256-GCM in your browser
+- **Expiration time** and the options you choose (for example a view limit)
+- **A proof derived from your password** (not the password itself), so the server can release the message only to someone who knows the password
+- **A random access token** - a unique ID for the message (not linked to you)
+
+Like any web request, each request also reaches our servers with your IP address. We use it only for rate limiting and abuse protection.
+
+The Firefox manifest declares what is sent as **personal communications** (the message) and **website content** (text you select on a page), because the extension's purpose requires sending them.
 
 **We NEVER receive:**
-- ✅ Your password - Stays in your browser forever
-- ✅ Decrypted message content - We only see encrypted data
+- ✅ Your password - it stays in your browser
+- ✅ Your message in readable form - we only see encrypted data
 - ✅ Your identity or personal information
-- ✅ Your IP address - Not logged or stored
 
 ## How We Use Your Data
 
@@ -50,7 +52,7 @@ When you explicitly create an encrypted message, we receive:
 ### Message Access
 - Messages are deleted immediately after first access
 - Expired messages are automatically purged
-- No backups are created - deletion is permanent
+- We keep no backups of message data of our own; our hosting provider may keep short-lived infrastructure recovery data that we cannot shorten
 
 ## Encryption & Security
 
@@ -133,7 +135,7 @@ NoteBurner does not knowingly collect information from anyone under 13 years of 
 
 - **Server Location:** United States (Cloudflare global network)
 - **Data Processed:** Only encrypted ciphertext (already protected)
-- **Compliance:** GDPR-friendly (no personal data collected)
+- **Compliance:** GDPR-friendly (data minimised: only ciphertext is stored, and there are no accounts)
 
 ## Your Rights
 
@@ -177,7 +179,7 @@ Currently not required (no personal data processing)
 
 ## Legal Compliance
 
-- **GDPR:** Compliant (no personal data collected)
+- **GDPR:** Data minimised: only ciphertext is stored, and there are no accounts
 - **CCPA:** Compliant (no sale of personal information)
 - **COPPA:** Compliant (no collection from children)
 

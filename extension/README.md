@@ -1,6 +1,6 @@
 # NoteBurner Browser Extension
 
-🔥 Send self-destructing, end-to-end encrypted messages from any webpage. Version v1.15.0 (Manifest V3) for Chrome, Edge, Brave and Firefox.
+🔥 Send self-destructing, end-to-end encrypted messages from any webpage. Version v1.15.1 (Manifest V3) for Chrome, Edge, Brave and Firefox.
 
 ## Features
 
@@ -13,7 +13,7 @@
 ## Install
 
 - **Firefox (142 or newer)**: [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/noteburner/)
-- **Chrome / Edge / Brave**: the Chrome Web Store listing is being updated to 1.15.0
+- **Chrome / Edge / Brave**: the Chrome Web Store listing is being updated to 1.15.1
 - **From source**: [README-chrome.md](./README-chrome.md) (Chromium browsers, load the folder unpacked) or [README-firefox.md](./README-firefox.md) (build first: Firefox needs its own manifest)
 
 ## Using it
@@ -49,7 +49,7 @@ npm run test:extension     # from the repository root: crypto parity with the we
 
 ## Changelog
 
-See the repository [CHANGELOG.md](../CHANGELOG.md). Extension changes in 1.15.0: the popup follows the system light or dark setting (System, Light, Dark button); standard `scrollbar-color` and `scrollbar-width` in the popup (with a dark variant); versions aligned with the web app; packages built from an allowlist (the Firefox package previously had no `manifest.json`); the unused `notifications` permission dropped. 1.14.0 removed the all-sites content script and added the signed app token.
+See the repository [CHANGELOG.md](../CHANGELOG.md). Extension changes in 1.15.1: the popup follows the system light or dark setting (System, Light, Dark button) and the Firefox manifest declares the data it sends. In 1.15.0: standard `scrollbar-color` and `scrollbar-width` in the popup (with a dark variant); versions aligned with the web app; packages built from an allowlist (the Firefox package previously had no `manifest.json`); the unused `notifications` permission dropped. 1.14.0 removed the all-sites content script and added the signed app token.
 
 ## License
 
