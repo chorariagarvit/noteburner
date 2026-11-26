@@ -48,7 +48,8 @@ export async function getMessageMeta(token) {
   const response = await fetch(`${API_URL}/api/messages/${token}/meta`);
 
   if (!response.ok) {
-    throw new Error(await readError(response, 'Failed to retrieve message'));
+    // The status tells the page apart "no such link" (404, 410) from "could not check" (network, 429, 5xx)
+    throw Object.assign(new Error(await readError(response, 'Failed to retrieve message')), { status: response.status });
   }
 
   return readJson(response);

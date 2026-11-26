@@ -177,7 +177,14 @@
     "decryptedTitle": "Nachricht Entschlüsselt",
     "decryptedDesc": "Diese Nachricht wurde dauerhaft gelöscht",
     "shareX": "Auf X teilen",
-    "shareReddit": "Auf Reddit teilen"
+    "shareReddit": "Auf Reddit teilen",
+    "checkingLink": "Link wird geprüft…",
+    "invalidTitle": "Nachricht nicht gefunden",
+    "invalidDesc": "Diese Nachricht existiert nicht oder wurde bereits gelesen oder zerstört. Prüfe den Link oder bitte den Absender um einen neuen. Eine Nachricht kann nur einmal gelesen werden.",
+    "invalidCta": "Eigene Nachricht erstellen",
+    "unavailableTitle": "Wir konnten diesen Link nicht prüfen",
+    "unavailableDesc": "Etwas ist schiefgelaufen oder es gab zu viele Versuche. Bitte warte einen Moment und versuche es erneut.",
+    "retry": "Erneut versuchen"
   },
   "auth": {
     "login": {

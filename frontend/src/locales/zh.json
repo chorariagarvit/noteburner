@@ -177,7 +177,14 @@
     "decryptedTitle": "消息已解密",
     "decryptedDesc": "此消息已被永久删除",
     "shareX": "分享到X",
-    "shareReddit": "分享到Reddit"
+    "shareReddit": "分享到Reddit",
+    "checkingLink": "正在检查链接…",
+    "invalidTitle": "未找到消息",
+    "invalidDesc": "此消息不存在，或已被阅读或销毁。请检查链接，或请发送者重新发送。每条消息只能阅读一次。",
+    "invalidCta": "创建您自己的消息",
+    "unavailableTitle": "无法检查此链接",
+    "unavailableDesc": "出了点问题，或尝试次数过多。请稍候再试。",
+    "retry": "重试"
   },
   "auth": {
     "login": {
