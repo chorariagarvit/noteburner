@@ -19,23 +19,34 @@ const errorMessage = document.getElementById('errorMessage');
 
 let currentShareUrl = '';
 
-// Dark mode toggle
-const darkModeToggle = document.getElementById('darkModeToggle');
-const darkModeIcon = document.querySelector('.dark-mode-icon');
+// Colour scheme: follows the system by default; the button cycles System, Light and Dark (see theme.js)
+const schemeToggle = document.getElementById('darkModeToggle');
+const schemeIcon = document.querySelector('.dark-mode-icon');
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+let colorScheme = 'system';
 
-// Initialize dark mode from storage
-chrome.storage.sync.get(['darkMode'], (result) => {
-  if (result.darkMode) {
-    document.body.classList.add('dark-mode');
-    darkModeIcon.textContent = '☀️';
-  }
+function applyColorScheme() {
+  document.body.classList.toggle('dark-mode', isDarkScheme(colorScheme, systemDark.matches));
+  schemeIcon.textContent = COLOR_SCHEME_ICONS[colorScheme];
+  const label = `Theme: ${COLOR_SCHEME_LABELS[colorScheme]}. Press to change.`;
+  schemeToggle.setAttribute('aria-label', label);
+  schemeToggle.title = label;
+}
+
+// Match the system straight away (no flash for the default), then apply the saved choice
+applyColorScheme();
+chrome.storage.sync.get(['colorScheme', 'darkMode'], (result) => {
+  colorScheme = readColorScheme(result);
+  applyColorScheme();
 });
 
-// Toggle dark mode
-darkModeToggle.addEventListener('click', () => {
-  const isDark = document.body.classList.toggle('dark-mode');
-  darkModeIcon.textContent = isDark ? '☀️' : '🌙';
-  chrome.storage.sync.set({ darkMode: isDark });
+// The system changed (for example at sunset) while the popup is open
+systemDark.addEventListener('change', applyColorScheme);
+
+schemeToggle.addEventListener('click', () => {
+  colorScheme = nextColorScheme(colorScheme);
+  applyColorScheme();
+  chrome.storage.sync.set({ colorScheme });
 });
 
 // Initialize

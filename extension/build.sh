@@ -23,7 +23,7 @@ GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC
 echo "🔨 Building NoteBurner Browser Extension..."
 
 # Everything that ships (besides the manifest). Add new runtime files here.
-FILES=(background.js popup.html popup.js popup.css crypto.js icons/icon16.png icons/icon48.png icons/icon128.png)
+FILES=(background.js popup.html popup.js popup.css crypto.js theme.js icons/icon16.png icons/icon48.png icons/icon128.png)
 
 for f in "${FILES[@]}" manifest.json manifest.firefox.json; do
   [[ -f "$f" ]] || { echo -e "${RED}Missing $f${NC}"; exit 1; }

@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tailwind's `dark:` variant follows the browser's colour scheme instead of a JavaScript-set `.dark` class; shared styles (`body`, `.card`, `.input-field`, the secondary button, the scrollbar) use `light-dark()`. The primary button keeps one accessible blue in both themes.
 - The API reports its version from `package.json`; `wrangler.toml` has a single production configuration (the unused `env.*` blocks that dropped bindings are gone) and sets `ENVIRONMENT=production`.
 - Group messages share the single-message limits; the hourly cleanup also removes expired group records and applies each team's data retention.
+- The browser extension popup follows the system light or dark setting by default; its theme button cycles System, Light and Dark (an earlier "dark" choice is kept).
 - The API documentation example matches the real create-message request; the extension popup scrollbars use the standard `scrollbar-color` and `scrollbar-width`.
 
 ### Fixed

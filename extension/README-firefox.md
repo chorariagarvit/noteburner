@@ -37,7 +37,7 @@ A temporary add-on is removed when Firefox closes. After code changes, rebuild a
 |---|---|
 | `activeTab` + `scripting` | Read the text you selected on the current tab, only at the moment you open the popup. There is **no content script**: the add-on does not run on pages you don't use it on. |
 | `contextMenus` | The right-click **Send via NoteBurner** item. |
-| `storage` | Remember dark mode. |
+| `storage` | Remember your theme choice (System, Light or Dark). |
 | Host access: `noteburner.work`, `api.noteburner.work` | Talk to the NoteBurner API. No other site is contacted. |
 
 Data collection: none (`data_collection_permissions: required: none`). Privacy policy: [PRIVACY.md](./PRIVACY.md).

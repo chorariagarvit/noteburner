@@ -6,7 +6,7 @@
 
 - **Right-click menu**: select text, right-click, **Send via NoteBurner**; the website opens with your text prefilled
 - **Quick popup**: click the toolbar icon, type or paste a message (selected text is prefilled), set a password, choose an expiry and get a one-time link
-- **Password generator**, light and dark mode
+- **Password generator**, and a popup that follows your system light or dark setting (or pin it with the theme button)
 - **Private by design**: encryption happens in your browser (AES-256-GCM); only ciphertext and a password-derived proof are sent; no tracking, analytics or data collection
 - **Only runs when you use it**: there is no content script and nothing is injected into pages
 
@@ -28,7 +28,7 @@
 |---|---|
 | `activeTab` + `scripting` | Read the text you selected on the current tab, only when you open the popup |
 | `contextMenus` | The right-click item |
-| `storage` | Remember dark mode |
+| `storage` | Remember your theme choice (System, Light or Dark) |
 | Hosts `noteburner.work`, `api.noteburner.work` | Talk to the NoteBurner API; no other site is contacted |
 
 Privacy policy: [PRIVACY.md](./PRIVACY.md).
@@ -49,7 +49,7 @@ npm run test:extension     # from the repository root: crypto parity with the we
 
 ## Changelog
 
-See the repository [CHANGELOG.md](../CHANGELOG.md). Extension changes in 1.15.0: standard `scrollbar-color` and `scrollbar-width` in the popup (with a dark variant); versions aligned with the web app; packages built from an allowlist (the Firefox package previously had no `manifest.json`); the unused `notifications` permission dropped. 1.14.0 removed the all-sites content script and added the signed app token.
+See the repository [CHANGELOG.md](../CHANGELOG.md). Extension changes in 1.15.0: the popup follows the system light or dark setting (System, Light, Dark button); standard `scrollbar-color` and `scrollbar-width` in the popup (with a dark variant); versions aligned with the web app; packages built from an allowlist (the Firefox package previously had no `manifest.json`); the unused `notifications` permission dropped. 1.14.0 removed the all-sites content script and added the signed app token.
 
 ## License
 

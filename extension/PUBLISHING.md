@@ -53,7 +53,7 @@ FEATURES:
 ✅ Password Protected - AES-256 encryption with custom passwords
 ✅ No Account Required - Start encrypting immediately
 ✅ Auto-Expiration - Set messages to expire (1h to 7 days)
-✅ Dark Mode - Easy on the eyes
+✅ Dark Mode - Follows your system light/dark setting, or pin it yourself
 ✅ Privacy First - Messages deleted permanently, no backups
 
 HOW IT WORKS:
@@ -101,7 +101,7 @@ https://noteburner.work
 **Required Permissions:**
 1. **activeTab** - Access current tab to get selected text for quick encryption
 2. **contextMenus** - Add "Send via NoteBurner" to right-click menu
-3. **storage** - Save user preferences (dark mode, default expiration)
+3. **storage** - Save the user's theme choice (System, Light or Dark)
 
 **Host Permissions:**
 1. **https://noteburner.work/*** - API communication for message creation
