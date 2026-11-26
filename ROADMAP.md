@@ -2,7 +2,7 @@
 
 **Mission**: Make NoteBurner the go-to platform for secure, self-destructing messages.
 
-**Current version**: v1.15.1 (Nov 26, 2026) · **Next**: v1.16.0, picked from section 2
+**Current version**: v1.16.0 (Nov 26, 2026) · **Next**: v1.17.0, picked from section 2
 
 > This file covers **status and what's next**. Details live elsewhere:
 > - [CHANGELOG.md](CHANGELOG.md): what shipped in each version
@@ -13,6 +13,15 @@
 ---
 
 ## 1. Where we are
+
+### v1.16.0: reliability and accessibility (Nov 26, 2026)
+
+Makes the site fail gracefully, recoverable and zoomable.
+
+- **Fails gracefully:** an error screen instead of a blank page, and safe reads (link checks) are retried; opening, creating and uploading are never retried.
+- **Recoverable:** nightly encrypted database export, a recovery guide, and rollback files and a script for migrations 0013 and 0014 (a test requires one for every new migration).
+- **Accessible on phones:** pinch-zoom works, the header fits at 390 px, the camera overlay is a real dialog.
+- The extension is unchanged (still 1.15.1, in store review); the release test now lets it trail the website.
 
 ### v1.15.1: screen reader support, faster loading and safer links (Nov 26, 2026)
 
@@ -39,6 +48,7 @@ The release that turns the app from "stores the settings" into "enforces them", 
 
 | Version | Released | Focus |
 |---|---|---|
+| v1.16.0 | Nov 26, 2026 | Error screen, safe-read retry, nightly encrypted backup and recovery guide, migration rollback, pinch-zoom and 390 px header |
 | v1.15.1 | Nov 26, 2026 | Screen reader support, faster loading, "Message not found" for invalid links, extension follows the system theme |
 | v1.15.0 | Nov 24, 2026 | Security hardening, server-enforced protections, team data, three-state theme, accessibility, code quality |
 | v1.14.0 | Mar 13, 2026 | Premium (Premium $5/mo, Lifetime $49, pricing page, dashboard) |
@@ -62,14 +72,10 @@ There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow th
 
 ## 2. What's next
 
-**v1.16.0 theme: accessibility and reliability.** Planned scope:
+**v1.17.0** is picked from the open items below. In order of urgency:
 
-| Track | Items |
-|---|---|
-| Accessibility | Remove `user-scalable=no` (responsive header at 390 px first); dialog role on the camera capture overlay; settings surface for the theme choice |
-| Reliability | App tolerates blocked browser storage; error boundaries; request retry in the web app; automated backups and a disaster recovery runbook; database migration rollback |
-| Quality | Snyk cleanup (random test passwords, rename `KEY` in `theme-init.js`); SonarCloud leftovers; loosen the 500 ms ping-latency test limit |
-| Housekeeping | Fix `extension/CHROME_WEB_STORE_SIGNING.md` for the rotated key; update extension README and this file when the stores approve 1.15.1 |
+### To finish the v1.16 rollout
+- [ ] Add the three GitHub Actions secrets for the nightly backup (`CLOUDFLARE_API_TOKEN` with D1 edit only, `CLOUDFLARE_ACCOUNT_ID`, `BACKUP_PASSPHRASE`), run the `Database backup` workflow once by hand and check the artifact; then practise a restore (see [docs/DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md))
 
 ### To finish the v1.15 rollout
 - [ ] Ignore the remaining Snyk false positive in the Snyk app (Turnstile script without an integrity hash, which cannot be pinned)
@@ -79,10 +85,8 @@ There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow th
 - [ ] Decide on Cloudflare Turnstile for the anonymous token endpoint: build is ready, off by default; enable it when bot traffic appears (see [SETUP.md](SETUP.md))
 
 ### Follow-ups from this release
-- [ ] Remove `user-scalable=no` from the viewport (it blocks pinch-zoom): make the header responsive at 390 px first, then drop it and re-run the mobile suites
 - [ ] Remaining SonarCloud items: `await` inside loops where order does not matter, optional chains, SVG names, the duplicated crypto code between the web app and the extension
 - [ ] A three-state theme choice in a settings surface instead of the header (the guidance recommends this for rarely used controls), and optional `light-dark()` tokens for more of the interface
-- [ ] Make the rest of the app tolerate blocked browser storage (the theme does; onboarding, language and gamification still need `localStorage`)
 
 ### Launch checklist (still open)
 - [ ] Set up custom domain
@@ -99,11 +103,8 @@ There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow th
 - [ ] Discord message creator (`/discord/create`): returns 501, same redesign needed
 
 ### Technical debt
-- [ ] Comprehensive error boundaries
-- [ ] Request retry logic in the web app (the large-file upload already retries)
-- [ ] Database migration rollback system
-- [ ] Automated backups
-- [ ] Disaster recovery runbook
+- [ ] Rollback files for migrations 0001-0012 (0013 onward have them)
+- [ ] Snyk: replace the hard-coded test passwords in the end-to-end tests with random ones, and ignore the Turnstile false positive in the Snyk app
 
 ### Ideas (unscheduled)
 - Native mobile apps (React Native?)
@@ -169,4 +170,4 @@ Solo project for now, open to collaboration in Q2:
 
 ---
 
-**Last updated**: Nov 26, 2026 · **Current version**: v1.15.1 · **Next release**: v1.16.0
+**Last updated**: Nov 26, 2026 · **Current version**: v1.16.0 · **Next release**: v1.17.0

@@ -1,12 +1,12 @@
 import React, { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import HomePage from './pages/HomePage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { AuthProvider } from './contexts/AuthContext';
-import { I18nProvider } from './contexts/I18nContext';
+import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { ThemeProvider } from './contexts/ThemeProvider';
-import { useI18n } from './contexts/I18nContext';
 import A11yRouteAnnouncer, { SkipLink } from './components/A11yRouteAnnouncer';
 
 // Every page except the landing page is its own chunk, so a visitor downloads only the code for the page
@@ -51,6 +51,12 @@ function PageFallback() {
 }
 
 
+// Resets when the visitor moves to another page, so one crashed page does not block the rest of the site
+function PageBoundary({ children }) {
+  const { pathname } = useLocation();
+  const { locale } = useI18n();
+  return <ErrorBoundary key={pathname} locale={locale}>{children}</ErrorBoundary>;
+}
 
 function App() {
   useEffect(() => {
@@ -67,6 +73,7 @@ function App() {
             <SkipLink />
             <Header />
             <main id="main-content" tabIndex={-1} className="flex-grow focus:outline-none">
+              <PageBoundary>
               <Suspense fallback={<PageFallback />}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
@@ -107,6 +114,7 @@ function App() {
                 <Route path="*" element={<HomePage />} />
               </Routes>
               </Suspense>
+              </PageBoundary>
             </main>
             <Footer />
             <A11yRouteAnnouncer />

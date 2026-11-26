@@ -3,14 +3,14 @@
 // Keep it tiny and dependency-free; the same rules live in src/utils/theme.js (a test checks they agree).
 (function () {
   try {
-    var KEY = 'color-scheme';
-    var saved = localStorage.getItem(KEY);
+    var schemeStorageName = 'color-scheme';
+    var saved = localStorage.getItem(schemeStorageName);
     if (saved === null) {
       // one-time migration from the old on/off switch: a stored "true" meant dark, "false" meant "no preference"
       var legacy = localStorage.getItem('darkMode');
       if (legacy !== null) {
         localStorage.removeItem('darkMode');
-        if (legacy === 'true') { saved = 'dark'; localStorage.setItem(KEY, saved); }
+        if (legacy === 'true') { saved = 'dark'; localStorage.setItem(schemeStorageName, saved); }
       }
     }
     var meta = document.querySelector('meta[name="color-scheme"]');

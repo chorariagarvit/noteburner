@@ -82,33 +82,6 @@ export const unlockOrientation = () => {
   }
 };
 
-// Prevent zoom on input focus (mobile)
-export const preventZoomOnFocus = () => {
-  const viewportMeta = document.querySelector('meta[name="viewport"]');
-  if (viewportMeta && isMobile()) {
-    const originalContent = viewportMeta.content;
-    
-    const disableZoom = () => {
-      viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-    };
-    
-    const enableZoom = () => {
-      viewportMeta.content = originalContent;
-    };
-    
-    // Disable zoom on input focus, enable after blur
-    document.addEventListener('focusin', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        disableZoom();
-      }
-    });
-    
-    document.addEventListener('focusout', () => {
-      setTimeout(enableZoom, 300);
-    });
-  }
-};
-
 // Get device pixel ratio (for high-DPI displays)
 export const getPixelRatio = () => {
   return window.devicePixelRatio || 1;
@@ -188,7 +161,6 @@ export default {
   getOrientation,
   lockOrientation,
   unlockOrientation,
-  preventZoomOnFocus,
   getPixelRatio,
   isStandalone,
   requestFullscreen,

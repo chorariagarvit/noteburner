@@ -1,4 +1,5 @@
 import { API_BASE } from './apiBase';
+import { fetchWithRetry } from './retry';
 const API_URL = API_BASE;
 
 // Parse a JSON error body safely: if the server returned HTML (e.g. SPA
@@ -45,7 +46,8 @@ export async function createMessage(encryptedData, iv, salt, expiresIn = null, c
 
 // Public metadata (salt, expiry, protections). Never returns ciphertext.
 export async function getMessageMeta(token) {
-  const response = await fetch(`${API_URL}/api/messages/${token}/meta`);
+  // A read that changes nothing, so a brief network or gateway failure is retried before the page gives up
+  const response = await fetchWithRetry(`${API_URL}/api/messages/${token}/meta`);
 
   if (!response.ok) {
     // The status tells the page apart "no such link" (404, 410) from "could not check" (network, 429, 5xx)
@@ -113,7 +115,7 @@ export async function createGroupMessage(encryptedData, iv, salt, expiresIn = nu
 }
 
 export async function checkSlugAvailability(slug) {
-  const response = await fetch(`${API_URL}/api/messages/check-slug/${encodeURIComponent(slug)}`);
+  const response = await fetchWithRetry(`${API_URL}/api/messages/check-slug/${encodeURIComponent(slug)}`);
 
   if (!response.ok) {
     throw new Error(await readError(response, 'Failed to check slug availability'));

@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Camera, X, Check, RotateCw } from 'lucide-react';
+import { useI18n } from '../../contexts/I18nContext';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 /** Shown when camera permission is denied. */
 const CameraError = ({ message, onClose }) => (
@@ -58,7 +60,10 @@ const CameraCapture = ({ onCapture, onClose, mode = 'photo' }) => {
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
-  
+  const dialogRef = useRef(null);
+  const { t } = useI18n();
+  useModalA11y(dialogRef, true, onClose);
+
   const [isRecording, setIsRecording] = useState(false);
   const [facingMode, setFacingMode] = useState('user'); // 'user' or 'environment'
   const [preview, setPreview] = useState(null);
@@ -175,7 +180,14 @@ const CameraCapture = ({ onCapture, onClose, mode = 'photo' }) => {
   }, [facingMode]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('camera.dialogLabel')}
+      tabIndex={-1}
+      className="fixed inset-0 z-50 bg-black focus:outline-none"
+    >
       {error && <CameraError message={error} onClose={onClose} />}
       {!error && preview && (
         <CapturePreview preview={preview} mode={mode} onRetake={retake} onConfirm={confirmCapture} />
@@ -198,7 +210,7 @@ const CameraCapture = ({ onCapture, onClose, mode = 'photo' }) => {
               className="w-12 h-12 bg-black/40 backdrop-blur rounded-full flex items-center justify-center"
               aria-label="Switch camera"
             >
-              <RotateCw className="w-5 h-5 text-white" />
+              <RotateCw className="w-5 h-5 text-white" aria-hidden="true" />
             </button>
             
             <button

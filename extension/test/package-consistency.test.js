@@ -10,10 +10,14 @@ const firefox = JSON.parse(read('manifest.firefox.json'));
 const rootPkg = JSON.parse(fs.readFileSync(path.join(EXT, '..', 'package.json'), 'utf8'));
 const sources = fs.readdirSync(EXT).filter((f) => f.endsWith('.js') && f !== 'generate-icons.js');
 
-test('both manifests are Manifest V3 and carry the app version', () => {
+// The extension is published only when it changes, so it may trail the website but must never be ahead of it
+const toNumbers = (v) => v.split('.').map(Number);
+const isAhead = (a, b) => { const [x, y] = [toNumbers(a), toNumbers(b)]; for (let i = 0; i < 3; i += 1) { if (x[i] !== y[i]) return x[i] > y[i]; } return false; };
+
+test('both manifests are Manifest V3, share one version, and are not ahead of the app', () => {
   assert.equal(chrome.manifest_version, 3);
   assert.equal(firefox.manifest_version, 3);
-  assert.equal(chrome.version, rootPkg.version);
+  assert.equal(isAhead(chrome.version, rootPkg.version), false, `extension ${chrome.version} is ahead of the app ${rootPkg.version}`);
   assert.equal(firefox.version, chrome.version);
 });
 

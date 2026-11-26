@@ -1,6 +1,6 @@
 # NoteBurner 🔥
 
-**Version**: v1.15.1 · see [CHANGELOG.md](./CHANGELOG.md) for what changed and [ROADMAP.md](./ROADMAP.md) for what is next
+**Version**: v1.16.0 · see [CHANGELOG.md](./CHANGELOG.md) for what changed and [ROADMAP.md](./ROADMAP.md) for what is next
 
 Send a secret that destroys itself after it is read. Messages are encrypted in your browser before they leave it, can be opened once, and are then permanently deleted. NoteBurner's servers only ever hold ciphertext.
 

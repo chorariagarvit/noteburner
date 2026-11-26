@@ -881,5 +881,14 @@
     "updateAvailable": "Eine neue Version von NoteBurner ist verfügbar.",
     "reload": "Neu laden",
     "later": "Später"
+  },
+  "errorBoundary": {
+    "title": "Auf dieser Seite ist etwas schiefgelaufen",
+    "body": "Die Seite konnte nicht angezeigt werden. Ihre Nachrichten sind nicht betroffen. Laden Sie die Seite neu oder gehen Sie zur Startseite.",
+    "reload": "Seite neu laden",
+    "home": "Startseite"
+  },
+  "camera": {
+    "dialogLabel": "Kamera"
   }
 }

@@ -881,5 +881,14 @@
     "updateAvailable": "NoteBurner 有新版本可用。",
     "reload": "重新加载",
     "later": "稍后"
+  },
+  "errorBoundary": {
+    "title": "此页面出现问题",
+    "body": "无法显示该页面。您的消息不受影响。请重新加载页面，或返回首页。",
+    "reload": "重新加载页面",
+    "home": "首页"
+  },
+  "camera": {
+    "dialogLabel": "相机"
   }
 }

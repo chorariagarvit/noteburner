@@ -43,7 +43,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
           </h5>
           <ul className="space-y-1">
             {features.map((feature) => (
-              <li key={feature} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+              <li key={feature} className="[overflow-wrap:anywhere] text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-primary-500 mt-1">•</span>
                 <span>{feature}</span>
               </li>
@@ -60,7 +60,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
           </h5>
           <ul className="space-y-1">
             {technical.map((item) => (
-              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+              <li key={item} className="[overflow-wrap:anywhere] text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-gray-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
@@ -77,7 +77,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
           </h5>
           <ul className="space-y-1">
             {security.map((item) => (
-              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+              <li key={item} className="[overflow-wrap:anywhere] text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-red-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
@@ -94,7 +94,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
           </h5>
           <ul className="space-y-1">
             {changed.map((item) => (
-              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+              <li key={item} className="[overflow-wrap:anywhere] text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-blue-400 mt-1">›</span>
                 <span>{item}</span>
               </li>
@@ -111,7 +111,7 @@ function VersionCard({ version, date, title, features, technical, security, chan
           </h5>
           <ul className="space-y-1">
             {fixed.map((item) => (
-              <li key={item} className="text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
+              <li key={item} className="[overflow-wrap:anywhere] text-xs text-gray-500 dark:text-gray-400 flex items-start gap-2">
                 <span className="text-green-400 mt-1">›</span>
                 <span>{item}</span>
               </li>

@@ -32,7 +32,7 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
-        aria-label={`${t('a11y.selectLanguage')}: ${t(`languages.${locale}`)}`}
+        aria-label={[t('a11y.selectLanguage'), t('languages.' + locale)].join(': ')}
         aria-expanded={open}
         aria-haspopup="listbox"
       >

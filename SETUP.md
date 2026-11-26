@@ -285,6 +285,7 @@ Verify R2 bucket is created and bound correctly in `wrangler.toml`.
 - [ ] Cloudflare dashboard settings checked (see above) and `npm run check:live-csp --workspace=frontend` passes
 - [ ] `ALLOW_COUNTRY_HEADER` is **not** set in production
 - [ ] Error monitoring set up (Sentry, etc.)
+- [ ] Backups: the three secrets for the nightly export are set and the first run succeeded (see [docs/DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md), which also covers recovery and rolling back a migration)
 
 ## Support
 

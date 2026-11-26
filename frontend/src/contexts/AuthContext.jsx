@@ -160,9 +160,10 @@ export function useAuth() {
 function saveSession(sessionToken, expiresAt, rememberMe) {
   // Persist the rememberMe preference explicitly so refreshSession can honour it
   localStore.set('rememberMe', rememberMe ? 'true' : 'false');
-  const storage = rememberMe ? localStorage : sessionStorage;
-  storage.setItem('sessionToken', sessionToken);
-  storage.setItem('expiresAt', expiresAt);
+  // Blocked or full storage must not break sign-in: the session then simply lasts until the page closes
+  const store = rememberMe ? localStore : sessionStore;
+  store.set('sessionToken', sessionToken);
+  store.set('expiresAt', expiresAt);
 }
 
 function getSessionToken() {

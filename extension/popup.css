@@ -392,11 +392,9 @@ body.dark-mode .error-message {
   --scrollbar-track: #f1f1f1;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-}
-
-:root {
   color-scheme: light;
 }
+
 
 :root:has(body.dark-mode) {
   color-scheme: dark;
@@ -429,5 +427,11 @@ body.dark-mode .error-message {
   .logo .icon,
   .loader {
     animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
   }
 }

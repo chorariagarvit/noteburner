@@ -11,8 +11,14 @@ const read = (f) => fs.readFileSync(path.join(root, f), 'utf8');
 const json = (f) => JSON.parse(read(f));
 const version = json('package.json').version;
 
-test('every package and both extension manifests carry the root version', () => {
-  for (const f of ['backend/package.json', 'frontend/package.json', 'extension/manifest.json', 'extension/manifest.firefox.json']) {
+// The extension is published separately and only when it changes, so its version may trail the web app's
+// (1.16.0 of the site shipped without a new extension). It must never be ahead, and both manifests must agree.
+const extensionVersion = json('extension/manifest.json').version;
+const parts = (v) => v.split('.').map(Number);
+const notAhead = (a, b) => { const [x, y] = [parts(a), parts(b)]; return x[0] < y[0] || (x[0] === y[0] && (x[1] < y[1] || (x[1] === y[1] && x[2] <= y[2]))); };
+
+test('every package carries the root version', () => {
+  for (const f of ['backend/package.json', 'frontend/package.json']) {
     assert.equal(json(f).version, version, f);
   }
   const lock = json('package-lock.json');
@@ -20,6 +26,11 @@ test('every package and both extension manifests carry the root version', () => 
   assert.equal(lock.packages[''].version, version, 'package-lock.json (root package)');
   assert.equal(lock.packages.backend.version, version, 'package-lock.json (backend)');
   assert.equal(lock.packages.frontend.version, version, 'package-lock.json (frontend)');
+});
+
+test('both extension manifests share one version, and it is not ahead of the web app', () => {
+  assert.equal(json('extension/manifest.firefox.json').version, extensionVersion, 'the two manifests must agree');
+  assert.ok(notAhead(extensionVersion, version), `extension ${extensionVersion} is ahead of the web app ${version}`);
 });
 
 test('the API reports the package version rather than a typed-in constant', () => {
@@ -46,7 +57,7 @@ test('README and ROADMAP name the current version', () => {
   assert.ok(read('ROADMAP.md').includes(`v${version}`), 'ROADMAP.md');
 });
 
-test('the extension docs name the version that is being published', () => {
-  assert.ok(read('extension/PUBLISHING.md').includes(version), 'extension/PUBLISHING.md');
-  assert.ok(read('extension/README.md').includes(`v${version}`), 'extension/README.md');
+test('the extension docs name the extension version that is being published', () => {
+  assert.ok(read('extension/PUBLISHING.md').includes(extensionVersion), 'extension/PUBLISHING.md');
+  assert.ok(read('extension/README.md').includes(`v${extensionVersion}`), 'extension/README.md');
 });

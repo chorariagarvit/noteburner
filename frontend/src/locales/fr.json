@@ -881,5 +881,14 @@
     "updateAvailable": "Une nouvelle version de NoteBurner est disponible.",
     "reload": "Recharger",
     "later": "Plus tard"
+  },
+  "errorBoundary": {
+    "title": "Un problème est survenu sur cette page",
+    "body": "La page n'a pas pu s'afficher. Vos messages ne sont pas touchés. Rechargez la page ou revenez à l'accueil.",
+    "reload": "Recharger la page",
+    "home": "Page d'accueil"
+  },
+  "camera": {
+    "dialogLabel": "Caméra"
   }
 }

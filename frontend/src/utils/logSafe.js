@@ -7,5 +7,5 @@
  */
 export function sanitizeForLog(value, maxLength = 200) {
   // eslint-disable-next-line no-control-regex
-  return String(value ?? '').replaceAll(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, ' ').slice(0, maxLength);
+  return (value == null ? '' : String(value)).replaceAll(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, ' ').slice(0, maxLength);
 }

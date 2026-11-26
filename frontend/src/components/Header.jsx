@@ -19,10 +19,13 @@ function Header() {
     navigate('/');
   };
   
+  const themeLabel = [t('a11y.theme'), t('a11y.theme_' + scheme)].join(': ');
+  const userMenuLabel = user?.displayName ? [t('a11y.userMenu'), user.displayName].join(': ') : t('a11y.userMenu');
+
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Flame className="w-8 h-8 text-red-600 dark:text-red-500" />
             <span className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -30,7 +33,7 @@ function Header() {
             </span>
           </Link>
           
-          <nav aria-label={t('a11y.mainNavigation')} className="flex items-center gap-4">
+          <nav aria-label={t('a11y.mainNavigation')} className="flex flex-wrap items-center gap-x-3 gap-y-2 w-full sm:w-auto sm:gap-4">
             <Link 
               to="/create" 
               className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors"
@@ -79,8 +82,8 @@ function Header() {
               type="button"
               onClick={cycleScheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              aria-label={`${t('a11y.theme')}: ${t(`a11y.theme_${scheme}`)}`}
-              title={`${t('a11y.theme')}: ${t(`a11y.theme_${scheme}`)}`}
+              aria-label={themeLabel}
+              title={themeLabel}
               data-scheme={scheme}
             >
               {scheme === 'dark' && <Moon className="w-5 h-5 text-gray-700 dark:text-gray-200" aria-hidden="true" />}
@@ -93,7 +96,7 @@ function Header() {
               <div className="relative">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  aria-label={`${t('a11y.userMenu')}${user?.displayName ? `: ${user.displayName}` : ''}`}
+                  aria-label={userMenuLabel}
                   aria-expanded={showUserMenu}
                   aria-haspopup="menu"
                   className="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"

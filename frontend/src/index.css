@@ -158,3 +158,13 @@
     border-radius: 4px;
   }
 }
+
+/* iOS zooms into any field whose text is smaller than 16px when it gets focus. Keeping fields at 16px on touch
+   screens stops that without locking pinch-zoom, which people with low vision rely on. */
+@media (pointer: coarse) {
+  input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']),
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}
