@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures.js';
+import { API, createMessage } from './api-helpers.js';
 
 test.beforeEach(async ({ page }) => {
   // Disable onboarding modal for E2E tests
@@ -221,17 +222,56 @@ test.describe('Message Viewing and Decryption', () => {
     await expect(page.locator('input[placeholder="Enter message password"]')).toBeVisible();
   });
 
-  test('should handle invalid message token', async ({ page }) => {
-    // Try to access non-existent message
+  test('a link to a message that does not exist shows a not found page, not the message preview', async ({ page }) => {
     await page.goto('http://localhost:5173/m/invalid-token-12345');
 
-    // Should show error or redirect
-    const errorShown = await Promise.race([
-      page.locator('text=/not found|invalid|expired|deleted/i').isVisible().then(() => true),
-      page.waitForTimeout(3000).then(() => false)
-    ]);
+    await expect(page.getByRole('heading', { level: 1, name: 'Message not found' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Create your own message' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Someone sent you a secret message' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Unlock Secret Message' })).toHaveCount(0);
+    await expect(page).toHaveTitle(/Message not found/);
+  });
 
-    expect(errorShown).toBeTruthy();
+  test('a shortened copy of a real link is not found, the full link is', async ({ page }) => {
+    const token = new URL(shareUrl).pathname.split('/').pop();
+    expect(token.length).toBeGreaterThan(20);
+
+    await page.goto(`http://localhost:5173/m/${token.slice(0, 12)}`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Message not found' })).toBeVisible();
+
+    await page.goto(`http://localhost:5173/m/${token}`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Someone sent you a secret message' })).toBeVisible();
+  });
+
+  test('a message that was already read is reported as not found', async ({ page, request }) => {
+    const m = await createMessage(request);
+    const read = await request.get(`${API}/messages/${m.token}`, { headers: { 'X-Auth-Tag': m.authTag } });
+    expect(read.status()).toBe(200);
+
+    await page.goto(`http://localhost:5173/m/${m.token}`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Message not found' })).toBeVisible();
+  });
+
+  test('a custom slug is checked the same way: found while it exists, not found otherwise', async ({ page, request }) => {
+    const slug = `slug-${Date.now().toString(36)}`;
+    await createMessage(request, { body: { customSlug: slug } });
+
+    await page.goto(`http://localhost:5173/m/${slug}`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Someone sent you a secret message' })).toBeVisible();
+
+    await page.goto(`http://localhost:5173/m/${slug}-nope`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Message not found' })).toBeVisible();
+  });
+
+  test('when the link cannot be checked, the page says so and can try again', async ({ page }) => {
+    await page.route('**/api/messages/*/meta', (route) => route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' }));
+    await page.goto(shareUrl);
+    await expect(page.getByRole('heading', { level: 1, name: "We couldn't check this link" })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Someone sent you a secret message' })).toHaveCount(0);
+
+    await page.unroute('**/api/messages/*/meta');
+    await page.getByRole('button', { name: 'Try again' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Someone sent you a secret message' })).toBeVisible();
   });
 
   test('should handle password case sensitivity', async ({ page }) => {
@@ -371,3 +411,36 @@ test.describe('Message Viewing and Decryption', () => {
   });
 });
 
+
+
+test.describe('Checking links on the server', () => {
+  test('an identifier that does not exist is a 404', async ({ request }) => {
+    const res = await request.get(`${API}/messages/${'x'.repeat(32)}/meta`);
+    expect(res.status()).toBe(404);
+  });
+
+  test('a message that was read is no longer found: the lookup says it is destroyed', async ({ request }) => {
+    const m = await createMessage(request);
+    expect((await request.get(`${API}/messages/${m.token}/meta`)).status()).toBe(200);
+    expect((await request.get(`${API}/messages/${m.token}`, { headers: { 'X-Auth-Tag': m.authTag } })).status()).toBe(200);
+    const after = await request.get(`${API}/messages/${m.token}/meta`);
+    expect(after.status()).toBe(410);
+    expect((await after.json()).code).toBe('ALREADY_VIEWED');
+  });
+
+  test('a message with views left is still found after a read', async ({ request }) => {
+    const m = await createMessage(request, { body: { maxViews: 3 } });
+    expect((await request.get(`${API}/messages/${m.token}`, { headers: { 'X-Auth-Tag': m.authTag } })).status()).toBe(200);
+    expect((await request.get(`${API}/messages/${m.token}/meta`)).status()).toBe(200);
+  });
+
+  test('looking links up is rate limited, so random identifiers cannot be probed quickly', async ({ request }) => {
+    let limited = 0;
+    for (let i = 0; i < 75; i += 1) {
+      const res = await request.get(`${API}/messages/probe-${i}-${Date.now()}/meta`);
+      if (res.status() === 429) limited += 1;
+      else expect(res.status()).toBe(404);
+    }
+    expect(limited).toBeGreaterThan(0);
+  });
+});

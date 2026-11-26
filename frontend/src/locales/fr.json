@@ -177,7 +177,14 @@
     "decryptedTitle": "Message Déchiffré",
     "decryptedDesc": "Ce message a été supprimé définitivement",
     "shareX": "Partager sur X",
-    "shareReddit": "Partager sur Reddit"
+    "shareReddit": "Partager sur Reddit",
+    "checkingLink": "Vérification du lien…",
+    "invalidTitle": "Message introuvable",
+    "invalidDesc": "Ce message n'existe pas, ou il a déjà été lu ou détruit. Vérifiez le lien ou demandez-en un nouveau à l'expéditeur. Un message ne peut être lu qu'une seule fois.",
+    "invalidCta": "Créez votre propre message",
+    "unavailableTitle": "Nous n'avons pas pu vérifier ce lien",
+    "unavailableDesc": "Une erreur s'est produite ou il y a eu trop de tentatives. Patientez un instant et réessayez.",
+    "retry": "Réessayer"
   },
   "auth": {
     "login": {

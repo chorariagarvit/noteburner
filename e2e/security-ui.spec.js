@@ -65,10 +65,10 @@ test.describe('One-time access in the UI', () => {
     await tryPassword(page, m.password);
     await expect(page.getByText(m.message)).toBeVisible({ timeout: 30000 });
 
-    // the message is gone for everyone now
+    // the message is gone for everyone now: its link says so, and offers nothing to unlock
     await page.goto(m.url);
-    await page.click('button:has-text("Unlock Secret Message")').catch(() => {});
-    await tryPassword(page, m.password).catch(() => {});
+    await expect(page.getByRole('heading', { level: 1, name: 'Message not found' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Unlock Secret Message' })).toHaveCount(0);
     await expect(page.getByText(m.message)).toHaveCount(0);
   });
 

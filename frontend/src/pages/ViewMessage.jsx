@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Flame, Lock, Eye, EyeOff, Download, AlertTriangle, X as XIcon, MessageSquare, Clock } from 'lucide-react';
 import { fireConfetti } from '../utils/confetti';
 import { deriveAuthTag, decryptMessage, decryptFile } from '../utils/crypto';
@@ -35,38 +35,44 @@ function ViewMessage() {
   const [totpVerified, setTotpVerified] = useState(false);
   const [totpProof, setTotpProof] = useState(null);
   const [meta, setMeta] = useState(null);
+  // Whether the link points at a message that exists: checking, ready, invalid (never existed, expired or already read) or unavailable (could not check)
+  const [linkStatus, setLinkStatus] = useState('checking');
+  const [checkAttempt, setCheckAttempt] = useState(0);
   // The server says whether THIS visitor's country may open the message (Cloudflare geolocation)
   const geoBlocked = !!(meta && meta.geoRestricted && !meta.geoAllowed);
   const [totpError, setTotpError] = useState('');
   const timeLeft = useCountdown(expiresAt);
   
-  // Set Open Graph tags - must be at component level, not in useEffect
-  setMessageOpenGraph();
+  // Set Open Graph tags - must be at component level, not in useEffect. Not for a link to nothing: that page
+  // keeps its own title.
+  if (linkStatus !== 'invalid') setMessageOpenGraph();
   
   useEffect(() => {
     document.title = 'NoteBurner - View Message';
     
-    // Fetch message metadata (including expiration and TOTP requirement) without decrypting
-    async function fetchMetadata() {
-      try {
-        const data = await getMessageMeta(messageIdentifier);
+    if (!messageIdentifier) return undefined;
+
+    // Ask the server whether the link points at a message before showing anything about it. This also brings
+    // the expiry and the protections (2FA, country) without decrypting.
+    let cancelled = false;
+    setLinkStatus('checking');
+    getMessageMeta(messageIdentifier)
+      .then((data) => {
+        if (cancelled) return;
         setMeta(data);
-        if (data.expiresAt) {
-          setExpiresAt(data.expiresAt);
-        }
-        if (data.totpRequired) {
-          setTotpRequired(true);
-        }
-      } catch (err) {
-        // Message not found or error - will be handled during decryption attempt
-        console.error('Failed to fetch message metadata:', err);
-      }
-    }
-    
-    if (messageIdentifier) {
-      void fetchMetadata();
-    }
-  }, [messageIdentifier]);
+        if (data.expiresAt) setExpiresAt(data.expiresAt);
+        if (data.totpRequired) setTotpRequired(true);
+        setLinkStatus('ready');
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        // 404: no such message or already read. 410: expired. The page says the same for all of them.
+        const gone = err.status === 404 || err.status === 410;
+        if (gone) document.title = `${t('view.invalidTitle')} - NoteBurner`;
+        setLinkStatus(gone ? 'invalid' : 'unavailable');
+      });
+    return () => { cancelled = true; };
+  }, [messageIdentifier, checkAttempt]);
 
   const handleExpire = () => {
     setError('This message has expired and is no longer available.');
@@ -242,6 +248,41 @@ function ViewMessage() {
       // File remains available for retry on error
     }
   };
+
+  if (!decrypted && linkStatus === 'checking') {
+    return (
+      <div role="status" data-page-loading="true" className="min-h-[calc(100vh-8rem)] flex items-center justify-center text-gray-600 dark:text-gray-300">
+        <span className="w-5 h-5 mr-3 border-2 border-current border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+        {t('view.checkingLink')}
+      </div>
+    );
+  }
+
+  if (!decrypted && (linkStatus === 'invalid' || linkStatus === 'unavailable')) {
+    const invalid = linkStatus === 'invalid';
+    return (
+      <div className="min-h-[calc(100vh-8rem)] bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-900 py-12">
+        <div className="max-w-xl mx-auto px-4">
+          <div className="card text-center animate-fade-in">
+            <div className="inline-flex rounded-full bg-amber-100 dark:bg-amber-900/30 p-6 mb-6">
+              <AlertTriangle className="w-12 h-12 text-amber-700 dark:text-amber-400" aria-hidden="true" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+              {invalid ? t('view.invalidTitle') : t('view.unavailableTitle')}
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+              {invalid ? t('view.invalidDesc') : t('view.unavailableDesc')}
+            </p>
+            {invalid ? (
+              <Link to="/create" className="btn-primary inline-block">{t('view.invalidCta')}</Link>
+            ) : (
+              <button type="button" onClick={() => setCheckAttempt((n) => n + 1)} className="btn-primary">{t('view.retry')}</button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (decrypted) {
     return (

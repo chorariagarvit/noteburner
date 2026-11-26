@@ -177,7 +177,14 @@
     "decryptedTitle": "Mensaje Descifrado",
     "decryptedDesc": "Este mensaje ha sido eliminado permanentemente",
     "shareX": "Compartir en X",
-    "shareReddit": "Compartir en Reddit"
+    "shareReddit": "Compartir en Reddit",
+    "checkingLink": "Comprobando el enlace…",
+    "invalidTitle": "Mensaje no encontrado",
+    "invalidDesc": "Este mensaje no existe, o ya fue leído o destruido. Revisa el enlace o pide al remitente uno nuevo. Un mensaje solo se puede leer una vez.",
+    "invalidCta": "Crea tu propio mensaje",
+    "unavailableTitle": "No pudimos comprobar este enlace",
+    "unavailableDesc": "Algo salió mal o hubo demasiados intentos. Espera un momento e inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
   },
   "auth": {
     "login": {

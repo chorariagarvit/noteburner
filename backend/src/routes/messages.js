@@ -332,7 +332,8 @@ app.post('/group', rateLimitMiddleware(5, 60), async (c) => {
 
 // Public metadata needed to start decryption (no ciphertext): salt for key derivation,
 // expiry, and which protections apply. Never reveals secrets or the auth hash.
-app.get('/:identifier/meta', async (c) => {
+// Rate limited per client: a link is looked up once per page view, and probing random identifiers must not be quick
+app.get('/:identifier/meta', rateLimitMiddleware(60, 60), async (c) => {
   try {
     const identifier = c.req.param('identifier');
     const result = await getMessageByIdentifier(c.env.DB, identifier, { includeSecrets: true });
@@ -342,6 +343,11 @@ app.get('/:identifier/meta', async (c) => {
     if (result.expires_at && Date.now() > result.expires_at) {
       await deleteExpiredMessage(c.env.DB, c.env.MEDIA_BUCKET, identifier, result);
       return c.json({ error: 'Message has expired' }, 410);
+    }
+    // A message whose views are used up is destroyed: the ciphertext is never released again (same rule as the
+    // claim below), so the link must stop looking alive even before the reader's browser deletes the row
+    if (result.max_views >= 0 && result.view_count >= (result.max_views || 1)) {
+      return c.json({ error: 'This message has already been viewed and is destroyed.', code: 'ALREADY_VIEWED' }, 410);
     }
     return c.json({
       salt: result.salt,

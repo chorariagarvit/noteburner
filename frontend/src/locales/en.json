@@ -177,7 +177,14 @@
     "decryptedTitle": "Message Decrypted",
     "decryptedDesc": "This message has been permanently deleted",
     "shareX": "Share on X",
-    "shareReddit": "Share on Reddit"
+    "shareReddit": "Share on Reddit",
+    "checkingLink": "Checking the link…",
+    "invalidTitle": "Message not found",
+    "invalidDesc": "This message doesn't exist, or it has already been read or destroyed. Check the link, or ask the sender for a new one. A message can only be read once.",
+    "invalidCta": "Create your own message",
+    "unavailableTitle": "We couldn't check this link",
+    "unavailableDesc": "Something went wrong, or there were too many attempts. Please wait a moment and try again.",
+    "retry": "Try again"
   },
   "auth": {
     "login": {
