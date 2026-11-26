@@ -62,11 +62,18 @@ There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow th
 
 ## 2. What's next
 
-**v1.16.0** is picked from the open items below. In order of urgency:
+**v1.16.0 theme: accessibility and reliability.** Planned scope:
+
+| Track | Items |
+|---|---|
+| Accessibility | Remove `user-scalable=no` (responsive header at 390 px first); dialog role on the camera capture overlay; settings surface for the theme choice |
+| Reliability | App tolerates blocked browser storage; error boundaries; request retry in the web app; automated backups and a disaster recovery runbook; database migration rollback |
+| Quality | Snyk cleanup (random test passwords, rename `KEY` in `theme-init.js`); SonarCloud leftovers; loosen the 500 ms ping-latency test limit |
+| Housekeeping | Fix `extension/CHROME_WEB_STORE_SIGNING.md` for the rotated key; update extension README and this file when the stores approve 1.15.1 |
 
 ### To finish the v1.15 rollout
-- [ ] Push `security-all`, open the pull request and let CI, SonarCloud and Snyk re-scan; ignore the remaining Snyk false positives in the Snyk app (Turnstile script without an integrity hash, which cannot be pinned)
-- [ ] Publish the browser extension 1.15.1: Firefox (the listing is live at 1.14.0) and Chrome (blocked until Google support resets the verified-upload public key; a new key pair and a signed CRX are ready)
+- [ ] Ignore the remaining Snyk false positive in the Snyk app (Turnstile script without an integrity hash, which cannot be pinned)
+- [ ] Extension 1.15.1 is submitted to Chrome and Firefox and waiting for review (the Chrome key rotation is complete; keys live outside the repo). When approved, update `extension/README.md`
 - [ ] Cloudflare dashboard settings found by `npm run check:live-csp`: Browser Cache TTL "Respect Existing Headers" (so `/sw.js` is not cached for 4 hours), Rocket Loader off, a decision on Web Analytics auto-injection (see [SETUP.md](SETUP.md))
 - [ ] Set the production secrets `APP_TOKEN_SECRET` and `TOTP_ENCRYPTION_KEY` and apply migrations `0013` and `0014` (done once; repeat for any new environment)
 - [ ] Decide on Cloudflare Turnstile for the anonymous token endpoint: build is ready, off by default; enable it when bot traffic appears (see [SETUP.md](SETUP.md))
