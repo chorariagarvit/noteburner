@@ -36,7 +36,7 @@ test.describe('Privacy policy', () => {
     await expect(page.getByText('rate limiting and abuse protection')).toBeVisible();
     await expect(page.getByText('create an account: your email address')).toBeVisible();
     await expect(page.getByText('5 minutes to 7 days').first()).toBeVisible();
-    await expect(page.getByText('Last Updated: November 24, 2026')).toBeVisible();
+    await expect(page.getByText('Last Updated: November 26, 2026')).toBeVisible();
   });
 
   test('makes no claims the app does not keep', async ({ page }) => {

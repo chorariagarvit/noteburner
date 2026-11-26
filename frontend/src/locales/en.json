@@ -799,7 +799,7 @@
   "privacy": {
     "title": "Privacy Policy",
     "subtitle": "We believe privacy is a fundamental right. That's why NoteBurner is built with a zero-knowledge architecture.",
-    "lastUpdated": "Last Updated: November 24, 2026",
+    "lastUpdated": "Last Updated: November 26, 2026",
     "overviewTitle": "Overview",
     "overviewText": "NoteBurner respects your privacy. Messages are encrypted in your browser before they leave your device, and our servers only ever hold ciphertext. We have no way to decrypt your messages. This policy covers the NoteBurner website and the NoteBurner browser extension.",
     "doNotCollectTitle": "We DO NOT Collect",
@@ -832,7 +832,7 @@
     "onlyReceive5": "Your IP address, used only for rate limiting and abuse protection, and the country it maps to when a message has a country restriction",
     "onlyReceive6": "If you choose to create an account: your email address and a salted hash of your account password (never the password itself)",
     "extensionTitle": "Browser Extension",
-    "extensionDesc": "The extension reads the text you have selected only when you open it or use its right-click menu item. It encrypts that text on your device and sends only the ciphertext to api.noteburner.work. It stores one setting, your dark mode preference, in your browser sync storage. It does not read your browsing history or any other page content.",
+    "extensionDesc": "The extension reads the text you have selected only when you open it or use its right-click menu item. It encrypts that text on your device and sends only the ciphertext to api.noteburner.work. It stores one setting, your theme choice (system, light or dark), in your browser sync storage. It does not read your browsing history or any other page content.",
     "retentionItem4": "Logs: audit logs and failed-login records are deleted after 30 days. Account data is kept until you delete your account."
   },
   "changelog": {
