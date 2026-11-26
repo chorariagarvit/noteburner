@@ -263,17 +263,6 @@ test.describe('Message Viewing and Decryption', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Message not found' })).toBeVisible();
   });
 
-  test('when the link cannot be checked, the page says so and can try again', async ({ page }) => {
-    await page.route('**/api/messages/*/meta', (route) => route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' }));
-    await page.goto(shareUrl);
-    await expect(page.getByRole('heading', { level: 1, name: "We couldn't check this link" })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Someone sent you a secret message' })).toHaveCount(0);
-
-    await page.unroute('**/api/messages/*/meta');
-    await page.getByRole('button', { name: 'Try again' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Someone sent you a secret message' })).toBeVisible();
-  });
-
   test('should handle password case sensitivity', async ({ page }) => {
     await page.goto(shareUrl);
     await page.click('button:has-text("Unlock Secret Message")');
@@ -442,5 +431,24 @@ test.describe('Checking links on the server', () => {
       else expect(res.status()).toBe(404);
     }
     expect(limited).toBeGreaterThan(0);
+  });
+});
+
+
+test.describe('A link that cannot be checked', () => {
+  // WebKit lets the site's own service worker answer fetches before page.route() sees them, so the simulated
+  // server error would never apply. Blocking the service worker for this group makes the interception reliable.
+  test.use({ serviceWorkers: 'block' });
+
+  test('the page says so and can try again', async ({ page, request }) => {
+    const m = await createMessage(request);
+    await page.route('**/api/messages/*/meta', (route) => route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"boom"}' }));
+    await page.goto(`http://localhost:5173/m/${m.token}`);
+    await expect(page.getByRole('heading', { level: 1, name: "We couldn't check this link" })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Someone sent you a secret message' })).toHaveCount(0);
+
+    await page.unroute('**/api/messages/*/meta');
+    await page.getByRole('button', { name: 'Try again' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Someone sent you a secret message' })).toBeVisible();
   });
 });
