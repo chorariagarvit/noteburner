@@ -7,7 +7,7 @@
 import { test, expect } from './fixtures.js';
 import { API, PASSWORD, newUser, newApiKey, bareContext, d1, sha256, uniq } from './api-helpers.js';
 
-import { randomPassword } from './secrets.js';
+import { randomPassword, wrongPassword, weakPassword } from './secrets.js';
 
 // Generated each run (see secrets.js): no password literals in the repository
 const TEST_PASSWORD_1 = randomPassword();
@@ -62,7 +62,7 @@ test.describe('Signup does not reveal registered emails', () => {
     const email = `val-${uniq()}@example.com`;
     await signup(request, { email, password: PASSWORD });
     for (const target of [email, `fresh-${uniq()}@example.com`]) {
-      const weak = await signup(request, { email: target, password: 'short' });
+      const weak = await signup(request, { email: target, password: weakPassword() });
       expect(weak.status()).toBe(400);
       expect((await weak.json()).code).toBe('WEAK_PASSWORD');
     }
@@ -94,7 +94,7 @@ test.describe('Password reset', () => {
     const token = newToken(); seedReset(user.userId, token);
     const sibling = newToken(); seedReset(user.userId, sibling);   // an older, still-unused link
 
-    const weak = await request.post(`${API}/auth/reset-password`, { data: { token, newPassword: 'short' } });
+    const weak = await request.post(`${API}/auth/reset-password`, { data: { token, newPassword: weakPassword() } });
     expect(weak.status()).toBe(400);
     expect((await weak.json()).code).toBe('WEAK_PASSWORD');         // ...and the link is NOT consumed by a bad password
 
@@ -211,7 +211,7 @@ test.describe('Account deletion', () => {
 
     expect((await request.delete(`${API}/auth/account`, { data: { password: PASSWORD } })).status()).toBe(401);   // no session
     expect((await del({})).status()).toBe(400);                                                                     // no password
-    expect((await del({ password: 'wrong-password-1' })).status()).toBe(403);                                      // wrong password
+    expect((await del({ password: wrongPassword() })).status()).toBe(403);                                      // wrong password
     expect((await request.get(`${API}/auth/me`, { headers: user.headers })).status()).toBe(200);                   // nothing happened yet
     expect((await bare.get(`${API}/v1/stats`, { headers: key.headers })).status()).toBe(200);
 

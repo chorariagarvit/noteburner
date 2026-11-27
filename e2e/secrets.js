@@ -30,3 +30,12 @@ export function devServerVar(name) {
   if (!match) throw new Error(`backend/package.json "dev" script does not set ${name}`);
   return match[1];
 }
+
+/** A new random 16-byte value, base64 encoded, for the `iv` and `salt` fields the API requires. */
+export function randomIv() {
+  return crypto.randomBytes(16).toString('base64');
+}
+
+/** A password that is wrong on purpose (never equal to a real test password) and a deliberately too-short one. */
+export const wrongPassword = () => randomPassword('Wrong');
+export const weakPassword = () => randomPassword('Wk').slice(0, 4);

@@ -7,7 +7,9 @@
 import { test, expect } from './fixtures.js';
 import { generateTOTP } from '../backend/src/utils/totp.js';
 
-import { randomPassword } from './secrets.js';
+import { randomPassword, wrongPassword } from './secrets.js';
+
+const GEO_PASSWORD = randomPassword('Geo');
 
 // Generated each run (see secrets.js): no password literals in the repository
 const TEST_PASSWORD_1 = randomPassword();
@@ -63,9 +65,9 @@ test.describe('One-time access in the UI', () => {
     const m = await createViaUi(page, { attempts: 3 });
     await openUnlock(page, m.url);
 
-    await tryPassword(page, 'definitely-wrong-1');
+    await tryPassword(page, wrongPassword());
     await expect(page.getByText('Incorrect password. 2 attempt(s) remaining.')).toBeVisible({ timeout: 30000 });
-    await tryPassword(page, 'definitely-wrong-2');
+    await tryPassword(page, wrongPassword());
     await expect(page.getByText('Incorrect password. 1 attempt(s) remaining.')).toBeVisible({ timeout: 30000 });
 
     await tryPassword(page, m.password);
@@ -81,7 +83,7 @@ test.describe('One-time access in the UI', () => {
   test('exhausting the attempts destroys the message', async ({ page }) => {
     const m = await createViaUi(page, { attempts: 1 });
     await openUnlock(page, m.url);
-    await tryPassword(page, 'wrong-password-1');
+    await tryPassword(page, wrongPassword());
     await expect(page.getByText(/destroyed|no longer available|not found|already/i).first()).toBeVisible({ timeout: 30000 });
     // even the correct password cannot recover it
     const status = await page.request.get(`${API}/messages/${m.url.split('/m/')[1]}/meta`);
@@ -92,7 +94,7 @@ test.describe('One-time access in the UI', () => {
     const m = await createViaUi(page, { attempts: -1 });
     await openUnlock(page, m.url);
     for (let i = 0; i < 5; i++) {
-      await tryPassword(page, `wrong-guess-${i}`);
+      await tryPassword(page, wrongPassword());
       await expect(page.getByText('Incorrect password.', { exact: false }).first()).toBeVisible({ timeout: 30000 });
     }
     await tryPassword(page, m.password);
@@ -309,7 +311,7 @@ test.describe('Country restriction in the UI', () => {
     await asCountry(page, 'DE');
     await openCreate(page);
     await page.fill('#message', 'Only for people in Germany');
-    await page.fill('#password', 'GeoTest-Passw0rd!');
+    await page.fill('#password', GEO_PASSWORD);
     await page.getByLabel('Restrict to same country').check();
     await page.click('button[type="submit"]');
     await expect(page.getByRole('heading', { name: 'Message Created Successfully' })).toBeVisible({ timeout: 30000 });
@@ -328,7 +330,7 @@ test.describe('Country restriction in the UI', () => {
     await expect(de.page.locator('button:has-text("Unlock Secret Message")')).toBeEnabled({ timeout: 20000 });
     await expect(de.page.getByRole('alert')).toHaveCount(0);
     await de.page.click('button:has-text("Unlock Secret Message")');
-    await tryPassword(de.page, 'GeoTest-Passw0rd!');
+    await tryPassword(de.page, GEO_PASSWORD);
     await expect(de.page.getByText('Only for people in Germany')).toBeVisible({ timeout: 30000 });
     await de.context.close();
   });
@@ -337,7 +339,7 @@ test.describe('Country restriction in the UI', () => {
     await asCountry(page, 'XX');
     await openCreate(page);
     await page.fill('#message', 'x');
-    await page.fill('#password', 'GeoTest-Passw0rd!');
+    await page.fill('#password', GEO_PASSWORD);
     await page.getByLabel('Restrict to same country').check();
     await page.click('button[type="submit"]');
     await expect(page.getByText(/country could not be determined/i).first()).toBeVisible({ timeout: 30000 });

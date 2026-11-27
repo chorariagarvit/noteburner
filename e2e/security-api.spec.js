@@ -10,7 +10,7 @@ import crypto from 'node:crypto';
 import { encryptMessage, deriveAuthTag, decryptMessage } from '../frontend/src/utils/crypto.js';
 import { generateTOTP } from '../backend/src/utils/totp.js';
 
-import { randomPassword, devServerVar } from './secrets.js';
+import { randomPassword, devServerVar, randomIv, wrongPassword, weakPassword } from './secrets.js';
 
 // Generated each run (see secrets.js): no password literals in the repository
 const TEST_PASSWORD_1 = randomPassword();
@@ -18,7 +18,7 @@ const TEST_PASSWORD_2 = randomPassword();
 const TEST_PASSWORD_3 = randomPassword();
 
 const API = 'http://localhost:8787/api';
-const IV = 'AAAAAAAAAAAAAAAAAAAAAA==';
+const IV = randomIv();
 const STRIPE_SECRET = devServerVar('STRIPE_WEBHOOK_SECRET'); // matches backend `npm run dev`
 const PASSWORD = TEST_PASSWORD_1;
 
@@ -30,8 +30,7 @@ test.beforeEach(async ({}, testInfo) => {
 // ---------------------------------------------------------------- helpers
 // A fresh random address every call (never collides with the per-test IPs from fixtures.js)
 const otherIp = () => {
-  const b = crypto.randomBytes(3);
-  return `172.${16 + (b[0] % 16)}.${b[1]}.${(b[2] % 253) + 1}`;
+  return `172.${crypto.randomInt(16, 32)}.${crypto.randomInt(0, 256)}.${crypto.randomInt(1, 254)}`;
 };
 const uniq = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -399,11 +398,11 @@ test.describe('Accounts and sessions', () => {
   test('login does not reveal which accounts exist or are locked', async ({ request }) => {
     const user = await newUser(request);
     const attempt = (email, password) => request.post(`${API}/auth/login`, { data: { email, password } });
-    const unknown = await attempt(`nobody-${uniq()}@example.com`, 'whatever-123');
+    const unknown = await attempt(`nobody-${uniq()}@example.com`, wrongPassword());
     const unknownBody = await unknown.json();
     expect(unknown.status()).toBe(401);
 
-    for (let i = 0; i < 5; i++) expect((await attempt(user.email, `wrong-${i}`)).status()).toBe(401);
+    for (let i = 0; i < 5; i++) expect((await attempt(user.email, wrongPassword())).status()).toBe(401);
     const locked = await attempt(user.email, PASSWORD); // correct password, but account is locked
     expect(locked.status()).toBe(401);
     expect(await locked.json()).toEqual(unknownBody); // identical response: no 423 / "locked" signal
@@ -431,7 +430,7 @@ test.describe('Accounts and sessions', () => {
       const r = await request.post(`${API}/auth/login`, { data: { email: evil, password: 'x'.repeat(10) } });
       expect(r.status(), evil).toBeLessThan(500);
     }
-    const weak = await request.post(`${API}/auth/signup`, { data: { email: `weak-${uniq()}@example.com`, password: 'short' } });
+    const weak = await request.post(`${API}/auth/signup`, { data: { email: `weak-${uniq()}@example.com`, password: weakPassword() } });
     expect(weak.status()).toBe(400);
     // a duplicate signup is indistinguishable from a first one (no "already registered" oracle)
     const dupe = await request.post(`${API}/auth/signup`, { data: { email, password: PASSWORD } });

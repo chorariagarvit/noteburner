@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import { hashCreatorToken, isHashedCreatorToken, matchesCreatorToken, upgradeCreatorToken, migrateLegacyCreatorTokens } from '../src/utils/creatorToken.js';
 import { sealSecret, openSecret, isSealed, migrateLegacyTotpSecrets } from '../src/utils/secretBox.js';
 
@@ -88,14 +89,17 @@ test('TOTP secrets: legacy plaintext still opens, and with no key nothing is enc
   assert.equal(await sealSecret(env, null, 'x'), null);
 });
 
+// A legacy (unencrypted) TOTP secret, random per run
+const LEGACY_TOTP = crypto.randomBytes(8).toString('hex').toUpperCase();
+
 test('TOTP secrets: the batch job encrypts legacy rows only when a key exists', async () => {
-  const mk = () => fakeDb([{ token: 'a', totp_secret: 'LEGACYPLAIN1' }, { token: 'b', totp_secret: null }, { token: 'c', totp_secret: 'v1:x:y' }]);
+  const mk = () => fakeDb([{ token: 'a', totp_secret: LEGACY_TOTP }, { token: 'b', totp_secret: null }, { token: 'c', totp_secret: 'v1:x:y' }]);
   const noKey = mk();
   assert.equal(await migrateLegacyTotpSecrets({ DB: noKey }), 0);
-  assert.equal(noKey.rows[0].totp_secret, 'LEGACYPLAIN1');
+  assert.equal(noKey.rows[0].totp_secret, LEGACY_TOTP);
   const withKey = mk();
   assert.equal(await migrateLegacyTotpSecrets({ ...env, DB: withKey }), 1);
   assert.ok(isSealed(withKey.rows[0].totp_secret));
-  assert.equal(await openSecret(env, withKey.rows[0].totp_secret, 'a'), 'LEGACYPLAIN1');
+  assert.equal(await openSecret(env, withKey.rows[0].totp_secret, 'a'), LEGACY_TOTP);
   assert.equal(withKey.rows[2].totp_secret, 'v1:x:y');
 });

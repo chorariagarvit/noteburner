@@ -5,6 +5,7 @@
 
 import { test, expect } from './fixtures.js';
 
+import { randomIv } from './secrets.js';
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8787';
 
 test.describe('Scaling & Performance', () => {
@@ -360,8 +361,8 @@ test.describe('Scaling & Performance', () => {
       // Create a test message
       const messageData = {
         encryptedData: 'test-encrypted-data',
-        iv: 'AAAAAAAAAAAAAAAAAAAAAA==',   // must be 16 bytes (24 base64 chars)
-        salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
+        iv: randomIv(),   // must be 16 bytes (24 base64 chars)
+        salt: randomIv(),
         expiresIn: 3600
       };
       

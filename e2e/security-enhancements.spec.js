@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures.js';
 
-import { randomPassword } from './secrets.js';
+import { randomPassword, wrongPassword } from './secrets.js';
 
 // Generated each run (see secrets.js): no password literals in the repository
 const TEST_PASSWORD_1 = randomPassword();
@@ -370,7 +370,7 @@ test.describe('Security Enhancements', () => {
         // Attempt 3 times with wrong password
         for (let i = 0; i < 3; i++) {
           await request.post(`/api/messages/${messageId}/decrypt`, {
-            data: { password: 'wrong_password' }
+            data: { password: wrongPassword() }
           });
         }
 
@@ -440,7 +440,7 @@ test.describe('Security Enhancements', () => {
         for (let i = 0; i < 5; i++) {
           promises.push(
             request.post(`/api/messages/${messageId}/decrypt`, {
-              data: { password: 'wrong_password' }
+              data: { password: wrongPassword() }
             })
           );
         }

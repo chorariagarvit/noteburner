@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures.js';
 
-import { randomPassword } from './secrets.js';
+import { randomPassword, randomToken } from './secrets.js';
 
 // Generated each run (see secrets.js): no password literals in the repository
 const TEST_PASSWORD_1 = randomPassword();
@@ -315,7 +315,7 @@ test.describe('Platform Integrations', () => {
       // Create message via Zapier
       const createResponse = await request.post('/api/integrations/zapier/create', {
         data: {
-          api_key: 'test_key',
+          api_key: randomToken('key'),
           message: 'Test tracking'
         }
       });

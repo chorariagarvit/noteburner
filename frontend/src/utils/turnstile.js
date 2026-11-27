@@ -12,6 +12,7 @@ function loadScript() {
   if (globalThis.turnstile) return Promise.resolve();
   if (!scriptPromise) {
     scriptPromise = new Promise((resolve, reject) => {
+      // No integrity hash: Cloudflare changes api.js without notice, so a pinned hash would break the check. The CSP limits the origin.
       const el = document.createElement('script');
       el.src = SCRIPT_URL;
       el.async = true;

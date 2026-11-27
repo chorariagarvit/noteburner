@@ -2,7 +2,7 @@ import { test, expect } from './fixtures.js';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 
-import { randomPassword } from './secrets.js';
+import { randomPassword, randomIv } from './secrets.js';
 
 // Generated each run (see secrets.js): no password literals in the repository
 const TEST_PASSWORD_1 = randomPassword();
@@ -116,8 +116,8 @@ test.describe('Enterprise Features', () => {
           headers: { 'X-API-Key': apiKey },
           data: { 
             encryptedData: 'mock_encrypted_test_message',
-            iv: 'AAAAAAAAAAAAAAAAAAAAAA==',   // 16 bytes, as the API requires
-            salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
+            iv: randomIv(),   // 16 bytes, as the API requires
+            salt: randomIv(),
             maxViews: 5 
           }
         });
@@ -670,8 +670,8 @@ test.describe('Enterprise Features', () => {
         headers: { 'X-API-Key': keyData.key },
         data: { 
           encryptedData: 'integration_test',
-          iv: 'AAAAAAAAAAAAAAAAAAAAAA==',
-          salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
+          iv: randomIv(),
+          salt: randomIv(),
           maxViews: 1 
         }
       });
@@ -736,8 +736,8 @@ test.describe('Enterprise Features', () => {
           headers: { 'X-API-Key': keyData.key },
           data: { 
             encryptedData: `usage_test_${i}`,
-            iv: 'AAAAAAAAAAAAAAAAAAAAAA==',
-            salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
+            iv: randomIv(),
+            salt: randomIv(),
             maxViews: 1 
           }
         });

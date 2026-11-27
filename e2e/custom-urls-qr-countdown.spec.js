@@ -348,10 +348,10 @@ test.describe('Open Graph Meta Tags', () => {
     // fields with the same ids, so filling too early types into the wrong form)
     await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
-    const secretMessage = 'This should never appear in meta tags';
+    const hiddenMessage = 'This should never appear in meta tags';
 
     // Create message
-    await page.fill('#message', secretMessage);
+    await page.fill('#message', hiddenMessage);
     await page.fill('#password', 'SecurePassword123');
     await page.click('button[type="submit"]');
     await page.waitForSelector('text=Message Created Successfully!', { timeout: 20000 });
@@ -365,7 +365,7 @@ test.describe('Open Graph Meta Tags', () => {
     for (const meta of allMeta) {
       const content = await meta.getAttribute('content');
       if (content) {
-        expect(content).not.toContain(secretMessage);
+        expect(content).not.toContain(hiddenMessage);
       }
     }
 
