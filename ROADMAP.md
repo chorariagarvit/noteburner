@@ -19,7 +19,7 @@
 Makes the site fail gracefully, recoverable and zoomable.
 
 - **Fails gracefully:** an error screen instead of a blank page, and safe reads (link checks) are retried; opening, creating and uploading are never retried.
-- **Recoverable:** nightly encrypted database export, a recovery guide, and rollback files and a script for migrations 0013 and 0014 (a test requires one for every new migration).
+- **Recoverable:** a recovery guide (Cloudflare Time Travel is on) and rollback files and a script for migrations 0013 and 0014 (a test requires one for every new migration).
 - **Accessible on phones:** pinch-zoom works, the header fits at 390 px, the camera overlay is a real dialog.
 - The extension is unchanged (still 1.15.1, in store review); the release test now lets it trail the website.
 
@@ -48,7 +48,7 @@ The release that turns the app from "stores the settings" into "enforces them", 
 
 | Version | Released | Focus |
 |---|---|---|
-| v1.16.0 | Nov 26, 2026 | Error screen, safe-read retry, nightly encrypted backup and recovery guide, migration rollback, pinch-zoom and 390 px header |
+| v1.16.0 | Nov 26, 2026 | Error screen, safe-read retry, recovery guide, migration rollback, pinch-zoom and 390 px header |
 | v1.15.1 | Nov 26, 2026 | Screen reader support, faster loading, "Message not found" for invalid links, extension follows the system theme |
 | v1.15.0 | Nov 24, 2026 | Security hardening, server-enforced protections, team data, three-state theme, accessibility, code quality |
 | v1.14.0 | Mar 13, 2026 | Premium (Premium $5/mo, Lifetime $49, pricing page, dashboard) |
@@ -74,9 +74,6 @@ There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow th
 
 **v1.17.0** is picked from the open items below. In order of urgency:
 
-### To finish the v1.16 rollout
-- [ ] Add the three GitHub Actions secrets for the nightly backup (`CLOUDFLARE_API_TOKEN` with D1 edit only, `CLOUDFLARE_ACCOUNT_ID`, `BACKUP_PASSPHRASE`), run the `Database backup` workflow once by hand and check the artifact; then practise a restore (see [docs/DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md))
-
 ### To finish the v1.15 rollout
 - [ ] Ignore the remaining Snyk false positive in the Snyk app (Turnstile script without an integrity hash, which cannot be pinned)
 - [ ] Extension 1.15.1 is submitted to Chrome and Firefox and waiting for review (the Chrome key rotation is complete; keys live outside the repo). When approved, update `extension/README.md`
@@ -85,6 +82,7 @@ There is no v1.11; the release after v1.10 is v1.12.0. Version numbers follow th
 - [ ] Decide on Cloudflare Turnstile for the anonymous token endpoint: build is ready, off by default; enable it when bot traffic appears (see [SETUP.md](SETUP.md))
 
 ### Follow-ups from this release
+- [ ] Optional off-account database backup (scheduled export, encrypted; either a GitHub Action or a Cloudflare scheduled Worker writing to R2). Shelved: Time Travel covers 30 days (see [docs/DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md))
 - [ ] Remaining SonarCloud items: `await` inside loops where order does not matter, optional chains, SVG names, the duplicated crypto code between the web app and the extension
 - [ ] A three-state theme choice in a settings surface instead of the header (the guidance recommends this for rarely used controls), and optional `light-dark()` tokens for more of the interface
 

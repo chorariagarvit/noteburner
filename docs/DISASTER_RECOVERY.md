@@ -6,7 +6,7 @@ What is stored where, how it is backed up, and the exact steps to recover. Writt
 
 | Store | Holds | Lost means | Protection |
 |---|---|---|---|
-| **D1** `noteburner-db` | Messages (ciphertext only), accounts, teams, audit log, stats | Accounts and unread messages are gone | Cloudflare **Time Travel** (restore to any minute in the last 30 days) + nightly encrypted export (below) |
+| **D1** `noteburner-db` | Messages (ciphertext only), accounts, teams, audit log, stats | Accounts and unread messages are gone | Cloudflare **Time Travel** (restore to any minute in the last 30 days; always on) |
 | **R2** `noteburner-media` | Encrypted attachments, deleted after download or expiry | Unread attachments are gone | None needed beyond expiry: the data is short-lived by design |
 | **KV** `CACHE` | Cached counters | Nothing important | Rebuilds itself |
 | **Durable Object** `RATE_LIMITER` | Rate-limit counters | Counters reset | Rebuilds itself |
@@ -14,25 +14,11 @@ What is stored where, how it is backed up, and the exact steps to recover. Writt
 
 Messages are encrypted in the browser, so a database backup never contains readable message text.
 
-## Nightly export (GitHub Action)
+## Extra backup (shelved)
 
-`.github/workflows/d1-backup.yml` runs at 02:17 UTC, exports the production database, **encrypts it with AES-256**, and keeps it as a workflow artifact for 30 days.
-The repository is public, so the export is never uploaded unencrypted.
-
-One-time setup, in GitHub → Settings → Secrets and variables → Actions:
-
-1. `CLOUDFLARE_API_TOKEN`: a token with **D1 Edit** permission only (Cloudflare → My Profile → API Tokens)
-2. `CLOUDFLARE_ACCOUNT_ID`: shown on the Cloudflare dashboard overview
-3. `BACKUP_PASSPHRASE`: a long random passphrase. **Also save it in your password manager**: without it the backups cannot be opened
-
-Until all three exist the workflow skips itself with a warning. Run it once by hand (Actions → Database backup → Run workflow) and confirm the artifact appears.
-
-To open a backup:
-
-```bash
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:BACKUP_PASSPHRASE \
-  -in noteburner-2026-11-26.sql.enc -out noteburner-2026-11-26.sql
-```
+Time Travel lives in the same Cloudflare account as the database, so it does not help if the whole account or the database itself is lost.
+An off-account copy (a scheduled export, encrypted before it is stored) was designed and then shelved: Time Travel covers the realistic failures.
+Revisit it if the data becomes harder to lose. Manual export, any time: `cd backend && npx wrangler d1 export noteburner-db --remote --output backup.sql` (the file holds e-mail addresses and password hashes: keep it private).
 
 ## Recovering
 
@@ -46,18 +32,18 @@ npx wrangler d1 time-travel restore noteburner-db --timestamp=2026-11-26T09:30:0
 
 Restoring is itself undoable: the command prints the bookmark from just before the restore.
 
-**B. Database deleted or Time Travel unavailable: restore the nightly export**
+**B. Database deleted, or older than 30 days:** restore a manual export if you made one:
 
 ```bash
 cd backend
 npx wrangler d1 create noteburner-db           # only if the database no longer exists; put the new id in wrangler.toml
-npx wrangler d1 execute noteburner-db --remote --file ../noteburner-2026-11-26.sql
+npx wrangler d1 execute noteburner-db --remote --file backup.sql
 ```
 
 **C. A migration went wrong**
 
 1. Roll back the Worker release first (`git revert`, push to `main`), so the code no longer needs the new columns.
-2. Back up (Time Travel bookmark or a manual `wrangler d1 export`).
+2. Note the Time Travel bookmark (`wrangler d1 time-travel info noteburner-db`) so you can restore to it if needed.
 3. `scripts/migrate-down.sh 0014 --remote` (type the number again to confirm). Only the newest migration should be rolled back.
 4. Every migration from 0013 on has a rollback file in `backend/migrations-rollback/`, and a test fails if one is missing.
 
@@ -70,4 +56,4 @@ npx wrangler d1 execute noteburner-db --remote --file ../noteburner-2026-11-26.s
 
 ## Practise it
 
-Once a quarter: restore the latest export into a scratch D1 database (`wrangler d1 create noteburner-restore-test`), run a few `SELECT COUNT(*)` queries, then delete it. A backup that has never been restored is only a hope.
+Once a quarter, run a Time Travel restore against a scratch copy or read the `info` output, so the commands are familiar before you need them.

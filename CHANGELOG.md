@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added - Reliability and accessibility
 - **A page that crashes no longer leaves a blank screen.** An error screen explains what happened, offers "Reload page" and "Home page", and clears itself when the visitor moves to another page. This also covers a page whose code failed to download after a new release.
 - **Safe reads are retried.** Looking up a message link and checking a custom link name are tried again (up to three attempts, with a growing pause) after a network failure or a 502, 503 or 504. Nothing that opens a message, creates one or uploads a file is ever retried, so a message cannot be burned or duplicated by a retry.
-- **Backups and recovery:** a nightly, encrypted export of the production database (GitHub Action `Database backup`), a recovery guide ([docs/DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md)) covering Time Travel restore, restoring an export and rolling back a migration, and `scripts/migrate-down.sh` with rollback files for migrations 0013 and 0014. A test fails if a new migration has no rollback file.
+- **Recovery:** a guide ([docs/DISASTER_RECOVERY.md](docs/DISASTER_RECOVERY.md)) covering what is stored where, restoring with Cloudflare Time Travel (already on) and rolling back a migration, and `scripts/migrate-down.sh` with rollback files for migrations 0013 and 0014. A test fails if a new migration has no rollback file. An extra off-account backup was designed and shelved for later.
 - The camera capture overlay is a proper dialog: it has a name, keeps focus inside, closes on Escape and returns focus.
 - New tests: small-screen layout at 390 px (no sideways scrolling on eight pages), the error screen, and the retry rules.
 
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `extension/CHROME_WEB_STORE_SIGNING.md` described the old key layout; it now describes the rotated key and where the keys are kept.
 
 ### Technical - Upgrading from 1.15.1
-- Add three GitHub Actions secrets to switch the nightly backup on: `CLOUDFLARE_API_TOKEN` (D1 edit only), `CLOUDFLARE_ACCOUNT_ID` and `BACKUP_PASSPHRASE` (keep a copy in your password manager). Until then the backup job skips itself with a warning.
+- Nothing to do: no new secrets.
 - No new migrations and no new Worker secrets.
 
 ---
