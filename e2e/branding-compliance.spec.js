@@ -6,6 +6,11 @@ import { test, expect } from './fixtures.js';
 import { API, IV, newUser, newApiKey, bareContext, d1, uniq, runCleanupUntil, parseCsv } from './api-helpers.js';
 import { encryptMessage, deriveAuthTag } from '../frontend/src/utils/crypto.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+
 test.describe.configure({ timeout: 180_000 });
 
 const XSS = '<img src=x onerror="window.__xss=1"><script>window.__xss=1</script>';
@@ -142,7 +147,7 @@ test.describe('Compliance API', () => {
     const { admin, teamId } = await setup(request);
     const put = (data) => request.put(`${API}/compliance/${teamId}/settings`, { headers: admin.headers, data });
     for (const data of [{ data_retention_days: 0 }, { data_retention_days: 3651 }, { data_retention_days: 'abc' }, { data_retention_days: 1.5 }, { data_retention_days: null },
-      { audit_log_retention: -5 }, { audit_log_retention: 0 }, { audit_log_retention: 31 }, { audit_log_retention: 'x' }, { min_password_strength: 9 }, { min_password_strength: 'strong' }]) {
+      { audit_log_retention: -5 }, { audit_log_retention: 0 }, { audit_log_retention: 31 }, { audit_log_retention: 'x' }, { min_password_strength: 9 }, { min_password_strength: TEST_PASSWORD_1 }]) {
       expect((await put(data)).status(), JSON.stringify(data)).toBe(400);
     }
     const notJson = await request.put(`${API}/compliance/${teamId}/settings`, { headers: { ...admin.headers, 'Content-Type': 'application/json' }, data: '{bad' });

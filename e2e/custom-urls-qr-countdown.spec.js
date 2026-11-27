@@ -1,5 +1,10 @@
 import { test, expect } from './fixtures.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5173';
 const API_URL = process.env.API_URL || 'http://localhost:8787';
 
@@ -106,7 +111,7 @@ test.describe('Custom URLs', () => {
     await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
     const testMessage = 'Message accessible via custom URL';
-    const testPassword = 'TestPassword123';
+    const testPassword = TEST_PASSWORD_1;
     const customSlug = `acc-${Date.now().toString().slice(-13)}`;
 
     // Create message with custom slug
@@ -228,7 +233,7 @@ test.describe('Countdown Timer', () => {
     // fields with the same ids, so filling too early types into the wrong form)
     await page.getByRole('heading', { name: 'Create Encrypted Message' }).waitFor();
 
-    const testPassword = 'TestPassword123';
+    const testPassword = TEST_PASSWORD_1;
 
     // Create message with 6 hour expiration
     await page.fill('#message', 'Test countdown after decrypt');

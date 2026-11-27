@@ -1,11 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import appTokenRoute from '../src/routes/app-token.js';
 import { verifyTurnstile, challengeEnabled } from '../src/utils/turnstile.js';
 import { verifyAppToken } from '../src/utils/appToken.js';
+// Random per run: no secret-shaped literals in the repository
+const APP_SECRET = crypto.randomBytes(16).toString('hex');
+const TURNSTILE_SECRET = crypto.randomBytes(16).toString('hex');
 
-const baseEnv = { APP_TOKEN_SECRET: 'dev-secret' };
-const withChallenge = { ...baseEnv, TURNSTILE_SECRET_KEY: 'ts-secret', TURNSTILE_SITE_KEY: 'site-123' };
+const baseEnv = { APP_TOKEN_SECRET: APP_SECRET };
+const withChallenge = { ...baseEnv, TURNSTILE_SECRET_KEY: TURNSTILE_SECRET, TURNSTILE_SITE_KEY: 'site-123' };
 const json = (body, status = 200) => ({ ok: status < 400, status, json: async () => body });
 
 /** Records what is sent to Cloudflare and answers with `reply`. */
@@ -23,14 +27,14 @@ test('the challenge is off unless a secret is configured', async () => {
   assert.equal(challengeEnabled(withChallenge), true);
   const res = await post(baseEnv, undefined);                    // exactly how local dev / CI behave today
   assert.equal(res.status, 200);
-  assert.ok(verifyAppToken((await res.json()).token, 'dev-secret'));
+  assert.ok(verifyAppToken((await res.json()).token, APP_SECRET));
 });
 
 test('verifyTurnstile sends the secret, the response token and the client IP to Cloudflare', async () => {
   const cf = fakeCloudflare(json({ success: true }));
   assert.deepEqual(await verifyTurnstile(withChallenge, 'solved-token', '203.0.113.7', cf.fetchImpl), { ok: true });
   assert.equal(cf.calls[0].url, 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
-  assert.deepEqual(cf.calls[0].form, { secret: 'ts-secret', response: 'solved-token', remoteip: '203.0.113.7' });
+  assert.deepEqual(cf.calls[0].form, { secret: TURNSTILE_SECRET, response: 'solved-token', remoteip: '203.0.113.7' });
 });
 
 test('rejected, empty, oversized and non-string tokens are refused without calling Cloudflare when malformed', async () => {
@@ -54,7 +58,7 @@ test('endpoint: no token -> 403 CHALLENGE_REQUIRED with the public site key (nev
   const body = await res.json();
   assert.equal(body.code, 'CHALLENGE_REQUIRED');
   assert.equal(body.siteKey, 'site-123');
-  assert.ok(!JSON.stringify(body).includes('ts-secret'));
+  assert.ok(!JSON.stringify(body).includes(TURNSTILE_SECRET));
   assert.equal((await post(withChallenge, undefined)).status, 403);                 // no body at all
   assert.equal((await post(withChallenge, { turnstileToken: 42 })).status, 403);    // wrong type
 });
@@ -65,7 +69,7 @@ test('endpoint: a token Cloudflare accepts yields an app token; one it rejects d
     globalThis.fetch = async () => json({ success: true });
     const ok = await post(withChallenge, { turnstileToken: 'good' });
     assert.equal(ok.status, 200);
-    assert.ok(verifyAppToken((await ok.json()).token, 'dev-secret'));
+    assert.ok(verifyAppToken((await ok.json()).token, APP_SECRET));
 
     globalThis.fetch = async () => json({ success: false, 'error-codes': ['timeout-or-duplicate'] });
     const denied = await post(withChallenge, { turnstileToken: 'replayed' });

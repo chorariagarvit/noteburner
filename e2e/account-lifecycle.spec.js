@@ -7,6 +7,13 @@
 import { test, expect } from './fixtures.js';
 import { API, PASSWORD, newUser, newApiKey, bareContext, d1, sha256, uniq } from './api-helpers.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+const TEST_PASSWORD_2 = randomPassword();
+const TEST_PASSWORD_3 = randomPassword();
+
 test.describe.configure({ timeout: 120_000 });
 test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'API tests are browser independent');
@@ -14,7 +21,7 @@ test.beforeEach(async ({}, testInfo) => {
 
 const FUTURE = '2099-01-01T00:00:00.000Z';
 const PAST = '2000-01-01T00:00:00.000Z';
-const NEW_PASSWORD = 'An0ther!Str0ngPass#2';
+const NEW_PASSWORD = TEST_PASSWORD_1;
 
 const seedReset = (userId, token, expires = FUTURE) =>
   d1(`INSERT INTO password_resets (id, user_id, reset_token, expires_at) VALUES ('r-${uniq()}', '${userId}', '${sha256(token)}', '${expires}')`);
@@ -40,10 +47,10 @@ test.describe('Signup does not reveal registered emails', () => {
   test('re-registering an address cannot overwrite or take over the real account', async ({ request }) => {
     const email = `owner-${uniq()}@example.com`;
     expect((await signup(request, { email, password: PASSWORD, displayName: 'The Owner' })).status()).toBe(201);
-    const attacker = await signup(request, { email, password: 'Attack3r!Passw0rd#9', displayName: 'Mallory' });
+    const attacker = await signup(request, { email, password: TEST_PASSWORD_2, displayName: 'Mallory' });
     expect(attacker.status()).toBe(201);                                           // looks like success...
 
-    expect((await login(request, email, 'Attack3r!Passw0rd#9')).status()).toBe(401);   // ...but nothing changed
+    expect((await login(request, email, TEST_PASSWORD_2)).status()).toBe(401);   // ...but nothing changed
     const ok = await login(request, email, PASSWORD);
     expect(ok.status()).toBe(200);
     const token = (await ok.json()).sessionToken;
@@ -99,9 +106,9 @@ test.describe('Password reset', () => {
     expect((await request.get(`${API}/auth/me`, { headers: user.headers })).status()).toBe(401);   // old sessions revoked
     expect((await request.get(`${API}/auth/me`, { headers: { 'X-Session-Token': secondSession } })).status()).toBe(401);
 
-    const reuse = await request.post(`${API}/auth/reset-password`, { data: { token, newPassword: 'Third!Str0ngPass#3' } });
+    const reuse = await request.post(`${API}/auth/reset-password`, { data: { token, newPassword: TEST_PASSWORD_3 } });
     expect(reuse.status()).toBe(400);
-    const other = await request.post(`${API}/auth/reset-password`, { data: { token: sibling, newPassword: 'Third!Str0ngPass#3' } });
+    const other = await request.post(`${API}/auth/reset-password`, { data: { token: sibling, newPassword: TEST_PASSWORD_3 } });
     expect(other.status()).toBe(400);                                // every other outstanding link was invalidated too
   });
 

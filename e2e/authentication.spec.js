@@ -5,10 +5,15 @@
 
 import { test, expect } from './fixtures.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+
 // Test data
 const testUser = {
   email: `test-${Date.now()}@example.com`,
-  password: 'TestPassword123!',
+  password: TEST_PASSWORD_1,
   displayName: 'Test User'
 };
 

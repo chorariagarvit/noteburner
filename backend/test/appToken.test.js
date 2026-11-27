@@ -16,7 +16,7 @@ test('app token round-trips and rejects tampering / wrong secret / expiry', () =
 });
 
 test('slack signature: valid, tampered, stale, and missing secret (fail closed)', () => {
-  const secret = 'slack-secret', body = 'text=hi', ts = String(Math.floor(Date.now() / 1000));
+  const secret = crypto.randomBytes(16).toString('hex'), body = 'text=hi', ts = String(Math.floor(Date.now() / 1000));
   const sig = 'v0=' + crypto.createHmac('sha256', secret).update(`v0:${ts}:${body}`).digest('hex');
   assert.equal(verifySlackSignature({ secret, timestamp: ts, signature: sig, rawBody: body }), true);
   assert.equal(verifySlackSignature({ secret, timestamp: ts, signature: sig, rawBody: 'text=evil' }), false);

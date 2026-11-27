@@ -6,6 +6,11 @@ import { test, expect } from './fixtures.js';
 import { API, newUser, newApiKey, bareContext, d1 } from './api-helpers.js';
 import { encryptMessage, deriveAuthTag } from '../frontend/src/utils/crypto.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+
 test.describe.configure({ timeout: 120_000 });
 test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'API tests are browser independent');
@@ -20,7 +25,7 @@ async function setup(request) {
   return { admin, member, outsider, teamId: team.id, memberKey: await newApiKey(request, member) };
 }
 
-async function teamMessage(bare, key, teamId, password = 'pw-team-1') {
+async function teamMessage(bare, key, teamId, password = TEST_PASSWORD_1) {
   const enc = await encryptMessage('team secret', password);
   const authTag = await deriveAuthTag(password, enc.salt);
   const res = await bare.post(`${API}/v1/messages`, { headers: key.headers, data: { ...enc, authTag, teamId } });

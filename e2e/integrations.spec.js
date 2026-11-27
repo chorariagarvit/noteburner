@@ -1,5 +1,11 @@
 import { test, expect } from './fixtures.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+const TEST_PASSWORD_2 = randomPassword();
+
 /**
  * E2E tests: Platform Integrations
  * Tests for Slack, Zapier, Discord integrations and API
@@ -9,7 +15,7 @@ import { test, expect } from './fixtures.js';
 // /api/integrations/keys/create endpoint was a hole and has been removed.
 async function createApiKey(request) {
   const email = `w8-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;
-  const password = 'Str0ng!Passw0rd#1';
+  const password = TEST_PASSWORD_1;
   const signup = await request.post('/api/auth/signup', { data: { email, password } });
   expect(signup.status()).toBe(201);
   const login = await request.post('/api/auth/login', { data: { email, password } });
@@ -98,7 +104,7 @@ test.describe('Platform Integrations', () => {
         data: {
           api_key: apiKey,
           message: 'Test with custom password',
-          password: 'custom123',
+          password: TEST_PASSWORD_2,
           expires_in_hours: 12
         }
       });

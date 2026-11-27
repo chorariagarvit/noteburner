@@ -7,6 +7,11 @@
 import { test, expect } from './fixtures.js';
 import fs from 'node:fs';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8787';
 const APP_URL = process.env.APP_URL || 'http://localhost:5173';
 
@@ -14,7 +19,7 @@ const APP_URL = process.env.APP_URL || 'http://localhost:5173';
 async function createTestUser(request, suffix = '') {
   const ts = Date.now();
   const email = `premium-test-${ts}${suffix}@example.com`;
-  const password = 'TestPassword123!';
+  const password = TEST_PASSWORD_1;
 
   await request.post(`${API_BASE_URL}/api/auth/signup`, {
     data: { email, password, username: `premtest${ts}` }

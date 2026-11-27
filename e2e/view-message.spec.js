@@ -1,6 +1,11 @@
 import { test, expect } from './fixtures.js';
 import { API, createMessage } from './api-helpers.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+
 test.beforeEach(async ({ page }) => {
   // Disable onboarding modal for E2E tests
   await page.addInitScript(() => {
@@ -16,7 +21,7 @@ test.describe('Message Viewing and Decryption', () => {
     // Create a test message before each test
     await page.goto('/');
 
-    password = 'ViewTest123!';
+    password = TEST_PASSWORD_1;
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Secret test message for viewing');
     await page.fill('input[placeholder="Enter a strong password"]', password);
     await page.click('button:has-text("Encrypt & Create Link")');

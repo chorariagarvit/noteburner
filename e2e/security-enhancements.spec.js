@@ -1,5 +1,11 @@
 import { test, expect } from './fixtures.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+const TEST_PASSWORD_2 = randomPassword();
+
 /**
  * E2E tests: Security Enhancements
  * Tests for password strength meter, self-destruct options, audit logs, 2FA
@@ -181,7 +187,7 @@ test.describe('Security Enhancements', () => {
       const createResponse = await request.post('/api/messages', {
         data: {
           content: 'Test message for audit',
-          password: 'test123'
+          password: TEST_PASSWORD_1
         }
       });
 
@@ -215,7 +221,7 @@ test.describe('Security Enhancements', () => {
       const createResponse = await request.post('/api/messages', {
         data: {
           content: 'Test audit log creation',
-          password: 'test123'
+          password: TEST_PASSWORD_1
         }
       });
 
@@ -242,7 +248,7 @@ test.describe('Security Enhancements', () => {
       const createResponse = await request.post('/api/messages', {
         data: {
           content: 'Test geo data',
-          password: 'test123'
+          password: TEST_PASSWORD_1
         }
       });
 
@@ -352,7 +358,7 @@ test.describe('Security Enhancements', () => {
       const createResponse = await request.post('/api/messages', {
         data: {
           content: 'Test max attempts',
-          password: 'correct_password',
+          password: TEST_PASSWORD_2,
           max_password_attempts: 3
         }
       });
@@ -370,7 +376,7 @@ test.describe('Security Enhancements', () => {
 
         // 4th attempt should fail (message burned)
         const finalResponse = await request.post(`/api/messages/${messageId}/decrypt`, {
-          data: { password: 'correct_password' }
+          data: { password: TEST_PASSWORD_2 }
         });
 
         expect(finalResponse.status()).toBe(404); // Message no longer exists
@@ -385,7 +391,7 @@ test.describe('Security Enhancements', () => {
       const createResponse = await request.post('/api/messages', {
         data: {
           content: 'Test max views',
-          password: 'test123',
+          password: TEST_PASSWORD_1,
           max_views: 2
         }
       });
@@ -396,17 +402,17 @@ test.describe('Security Enhancements', () => {
 
         // View 1
         await request.post(`/api/messages/${messageId}/decrypt`, {
-          data: { password: 'test123' }
+          data: { password: TEST_PASSWORD_1 }
         });
 
         // View 2
         await request.post(`/api/messages/${messageId}/decrypt`, {
-          data: { password: 'test123' }
+          data: { password: TEST_PASSWORD_1 }
         });
 
         // View 3 should fail (burned)
         const finalResponse = await request.post(`/api/messages/${messageId}/decrypt`, {
-          data: { password: 'test123' }
+          data: { password: TEST_PASSWORD_1 }
         });
 
         expect(finalResponse.status()).toBe(404);
@@ -420,7 +426,7 @@ test.describe('Security Enhancements', () => {
       const createResponse = await request.post('/api/messages', {
         data: {
           content: 'Test suspicious activity',
-          password: 'test123',
+          password: TEST_PASSWORD_1,
           auto_burn_suspicious: true
         }
       });
@@ -516,7 +522,7 @@ test.describe('Security Enhancements', () => {
       const response = await request.post('/api/messages', {
         data: {
           content: 'Test rate limit',
-          password: 'test123'
+          password: TEST_PASSWORD_1
         }
       });
 
@@ -528,7 +534,7 @@ test.describe('Security Enhancements', () => {
 
     test('should enforce stricter limits on message creation', async ({ request }) => {
       const limit = parseInt((await request.post('/api/messages', {
-        data: { content: 'Test', password: 'test123' }
+        data: { content: 'Test', password: TEST_PASSWORD_1 }
       })).headers()['x-ratelimit-limit']);
 
       expect(limit).toBeLessThanOrEqual(200); // 200 req/min for messages in test mode

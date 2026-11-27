@@ -10,10 +10,17 @@ import crypto from 'node:crypto';
 import { encryptMessage, deriveAuthTag, decryptMessage } from '../frontend/src/utils/crypto.js';
 import { generateTOTP } from '../backend/src/utils/totp.js';
 
+import { randomPassword, devServerVar } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+const TEST_PASSWORD_2 = randomPassword();
+const TEST_PASSWORD_3 = randomPassword();
+
 const API = 'http://localhost:8787/api';
 const IV = 'AAAAAAAAAAAAAAAAAAAAAA==';
-const STRIPE_SECRET = 'dev-stripe-webhook-secret'; // matches backend `npm run dev`
-const PASSWORD = 'Str0ng!Passw0rd#1';
+const STRIPE_SECRET = devServerVar('STRIPE_WEBHOOK_SECRET'); // matches backend `npm run dev`
+const PASSWORD = TEST_PASSWORD_1;
 
 test.describe.configure({ timeout: 90_000 });
 test.beforeEach(async ({}, testInfo) => {
@@ -28,7 +35,7 @@ const otherIp = () => {
 };
 const uniq = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-async function createMessage(request, { password = 'correct-horse-1', text = 'top secret', body = {}, tag = true } = {}) {
+async function createMessage(request, { password = TEST_PASSWORD_2, text = 'top secret', body = {}, tag = true } = {}) {
   const enc = await encryptMessage(text, password);
   const authTag = tag ? await deriveAuthTag(password, enc.salt) : undefined;
   const res = await request.post(`${API}/messages`, { data: { ...enc, expiresIn: 3600, authTag, ...body } });
@@ -273,7 +280,7 @@ test.describe('Every API call needs credentials', () => {
     await bad(`${payload}.${'0'.repeat(mac.length)}`);                    // wrong signature
     await bad(`${Buffer.from(JSON.stringify({ exp: Date.now() + 1e9, n: 'x' })).toString('base64url')}.${mac}`); // forged payload
     const expiredPayload = Buffer.from(JSON.stringify({ exp: Date.now() - 1000, n: 'x' })).toString('base64url');
-    const expiredMac = crypto.createHmac('sha256', 'dev-app-token-secret').update(expiredPayload).digest('hex');
+    const expiredMac = crypto.createHmac('sha256', devServerVar('APP_TOKEN_SECRET')).update(expiredPayload).digest('hex');
     await bad(`${expiredPayload}.${expiredMac}`);                          // correctly signed but expired
     await bad('not-a-token');
     await bare.dispose();
@@ -404,7 +411,7 @@ test.describe('Accounts and sessions', () => {
 
   test('login and signup are throttled per IP', async ({ request }) => {
     const logins = [];
-    for (let i = 0; i < 12; i++) logins.push((await request.post(`${API}/auth/login`, { data: { email: `x${i}@example.com`, password: 'nope-nope-1' } })).status());
+    for (let i = 0; i < 12; i++) logins.push((await request.post(`${API}/auth/login`, { data: { email: `x${i}@example.com`, password: TEST_PASSWORD_3 } })).status());
     expect(logins).toContain(429);
     const signups = [];
     for (let i = 0; i < 7; i++) signups.push((await request.post(`${API}/auth/signup`, { data: { email: `thr-${uniq()}-${i}@example.com`, password: PASSWORD } })).status());

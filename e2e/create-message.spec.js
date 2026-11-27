@@ -1,5 +1,11 @@
 import { test, expect } from './fixtures.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+const TEST_PASSWORD_2 = randomPassword();
+
 test.beforeEach(async ({ page }) => {
   // Disable onboarding modal for E2E tests
   await page.addInitScript(() => {
@@ -138,7 +144,7 @@ test.describe('Message Creation', () => {
   test('should use "Create Similar Message" feature', async ({ page }) => {
     await page.goto('/');
 
-    const testPassword = 'SimilarTest123!';
+    const testPassword = TEST_PASSWORD_1;
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'First message');
     await page.fill('input[placeholder="Enter a strong password"]', testPassword);
     await page.selectOption('#time-limit', '360'); // 6 hours = 360 minutes
@@ -289,7 +295,7 @@ test.describe('Message Creation', () => {
   test('should handle special characters in passwords', async ({ page }) => {
     await page.goto('/');
 
-    const specialPassword = 'P@ssw0rd!#$%^&*()_+-=[]{}|;:,.<>?';
+    const specialPassword = TEST_PASSWORD_2;
     await page.fill('textarea[placeholder="Enter your secret message..."]', 'Special chars password test');
     await page.fill('input[placeholder="Enter a strong password"]', specialPassword);
     await page.click('button:has-text("Encrypt & Create Link")');

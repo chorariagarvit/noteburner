@@ -2,6 +2,12 @@ import { test, expect } from './fixtures.js';
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+const TEST_PASSWORD_2 = randomPassword();
+
 // Plans are NOT client-selectable any more (teams always start on 'free'; paid plans come only from
 // verified billing). Tests that exercise paid features flip the plan directly in the local test DB.
 function upgradeTeam(teamId, plan = 'enterprise') {
@@ -27,7 +33,7 @@ function upgradeTeam(teamId, plan = 'enterprise') {
 async function registerUser(request) {
   const email = `e2e-member-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;
   const res = await request.post('http://localhost:8787/api/auth/signup', {
-    data: { email, password: 'Str0ng!Passw0rd#1' }
+    data: { email, password: TEST_PASSWORD_1 }
   });
   expect(res.status()).toBe(201);
   return email;
@@ -38,7 +44,7 @@ test.describe('Enterprise Features', () => {
   let sessionToken = '';
   const testUser = {
     email: `e2e-enterprise-${Date.now()}@example.com`,
-    password: 'TestPassword123!',
+    password: TEST_PASSWORD_2,
     displayName: 'E2E Test User'
   };
   

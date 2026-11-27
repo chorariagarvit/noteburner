@@ -6,6 +6,7 @@
 import { test, expect } from './fixtures.js';
 import { API, IV, PASSWORD, createMessage, newUser, newApiKey, bareContext, d1, uniq, randomIp, sha256 } from './api-helpers.js';
 import { generateTOTP } from '../backend/src/utils/totp.js';
+import { devServerVar } from './secrets.js';
 import crypto from 'node:crypto';
 
 test.describe.configure({ timeout: 120_000 });
@@ -129,7 +130,7 @@ test.describe('Rate limits are exact under a burst (Durable Object)', () => {
 });
 
 test.describe('Billing idempotency', () => {
-  const STRIPE_SECRET = 'dev-stripe-webhook-secret';
+  const STRIPE_SECRET = devServerVar('STRIPE_WEBHOOK_SECRET');
   const send = (request, event) => {
     const raw = JSON.stringify(event);
     const ts = Math.floor(Date.now() / 1000);

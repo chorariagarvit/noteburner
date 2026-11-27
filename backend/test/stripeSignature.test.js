@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { verifyStripeSignature } from '../src/utils/stripeSignature.js';
 
-const secret = 'whsec_test';
+const secret = `whsec_${crypto.randomBytes(16).toString('hex')}`; // random per run
 const body = '{"type":"checkout.session.completed"}';
 const sign = (ts, payload = body, key = secret) =>
   `t=${ts},v1=${crypto.createHmac('sha256', key).update(`${ts}.${payload}`).digest('hex')}`;

@@ -7,6 +7,12 @@
 import { test, expect } from './fixtures.js';
 import { generateTOTP } from '../backend/src/utils/totp.js';
 
+import { randomPassword } from './secrets.js';
+
+// Generated each run (see secrets.js): no password literals in the repository
+const TEST_PASSWORD_1 = randomPassword();
+const TEST_PASSWORD_2 = randomPassword();
+
 const API = 'http://localhost:8787/api';
 
 test.describe.configure({ timeout: 90_000 }); // two PBKDF2 derivations per create/unlock: slow on WebKit/mobile
@@ -24,7 +30,7 @@ async function openCreate(page) {
 }
 
 /** Create a message through the real UI and return { url, password, secret? } */
-async function createViaUi(page, { message = 'UI secret message', password = 'UiTest-Passw0rd!', attempts, twoFA } = {}) {
+async function createViaUi(page, { message = 'UI secret message', password = TEST_PASSWORD_1, attempts, twoFA } = {}) {
   await openCreate(page);
   await page.fill('#message', message);
   await page.fill('#password', password);
@@ -134,7 +140,7 @@ test.describe('Errors and edge cases', () => {
     });
     await openCreate(page);
     await page.fill('#message', 'will not be created');
-    await page.fill('#password', 'UiTest-Passw0rd!');
+    await page.fill('#password', TEST_PASSWORD_1);
     await page.click('button[type="submit"]');
     const alert = page.getByText(/Unexpected server response/i).first();
     await expect(alert).toBeVisible({ timeout: 30000 });
@@ -147,7 +153,7 @@ test.describe('Errors and edge cases', () => {
       : route.continue());
     await openCreate(page);
     await page.fill('#message', 'x');
-    await page.fill('#password', 'UiTest-Passw0rd!');
+    await page.fill('#password', TEST_PASSWORD_1);
     await page.click('button[type="submit"]');
     await expect(page.getByText(/502/).first()).toBeVisible({ timeout: 30000 });
     await expect(page.getByText(/Unexpected token/i)).toHaveCount(0);
@@ -222,13 +228,13 @@ test.describe('Offline / online notices', () => {
 test.describe('Accounts', () => {
   async function signup(request) {
     const email = `ui-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@example.com`;
-    const res = await request.post(`${API}/auth/signup`, { data: { email, password: 'Str0ng!Passw0rd#1' } });
+    const res = await request.post(`${API}/auth/signup`, { data: { email, password: TEST_PASSWORD_2 } });
     expect(res.status()).toBe(201);
     return email;
   }
   async function loginViaUi(page, email) {
     await page.fill('#email', email);
-    await page.fill('#password', 'Str0ng!Passw0rd#1');
+    await page.fill('#password', TEST_PASSWORD_2);
     await page.click('button[type="submit"]');
     await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 20000 });
   }
