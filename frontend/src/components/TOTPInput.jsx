@@ -124,7 +124,6 @@ export default function TOTPInput({ onVerify, error: externalError }) {
                 : 'border-gray-300 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
               } 
               transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed`}
-            aria-label={`Digit ${index + 1}`}
           />
         ))}
       </div>

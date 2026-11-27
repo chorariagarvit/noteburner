@@ -112,9 +112,9 @@ test.describe('Two-factor (TOTP) flow', () => {
 
     await openUnlock(page, m.url);
     // password alone is not enough: the code step comes first
-    await expect(page.locator('input[aria-label="Digit 1"]')).toBeVisible();
+    await expect(page.locator('input[aria-label^="Digit 1 of"]')).toBeVisible();
     const code = generateTOTP(m.secret);
-    for (let i = 0; i < 6; i++) await page.fill(`input[aria-label="Digit ${i + 1}"]`, code[i]);
+    for (let i = 0; i < 6; i++) await page.fill(`input[aria-label^="Digit ${i + 1} of"]`, code[i]);
     await expect(page.getByText(/verified/i).first()).toBeVisible({ timeout: 20000 });
 
     await tryPassword(page, m.password);
@@ -124,7 +124,7 @@ test.describe('Two-factor (TOTP) flow', () => {
   test('a wrong code is rejected and does not unlock the message', async ({ page }) => {
     const m = await createViaUi(page, { twoFA: true });
     await openUnlock(page, m.url);
-    for (let i = 0; i < 6; i++) await page.fill(`input[aria-label="Digit ${i + 1}"]`, String((i * 7 + 3) % 10));
+    for (let i = 0; i < 6; i++) await page.fill(`input[aria-label^="Digit ${i + 1} of"]`, String((i * 7 + 3) % 10));
     await expect(page.getByText(/invalid|incorrect|expired/i).first()).toBeVisible({ timeout: 20000 });
     await expect(page.getByText(m.message)).toHaveCount(0);
   });
